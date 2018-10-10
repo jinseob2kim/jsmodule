@@ -10,7 +10,7 @@ Shiny modules for medical research
 ## Install
 
 ```r
-devtools::install_github('jinseob2kim/jstable')
+devtools::install_github('jinseob2kim/jsmodule')
 ```
 
 ## Example: Shiny app for `csv/xlsx` input
