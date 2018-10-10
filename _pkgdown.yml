@@ -1,0 +1,19 @@
+URL: https://jinseob2kim2.github.io/jsmodule, https://github.com/jinseob2kim/jsmodule
+
+development:
+  mode: unreleased
+
+
+authors:
+  Jinseob Kim:
+    href: https://github.com/jinseob2kim
+  Anpanman:
+    href: https://www.anpanman.co.kr
+    html: <img src="https://raw.githubusercontent.com/anpanmancorp/Anpanman/master/horizontal_anpanman_transparent.png" height="24" />
+
+
+template:
+  params:
+    docsearch:
+      api_key: f6ab1678f68371b7775614662cffcb9d
+      index_name: jsmodule
