@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>csvFileInput: Shiny module UI for file upload. — csvFileInput • jsmodule</title>
+<title>tb1moduleUI: Shiny module UI for Table 1. — tb1moduleUI • jsmodule</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -36,9 +36,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="csvFileInput: Shiny module UI for file upload. — csvFileInput" />
+<meta property="og:title" content="tb1moduleUI: Shiny module UI for Table 1. — tb1moduleUI" />
 
-<meta property="og:description" content="Shiny module UI for file(csv or xlsx) upload." />
+<meta property="og:description" content="Shiny module UI for Table 1." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -113,18 +113,18 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>csvFileInput: Shiny module UI for file upload.</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/R/csvFileInput.R'><code>R/csvFileInput.R</code></a></small>
-    <div class="hidden name"><code>csvFileInput.Rd</code></div>
+    <h1>tb1moduleUI: Shiny module UI for Table 1.</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/R/tb1.R'><code>R/tb1.R</code></a></small>
+    <div class="hidden name"><code>tb1moduleUI.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Shiny module UI for file(csv or xlsx) upload.</p>
+    <p>Shiny module UI for Table 1.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>csvFileInput</span>(<span class='no'>id</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"csv/xlsx file"</span>)</pre>
+    <pre class="usage"><span class='fu'>tb1moduleUI</span>(<span class='no'>id</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -132,10 +132,6 @@
     <tr>
       <th>id</th>
       <td><p>id</p></td>
-    </tr>
-    <tr>
-      <th>label</th>
-      <td><p>label, Default: 'csv/xlsx file'</p></td>
     </tr>
     </table>
     
@@ -151,30 +147,42 @@
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
 <span class='kw'>if</span>(<span class='fu'>interactive</span>()){
- <span class='fu'>library</span>(<span class='no'>shiny</span>);<span class='fu'>library</span>(<span class='no'>DT</span>);<span class='fu'>library</span>(<span class='no'>data.table</span>);<span class='fu'>library</span>(<span class='no'>readxl</span>);<span class='fu'>library</span>(<span class='no'>jstable</span>)
+ <span class='fu'>library</span>(<span class='no'>shiny</span>);<span class='fu'>library</span>(<span class='no'>data.table</span>);<span class='fu'>library</span>(<span class='no'>DT</span>)
+ <span class='fu'>library</span>(<span class='no'>jstable</span>);<span class='fu'>library</span>(<span class='no'>shinycustomloader</span>);<span class='fu'>library</span>(<span class='no'>tableone</span>);<span class='fu'>library</span>(<span class='no'>labelled</span>)
+ <span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/data.table/topics/data.table'>data.table</a></span>(<span class='no'>mtcars</span>)
+ <span class='no'>data</span>$<span class='no'>vs</span> <span class='kw'>=</span> <span class='fu'>as.factor</span>(<span class='no'>data</span>$<span class='no'>vs</span>)
+ <span class='no'>data</span>$<span class='no'>am</span> <span class='kw'>=</span> <span class='fu'>as.factor</span>(<span class='no'>data</span>$<span class='no'>am</span>)
+ <span class='no'>data</span>$<span class='no'>cyl</span> <span class='kw'>=</span> <span class='fu'>as.factor</span>(<span class='no'>data</span>$<span class='no'>cyl</span>)
+ <span class='no'>data.label</span> <span class='kw'>=</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/jstable/topics/mk.lev'>mk.lev</a></span>(<span class='no'>data</span>)
+
  <span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/fluidPage'>fluidPage</a></span>(
-   <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/sidebarLayout'>sidebarLayout</a></span>(
-     <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/sidebarPanel'>sidebarPanel</a></span>(
-       <span class='fu'>csvFileInput</span>(<span class='st'>"datafile"</span>, <span class='st'>"Upload data (csv/xlsx format)"</span>)
-     ),
-     <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/mainPanel'>mainPanel</a></span>(
-       <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/tabsetPanel'>tabsetPanel</a></span>(<span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"pills"</span>,
-                   <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/tabPanel'>tabPanel</a></span>(<span class='st'>"Data"</span>, <span class='fu'><a href='http://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>DTOutput</a></span>(<span class='st'>"data"</span>)),
-                   <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/tabPanel'>tabPanel</a></span>(<span class='st'>"Label"</span>, <span class='fu'><a href='http://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>DTOutput</a></span>(<span class='st'>"data_label"</span>, <span class='kw'>width</span> <span class='kw'>=</span> <span class='st'>"100%"</span>))
-                   )
-     )
+ <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/sidebarLayout'>sidebarLayout</a></span>(
+   <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/sidebarPanel'>sidebarPanel</a></span>(
+     <span class='fu'>tb1moduleUI</span>(<span class='st'>"tb1"</span>)
+   ),
+   <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/mainPanel'>mainPanel</a></span>(
+     <span class='fu'><a href='http://www.rdocumentation.org/packages/shinycustomloader/topics/withLoader'>withLoader</a></span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>DTOutput</a></span>(<span class='st'>"table1"</span>), <span class='kw'>type</span><span class='kw'>=</span><span class='st'>"html"</span>, <span class='kw'>loader</span><span class='kw'>=</span><span class='st'>"loader6"</span>),
    )
+ )
  )
 
  <span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
-   <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/callModule'>callModule</a></span>(<span class='no'>csvFile</span>, <span class='st'>"datafile"</span>)
-
-   <span class='no'>output</span>$<span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>renderDT</a></span>({
-     <span class='fu'>data</span>()$<span class='no'>data</span>
-   })
-
-   <span class='no'>output</span>$<span class='no'>label</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>renderDT</a></span>({
-     <span class='fu'>data</span>()$<span class='no'>label</span>
+   <span class='no'>out_tb1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/callModule'>callModule</a></span>(<span class='no'>tb1module</span>, <span class='st'>"tb1"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>,
+                         <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>, <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+   <span class='no'>output</span>$<span class='no'>table1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>renderDT</a></span>({
+     <span class='no'>tb</span> <span class='kw'>=</span> <span class='fu'>out_tb1</span>()$<span class='no'>table</span>
+     <span class='no'>cap</span> <span class='kw'>=</span> <span class='fu'>out_tb1</span>()$<span class='no'>caption</span>
+     <span class='no'>out.tb1</span> <span class='kw'>=</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/DT/topics/datatable'>datatable</a></span>(<span class='no'>tb</span>, <span class='kw'>rownames</span> <span class='kw'>=</span> <span class='no'>T</span>, <span class='kw'>extension</span><span class='kw'>=</span> <span class='st'>"Buttons"</span>, <span class='kw'>caption</span> <span class='kw'>=</span> <span class='no'>cap</span>,
+                         <span class='kw'>options</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fu'><a href='http://www.rdocumentation.org/packages/jstable/topics/opt.tb1'>opt.tb1</a></span>(<span class='st'>"tb1"</span>),
+                                     <span class='fu'>list</span>(<span class='kw'>columnDefs</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='fu'>list</span>(<span class='kw'>visible</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>targets</span><span class='kw'>=</span> <span class='fu'>which</span>(<span class='fu'>colnames</span>(<span class='no'>tb</span>) <span class='kw'>%in%</span> <span class='fu'>c</span>(<span class='st'>"test"</span>,<span class='st'>"sig"</span>))))
+                                     ),
+                                     <span class='fu'>list</span>(<span class='kw'>scrollX</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+                         )
+     )
+     <span class='kw'>if</span> (<span class='st'>"sig"</span> <span class='kw'>%in%</span> <span class='fu'>colnames</span>(<span class='no'>tb</span>)){
+       <span class='no'>out.tb1</span> <span class='kw'>=</span> <span class='no'>out.tb1</span> <span class='kw'>%&gt;%</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/DT/topics/formatCurrency'>formatStyle</a></span>(<span class='st'>"sig"</span>, <span class='kw'>target</span> <span class='kw'>=</span> <span class='st'>'row'</span> ,<span class='kw'>backgroundColor</span> <span class='kw'>=</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/DT/topics/styleInterval'>styleEqual</a></span>(<span class='st'>"**"</span>, <span class='st'>'yellow'</span>))
+     }
+     <span class='fu'>return</span>(<span class='no'>out.tb1</span>)
    })
  }
 
