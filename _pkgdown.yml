@@ -15,5 +15,5 @@ authors:
 template:
   params:
     docsearch:
-      api_key: f6ab1678f68371b7775614662cffcb9d
-      index_name: jsmodule
+      api_key: ffde01d60d45a47d3239f39b9bee59c7
+      index_name: jinseob2kim_jsmodule
