@@ -17,7 +17,7 @@ devtools::install_github('jinseob2kim/jsmodule')
 
 ```r
 library(jsmodule)
-library(shiny)
+library(shiny);library(data.table);library(readxl);library(DT);library(jstable);library(shinycustomloader)
 
 ui <- fluidPage(
   sidebarLayout(
@@ -25,16 +25,28 @@ ui <- fluidPage(
       csvFileInput("datafile", "Upload data (csv/xlsx format)")
     ),
     mainPanel(
-      dataTableOutput("table")
+      tabsetPanel(type = "pills",
+                  tabPanel("Data", withLoader(DTOutput("data"), type="html", loader="loader6")),
+                  tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type="html", loader="loader6"))
+      )
     )
   )
 )
 
 server <- function(input, output, session) {
-  datafile <- callModule(csvFile, "datafile")
+  data <- callModule(csvFile, "datafile")
 
-  output$table <- renderDataTable({
-    datafile()
+  output$data <- renderDT({
+    datatable(data()$data, rownames=F, editable = F, extension= "Buttons", caption = "Labels of data",
+              options = opt.data("data")
+    )
+  })
+
+
+  output$data_label <- renderDT({
+    datatable(data()$label, rownames=F, editable = F, extension= "Buttons", caption = "Labels of data",
+              options = opt.data("label")
+    )
   })
 }
 

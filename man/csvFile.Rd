@@ -25,22 +25,30 @@ DETAILS
 \examples{
 \dontrun{
 if(interactive()){
- library(shiny)
+ library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
  ui <- fluidPage(
    sidebarLayout(
      sidebarPanel(
        csvFileInput("datafile", "Upload data (csv/xlsx format)")
      ),
      mainPanel(
-       dataTableOutput("table")
+       tabsetPanel(type = "pills",
+                   tabPanel("Data", DTOutput("data")),
+                   tabPanel("Label", DTOutput("data_label", width = "100\%"))
+                   )
      )
    )
  )
- server <- function(input, output, session) {
-   datafile <- callModule(csvFile, "datafile")
 
-   output$table <- renderDataTable({
-     datafile()
+ server <- function(input, output, session) {
+   data <- callModule(csvFile, "datafile")
+
+   output$data <- renderDT({
+     data()$data
+   })
+
+   output$label <- renderDT({
+     data()$label
    })
  }
 

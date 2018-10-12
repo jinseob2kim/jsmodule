@@ -8,23 +8,30 @@
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  library(shiny)
+#'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #'  ui <- fluidPage(
 #'    sidebarLayout(
 #'      sidebarPanel(
 #'        csvFileInput("datafile", "Upload data (csv/xlsx format)")
 #'      ),
 #'      mainPanel(
-#'        dataTableOutput("table")
+#'        tabsetPanel(type = "pills",
+#'                    tabPanel("Data", DTOutput("data")),
+#'                    tabPanel("Label", DTOutput("data_label", width = "100%"))
+#'                    )
 #'      )
 #'    )
 #'  )
-
-#'  server <- function(input, output, session) {
-#'    datafile <- callModule(csvFile, "datafile")
 #'
-#'    output$table <- renderDataTable({
-#'      datafile()
+#'  server <- function(input, output, session) {
+#'    data <- callModule(csvFile, "datafile")
+#'
+#'    output$data <- renderDT({
+#'      data()$data
+#'    })
+#'
+#'    output$label <- renderDT({
+#'      data()$label
 #'    })
 #'  }
 #'
@@ -40,7 +47,8 @@ csvFileInput <- function(id, label = "csv/xlsx file") {
   ns <- NS(id)
 
   tagList(
-    fileInput(ns("file"), label)
+    fileInput(ns("file"), label),
+    uiOutput(ns("factor"))
   )
 }
 
@@ -56,23 +64,30 @@ csvFileInput <- function(id, label = "csv/xlsx file") {
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  library(shiny)
+#'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #'  ui <- fluidPage(
 #'    sidebarLayout(
 #'      sidebarPanel(
 #'        csvFileInput("datafile", "Upload data (csv/xlsx format)")
 #'      ),
 #'      mainPanel(
-#'        dataTableOutput("table")
+#'        tabsetPanel(type = "pills",
+#'                    tabPanel("Data", DTOutput("data")),
+#'                    tabPanel("Label", DTOutput("data_label", width = "100%"))
+#'                    )
 #'      )
 #'    )
 #'  )
-
-#'  server <- function(input, output, session) {
-#'    datafile <- callModule(csvFile, "datafile")
 #'
-#'    output$table <- renderDataTable({
-#'      datafile()
+#'  server <- function(input, output, session) {
+#'    data <- callModule(csvFile, "datafile")
+#'
+#'    output$data <- renderDT({
+#'      data()$data
+#'    })
+#'
+#'    output$label <- renderDT({
+#'      data()$label
 #'    })
 #'  }
 #'
@@ -82,26 +97,50 @@ csvFileInput <- function(id, label = "csv/xlsx file") {
 #' @rdname csvFile
 #' @export
 #' @import shiny
-#' @importFrom data.table fread data.table
+#' @importFrom data.table fread data.table .SD :=
 #' @importFrom readxl read_excel
+#' @importFrom jstable mk.lev
 
 csvFile <- function(input, output, session) {
   # The selected file, if any
-  userFile <- reactive({
+  userFile <- eventReactive(input$file, {
     # If no file is selected, don't do anything
-    validate(need(input$file, message = FALSE))
+    #validate(need(input$file, message = FALSE))
     input$file
   })
 
   # The user's data, parsed into a data frame
-  dataframe <- reactive({
+  change.vnlist = list(c(" ", "_"), c("=<", "_le_"), c("=>", "_ge_"), c("=", "_eq_"), c("\\(", "_open_"), c("\\)", "_close_"), c("%", "_percent_") )
+
+  data <- eventReactive(input$file, {
     validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T), message = "Please upload csv/xlsx file"))
     if (grepl("csv", userFile()$name) == T){
-      fread(userFile()$datapath)
+      out = fread(userFile()$datapath)
     } else{
-      data.table(read_excel(userFile()$datapath))
+      out = data.table(read_excel(userFile()$datapath))
     }
+    for (x in change.vnlist){
+      names(out) <- gsub(x[1], x[2], names(out))
+    }
+    factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
+    out[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
+    conti_vars <- setdiff(names(out), factor_vars)
+    nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x))}), .SDcols = conti_vars])
+    #except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
+    add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
+    #factor_vars_ini <- union(factor_vars, add_vars)
+    return(list(data = out, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= 20], factor_adds = add_vars))
   })
+
+
+
+
+  output$factor <- renderUI({
+    selectInput(session$ns("factor_vname"), label = "Additional categorical variables",
+                choices = data()$factor_adds_list, multiple = T,
+                selected = data()$factor_adds)
+  })
+
 
 
   # We can run observers in here if we want to
@@ -110,6 +149,18 @@ csvFile <- function(input, output, session) {
     cat(msg, "\n")
   })
 
+  outdata <- reactive({
+    out <- data()$data
+    out[, (data()$conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = data()$conti_original]
+    if (!is.null(input$factor_vname)){
+      out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
+    }
+    out.label <- mk.lev(out)
+    return(list(data = out, label = out.label))
+  })
+
+
   # Return the reactive that yields the data frame
-  return(dataframe)
+  return(outdata)
 }
+
