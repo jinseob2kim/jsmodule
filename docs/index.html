@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">jsmodule</a>
-        <span class="label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.2.0</span>
+        <span class="label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.2.5</span>
       </span>
     </div>
 
@@ -137,42 +137,137 @@
 <a class="sourceLine" id="cb3-8" data-line-number="8">data.label =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/jstable/topics/mk.lev">mk.lev</a></span>(data)</a>
 <a class="sourceLine" id="cb3-9" data-line-number="9"></a>
 <a class="sourceLine" id="cb3-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb3-11" data-line-number="11">ui &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/fluidPage">fluidPage</a></span>(</a>
-<a class="sourceLine" id="cb3-12" data-line-number="12">  <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/sidebarLayout">sidebarLayout</a></span>(</a>
-<a class="sourceLine" id="cb3-13" data-line-number="13">    <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/sidebarPanel">sidebarPanel</a></span>(</a>
-<a class="sourceLine" id="cb3-14" data-line-number="14">      <span class="kw"><a href="reference/tb1moduleUI.html">tb1moduleUI</a></span>(<span class="st">"tb1"</span>)</a>
-<a class="sourceLine" id="cb3-15" data-line-number="15">    ),</a>
-<a class="sourceLine" id="cb3-16" data-line-number="16">    <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/mainPanel">mainPanel</a></span>(</a>
-<a class="sourceLine" id="cb3-17" data-line-number="17">      <span class="kw"><a href="http://www.rdocumentation.org/packages/shinycustomloader/topics/withLoader">withLoader</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">DTOutput</a></span>(<span class="st">"table1"</span>), <span class="dt">type=</span><span class="st">"html"</span>, <span class="dt">loader=</span><span class="st">"loader6"</span>),</a>
-<a class="sourceLine" id="cb3-18" data-line-number="18">      <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/wellPanel">wellPanel</a></span>(</a>
-<a class="sourceLine" id="cb3-19" data-line-number="19">        <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/builder">h5</a></span>(<span class="st">"Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(&gt; 2 groups)"</span>),</a>
-<a class="sourceLine" id="cb3-20" data-line-number="20">        <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/builder">h5</a></span>(<span class="st">"Non-normal continuous variables are summarized with median [IQR] and kruskal-wallis test"</span>),</a>
-<a class="sourceLine" id="cb3-21" data-line-number="21">        <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/builder">h5</a></span>(<span class="st">"Categorical variables  are summarized with table"</span>)</a>
-<a class="sourceLine" id="cb3-22" data-line-number="22">      )</a>
-<a class="sourceLine" id="cb3-23" data-line-number="23">    )</a>
-<a class="sourceLine" id="cb3-24" data-line-number="24">  )</a>
-<a class="sourceLine" id="cb3-25" data-line-number="25">)</a>
-<a class="sourceLine" id="cb3-26" data-line-number="26"></a>
-<a class="sourceLine" id="cb3-27" data-line-number="27">server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output, session) {</a>
-<a class="sourceLine" id="cb3-28" data-line-number="28">  out_tb1 &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/callModule">callModule</a></span>(tb1module, <span class="st">"tb1"</span>, <span class="dt">data =</span> data, <span class="dt">data_label =</span> data.label, <span class="dt">data_varStruct =</span> <span class="ot">NULL</span>)</a>
-<a class="sourceLine" id="cb3-29" data-line-number="29">  output<span class="op">$</span>table1 &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">renderDT</a></span>({</a>
-<a class="sourceLine" id="cb3-30" data-line-number="30">    tb =<span class="st"> </span><span class="kw">out_tb1</span>()<span class="op">$</span>table</a>
-<a class="sourceLine" id="cb3-31" data-line-number="31">    cap =<span class="st"> </span><span class="kw">out_tb1</span>()<span class="op">$</span>caption</a>
-<a class="sourceLine" id="cb3-32" data-line-number="32">    out.tb1 =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/datatable">datatable</a></span>(tb, <span class="dt">rownames =</span> T, <span class="dt">extension=</span> <span class="st">"Buttons"</span>, <span class="dt">caption =</span> cap,</a>
-<a class="sourceLine" id="cb3-33" data-line-number="33">                        <span class="dt">options =</span> <span class="kw">c</span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/jstable/topics/opt.tb1">opt.tb1</a></span>(<span class="st">"tb1"</span>),</a>
-<a class="sourceLine" id="cb3-34" data-line-number="34">                                    <span class="kw">list</span>(<span class="dt">columnDefs =</span> <span class="kw">list</span>(<span class="kw">list</span>(<span class="dt">visible=</span><span class="ot">FALSE</span>, <span class="dt">targets=</span> <span class="kw">which</span>(<span class="kw">colnames</span>(tb) <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"test"</span>,<span class="st">"sig"</span>))))</a>
-<a class="sourceLine" id="cb3-35" data-line-number="35">                                    ),</a>
-<a class="sourceLine" id="cb3-36" data-line-number="36">                                    <span class="kw">list</span>(<span class="dt">scrollX =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb3-37" data-line-number="37">                        )</a>
-<a class="sourceLine" id="cb3-38" data-line-number="38">    )</a>
-<a class="sourceLine" id="cb3-39" data-line-number="39">    <span class="cf">if</span> (<span class="st">"sig"</span> <span class="op">%in%</span><span class="st"> </span><span class="kw">colnames</span>(tb)){</a>
-<a class="sourceLine" id="cb3-40" data-line-number="40">      out.tb1 =<span class="st"> </span>out.tb1 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/formatCurrency">formatStyle</a></span>(<span class="st">"sig"</span>, <span class="dt">target =</span> <span class="st">'row'</span> ,<span class="dt">backgroundColor =</span> <span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/styleInterval">styleEqual</a></span>(<span class="st">"**"</span>, <span class="st">'yellow'</span>))</a>
-<a class="sourceLine" id="cb3-41" data-line-number="41">    }</a>
-<a class="sourceLine" id="cb3-42" data-line-number="42">    <span class="kw">return</span>(out.tb1)</a>
-<a class="sourceLine" id="cb3-43" data-line-number="43">  })</a>
-<a class="sourceLine" id="cb3-44" data-line-number="44">}</a>
-<a class="sourceLine" id="cb3-45" data-line-number="45"></a>
-<a class="sourceLine" id="cb3-46" data-line-number="46"><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</a></code></pre></div>
+<a class="sourceLine" id="cb3-11" data-line-number="11">ui &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/navbarPage">navbarPage</a></span>(<span class="st">"Basic statistics"</span>,</a>
+<a class="sourceLine" id="cb3-12" data-line-number="12">                 <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/tabPanel">tabPanel</a></span>(<span class="st">"Data"</span>,</a>
+<a class="sourceLine" id="cb3-13" data-line-number="13">                          <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/tabsetPanel">tabsetPanel</a></span>(<span class="dt">type =</span> <span class="st">"pills"</span>,</a>
+<a class="sourceLine" id="cb3-14" data-line-number="14">                                      <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/tabPanel">tabPanel</a></span>(<span class="st">"Data"</span>, <span class="kw"><a href="http://www.rdocumentation.org/packages/shinycustomloader/topics/withLoader">withLoader</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">DTOutput</a></span>(<span class="st">"data"</span>), <span class="dt">type=</span><span class="st">"html"</span>, <span class="dt">loader=</span><span class="st">"loader6"</span>)),</a>
+<a class="sourceLine" id="cb3-15" data-line-number="15">                                      <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/tabPanel">tabPanel</a></span>(<span class="st">"Label"</span>, <span class="kw"><a href="http://www.rdocumentation.org/packages/shinycustomloader/topics/withLoader">withLoader</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">DTOutput</a></span>(<span class="st">"data_label"</span>, <span class="dt">width =</span> <span class="st">"100%"</span>), <span class="dt">type=</span><span class="st">"html"</span>, <span class="dt">loader=</span><span class="st">"loader6"</span>))</a>
+<a class="sourceLine" id="cb3-16" data-line-number="16">                          )</a>
+<a class="sourceLine" id="cb3-17" data-line-number="17">                 ),</a>
+<a class="sourceLine" id="cb3-18" data-line-number="18">                 <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/tabPanel">tabPanel</a></span>(<span class="st">"Table 1"</span>,</a>
+<a class="sourceLine" id="cb3-19" data-line-number="19">                          <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/sidebarLayout">sidebarLayout</a></span>(</a>
+<a class="sourceLine" id="cb3-20" data-line-number="20">                            <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/sidebarPanel">sidebarPanel</a></span>(</a>
+<a class="sourceLine" id="cb3-21" data-line-number="21">                              <span class="kw"><a href="reference/tb1moduleUI.html">tb1moduleUI</a></span>(<span class="st">"tb1"</span>)</a>
+<a class="sourceLine" id="cb3-22" data-line-number="22">                            ),</a>
+<a class="sourceLine" id="cb3-23" data-line-number="23">                            <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/mainPanel">mainPanel</a></span>(</a>
+<a class="sourceLine" id="cb3-24" data-line-number="24">                              <span class="kw"><a href="http://www.rdocumentation.org/packages/shinycustomloader/topics/withLoader">withLoader</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">DTOutput</a></span>(<span class="st">"table1"</span>), <span class="dt">type=</span><span class="st">"html"</span>, <span class="dt">loader=</span><span class="st">"loader6"</span>),</a>
+<a class="sourceLine" id="cb3-25" data-line-number="25">                              <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/wellPanel">wellPanel</a></span>(</a>
+<a class="sourceLine" id="cb3-26" data-line-number="26">                                <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/builder">h5</a></span>(<span class="st">"Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(&gt; 2 groups)"</span>),</a>
+<a class="sourceLine" id="cb3-27" data-line-number="27">                                <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/builder">h5</a></span>(<span class="st">"Non-normal continuous variables are summarized with median [IQR] and kruskal-wallis test"</span>),</a>
+<a class="sourceLine" id="cb3-28" data-line-number="28">                                <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/builder">h5</a></span>(<span class="st">"Categorical variables  are summarized with table"</span>)</a>
+<a class="sourceLine" id="cb3-29" data-line-number="29">                              )</a>
+<a class="sourceLine" id="cb3-30" data-line-number="30">                            )</a>
+<a class="sourceLine" id="cb3-31" data-line-number="31">                          )</a>
+<a class="sourceLine" id="cb3-32" data-line-number="32"></a>
+<a class="sourceLine" id="cb3-33" data-line-number="33">                 )</a>
+<a class="sourceLine" id="cb3-34" data-line-number="34">)</a>
+<a class="sourceLine" id="cb3-35" data-line-number="35"></a>
+<a class="sourceLine" id="cb3-36" data-line-number="36">server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output, session) {</a>
+<a class="sourceLine" id="cb3-37" data-line-number="37">  out_tb1 &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/callModule">callModule</a></span>(tb1module, <span class="st">"tb1"</span>, <span class="dt">data =</span> data, <span class="dt">data_label =</span> data.label, <span class="dt">data_varStruct =</span> <span class="ot">NULL</span>)</a>
+<a class="sourceLine" id="cb3-38" data-line-number="38">  output<span class="op">$</span>table1 &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">renderDT</a></span>({</a>
+<a class="sourceLine" id="cb3-39" data-line-number="39">    tb =<span class="st"> </span><span class="kw">out_tb1</span>()<span class="op">$</span>table</a>
+<a class="sourceLine" id="cb3-40" data-line-number="40">    cap =<span class="st"> </span><span class="kw">out_tb1</span>()<span class="op">$</span>caption</a>
+<a class="sourceLine" id="cb3-41" data-line-number="41">    out.tb1 =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/datatable">datatable</a></span>(tb, <span class="dt">rownames =</span> T, <span class="dt">extension=</span> <span class="st">"Buttons"</span>, <span class="dt">caption =</span> cap,</a>
+<a class="sourceLine" id="cb3-42" data-line-number="42">                        <span class="dt">options =</span> <span class="kw">c</span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/jstable/topics/opt.tb1">opt.tb1</a></span>(<span class="st">"tb1"</span>),</a>
+<a class="sourceLine" id="cb3-43" data-line-number="43">                                    <span class="kw">list</span>(<span class="dt">columnDefs =</span> <span class="kw">list</span>(<span class="kw">list</span>(<span class="dt">visible=</span><span class="ot">FALSE</span>, <span class="dt">targets=</span> <span class="kw">which</span>(<span class="kw">colnames</span>(tb) <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"test"</span>,<span class="st">"sig"</span>))))</a>
+<a class="sourceLine" id="cb3-44" data-line-number="44">                                    ),</a>
+<a class="sourceLine" id="cb3-45" data-line-number="45">                                    <span class="kw">list</span>(<span class="dt">scrollX =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb3-46" data-line-number="46">                        )</a>
+<a class="sourceLine" id="cb3-47" data-line-number="47">    )</a>
+<a class="sourceLine" id="cb3-48" data-line-number="48">    <span class="cf">if</span> (<span class="st">"sig"</span> <span class="op">%in%</span><span class="st"> </span><span class="kw">colnames</span>(tb)){</a>
+<a class="sourceLine" id="cb3-49" data-line-number="49">      out.tb1 =<span class="st"> </span>out.tb1 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/formatCurrency">formatStyle</a></span>(<span class="st">"sig"</span>, <span class="dt">target =</span> <span class="st">'row'</span> ,<span class="dt">backgroundColor =</span> <span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/styleInterval">styleEqual</a></span>(<span class="st">"**"</span>, <span class="st">'yellow'</span>))</a>
+<a class="sourceLine" id="cb3-50" data-line-number="50">    }</a>
+<a class="sourceLine" id="cb3-51" data-line-number="51">    <span class="kw">return</span>(out.tb1)</a>
+<a class="sourceLine" id="cb3-52" data-line-number="52">  })</a>
+<a class="sourceLine" id="cb3-53" data-line-number="53">}</a>
+<a class="sourceLine" id="cb3-54" data-line-number="54"></a>
+<a class="sourceLine" id="cb3-55" data-line-number="55"><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</a></code></pre></div>
+</div>
+<div id="example3-table-1-for-reactive-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#example3-table-1-for-reactive-data" class="anchor"></a>Example3: Table 1 for <strong>reactive</strong> data</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">library</span>(shiny);<span class="kw">library</span>(data.table);<span class="kw">library</span>(readxl);<span class="kw">library</span>(DT);<span class="kw">library</span>(jstable);<span class="kw">library</span>(shinycustomloader);<span class="kw">library</span>(tableone);<span class="kw">library</span>(labelled)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">ui &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/navbarPage">navbarPage</a></span>(<span class="st">"Basic statistics"</span>,</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">                 <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/tabPanel">tabPanel</a></span>(<span class="st">"Data"</span>,</a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">                          <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/sidebarLayout">sidebarLayout</a></span>(</a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">                            <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/sidebarPanel">sidebarPanel</a></span>(</a>
+<a class="sourceLine" id="cb4-8" data-line-number="8">                              <span class="kw"><a href="reference/csvFileInput.html">csvFileInput</a></span>(<span class="st">"datafile"</span>, <span class="st">"Upload data (csv/xlsx format)"</span>)</a>
+<a class="sourceLine" id="cb4-9" data-line-number="9">                            ),</a>
+<a class="sourceLine" id="cb4-10" data-line-number="10">                            <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/mainPanel">mainPanel</a></span>(</a>
+<a class="sourceLine" id="cb4-11" data-line-number="11">                              <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/tabsetPanel">tabsetPanel</a></span>(<span class="dt">type =</span> <span class="st">"pills"</span>,</a>
+<a class="sourceLine" id="cb4-12" data-line-number="12">                                          <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/tabPanel">tabPanel</a></span>(<span class="st">"Data"</span>, <span class="kw"><a href="http://www.rdocumentation.org/packages/shinycustomloader/topics/withLoader">withLoader</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">DTOutput</a></span>(<span class="st">"data"</span>), <span class="dt">type=</span><span class="st">"html"</span>, <span class="dt">loader=</span><span class="st">"loader6"</span>)),</a>
+<a class="sourceLine" id="cb4-13" data-line-number="13">                                          <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/tabPanel">tabPanel</a></span>(<span class="st">"Label"</span>, <span class="kw"><a href="http://www.rdocumentation.org/packages/shinycustomloader/topics/withLoader">withLoader</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">DTOutput</a></span>(<span class="st">"data_label"</span>, <span class="dt">width =</span> <span class="st">"100%"</span>), <span class="dt">type=</span><span class="st">"html"</span>, <span class="dt">loader=</span><span class="st">"loader6"</span>))</a>
+<a class="sourceLine" id="cb4-14" data-line-number="14">                                          )</a>
+<a class="sourceLine" id="cb4-15" data-line-number="15">                              )</a>
+<a class="sourceLine" id="cb4-16" data-line-number="16">                            )</a>
+<a class="sourceLine" id="cb4-17" data-line-number="17">                 ),</a>
+<a class="sourceLine" id="cb4-18" data-line-number="18">                 <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/tabPanel">tabPanel</a></span>(<span class="st">"Table 1"</span>,</a>
+<a class="sourceLine" id="cb4-19" data-line-number="19">                          <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/sidebarLayout">sidebarLayout</a></span>(</a>
+<a class="sourceLine" id="cb4-20" data-line-number="20">                            <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/sidebarPanel">sidebarPanel</a></span>(</a>
+<a class="sourceLine" id="cb4-21" data-line-number="21">                              <span class="kw"><a href="reference/tb1moduleUI.html">tb1moduleUI</a></span>(<span class="st">"tb1"</span>)</a>
+<a class="sourceLine" id="cb4-22" data-line-number="22">                            ),</a>
+<a class="sourceLine" id="cb4-23" data-line-number="23">                            <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/mainPanel">mainPanel</a></span>(</a>
+<a class="sourceLine" id="cb4-24" data-line-number="24">                              <span class="kw"><a href="http://www.rdocumentation.org/packages/shinycustomloader/topics/withLoader">withLoader</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">DTOutput</a></span>(<span class="st">"table1"</span>), <span class="dt">type=</span><span class="st">"html"</span>, <span class="dt">loader=</span><span class="st">"loader6"</span>),</a>
+<a class="sourceLine" id="cb4-25" data-line-number="25">                              <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/wellPanel">wellPanel</a></span>(</a>
+<a class="sourceLine" id="cb4-26" data-line-number="26">                                <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/builder">h5</a></span>(<span class="st">"Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(&gt; 2 groups)"</span>),</a>
+<a class="sourceLine" id="cb4-27" data-line-number="27">                                <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/builder">h5</a></span>(<span class="st">"Non-normal continuous variables are summarized with median [IQR] and kruskal-wallis test"</span>),</a>
+<a class="sourceLine" id="cb4-28" data-line-number="28">                                <span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/builder">h5</a></span>(<span class="st">"Categorical variables  are summarized with table"</span>)</a>
+<a class="sourceLine" id="cb4-29" data-line-number="29">                              )</a>
+<a class="sourceLine" id="cb4-30" data-line-number="30">                            )</a>
+<a class="sourceLine" id="cb4-31" data-line-number="31">                          )</a>
+<a class="sourceLine" id="cb4-32" data-line-number="32"></a>
+<a class="sourceLine" id="cb4-33" data-line-number="33">                 )</a>
+<a class="sourceLine" id="cb4-34" data-line-number="34">)</a>
+<a class="sourceLine" id="cb4-35" data-line-number="35"></a>
+<a class="sourceLine" id="cb4-36" data-line-number="36"></a>
+<a class="sourceLine" id="cb4-37" data-line-number="37"></a>
+<a class="sourceLine" id="cb4-38" data-line-number="38"></a>
+<a class="sourceLine" id="cb4-39" data-line-number="39">server &lt;-<span class="st"> </span><span class="cf">function</span>(input, output, session) {</a>
+<a class="sourceLine" id="cb4-40" data-line-number="40">  data.info &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/callModule">callModule</a></span>(csvFile, <span class="st">"datafile"</span>)</a>
+<a class="sourceLine" id="cb4-41" data-line-number="41">  data &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/reactive">reactive</a></span>(<span class="kw">data.info</span>()<span class="op">$</span>data)</a>
+<a class="sourceLine" id="cb4-42" data-line-number="42">  data.label &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/reactive">reactive</a></span>(<span class="kw">data.info</span>()<span class="op">$</span>label)</a>
+<a class="sourceLine" id="cb4-43" data-line-number="43"></a>
+<a class="sourceLine" id="cb4-44" data-line-number="44">  output<span class="op">$</span>data &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">renderDT</a></span>({</a>
+<a class="sourceLine" id="cb4-45" data-line-number="45">    <span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/datatable">datatable</a></span>(<span class="kw">data</span>(), <span class="dt">rownames=</span>F, <span class="dt">editable =</span> F, <span class="dt">extension=</span> <span class="st">"Buttons"</span>, <span class="dt">caption =</span> <span class="st">"Data"</span>,</a>
+<a class="sourceLine" id="cb4-46" data-line-number="46">              <span class="dt">options =</span> <span class="kw"><a href="http://www.rdocumentation.org/packages/jstable/topics/opt.data">opt.data</a></span>(<span class="st">"data"</span>)</a>
+<a class="sourceLine" id="cb4-47" data-line-number="47">    )</a>
+<a class="sourceLine" id="cb4-48" data-line-number="48">  })</a>
+<a class="sourceLine" id="cb4-49" data-line-number="49"></a>
+<a class="sourceLine" id="cb4-50" data-line-number="50"></a>
+<a class="sourceLine" id="cb4-51" data-line-number="51">  output<span class="op">$</span>data_label &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">renderDT</a></span>({</a>
+<a class="sourceLine" id="cb4-52" data-line-number="52">    <span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/datatable">datatable</a></span>(<span class="kw">data.label</span>(), <span class="dt">rownames=</span>F, <span class="dt">editable =</span> F, <span class="dt">extension=</span> <span class="st">"Buttons"</span>, <span class="dt">caption =</span> <span class="st">"Label of data"</span>,</a>
+<a class="sourceLine" id="cb4-53" data-line-number="53">              <span class="dt">options =</span> <span class="kw"><a href="http://www.rdocumentation.org/packages/jstable/topics/opt.data">opt.data</a></span>(<span class="st">"label"</span>)</a>
+<a class="sourceLine" id="cb4-54" data-line-number="54">    )</a>
+<a class="sourceLine" id="cb4-55" data-line-number="55">  })</a>
+<a class="sourceLine" id="cb4-56" data-line-number="56"></a>
+<a class="sourceLine" id="cb4-57" data-line-number="57"></a>
+<a class="sourceLine" id="cb4-58" data-line-number="58"></a>
+<a class="sourceLine" id="cb4-59" data-line-number="59"></a>
+<a class="sourceLine" id="cb4-60" data-line-number="60">  out_tb1 &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/callModule">callModule</a></span>(tb1module2, <span class="st">"tb1"</span>, <span class="dt">data =</span> data, <span class="dt">data_label =</span> data.label, <span class="dt">data_varStruct =</span> <span class="ot">NULL</span>)</a>
+<a class="sourceLine" id="cb4-61" data-line-number="61"></a>
+<a class="sourceLine" id="cb4-62" data-line-number="62">  output<span class="op">$</span>table1 &lt;-<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/dataTableOutput">renderDT</a></span>({</a>
+<a class="sourceLine" id="cb4-63" data-line-number="63">    tb =<span class="st"> </span><span class="kw">out_tb1</span>()<span class="op">$</span>table</a>
+<a class="sourceLine" id="cb4-64" data-line-number="64">    cap =<span class="st"> </span><span class="kw">out_tb1</span>()<span class="op">$</span>caption</a>
+<a class="sourceLine" id="cb4-65" data-line-number="65">    out.tb1 =<span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/datatable">datatable</a></span>(tb, <span class="dt">rownames =</span> T, <span class="dt">extension=</span> <span class="st">"Buttons"</span>, <span class="dt">caption =</span> cap,</a>
+<a class="sourceLine" id="cb4-66" data-line-number="66">                        <span class="dt">options =</span> <span class="kw">c</span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/jstable/topics/opt.tb1">opt.tb1</a></span>(<span class="st">"tb1"</span>),</a>
+<a class="sourceLine" id="cb4-67" data-line-number="67">                                    <span class="kw">list</span>(<span class="dt">columnDefs =</span> <span class="kw">list</span>(<span class="kw">list</span>(<span class="dt">visible=</span><span class="ot">FALSE</span>, <span class="dt">targets=</span> <span class="kw">which</span>(<span class="kw">colnames</span>(tb) <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">"test"</span>,<span class="st">"sig"</span>))))</a>
+<a class="sourceLine" id="cb4-68" data-line-number="68">                                    ),</a>
+<a class="sourceLine" id="cb4-69" data-line-number="69">                                    <span class="kw">list</span>(<span class="dt">scrollX =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb4-70" data-line-number="70">                        )</a>
+<a class="sourceLine" id="cb4-71" data-line-number="71">    )</a>
+<a class="sourceLine" id="cb4-72" data-line-number="72">    <span class="cf">if</span> (<span class="st">"sig"</span> <span class="op">%in%</span><span class="st"> </span><span class="kw">colnames</span>(tb)){</a>
+<a class="sourceLine" id="cb4-73" data-line-number="73">      out.tb1 =<span class="st"> </span>out.tb1 <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/formatCurrency">formatStyle</a></span>(<span class="st">"sig"</span>, <span class="dt">target =</span> <span class="st">'row'</span> ,<span class="dt">backgroundColor =</span> <span class="kw"><a href="http://www.rdocumentation.org/packages/DT/topics/styleInterval">styleEqual</a></span>(<span class="st">"**"</span>, <span class="st">'yellow'</span>))</a>
+<a class="sourceLine" id="cb4-74" data-line-number="74">    }</a>
+<a class="sourceLine" id="cb4-75" data-line-number="75">    <span class="kw">return</span>(out.tb1)</a>
+<a class="sourceLine" id="cb4-76" data-line-number="76">  })</a>
+<a class="sourceLine" id="cb4-77" data-line-number="77"></a>
+<a class="sourceLine" id="cb4-78" data-line-number="78"></a>
+<a class="sourceLine" id="cb4-79" data-line-number="79"></a>
+<a class="sourceLine" id="cb4-80" data-line-number="80">}</a>
+<a class="sourceLine" id="cb4-81" data-line-number="81"></a>
+<a class="sourceLine" id="cb4-82" data-line-number="82"><span class="kw"><a href="http://www.rdocumentation.org/packages/shiny/topics/shinyApp">shinyApp</a></span>(ui, server)</a></code></pre></div>
 </div>
 </div>
   </div>

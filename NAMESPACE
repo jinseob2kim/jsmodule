@@ -3,6 +3,7 @@
 export(csvFile)
 export(csvFileInput)
 export(tb1module)
+export(tb1module2)
 export(tb1moduleUI)
 import(shiny)
 importFrom(data.table,":=")

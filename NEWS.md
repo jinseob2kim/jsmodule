@@ -1,3 +1,13 @@
+# jsmodule 0.2.5
+
+## Update
+
+* `csvFile` : Add *n_* to column names that begin with a number.
+
+## New module
+
+* `tb1moduleUI2` can deal **reactive data**
+
 # jsmodule 0.2.0
 
 * New module: `tb1moduleUI`, `tb1module`

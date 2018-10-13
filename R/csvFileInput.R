@@ -122,6 +122,10 @@ csvFile <- function(input, output, session) {
     for (x in change.vnlist){
       names(out) <- gsub(x[1], x[2], names(out))
     }
+
+    numstart.vnum <- suppressWarnings(sapply(names(out),function(x){!is.na(as.numeric(substr(x, 1,1)))}))
+    names(out)[numstart.vnum] <- paste("n_", names(out)[numstart.vnum], sep = "")
+
     factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
     out[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
     conti_vars <- setdiff(names(out), factor_vars)
