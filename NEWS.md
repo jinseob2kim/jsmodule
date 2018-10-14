@@ -4,6 +4,13 @@
 
 * `tbmoduleUI`, `tbmoduleUI` : Apply `shapiro.test`
 
+## New module
+
+* `regressModuleUI`, `regressModule`, `regressModule2`
+
+* `logisticModuleUI`, `logisticModule`, `logisticModule2`
+
+* `ggpairsModuleUI1`, `ggpairsModuleUI2`, `ggpairsModule`
 
 
 # jsmodule 0.2.5

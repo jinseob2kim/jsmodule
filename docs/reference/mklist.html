@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Changelog • jsmodule</title>
+<title>mklist: make intersect varlist — mklist • jsmodule</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -36,7 +36,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="Changelog" />
+<meta property="og:title" content="mklist: make intersect varlist — mklist" />
+
+<meta property="og:description" content="make intersect varlist" />
+<meta name="twitter:card" content="summary" />
 
 
 
@@ -52,7 +55,7 @@
   </head>
 
   <body>
-    <div class="container template-news">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -110,91 +113,62 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Changelog <small></small></h1>
-      <small>Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
+    <h1>mklist: make intersect varlist</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/R/regress.R'><code>R/regress.R</code></a></small>
+    <div class="hidden name"><code>mklist.Rd</code></div>
     </div>
 
-    <div id="jsmodule-0-3-0" class="section level1">
-<h1 class="page-header">
-<a href="#jsmodule-0-3-0" class="anchor"></a>jsmodule 0.3.0</h1>
-<div id="bug-fixes" class="section level2">
-<h2 class="hasAnchor">
-<a href="#bug-fixes" class="anchor"></a>Bug fixes:</h2>
-<ul>
-<li>
-<code>tbmoduleUI</code>, <code>tbmoduleUI</code> : Apply <code>shapiro.test</code>
-</li>
-</ul>
-</div>
-<div id="new-module" class="section level2">
-<h2 class="hasAnchor">
-<a href="#new-module" class="anchor"></a>New module</h2>
-<ul>
-<li><p><code>regressModuleUI</code>, <code>regressModule</code>, <code>regressModule2</code></p></li>
-<li><p><code>logisticModuleUI</code>, <code>logisticModule</code>, <code>logisticModule2</code></p></li>
-<li><p><code>ggpairsModuleUI1</code>, <code>ggpairsModuleUI2</code>, <code>ggpairsModule</code></p></li>
-</ul>
-</div>
-</div>
-    <div id="jsmodule-0-2-5" class="section level1">
-<h1 class="page-header">
-<a href="#jsmodule-0-2-5" class="anchor"></a>jsmodule 0.2.5</h1>
-<div id="update" class="section level2">
-<h2 class="hasAnchor">
-<a href="#update" class="anchor"></a>Update</h2>
-<ul>
-<li>
-<code>csvFile</code> : Add <em>n_</em> to column names that begin with a number.</li>
-</ul>
-</div>
-<div id="new-module-1" class="section level2">
-<h2 class="hasAnchor">
-<a href="#new-module-1" class="anchor"></a>New module</h2>
-<ul>
-<li>
-<code>tb1moduleUI2</code> can deal <strong>reactive data</strong>
-</li>
-</ul>
-</div>
-</div>
-    <div id="jsmodule-0-2-0" class="section level1">
-<h1 class="page-header">
-<a href="#jsmodule-0-2-0" class="anchor"></a>jsmodule 0.2.0</h1>
-<ul>
-<li>New module: <code>tb1moduleUI</code>, <code>tb1module</code>
-</li>
-</ul>
-</div>
-    <div id="jsmodule-0-1-0" class="section level1">
-<h1 class="page-header">
-<a href="#jsmodule-0-1-0" class="anchor"></a>jsmodule 0.1.0</h1>
-<ul>
-<li>Update: <code>csvFile</code> can deal label information</li>
-</ul>
-</div>
-    <div id="jsmodule-0-0-1" class="section level1">
-<h1 class="page-header">
-<a href="#jsmodule-0-0-1" class="anchor"></a>jsmodule 0.0.1</h1>
-<ul>
-<li>File upload: <code>csvFileInput</code>, <code>csvFile</code>
-</li>
-</ul>
-</div>
-  </div>
+    <div class="ref-description">
+    
+    <p>make intersect varlist</p>
+    
+    </div>
 
+    <pre class="usage"><span class='fu'>mklist</span>(<span class='no'>varlist</span>, <span class='no'>vars</span>)</pre>
+    
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>varlist</th>
+      <td><p>varlist</p></td>
+    </tr>
+    <tr>
+      <th>vars</th>
+      <td><p>vars</p></td>
+    </tr>
+    </table>
+    
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>Intersect varlist</p>
+    
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Internal function</p>
+    
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><span class='co'># NOT RUN {</span>
+<span class='kw'>if</span>(<span class='fu'>interactive</span>()){
+ <span class='no'>data_varStruct</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>variable</span> <span class='kw'>=</span> <span class='fu'>names</span>(<span class='no'>data</span>))
+ <span class='no'>conti_list</span> <span class='kw'>&lt;-</span> <span class='fu'>mklist</span>(<span class='no'>data_varStruct</span>, <span class='no'>conti_vars</span>)
+ }
+<span class='co'># }</span></pre>
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <div id="tocnav">
-      <h2>Contents</h2>
-      <ul class="nav nav-pills nav-stacked">
-        <li><a href="#jsmodule-0-3-0">0.3.0</a></li>
-        <li><a href="#jsmodule-0-2-5">0.2.5</a></li>
-        <li><a href="#jsmodule-0-2-0">0.2.0</a></li>
-        <li><a href="#jsmodule-0-1-0">0.1.0</a></li>
-        <li><a href="#jsmodule-0-0-1">0.0.1</a></li>
-      </ul>
-    </div>
-  </div>
+    <h2>Contents</h2>
+    <ul class="nav nav-pills nav-stacked">
+      <li><a href="#arguments">Arguments</a></li>
+      
+      <li><a href="#value">Value</a></li>
 
+      <li><a href="#details">Details</a></li>
+      
+      <li><a href="#examples">Examples</a></li>
+    </ul>
+
+  </div>
 </div>
 
       <footer>
