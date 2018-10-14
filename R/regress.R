@@ -294,12 +294,12 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
     )
     form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
     res.linear = glm(form, data = data())
-    #tb.linear = regress.display(res.linear, crude = T, crude.p.value = T, decimal = input$decimal, simplified = F)
+    tb.linear = regress.display2(res.linear, crude = T, crude.p.value = T, decimal = input$decimal, simplified = F)
     cap.linear = paste("Linear regression predicting ", data_label()[variable == y, var_label][1], sep="")
-    #out.linear = LabelepiDisplay(tb.linear, xs, ref = data_label())
-    out.linear = summary(res.linear)$coefficients
-    sig = ifelse(out.linear[, 4] <= 0.05, "**", "NA")
-    return(list(table = cbind(out.linear, sig), caption = cap.linear))
+    out.linear = LabelepiDisplay(tb.linear, xs, ref = data_label())
+    #out.linear = summary(res.linear)$coefficients
+    #sig = ifelse(out.linear[, 4] <= 0.05, "**", "NA")
+    return(list(table = out.linear, caption = cap.linear))
   })
 
   return(out)
@@ -513,12 +513,12 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     )
     form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
     res.logistic = glm(form, data = data(), family = binomial)
-    #tb.logistic = logistic.display(res.logistic, crude = T, crude.p.value = T, decimal = input$decimal)
+    tb.logistic = logistic.display2(res.logistic, crude = T, crude.p.value = T, decimal = input$decimal)
     cap.logistic = paste("Logistic regression predicting ", data_label()[variable == y, var_label][1], sep="")
-    #out.logistic = LabelepiDisplay(tb.logistic, xs, ref = data_label)
-    out.logistic = summary(res.logistic)$coefficients
-    sig = ifelse(out.logistic[, 4] <= 0.05, "**", "NA")
-    return(list(table = cbind(out.logistic, sig), caption = cap.logistic))
+    out.logistic = LabelepiDisplay(tb.logistic, xs, ref = data_label)
+    #out.logistic = summary(res.logistic)$coefficients
+    #sig = ifelse(out.logistic[, 4] <= 0.05, "**", "NA")
+    return(list(table = out.logistic, caption = cap.logistic))
   })
 
   return(out)

@@ -12,6 +12,11 @@
 
 * `ggpairsModuleUI1`, `ggpairsModuleUI2`, `ggpairsModule`
 
+## New function 
+
+* `regress.display2`, `logistic.display2` : Regression table for reactive data
+
+
 
 # jsmodule 0.2.5
 
