@@ -1,3 +1,11 @@
+# jsmodule 0.3.0
+
+## Bug fixes: 
+
+* `tbmoduleUI`, `tbmoduleUI` : Apply `shapiro.test`
+
+
+
 # jsmodule 0.2.5
 
 ## Update

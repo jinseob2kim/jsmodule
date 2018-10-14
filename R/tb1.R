@@ -132,6 +132,7 @@ tb1moduleUI <- function(id) {
 
 
 tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL){
+
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
   }
@@ -158,8 +159,11 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
            })
   }
 
+  if (!("data.table" %in% class(data))) {data = data.table(data)}
+  if (!("data.table" %in% class(data_label))) {data_label = data.table(data_label)}
 
   factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
+  #data[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
   factor_list <- mklist(data_varStruct, factor_vars)
 
   conti_vars <- setdiff(names(data), factor_vars)
@@ -167,16 +171,21 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 
   nclass_factor <- unlist(data[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
 
-  group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10]
+  group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data)]
   group_list <- mklist(data_varStruct, group_vars)
 
-  except_vars <- factor_vars[nclass_factor > 10]
+  except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data)]
 
-  non_normal <- sapply(conti_vars,
-                       function(x){
-                         if (length(unique(data[[x]])) == 1) return(FALSE)
-                         return(shapiro.test(data[[x]])$p.value <= 0.05)
-                       })
+
+  ## non-normal: shapiro test
+  f <- function(x) {
+    if (diff(range(x, na.rm = T)) == 0) return(F) else return(shapiro.test(x)$p.value <= 0.05)
+  }
+
+  non_normal <- ifelse(nrow(data) <=3 | nrow(data) >= 5000,
+                       rep(F, length(conti_vars)),
+                       sapply(conti_vars, function(x){f(data[[x]])})
+                       )
 
 
 
@@ -244,6 +253,8 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
                              catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, labeldata = data_label)
 
       return(res)
+    } else if(is.null(input$group2_vars)) {
+      return(NULL)
     } else if ((input$group2_vars == "None") | (input$group2_vars == input$group_vars)){
       vars.tb1 = setdiff(vars, input$group_vars)
 
@@ -401,16 +412,21 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
     nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
     #nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]]))})
 
-    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10]
+    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data())]
     group_list <- mklist(data_varStruct(), group_vars)
 
-    except_vars <- factor_vars[nclass_factor > 10]
+    except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data())]
 
-    non_normal <- sapply(conti_vars,
-                         function(x){
-                           if (length(unique(data()[[x]])) ==1) return(F)
-                           return(shapiro.test(data()[[x]])$p.value <= 0.05)
-                         })
+    ## non-normal: shapiro test
+    f <- function(x) {
+      if (diff(range(x, na.rm = T)) == 0) return(F) else return(shapiro.test(x)$p.value <= 0.05)
+    }
+
+    non_normal <- ifelse(nrow(data) <=3 | nrow(data) >= 5000,
+                         rep(F, length(conti_vars)),
+                         sapply(conti_vars, function(x){f(data()[[x]])})
+    )
+
     return(list(factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list,
                 group_vars = group_vars, group_list = group_list, except_vars = except_vars, non_normal = non_normal
     ))
@@ -499,7 +515,9 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
                              catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, labeldata = data_label())
 
       return(res)
-    } else if ((input$group2_vars == "None") | (input$group2_vars == input$group_vars)){
+    } else if(is.null(input$group2_vars)) {
+      return(NULL)
+      } else if ((input$group2_vars == "None") | (input$group2_vars == input$group_vars)){
       vars.tb1 = setdiff(vars, input$group_vars)
 
       vars.fisher = sapply(setdiff(vlist()$factor_vars, input$group_vars), function(x){is(tryCatch(chisq.test(table(data()[[input$group_vars]], data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
