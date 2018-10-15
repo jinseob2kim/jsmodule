@@ -29,7 +29,7 @@ if(interactive()){
  ui <- fluidPage(
    sidebarLayout(
      sidebarPanel(
-       csvFileInput("datafile", "Upload data (csv/xlsx format)")
+       csvFileInput("datafile")
      ),
      mainPanel(
        tabsetPanel(type = "pills",

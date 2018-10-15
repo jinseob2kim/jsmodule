@@ -22,7 +22,7 @@ library(shiny);library(data.table);library(readxl);library(DT);library(jstable);
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
-      csvFileInput("datafile", "Upload data (csv/xlsx format)")
+      csvFileInput("datafile")
     ),
     mainPanel(
       tabsetPanel(type = "pills",
@@ -124,7 +124,7 @@ ui <- navbarPage("Basic statistics",
                  tabPanel("Data",
                           sidebarLayout(
                             sidebarPanel(
-                              csvFileInput("datafile", "Upload data (csv/xlsx format)")
+                              csvFileInput("datafile")
                             ),
                             mainPanel(
                               tabsetPanel(type = "pills",
@@ -335,7 +335,7 @@ ui <- navbarPage("Basic statistics",
                  tabPanel("Data",
                           sidebarLayout(
                             sidebarPanel(
-                              csvFileInput("datafile", "Upload data (csv/xlsx format)")
+                              csvFileInput("datafile")
                             ),
                             mainPanel(
                               tabsetPanel(type = "pills",
@@ -620,7 +620,7 @@ ui <- navbarPage("Basic statistics",
                  tabPanel("Data",
                           sidebarLayout(
                             sidebarPanel(
-                              csvFileInput("datafile", "Upload data (csv/xlsx format)")
+                              csvFileInput("datafile")
                             ),
                             mainPanel(
                               tabsetPanel(type = "pills",

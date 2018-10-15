@@ -1,3 +1,7 @@
+# jsmodule 0.3.1
+
+* Support `sav/sas7bdat` formats.
+
 # jsmodule 0.3.0
 
 ## Bug fixes: 
@@ -14,7 +18,7 @@
 
 ## New function 
 
-* `regress.display2`, `logistic.display2` : Regression table for reactive data
+* `regress.display2`, `logistic.display2` : Regression table for reactive data.
 
 
 

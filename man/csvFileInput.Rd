@@ -4,12 +4,12 @@
 \alias{csvFileInput}
 \title{csvFileInput: Shiny module UI for file upload.}
 \usage{
-csvFileInput(id, label = "csv/xlsx file")
+csvFileInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat)")
 }
 \arguments{
 \item{id}{id}
 
-\item{label}{label, Default: 'csv/xlsx file'}
+\item{label}{label, Default: 'csv/xlsx/sav/sas7bdat file'}
 }
 \value{
 Shiny UI
@@ -27,7 +27,7 @@ if(interactive()){
  ui <- fluidPage(
    sidebarLayout(
      sidebarPanel(
-       csvFileInput("datafile", "Upload data (csv/xlsx format)")
+       csvFileInput("datafile")
      ),
      mainPanel(
        tabsetPanel(type = "pills",

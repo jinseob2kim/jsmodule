@@ -39,7 +39,7 @@ if(interactive()){
  tabPanel("Data",
           sidebarLayout(
             sidebarPanel(
-              csvFileInput("datafile", "Upload data (csv/xlsx format)")
+              csvFileInput("datafile")
             ),
             mainPanel(
               tabsetPanel(type = "pills",

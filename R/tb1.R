@@ -319,7 +319,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #'  tabPanel("Data",
 #'           sidebarLayout(
 #'             sidebarPanel(
-#'               csvFileInput("datafile", "Upload data (csv/xlsx format)")
+#'               csvFileInput("datafile")
 #'             ),
 #'             mainPanel(
 #'               tabsetPanel(type = "pills",

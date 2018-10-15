@@ -2,7 +2,7 @@
 #' @title csvFileInput: Shiny module UI for file upload.
 #' @description Shiny module UI for file(csv or xlsx) upload.
 #' @param id id
-#' @param label label, Default: 'csv/xlsx file'
+#' @param label label, Default: 'csv/xlsx/sav/sas7bdat file'
 #' @return Shiny UI
 #' @details DETAILS
 #' @examples
@@ -12,7 +12,7 @@
 #'  ui <- fluidPage(
 #'    sidebarLayout(
 #'      sidebarPanel(
-#'        csvFileInput("datafile", "Upload data (csv/xlsx format)")
+#'        csvFileInput("datafile")
 #'      ),
 #'      mainPanel(
 #'        tabsetPanel(type = "pills",
@@ -42,7 +42,7 @@
 #' @export
 #' @import shiny
 
-csvFileInput <- function(id, label = "csv/xlsx file") {
+csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat)") {
   # Create a namespace function using the provided id
   ns <- NS(id)
 
@@ -68,7 +68,7 @@ csvFileInput <- function(id, label = "csv/xlsx file") {
 #'  ui <- fluidPage(
 #'    sidebarLayout(
 #'      sidebarPanel(
-#'        csvFileInput("datafile", "Upload data (csv/xlsx format)")
+#'        csvFileInput("datafile")
 #'      ),
 #'      mainPanel(
 #'        tabsetPanel(type = "pills",
@@ -100,6 +100,7 @@ csvFileInput <- function(id, label = "csv/xlsx file") {
 #' @importFrom data.table fread data.table .SD :=
 #' @importFrom readxl read_excel
 #' @importFrom jstable mk.lev
+#' @importFrom haven read_sav read_sas
 
 csvFile <- function(input, output, session) {
   # The selected file, if any
@@ -116,8 +117,14 @@ csvFile <- function(input, output, session) {
     validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T), message = "Please upload csv/xlsx file"))
     if (grepl("csv", userFile()$name) == T){
       out = fread(userFile()$datapath)
-    } else{
+    } else if (grepl("xlsx", userFile()$name) == T){
       out = data.table(read_excel(userFile()$datapath))
+    } else if (grepl("sav", userFile()$name) == T){
+      out = data.table(read_sav(userFile()$datapath))
+    } else if (grepl("sas7bdat", userFile()$name) == T){
+      out = data.table(read_sas(userFile()$datapath))
+    } else {
+      stop("Not supported format.")
     }
     for (x in change.vnlist){
       names(out) <- gsub(x[1], x[2], names(out))

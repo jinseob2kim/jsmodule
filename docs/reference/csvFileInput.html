@@ -68,7 +68,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.3.0</span>
+        <span class="label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.3.1</span>
       </span>
     </div>
 
@@ -124,7 +124,7 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>csvFileInput</span>(<span class='no'>id</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"csv/xlsx file"</span>)</pre>
+    <pre class="usage"><span class='fu'>csvFileInput</span>(<span class='no'>id</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>"Upload data (csv/xlsx/sav/sas7bdat)"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -135,7 +135,7 @@
     </tr>
     <tr>
       <th>label</th>
-      <td><p>label, Default: 'csv/xlsx file'</p></td>
+      <td><p>label, Default: 'csv/xlsx/sav/sas7bdat file'</p></td>
     </tr>
     </table>
     
@@ -155,7 +155,7 @@
  <span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/fluidPage'>fluidPage</a></span>(
    <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/sidebarLayout'>sidebarLayout</a></span>(
      <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/sidebarPanel'>sidebarPanel</a></span>(
-       <span class='fu'>csvFileInput</span>(<span class='st'>"datafile"</span>, <span class='st'>"Upload data (csv/xlsx format)"</span>)
+       <span class='fu'>csvFileInput</span>(<span class='st'>"datafile"</span>)
      ),
      <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/mainPanel'>mainPanel</a></span>(
        <span class='fu'><a href='http://www.rdocumentation.org/packages/shiny/topics/tabsetPanel'>tabsetPanel</a></span>(<span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"pills"</span>,
