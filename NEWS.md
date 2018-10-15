@@ -1,12 +1,19 @@
 # jsmodule 0.3.1
 
-* Support `sav/sas7bdat` formats.
+## Minor update
+
+* Support `sav/sas7bdat` formats
+
+## Bug fixes:
+
+* `tbmoduleUI`, `tbmoduleUI2` : some error
+
 
 # jsmodule 0.3.0
 
 ## Bug fixes: 
 
-* `tbmoduleUI`, `tbmoduleUI` : Apply `shapiro.test`
+* `tbmoduleUI`, `tbmoduleUI2` : Apply `shapiro.test`
 
 ## New module
 

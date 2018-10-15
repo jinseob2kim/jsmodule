@@ -276,7 +276,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
       vars.group = paste(data[[input$group_vars]], data[[input$group2_vars]], sep= ":")
 
       vars.fisher = sapply(setdiff(factor_vars, c(input$group2_vars, input$group_vars)), function(x){is(tryCatch(chisq.test(table(vars.group, data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
-      vars.fisher = setdiff(factor_vars, c(input$group2_vars, input$group_vars))[vars.fisher]
+      vars.fisher = setdiff(factor_vars, c(input$group2_vars, input$group_vars))[unlist(vars.fisher)]
 
       res = CreateTableOneJS(data = data,
                              vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
@@ -521,7 +521,9 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
       vars.tb1 = setdiff(vars, input$group_vars)
 
       vars.fisher = sapply(setdiff(vlist()$factor_vars, input$group_vars), function(x){is(tryCatch(chisq.test(table(data()[[input$group_vars]], data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
-      vars.fisher = setdiff(vlist()$factor_vars, input$group_vars)[vars.fisher]
+
+      vars.fisher = setdiff(vlist()$factor_vars, input$group_vars)[unlist(vars.fisher)]
+
 
       res = CreateTableOneJS(data = data(),
                              vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
