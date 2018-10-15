@@ -114,7 +114,7 @@ csvFile <- function(input, output, session) {
   change.vnlist = list(c(" ", "_"), c("=<", "_le_"), c("=>", "_ge_"), c("=", "_eq_"), c("\\(", "_open_"), c("\\)", "_close_"), c("%", "_percent_"), c("-", "_"))
 
   data <- eventReactive(input$file, {
-    validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T), message = "Please upload csv/xlsx file"))
+    validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T) | (grepl("sav", userFile()$name) == T) | (grepl("sas7bdat", userFile()$name) == T), message = "Please upload csv/xlsx/sav/sas7bdat file"))
     if (grepl("csv", userFile()$name) == T){
       out = fread(userFile()$datapath)
     } else if (grepl("xlsx", userFile()$name) == T){
