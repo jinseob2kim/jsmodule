@@ -4,6 +4,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/jinseob2kim/jsmodule.svg)](https://github.com/jinseob2kim/jsmodule/stargazers)
 [![GitHub license](https://img.shields.io/github/license/jinseob2kim/jsmodule.svg)](https://github.com/jinseob2kim/jsmodule/blob/master/LICENSE)
 [![GitHub last commit](https://img.shields.io/github/last-commit/google/skia.svg)](https://github.com/jinseob2kim/jsmodule)
+[![GitHub contributors](https://img.shields.io/github/contributors/jinseob2kim/jsmodule.svg?maxAge=2592000)](https://github.com/jinseob2kim/jsmodule/graphs/contributors)
 
 Shiny modules for medical research
 
