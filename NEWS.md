@@ -1,3 +1,14 @@
+# jomodule 0.3.5
+
+## New gadget
+
+* `jsBasicGadget` : Basic statistics
+
+## Minor update
+
+* `csvFile` changes variable name including **/** to **_**.
+
+
 # jsmodule 0.3.1
 
 ## Minor update
