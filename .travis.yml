@@ -1,0 +1,4 @@
+language: r
+cache: packages
+Imports: stats, data.table, shiny, readxl, DT, jstable, labelled, methods, epiDisplay, GGally, ggplot2, haven, rstudioapi, shinycustomloader
+Remotes: jinseob2kim/jstable
