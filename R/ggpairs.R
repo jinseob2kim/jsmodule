@@ -200,18 +200,18 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
       if (is.null(input$vars)){
         return(NULL)
       } else if (input$strata == "None"){
-        p = ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label[variable == x, var_label][1]}),
-                    upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
-                    lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
-                    diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
-                    axisLabels='show')
+        p = GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label[variable == x, var_label][1]}),
+                            upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
+                            lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
+                            diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
+                            axisLabels='show')
       } else {
-        p = ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label[variable == x, var_label][1]}),
-                    mapping = aes_string(color = input$strata),
-                    upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
-                    lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
-                    diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
-                    axisLabels='show')
+        p = GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label[variable == x, var_label][1]}),
+                            mapping = aes_string(color = input$strata),
+                            upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
+                            lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
+                            diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
+                            axisLabels='show')
       }
       if (is.null(input$theme)){
         return(p)
@@ -444,18 +444,18 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
     if (is.null(input$vars)){
       return(NULL)
     } else if (input$strata == "None"){
-      p = ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label()[variable == x, var_label][1]}),
-                  upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
-                  lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
-                  diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
-                  axisLabels='show')
+      p = GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label()[variable == x, var_label][1]}),
+                          upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
+                          lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
+                          diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
+                          axisLabels='show')
     } else {
-      p = ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label()[variable == x, var_label][1]}),
-                  mapping = aes_string(color = input$strata),
-                  upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
-                  lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
-                  diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
-                  axisLabels='show')
+      p = GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label()[variable == x, var_label][1]}),
+                          mapping = aes_string(color = input$strata),
+                          upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
+                          lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
+                          diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
+                          axisLabels='show')
     }
     if (is.null(input$theme)){
       return(p)
