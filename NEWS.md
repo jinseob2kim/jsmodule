@@ -6,7 +6,7 @@
 
 ## Minor update
 
-* `csvFile` changes variable name including **/** to **_**.
+* `csvFile` changes variable name including `/` to `_`.
 
 ## Bug fixes
 
