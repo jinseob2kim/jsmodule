@@ -8,6 +8,9 @@
 
 * `csvFile` changes variable name including **/** to **_**.
 
+## Bug fixes
+
+* Dependency issue with **jstable** package
 
 # jsmodule 0.3.1
 

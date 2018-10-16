@@ -18,6 +18,7 @@
 #' @importFrom data.table data.table := .SD
 #' @importFrom DT datatable %>% formatStyle styleEqual renderDT DTOutput
 #' @importFrom shinycustomloader withLoader
+#' @importFrom jstable opt.data opt.tb1 opt.tbreg
 #' @import ggplot2
 #' @import shiny
 
@@ -140,14 +141,14 @@ jsBasicGadget <- function(data) {
 
     output$data <- renderDT({
       datatable(data(), rownames=F, editable = F, extensions= "Buttons", caption = "Data",
-                options = opt.data("data")
+                options = jstable::opt.data("data")
       )
     })
 
 
     output$data_label <- renderDT({
       datatable(data.label(), rownames=F, editable = F, extensions= "Buttons", caption = "Label of data",
-                options = opt.data("label")
+                options = jstable::opt.data("label")
       )
     })
 
@@ -160,7 +161,7 @@ jsBasicGadget <- function(data) {
       tb = out_tb1()$table
       cap = out_tb1()$caption
       out.tb1 = datatable(tb, rownames = T, extensions = "Buttons", caption = cap,
-                          options = c(opt.tb1("tb1"),
+                          options = c(jstable::opt.tb1("tb1"),
                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
                                       ),
                                       list(scrollX = TRUE)
@@ -177,7 +178,7 @@ jsBasicGadget <- function(data) {
     output$lineartable <- renderDT({
       hide = which(colnames(out_linear()$table) == c("P(F-test)",  "sig"))
       datatable(out_linear()$table, rownames=T, extensions = "Buttons", caption = out_linear()$caption,
-                options = c(opt.tbreg(out_linear()$caption),
+                options = c(jstable::opt.tbreg(out_linear()$caption),
                             list(columnDefs = list(list(visible=FALSE, targets =hide))
                             )
                 )
@@ -189,7 +190,7 @@ jsBasicGadget <- function(data) {
     output$logistictable <- renderDT({
       hide = which(colnames(out_logistic()$table) == c("P(F-test)",  "sig"))
       datatable(out_logistic()$table, rownames=T, extensions = "Buttons", caption = out_logistic()$caption,
-                options = c(opt.tbreg(out_logistic()$caption),
+                options = c(jstable::opt.tbreg(out_logistic()$caption),
                             list(columnDefs = list(list(visible=FALSE, targets =hide))
                             )
                 )

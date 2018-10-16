@@ -236,14 +236,14 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 
   })
 
-  var_label(data) = sapply(names(data), function(v){data_label[variable == v, var_label][1]}, simplify = F)
+  labelled::var_label(data) = sapply(names(data), function(v){data_label[variable == v, var_label][1]}, simplify = F)
 
   out <- reactive({
     req(!is.null(input$group_vars))
     vars = setdiff(setdiff(names(data),except_vars),  input$group_vars)
 
     if (input$group_vars == "None"){
-      res = CreateTableOneJS(data = data,
+      res = jstable::CreateTableOneJS(data = data,
                              vars = vars, includeNA = F, test = T,
                              testApprox = chisq.test, argsApprox = list(correct = TRUE),
                              testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
@@ -261,7 +261,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
       vars.fisher = sapply(setdiff(factor_vars, input$group_vars), function(x){is(tryCatch(chisq.test(table(data[[input$group_vars]], data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
       vars.fisher = setdiff(factor_vars, input$group_vars)[vars.fisher]
 
-      res = CreateTableOneJS(data = data,
+      res = jstable::CreateTableOneJS(data = data,
                              vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
                              testApprox = chisq.test, argsApprox = list(correct = TRUE),
                              testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
@@ -278,7 +278,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
       vars.fisher = sapply(setdiff(factor_vars, c(input$group2_vars, input$group_vars)), function(x){is(tryCatch(chisq.test(table(vars.group, data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
       vars.fisher = setdiff(factor_vars, c(input$group2_vars, input$group_vars))[unlist(vars.fisher)]
 
-      res = CreateTableOneJS(data = data,
+      res = jstable::CreateTableOneJS(data = data,
                              vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
                              testApprox = chisq.test, argsApprox = list(correct = TRUE),
                              testExact = fisher.test, argsExact = list(workspace = 2 * 10^5, hybrid = T),
@@ -505,7 +505,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
     vars = setdiff(setdiff(names(data()),vlist()$except_vars),  input$group_vars)
 
     if (input$group_vars == "None"){
-      res = CreateTableOneJS(data = data(),
+      res = jstable::CreateTableOneJS(data = data(),
                              vars = vars, includeNA = F, test = T,
                              testApprox = chisq.test, argsApprox = list(correct = TRUE),
                              testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
@@ -525,7 +525,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
       vars.fisher = setdiff(vlist()$factor_vars, input$group_vars)[unlist(vars.fisher)]
 
 
-      res = CreateTableOneJS(data = data(),
+      res = jstable::CreateTableOneJS(data = data(),
                              vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
                              testApprox = chisq.test, argsApprox = list(correct = TRUE),
                              testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
@@ -542,7 +542,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
       vars.fisher = sapply(setdiff(vlist()$factor_vars, c(input$group2_vars, input$group_vars)), function(x){is(tryCatch(chisq.test(table(vars.group, data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
       vars.fisher = setdiff(vlist()$factor_vars, c(input$group2_vars, input$group_vars))[vars.fisher]
 
-      res = CreateTableOneJS(data = data(),
+      res = jstable::CreateTableOneJS(data = data(),
                              vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
                              testApprox = chisq.test, argsApprox = list(correct = TRUE),
                              testExact = fisher.test, argsExact = list(workspace = 2 * 10^5, hybrid = T),
