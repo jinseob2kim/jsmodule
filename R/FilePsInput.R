@@ -60,9 +60,7 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat)") {
     uiOutput(ns("factor")),
     uiOutput(ns("group_ps")),
     uiOutput(ns("indep_ps")),
-    radioButtons(ns("pcut_ps"), label = "Default p-value cut for ps calculation",
-                 choices = c(0.05, 0.1, 0.2),
-                 selected = 0.1, inline =T)
+    uiOutput(ns("pcut"))
   )
 }
 
@@ -150,6 +148,8 @@ FilePs <- function(input, output, session) {
 
 
 
+
+
   data.info <- eventReactive(input$file, {
     validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T) | (grepl("sav", userFile()$name) == T) | (grepl("sas7bdat", userFile()$name) == T), message = "Please upload csv/xlsx/sav/sas7bdat file"))
     if (grepl("csv", userFile()$name) == T){
@@ -187,6 +187,12 @@ FilePs <- function(input, output, session) {
            )
   })
 
+  output$pcut <- renderUI({
+    if (is.null(input$file)){return(NULL)}
+    radioButtons(session$ns("pcut_ps"), label = "Default p-value cut for ps calculation",
+                 choices = c(0.05, 0.1, 0.2),
+                 selected = 0.1, inline =T)
+  })
 
 
 
@@ -215,7 +221,7 @@ FilePs <- function(input, output, session) {
     return(out)
     })
 
-  data.label <- reactive({
+  data.label <- eventReactive(data(), {
     return(mk.lev(data()))
     })
 
@@ -242,30 +248,34 @@ FilePs <- function(input, output, session) {
                 selected = factor_01vars_case_small[1])
   })
 
-  output$indep_ps <- renderUI({
-    if (is.null(input$group_pscal)){
-      return(NULL)
-    }
-    validate(
-      need(length(input$group_pscal) != 0, "No group variables in data")
-    )
+  observeEvent(input$group_pscal , {
+    output$indep_ps <- renderUI({
+      if (is.null(input$group_pscal)){
+        return(NULL)
+      }
+      validate(
+        need(length(input$group_pscal) != 0, "No group variables in data")
+      )
 
-    vars <- setdiff(setdiff(names(data()), data.info()$except_vars),  input$group_pscal)
-    varsIni <- sapply(vars,
-                      function(v){
-                        forms <- as.formula(paste(input$group_pscal, "~", v))
-                        coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
-                        sigOK <- !all(coef[-1, 4] > as.numeric(input$pcut_ps))
-                        return(sigOK)
-                      })
-    tagList(
-      selectInput(session$ns("indep_pscal"), label = "Independent variables for PS calculation",
-                  choices = mklist(data.info()$data_varStruct, vars), multiple = T,
-                  selected = vars[varsIni])
-    )
+      vars <- setdiff(setdiff(names(data()), data.info()$except_vars),  input$group_pscal)
+      varsIni <- sapply(vars,
+                        function(v){
+                          forms <- as.formula(paste(input$group_pscal, "~", v))
+                          coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
+                          sigOK <- !all(coef[-1, 4] > as.numeric(input$pcut_ps))
+                          return(sigOK)
+                        })
+      tagList(
+        selectInput(session$ns("indep_pscal"), label = "Independent variables for PS calculation",
+                    choices = mklist(data.info()$data_varStruct, vars), multiple = T,
+                    selected = vars[varsIni])
+      )
+    })
   })
 
-  mat.info <- reactive({
+
+
+  mat.info <- eventReactive(input$indep_pscal, {
     if (is.null(input$group_pscal) | is.null(input$indep_pscal)){
       return(NULL)
     }
@@ -280,7 +290,7 @@ FilePs <- function(input, output, session) {
     return(list(data = wdata, matdata = mdata[, -grep("weights", names(mdata))]))
   })
 
-  naomit <- reactive({
+  naomit <- eventReactive(data.info(), {
     if (length(data.info()$naCol) == 0) {
       return("Data has <B>no</B> missing values.")
     } else{

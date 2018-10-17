@@ -142,14 +142,14 @@ jsBasicGadget <- function(data) {
 
     output$data <- renderDT({
       datatable(data(), rownames=F, editable = F, extensions= "Buttons", caption = "Data",
-                options = jstable::opt.data("data")
+                options = c(jstable::opt.data("data"), list(scrollX = TRUE))
       )
     })
 
 
     output$data_label <- renderDT({
       datatable(data.label(), rownames=F, editable = F, extensions= "Buttons", caption = "Label of data",
-                options = jstable::opt.data("label")
+                options = c(jstable::opt.data("label"), list(scrollX = TRUE))
       )
     })
 
@@ -181,7 +181,8 @@ jsBasicGadget <- function(data) {
       datatable(out_linear()$table, rownames=T, extensions = "Buttons", caption = out_linear()$caption,
                 options = c(jstable::opt.tbreg(out_linear()$caption),
                             list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            )
+                            ),
+                            list(scrollX = TRUE)
                 )
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
@@ -193,7 +194,8 @@ jsBasicGadget <- function(data) {
       datatable(out_logistic()$table, rownames=T, extensions = "Buttons", caption = out_logistic()$caption,
                 options = c(jstable::opt.tbreg(out_logistic()$caption),
                             list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            )
+                            ),
+                            list(scrollX = TRUE)
                 )
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
