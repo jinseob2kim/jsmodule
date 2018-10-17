@@ -1,4 +1,8 @@
-# jomodule 0.3.5
+# jsmodule 0.3.6
+
+* Change default `data.table` & `fread` **check.names** option to `TRUE` 
+
+# jsmodule 0.3.5
 
 ## New gadget
 

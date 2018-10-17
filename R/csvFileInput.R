@@ -111,26 +111,26 @@ csvFile <- function(input, output, session) {
   })
 
   # The user's data, parsed into a data frame
-  change.vnlist = list(c(" ", "_"), c("=<", "_le_"), c("=>", "_ge_"), c("=", "_eq_"), c("\\(", "_open_"), c("\\)", "_close_"), c("%", "_percent_"), c("-", "_"),  c("/", "_"),
-                       c("\r\n", "_"), c(",", "_comma_")
-  )
+  #change.vnlist = list(c(" ", "_"), c("=<", "_le_"), c("=>", "_ge_"), c("=", "_eq_"), c("\\(", "_open_"), c("\\)", "_close_"), c("%", "_percent_"), c("-", "_"),  c("/", "_"),
+  #                     c("\r\n", "_"), c(",", "_comma_")
+  #)
 
   data <- eventReactive(input$file, {
     validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T) | (grepl("sav", userFile()$name) == T) | (grepl("sas7bdat", userFile()$name) == T), message = "Please upload csv/xlsx/sav/sas7bdat file"))
     if (grepl("csv", userFile()$name) == T){
-      out = fread(userFile()$datapath)
+      out = fread(userFile()$datapath, check.names = T)
     } else if (grepl("xlsx", userFile()$name) == T){
-      out = data.table(read_excel(userFile()$datapath))
+      out = data.table(read_excel(userFile()$datapath), check.names = T)
     } else if (grepl("sav", userFile()$name) == T){
-      out = data.table(read_sav(userFile()$datapath))
+      out = data.table(read_sav(userFile()$datapath), check.names = T)
     } else if (grepl("sas7bdat", userFile()$name) == T){
-      out = data.table(read_sas(userFile()$datapath))
+      out = data.table(read_sas(userFile()$datapath), check.names = T)
     } else {
       stop("Not supported format.")
     }
-    for (x in change.vnlist){
-      names(out) <- gsub(x[1], x[2], names(out))
-    }
+    #for (x in change.vnlist){
+    #  names(out) <- gsub(x[1], x[2], names(out))
+    #}
 
     numstart.vnum <- suppressWarnings(sapply(names(out),function(x){!is.na(as.numeric(substr(x, 1,1)))}))
     names(out)[numstart.vnum] <- paste("n_", names(out)[numstart.vnum], sep = "")
