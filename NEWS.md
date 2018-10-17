@@ -1,6 +1,13 @@
 # jsmodule 0.3.6
 
+## New module
+
+* `FilePsInput`, `FilePs` are modules of data input for propensity score calculation.
+
+## Minor update
+
 * Change default `data.table` & `fread` **check.names** option to `TRUE` 
+
 
 # jsmodule 0.3.5
 
