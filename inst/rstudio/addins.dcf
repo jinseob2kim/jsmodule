@@ -2,3 +2,9 @@ Name: Basic statistics
 Description: Gadget including Data, Label info, Table 1, Regression(liear, logistic), Basic plot.
 Binding: jsBasicAddin
 Interactive: true
+
+
+Name: Propensity score analysis
+Description: Gatget including propensity score matching & IPTW analysis
+Binding: jsPropensityAddin
+Interactive: true
