@@ -1,6 +1,6 @@
 Package: jsmodule
 Title: Shiny modules for medical research
-Version: 0.3.7
+Version: 0.4.0
 Authors@R: c(person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c("aut", "cre"),  comment = c(ORCID = "0000-0002-9403-605X")),
              person("Anpanman", role = c("cph", "fnd"))
              )
@@ -10,7 +10,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.0
-Imports: stats, data.table, shiny, readxl, DT, jstable, labelled, methods, epiDisplay, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt
+Imports: stats, data.table, shiny, readxl, DT, jstable, labelled, methods, epiDisplay, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt, survey, tableone
 Remotes: jinseob2kim/jstable
 URL: https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues

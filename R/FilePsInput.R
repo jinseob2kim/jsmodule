@@ -300,7 +300,7 @@ FilePs <- function(input, output, session) {
   })
 
   outdata <- reactive({
-    list(data = mat.info()$data, matdata = mat.info()$matdata, data.label = data.label(), naomit = naomit())
+    list(data = mat.info()$data, matdata = mat.info()$matdata, data.label = data.label(), naomit = naomit(), group_var = input$group_pscal)
   })
 
 

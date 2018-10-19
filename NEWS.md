@@ -1,3 +1,9 @@
+# jsmodule 0.4.0
+
+## New module
+
+* `tb1simpleUI`, `tb1simple`, `tb1simple2` for propensity score analysis
+
 # jsmodule 0.3.7
 
 ## Bug fixes
