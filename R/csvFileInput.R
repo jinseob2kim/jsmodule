@@ -141,7 +141,7 @@ csvFile <- function(input, output, session) {
     conti_vars <- setdiff(names(out), factor_vars)
     nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}), .SDcols = conti_vars])
     #except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
-    add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
+    add_vars <- names(nclass)[nclass >= 2 &  nclass <= 5]
     #factor_vars_ini <- union(factor_vars, add_vars)
     return(list(data = out, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= 20], factor_adds = add_vars))
   })
