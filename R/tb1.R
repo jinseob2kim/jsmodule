@@ -169,7 +169,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
   conti_vars <- setdiff(names(data), factor_vars)
   conti_list <- mklist(data_varStruct, conti_vars)
 
-  nclass_factor <- unlist(data[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
+  nclass_factor <- unlist(data[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}), .SDcols = factor_vars])
 
   group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data)]
   group_list <- mklist(data_varStruct, group_vars)
@@ -409,7 +409,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
     conti_vars <- setdiff(names(data()), factor_vars)
     conti_list <- mklist(data_varStruct(), conti_vars)
 
-    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
+    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}), .SDcols = factor_vars])
     #nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]]))})
 
     group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data())]

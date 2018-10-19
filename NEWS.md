@@ -1,3 +1,9 @@
+# jsmodule 0.3.7
+
+## Bug fixes
+
+* factor variable criteria in `csvInput`, `tb1module` and `tb1module2`
+
 # jsmodule 0.3.6
 
 ## New module
