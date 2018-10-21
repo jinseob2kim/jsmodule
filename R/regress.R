@@ -359,6 +359,9 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 
 
   output$dep <- renderUI({
+    validate(
+      need(length(factor2_vars) >=1 , "No candidate dependent variable")
+    )
     tagList(
       selectInput(session$ns("dep_vars"), "Dependent variable",
                   choices = factor2_list, multiple = F,
@@ -476,6 +479,9 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
 
 
   output$dep <- renderUI({
+    validate(
+      need(length(vlist()$factor2_vars) >=1 , "No candidate dependent variable")
+    )
     tagList(
       selectInput(session$ns("dep_vars"), "Dependent variable",
                   choices = vlist()$factor2_list, multiple = F,
@@ -525,3 +531,4 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
 
 
 }
+
