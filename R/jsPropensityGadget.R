@@ -14,7 +14,7 @@
 #'  \code{\link[data.table]{data.table}}
 #'  \code{\link[MatchIt]{matchit}},\code{\link[MatchIt]{match.data}}
 #'  \code{\link[jstable]{cox2.display}},\code{\link[jstable]{svycox.display}}
-#'  \code{\link[survival]{survfit}},\code{\link[survival]{coxph}}
+#'  \code{\link[survival]{survfit}},\code{\link[survival]{coxph}},\code{\link[survival]{Surv}}
 #'  \code{\link[jskm]{jskm}},\code{\link[jskm]{svyjskm}}
 #'  \code{\link[ggplot2]{ggsave}}
 #'  \code{\link[survey]{svykm}}
@@ -471,7 +471,7 @@ jsPropensityGadget <- function(data){
       validate(
         need(!is.null(input$indep_cox), "Please select at least 1 independent variable.")
       )
-      as.formula(paste("Surv(",input$time_cox,",", input$event_cox,") ~ ", paste(input$indep_cox, collapse="+"),sep=""))
+      as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", paste(input$indep_cox, collapse="+"),sep=""))
     })
 
 
@@ -482,6 +482,7 @@ jsPropensityGadget <- function(data){
       cc = substitute(survival::coxph(.form, data= data.cox), list(.form= form.cox()))
       res.cox = eval(cc)
       tb.cox <- jstable::cox2.display(res.cox, data = data.cox)
+      tb.cox <- jstable::LabeljsCox(tb.cox, data.label())
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
       sig <- out.cox[, ncol(out.cox)]
       sig <- gsub("< ", "", sig)
@@ -502,9 +503,10 @@ jsPropensityGadget <- function(data){
     output$cox_ps <- renderDT({
       data.cox <- mat.info()$matdata
       data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
-      cc = substitute(coxph(.form, data= data.cox), list(.form= form.cox()))
+      cc = substitute(survival::coxph(.form, data= data.cox), list(.form= form.cox()))
       res.cox = eval(cc)
       tb.cox <- jstable::cox2.display(res.cox, data = data.cox)
+      tb.cox <- jstable::LabeljsCox(tb.cox, data.label())
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
       sig <- out.cox[, ncol(out.cox)]
       sig <- gsub("< ", "", sig)
@@ -524,11 +526,12 @@ jsPropensityGadget <- function(data){
     output$cox_iptw <- renderDT({
       data.cox <- mat.info()$data
       data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
-      data.design <- svydesign(ids = ~ 1, data = data.cox, weights = ~ iptw)
+      data.design <- survey::svydesign(ids = ~ 1, data = data.cox, weights = ~ iptw)
 
-      cc = substitute(svycoxph(.form, design= data.design), list(.form= form.cox()))
+      cc = substitute(survey::svycoxph(.form, design= data.design), list(.form= form.cox()))
       res.cox = eval(cc)
       tb.cox <- jstable::svycox.display(res.cox)
+      tb.cox <- jstable::LabeljsCox(tb.cox, data.label())
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
       sig <- out.cox[, ncol(out.cox)]
       sig <- gsub("< ", "", sig)
@@ -599,7 +602,7 @@ jsPropensityGadget <- function(data){
       validate(
         need(!is.null(input$indep_km), "Please select at least 1 independent variable.")
       )
-      as.formula(paste("Surv(",input$time_km,",", input$event_km,") ~ ", input$indep_km ,sep=""))
+      as.formula(paste("survival::Surv(",input$time_km,",", input$event_km,") ~ ", input$indep_km ,sep=""))
     })
 
     ## KM original
@@ -710,11 +713,11 @@ jsPropensityGadget <- function(data){
     )
 
 
-    ## KM ps
+    ## KM iptw
     km_iptw_input <- reactive({
       data.km <- mat.info()$data
       data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
-      data.design <- svydesign(ids = ~ 1, data = data.km, weights = ~ iptw)
+      data.design <- survey::svydesign(ids = ~ 1, data = data.km, weights = ~ iptw)
       cc = substitute(survey::svykm(.form, design = data.design), list(.form= form.km()))
       res.km = eval(cc)
       yst.name = data.label()[variable == input$indep_km, var_label][1]

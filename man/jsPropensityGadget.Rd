@@ -29,7 +29,7 @@ if(interactive()){
 \code{\link[data.table]{data.table}}
  \code{\link[MatchIt]{matchit}},\code{\link[MatchIt]{match.data}}
  \code{\link[jstable]{cox2.display}},\code{\link[jstable]{svycox.display}}
- \code{\link[survival]{survfit}},\code{\link[survival]{coxph}}
+ \code{\link[survival]{survfit}},\code{\link[survival]{coxph}},\code{\link[survival]{Surv}}
  \code{\link[jskm]{jskm}},\code{\link[jskm]{svyjskm}}
  \code{\link[ggplot2]{ggsave}}
  \code{\link[survey]{svykm}}
