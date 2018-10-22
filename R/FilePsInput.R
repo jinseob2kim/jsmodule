@@ -153,14 +153,21 @@ FilePs <- function(input, output, session) {
   data.info <- eventReactive(input$file, {
     validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T) | (grepl("sav", userFile()$name) == T) | (grepl("sas7bdat", userFile()$name) == T), message = "Please upload csv/xlsx/sav/sas7bdat file"))
     if (grepl("csv", userFile()$name) == T){
-      out = data.table::fread(userFile()$datapath, check.names = T)
+      out = data.table::fread(userFile()$datapath, check.names = F)
     } else if (grepl("xlsx", userFile()$name) == T){
-      out = data.table::data.table(readxl::read_excel(userFile()$datapath), check.names = T)
+      out = data.table::data.table(readxl::read_excel(userFile()$datapath), check.names = F)
     } else if (grepl("sav", userFile()$name) == T){
-      out = data.table::data.table(haven::read_sav(userFile()$datapath), check.names = T)
+      out = data.table::data.table(haven::read_sav(userFile()$datapath), check.names = F)
     } else if (grepl("sas7bdat", userFile()$name) == T){
-      out = data.table::data.table(haven::read_sas(userFile()$datapath), check.names = T)
+      out = data.table::data.table(haven::read_sas(userFile()$datapath), check.names = F)
     }
+
+
+    out.old <- out
+    name.old <- names(out.old)
+    out <- data.table::data.table(out, check.names = T)
+    name.new <- names(out)
+    ref <- list(name.old = name.old, name.new = name.new)
 
 
 
@@ -170,7 +177,7 @@ FilePs <- function(input, output, session) {
     data_varStruct = list(variable = names(out))
 
     factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
-    if (!is.null(factor_vars)){
+    if (!is.null(factor_vars) & length(factor_vars) > 0){
       out[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
     }
 
@@ -183,7 +190,7 @@ FilePs <- function(input, output, session) {
     #factor_vars_ini <- union(factor_vars, add_vars)
     return(list(data = out, data_varStruct = data_varStruct,
                 conti_original = conti_vars, factor_adds_list = factor_adds_list,
-                factor_adds = add_vars, naCol = naCol, except_vars = except_vars)
+                factor_adds = add_vars, naCol = naCol, except_vars = except_vars, ref = ref)
            )
   })
 
@@ -222,13 +229,18 @@ FilePs <- function(input, output, session) {
     })
 
   data.label <- eventReactive(data(), {
-    return(mk.lev(data()))
+    labeldata <- mk.lev(data())
+    for (vn in data.info()$ref[["name.new"]]){
+      w <- which(data.info()$ref[["name.new"]] == vn)
+      labeldata[variable ==vn, var_label := data.info()$ref[["name.old"]][w]]
+    }
+    return(labeldata)
     })
 
   output$group_ps <- renderUI({
     factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
     validate(
-      need(!is.null(factor_vars), "No categorical variables in data")
+      need(!is.null(factor_vars) & length(factor_vars) > 0, "No categorical variables in data")
     )
 
     class01_factor <- unlist(data()[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])

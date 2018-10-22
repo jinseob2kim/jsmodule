@@ -181,6 +181,7 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 #' @param matdata reactive matdata
 #' @param data_label reactive data_label
 #' @param data_varStruct data_varStruct, Default: NULL
+#' @param vlist variable lists
 #' @param group_var reactive group_var
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
@@ -200,56 +201,11 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 #' @importFrom survey svydesign
 #' @importFrom tableone svyCreateTableOne
 #'
-tb1simple2 <- function(input, output, session, data, matdata, data_label, data_varStruct = NULL, group_var ){
+tb1simple2 <- function(input, output, session, data, matdata, data_label, data_varStruct = NULL, vlist, group_var ){
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))
   }
-
-  vlist <- reactive({
-
-    mklist <- function(varlist, vars){
-      lapply(varlist,
-             function(x){
-               inter <- intersect(x, vars)
-               if (length(inter) == 1){
-                 inter <- c(inter, "")
-               }
-               return(inter)
-             })
-    }
-
-
-    factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
-    #factor_vars <- names(data())[sapply(names(data()), function(x){class(data()[[x]]) %in% c("factor", "character")})]
-    factor_list <- mklist(data_varStruct(), factor_vars)
-
-
-    conti_vars <- setdiff(names(data()), c(factor_vars, "pscore", "iptw"))
-    conti_list <- mklist(data_varStruct(), conti_vars)
-
-    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}), .SDcols = factor_vars])
-    #nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]]))})
-
-    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data())]
-    group_list <- mklist(data_varStruct(), group_vars)
-
-    except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data())]
-
-    ## non-normal: shapiro test
-    f <- function(x) {
-      if (diff(range(x, na.rm = T)) == 0) return(F) else return(shapiro.test(x)$p.value <= 0.05)
-    }
-
-    non_normal <- ifelse(nrow(data()) <=3 | nrow(data()) >= 5000,
-                         rep(F, length(conti_vars)),
-                         sapply(conti_vars, function(x){f(data()[[x]])})
-    )
-
-    return(list(factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list,
-                group_vars = group_vars, group_list = group_list, except_vars = except_vars, non_normal = non_normal
-    ))
-  })
 
 
   output$base <- renderUI({

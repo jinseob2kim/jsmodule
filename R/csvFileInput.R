@@ -118,19 +118,25 @@ csvFile <- function(input, output, session) {
   data <- eventReactive(input$file, {
     validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T) | (grepl("sav", userFile()$name) == T) | (grepl("sas7bdat", userFile()$name) == T), message = "Please upload csv/xlsx/sav/sas7bdat file"))
     if (grepl("csv", userFile()$name) == T){
-      out = fread(userFile()$datapath, check.names = T)
+      out = data.table::fread(userFile()$datapath, check.names = F)
     } else if (grepl("xlsx", userFile()$name) == T){
-      out = data.table(read_excel(userFile()$datapath), check.names = T)
+      out = data.table::data.table(read_excel(userFile()$datapath), check.names = F)
     } else if (grepl("sav", userFile()$name) == T){
-      out = data.table(read_sav(userFile()$datapath), check.names = T)
+      out = data.table::data.table(read_sav(userFile()$datapath), check.names = F)
     } else if (grepl("sas7bdat", userFile()$name) == T){
-      out = data.table(read_sas(userFile()$datapath), check.names = T)
+      out = data.table::data.table(read_sas(userFile()$datapath), check.names = F)
     } else {
       stop("Not supported format.")
     }
     #for (x in change.vnlist){
     #  names(out) <- gsub(x[1], x[2], names(out))
     #}
+
+    out.old <- out
+    name.old <- names(out.old)
+    out <- data.table::data.table(out, check.names = T)
+    name.new <- names(out)
+    ref <- list(name.old = name.old, name.new = name.new)
 
 
     numstart.vnum <- suppressWarnings(sapply(names(out),function(x){!is.na(as.numeric(substr(x, 1,1)))}))
@@ -143,7 +149,7 @@ csvFile <- function(input, output, session) {
     #except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
     add_vars <- names(nclass)[nclass >= 2 &  nclass <= 5]
     #factor_vars_ini <- union(factor_vars, add_vars)
-    return(list(data = out, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= 20], factor_adds = add_vars))
+    return(list(data = out, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= 20], factor_adds = add_vars, ref = ref))
   })
 
 
@@ -169,7 +175,13 @@ csvFile <- function(input, output, session) {
     if (!is.null(input$factor_vname)){
       out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
     }
+
+    ref <- data()$ref
     out.label <- mk.lev(out)
+    for (vn in ref[["name.new"]]){
+      w <- which(ref[["name.new"]] == vn)
+      out.label[variable == vn, var_label := ref[["name.old"]][w]]
+    }
     return(list(data = out, label = out.label))
   })
 

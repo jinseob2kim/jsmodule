@@ -1,7 +1,7 @@
 #' @title jsBasicGadget: Shiny Gadget of Basic Statistics in Medical Research.
-#' @description Shiny Gadget including Data, Label info, Table 1, Regression(liear, logistic), Basic plot
+#' @description Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plot
 #' @param data data
-#' @return Shiny Gadget including Data, Label info, Table 1, Regression(liear, logistic), Basic plot
+#' @return Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plot
 #' @details DETAILS
 #' @examples
 #' \dontrun{

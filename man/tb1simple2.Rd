@@ -5,7 +5,7 @@
 \title{tb1simple2: tb1 module for propensity score analysis for reactive data}
 \usage{
 tb1simple2(input, output, session, data, matdata, data_label,
-  data_varStruct = NULL, group_var)
+  data_varStruct = NULL, vlist, group_var)
 }
 \arguments{
 \item{input}{input}
@@ -21,6 +21,8 @@ tb1simple2(input, output, session, data, matdata, data_label,
 \item{data_label}{reactive data_label}
 
 \item{data_varStruct}{data_varStruct, Default: NULL}
+
+\item{vlist}{variable lists}
 
 \item{group_var}{reactive group_var}
 }

@@ -18,7 +18,24 @@ Shiny modules for medical research
 devtools::install_github(c('jinseob2kim/jstable', 'jinseob2kim/jsmodule'))
 ```
 
-## Example 1: Shiny app for `csv/xlsx` input
+## Gadget
+
+### Basic statistics 
+
+```r
+jsBasicGadget(mtcars)
+```
+
+### Propensity score analysis
+
+```r
+jsPropensityGadget(mtcars)
+```
+
+
+## Modules
+
+### Example 1: Shiny app for `csv/xlsx` input
 
 ```r
 library(jsmodule)
@@ -58,7 +75,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-## Example 2: Table 1
+### Example 2: Table 1
 
 ```r
 library(shiny);library(data.table);library(DT)
@@ -119,7 +136,7 @@ shinyApp(ui, server)
 
 ```
 
-## Example3: Table 1 for **reactive** data
+### Example3: Table 1 for **reactive** data
 
 ```r
 library(shiny);library(data.table);library(readxl);library(DT);library(jstable);library(shinycustomloader);library(tableone);library(labelled)
@@ -206,7 +223,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-## Example 4: Add linear & logistic regression
+### Example 4: Add linear & logistic regression
 
 ```r
 library(shiny);library(data.table);library(readxl);library(DT);library(jstable);library(shinycustomloader);library(tableone);library(labelled)
@@ -330,7 +347,7 @@ shinyApp(ui, server)
 ```
 
 
-## Example 5: Add linear & logistic regression for **reactive** data
+### Example 5: Add linear & logistic regression for **reactive** data
 
 ```r
 library(shiny);library(data.table);library(readxl);library(DT);library(jstable);library(shinycustomloader);library(tableone);library(labelled)
@@ -466,7 +483,7 @@ shinyApp(ui, server)
 ```
 
 
-## Example 6: Add scatterplot
+### Example 6: Add scatterplot
 
 ```r
 library(shiny);library(data.table);library(readxl);library(DT);library(jstable);library(shinycustomloader);library(tableone);library(labelled)
@@ -614,7 +631,7 @@ shinyApp(ui, server)
 ```
 
 
-## Example 7: Add scatterplot for **reactive data**
+### Example 7: Add scatterplot for **reactive data**
 
 ```r
 library(shiny);library(data.table);library(readxl);library(DT);library(jstable);library(shinycustomloader);library(tableone);library(labelled)

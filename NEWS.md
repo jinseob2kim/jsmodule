@@ -1,3 +1,15 @@
+# jsmodule 0.4.3
+
+## New gadget
+
+* `jsPropensityGadget` : Propensity score analysis
+
+## Update
+
+* Excluded non-normal variable selection feature from `tb1simple` module.
+
+* Apply original variable names to label information : `csvFileInput` & `FilePsInput` functions. 
+
 # jsmodule 0.4.0
 
 ## New module

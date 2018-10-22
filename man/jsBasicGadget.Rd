@@ -10,10 +10,10 @@ jsBasicGadget(data)
 \item{data}{data}
 }
 \value{
-Shiny Gadget including Data, Label info, Table 1, Regression(liear, logistic), Basic plot
+Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plot
 }
 \description{
-Shiny Gadget including Data, Label info, Table 1, Regression(liear, logistic), Basic plot
+Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plot
 }
 \details{
 DETAILS
