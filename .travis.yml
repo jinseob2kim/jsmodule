@@ -6,6 +6,10 @@ Remotes: jinseob2kim/jstable, jinseob2kim/jskm
 r_packages:
   - covr
 
+r_github_packages:
+  - jinseob2km/jsmodule
+
+
 after_success:
   - Rscript -e 'library(jsmodule); jsBasicAddin(mtcars)'
   - Rscript -e 'library(covr); codecov()'
