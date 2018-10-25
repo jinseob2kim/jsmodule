@@ -420,3 +420,6 @@ logistic.display2 <- function (logistic.model, alpha = 0.05, crude = TRUE, crude
 
 
 
+
+
+
