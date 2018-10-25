@@ -7,4 +7,5 @@ r_packages:
   - covr
 
 after_success:
+  - Rscript -e 'library(jsmodule); jsBasicAddin(mtcars)'
   - Rscript -e 'library(covr); codecov()'

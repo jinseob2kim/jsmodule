@@ -1,3 +1,8 @@
+# jsmodule 0.4.4
+
+* Change regression table function to `glmshow.display` in **jstable** package.
+
+
 # jsmodule 0.4.3
 
 ## New gadget
