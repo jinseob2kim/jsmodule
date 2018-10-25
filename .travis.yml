@@ -7,7 +7,7 @@ r_packages:
   - covr
 
 r_github_packages:
-  - jinseob2km/jsmodule
+  - jinseob2kim/jsmodule
 
 
 after_success:
