@@ -1,3 +1,7 @@
+# jsmodule 0.4.5
+
+* Update : `csvFile` module can remove empty columns.
+
 # jsmodule 0.4.4
 
 * Change regression table function to `glmshow.display` in **jstable** package.

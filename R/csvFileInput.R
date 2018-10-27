@@ -132,6 +132,10 @@ csvFile <- function(input, output, session) {
     #  names(out) <- gsub(x[1], x[2], names(out))
     #}
 
+    naCol <- names(out)[unlist(out[, lapply(.SD, function(x){all(is.na(x))})])]
+    out <- out[, .SD, .SDcols = -naCol]
+    naomit <- ifelse(length(naCol) ==0, NULL, paste("Column <B>", paste(naCol, collapse = ", "), "</B> are(is) excluded because it is empty.", sep = ""))
+
     out.old <- out
     name.old <- names(out.old)
     out <- data.table::data.table(out, check.names = T)
@@ -149,7 +153,7 @@ csvFile <- function(input, output, session) {
     #except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
     add_vars <- names(nclass)[nclass >= 2 &  nclass <= 5]
     #factor_vars_ini <- union(factor_vars, add_vars)
-    return(list(data = out, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= 20], factor_adds = add_vars, ref = ref))
+    return(list(data = out, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= 20], factor_adds = add_vars, ref = ref, naomit = naomit))
   })
 
 
@@ -182,8 +186,9 @@ csvFile <- function(input, output, session) {
       w <- which(ref[["name.new"]] == vn)
       out.label[variable == vn, var_label := ref[["name.old"]][w]]
     }
-    return(list(data = out, label = out.label))
+    return(list(data = out, label = out.label, naomit = data()$naomit))
   })
+
 
 
   # Return the reactive that yields the data frame
