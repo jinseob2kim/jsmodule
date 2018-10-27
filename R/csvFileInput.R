@@ -133,8 +133,12 @@ csvFile <- function(input, output, session) {
     #}
 
     naCol <- names(out)[unlist(out[, lapply(.SD, function(x){all(is.na(x))})])]
-    out <- out[, .SD, .SDcols = -naCol]
-    naomit <- ifelse(length(naCol) ==0, NULL, paste("Column <B>", paste(naCol, collapse = ", "), "</B> are(is) excluded because it is empty.", sep = ""))
+    if (length(naCol) ==0){
+      naomit = NULL
+    } else{
+      out <- out[, .SD, .SDcols = -naCol]
+      naomit = paste("Column <B>", paste(naCol, collapse = ", "), "</B> are(is) excluded because it is empty.", sep = "")
+    }
 
     out.old <- out
     name.old <- names(out.old)
@@ -147,7 +151,9 @@ csvFile <- function(input, output, session) {
     names(out)[numstart.vnum] <- paste("n_", names(out)[numstart.vnum], sep = "")
 
     factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
-    out[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
+    if (length(factor_vars) > 0){
+      out[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
+    }
     conti_vars <- setdiff(names(out), factor_vars)
     nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}), .SDcols = conti_vars])
     #except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
@@ -176,7 +182,7 @@ csvFile <- function(input, output, session) {
   outdata <- reactive({
     out <- data()$data
     out[, (data()$conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = data()$conti_original]
-    if (!is.null(input$factor_vname)){
+    if (length(input$factor_vname) > 0){
       out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
     }
 
