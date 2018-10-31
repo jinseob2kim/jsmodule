@@ -1,3 +1,7 @@
+# jsmodule 0.4.6
+
+* Bug fixes : Modules for regression exclude `NA` when selecting binary variables.
+
 # jsmodule 0.4.5
 
 * Update : `csvFile` module can remove empty columns.

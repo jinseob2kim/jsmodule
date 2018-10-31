@@ -128,7 +128,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
   conti_vars <- setdiff(names(data), factor_vars)
   conti_list <- mklist(data_varStruct, conti_vars)
 
-  nclass_factor <- unlist(data[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
+  nclass_factor <- unlist(data[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
 
   group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data)]
   group_list <- mklist(data_varStruct, group_vars)
@@ -240,7 +240,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
     conti_vars <- setdiff(names(data()), factor_vars)
     conti_list <- mklist(data_varStruct(), conti_vars)
 
-    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
+    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
     #nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]]))})
 
     group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data())]
@@ -350,7 +350,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
   factor_list <- mklist(data_varStruct, factor_vars)
 
 
-  nclass_factor <- unlist(data[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
+  nclass_factor <- unlist(data[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
 
   factor2_vars <- factor_vars[nclass_factor == 2]
   factor2_list <- mklist(data_varStruct, factor2_vars)
@@ -463,7 +463,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     factor_list <- mklist(data_varStruct(), factor_vars)
 
 
-    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
+    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
 
     factor2_vars <- factor_vars[nclass_factor == 2]
     factor2_list <- mklist(data_varStruct(), factor2_vars)
