@@ -1,4 +1,5 @@
 language: r
+sudo: required
 cache: packages
 Imports: stats, data.table, shiny, readxl, DT, jstable, labelled, methods, epiDisplay, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt, survey, tableone, jskm, survival
 Remotes: jinseob2kim/jstable, jinseob2kim/jskm
