@@ -5,7 +5,7 @@
 \title{tb1module2: Shiny module Server for Table 1 using reactive data.}
 \usage{
 tb1module2(input, output, session, data, data_label,
-  data_varStruct = NULL)
+  data_varStruct = NULL, nfactor.limit = 10)
 }
 \arguments{
 \item{input}{input}
@@ -19,6 +19,8 @@ tb1module2(input, output, session, data, data_label,
 \item{data_label}{reactive data label(reactive)}
 
 \item{data_varStruct}{Variable structure list of data, Default: NULL}
+
+\item{nfactor.limit}{maximum factor levels to include, Default: 10}
 }
 \value{
 Shiny module

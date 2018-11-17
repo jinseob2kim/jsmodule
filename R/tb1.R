@@ -74,6 +74,7 @@ tb1moduleUI <- function(id) {
 #' @param data data
 #' @param data_label data label
 #' @param data_varStruct Variable structure list of data, Default: NULL
+#' @param nfactor.limit maximum factor levels to include, Default: 10
 #' @return Shiny module
 #' @details DETAILS
 #' @examples
@@ -131,7 +132,7 @@ tb1moduleUI <- function(id) {
 #' @importFrom methods is
 
 
-tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL){
+tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10){
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -171,10 +172,10 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 
   nclass_factor <- unlist(data[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}), .SDcols = factor_vars])
 
-  group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data)]
+  group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <= nfactor.limit & nclass_factor < nrow(data)]
   group_list <- mklist(data_varStruct, group_vars)
 
-  except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data)]
+  except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data)]
 
 
   ## non-normal: shapiro test
@@ -307,6 +308,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @param data reactive data
 #' @param data_label reactive data label(reactive)
 #' @param data_varStruct Variable structure list of data, Default: NULL
+#' @param nfactor.limit maximum factor levels to include, Default: 10
 #' @return Shiny module
 #' @details DETAILS
 #' @examples
@@ -380,7 +382,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @importFrom methods is
 
 
-tb1module2 <- function(input, output, session, data, data_label, data_varStruct = NULL){
+tb1module2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10){
 
 
   if (is.null(data_varStruct)){
@@ -412,10 +414,10 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
     nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}), .SDcols = factor_vars])
     #nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]]))})
 
-    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data())]
+    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <= nfactor.limit & nclass_factor < nrow(data())]
     group_list <- mklist(data_varStruct(), group_vars)
 
-    except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data())]
+    except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data())]
 
     ## non-normal: shapiro test
     f <- function(x) {

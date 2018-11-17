@@ -1,3 +1,7 @@
+# jsmodude 0.4.8
+
+* `tb1module` and `tb1module2`  can control the maximum factor levels to include.
+
 # jsmodule 0.4.6
 
 * Bug fixes : Modules for regression exclude `NA` when selecting binary variables.
