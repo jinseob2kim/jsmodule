@@ -1,3 +1,7 @@
+# jsmodude 0.4.9
+
+* Bug fixes : IPTW table in `tb1simple` and `tb1simple2` modules.
+
 # jsmodude 0.4.8
 
 * `tb1module` and `tb1module2`  can control the maximum factor levels to include.

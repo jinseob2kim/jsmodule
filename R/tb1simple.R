@@ -149,9 +149,10 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 
     res.iptw1 <- tableone::svyCreateTableOne(vars = vars.tb1, strata = group_var, data = Svydesign, smd = input$smd)
     ptb1 <- print(res.iptw1, nonnormal = input$nonnormal_vars, catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p,
-                  showAllLevels = T, printToggle = F, quote = F)
+                  showAllLevels = T, printToggle = F, quote = F, smd = input$smd)
 
     rownames(ptb1) = gsub("(mean (sd))", "", rownames(ptb1), fixed=T)
+    colnames(ptb1)[1] = data_label()[get("variable") == group_var(), "var_label"][1]
 
     #colname.group_var = unlist(data_label()[get("variable") == strata, "val_label"])
     #colnames(ptb1)[1:(length(colname.group_var)+1)] = unlist(c(data_label()[get("variable") == strata, "var_label"][1], colname.group_var))
@@ -267,9 +268,10 @@ tb1simple2 <- function(input, output, session, data, matdata, data_label, data_v
 
     res.iptw1 <- tableone::svyCreateTableOne(vars = vars.tb1, strata = group_var(), data = Svydesign, smd = input$smd)
     ptb1 <- print(res.iptw1, nonnormal = input$nonnormal_vars, catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p,
-                      showAllLevels = T, printToggle = F, quote = F)
+                      showAllLevels = T, printToggle = F, quote = F, smd = input$smd)
 
     rownames(ptb1) = gsub("(mean (sd))", "", rownames(ptb1), fixed=T)
+    colnames(ptb1)[1] = data_label()[get("variable") == group_var(), "var_label"][1]
 
     #colname.group_var = unlist(data_label()[get("variable") == strata, "val_label"])
     #colnames(ptb1)[1:(length(colname.group_var)+1)] = unlist(c(data_label()[get("variable") == strata, "var_label"][1], colname.group_var))
