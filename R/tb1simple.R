@@ -85,13 +85,14 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 
   ## non-normal: shapiro test
   f <- function(x) {
-    if (diff(range(x, na.rm = T)) == 0) return(F) else return(shapiro.test(x)$p.value <= 0.05)
-  }
+      if (diff(range(x, na.rm = T)) == 0) return(F) else return(shapiro.test(x)$p.value <= 0.05)
+    }
 
   non_normal <- ifelse(nrow(data) <=3 | nrow(data) >= 5000,
-                       rep(F, length(conti_vars)),
-                       sapply(conti_vars, function(x){f(data[[x]])})
-  )
+                         rep(F, length(conti_vars)),
+                         sapply(conti_vars, function(x){f(data[[x]])})
+                       )
+
 
 
   output$base <- renderUI({
