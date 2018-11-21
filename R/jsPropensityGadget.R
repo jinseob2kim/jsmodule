@@ -576,7 +576,7 @@ jsPropensityGadget <- function(data){
 
 
     output$kmUI_indep <- renderUI({
-      indep.km <- setdiff(vlist()$factor_vars, c(vlist()$except_vars, input$event_cox, input$time_cox ))
+      indep.km <- setdiff(vlist()$factor_vars, c(vlist()$except_vars, input$event_km, input$time_km ))
       mklist <- function(varlist, vars){
         lapply(varlist,
                function(x){

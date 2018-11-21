@@ -1,6 +1,10 @@
 # jsmodude 0.4.9
 
-* Bug fixes : IPTW table in `tb1simple` and `tb1simple2` modules.
+## Bug fixes 
+
+* IPTW table in `tb1simple` and `tb1simple2` modules.
+
+* Kaplan-meier UI in `jsPropensityGadget`
 
 # jsmodude 0.4.8
 
