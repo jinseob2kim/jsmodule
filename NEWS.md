@@ -2,7 +2,9 @@
 
 ## Update
 
-* Add sub-group analysis to `regressModule`, `logisticModule` and `jsPropensityGadget`
+* Add sub-group analysis to `regressModule`, `logisticModule` and `jsPropensityGadget`.
+
+* Apply the updated `cox2.display` function in **jstable** package to `jsPropensityGadget`.
 
 ## Typo
 

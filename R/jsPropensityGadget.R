@@ -513,9 +513,9 @@ jsPropensityGadget <- function(data){
       if(input$coxUI_subcheck == T){
         data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
       }
-      cc = substitute(survival::coxph(.form, data= data.cox), list(.form= form.cox()))
+      cc = substitute(survival::coxph(.form, data= data.cox, model = T), list(.form= form.cox()))
       res.cox = eval(cc)
-      tb.cox <- jstable::cox2.display(res.cox, data = data.cox)
+      tb.cox <- jstable::cox2.display(res.cox)
       tb.cox <- jstable::LabeljsCox(tb.cox, data.label())
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
       sig <- out.cox[, ncol(out.cox)]
@@ -543,9 +543,9 @@ jsPropensityGadget <- function(data){
       if(input$coxUI_subcheck == T){
         data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
       }
-      cc = substitute(survival::coxph(.form, data= data.cox), list(.form= form.cox()))
+      cc = substitute(survival::coxph(.form, data= data.cox, model = T), list(.form= form.cox()))
       res.cox = eval(cc)
-      tb.cox <- jstable::cox2.display(res.cox, data = data.cox)
+      tb.cox <- jstable::cox2.display(res.cox)
       tb.cox <- jstable::LabeljsCox(tb.cox, data.label())
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
       sig <- out.cox[, ncol(out.cox)]
