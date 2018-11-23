@@ -119,7 +119,10 @@ jsPropensityGadget <- function(data){
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("coxUI_eventtime"),
-                                uiOutput("coxUI_indep")
+                                uiOutput("coxUI_indep"),
+                                checkboxInput("coxUI_subcheck", "Sub-group analysis"),
+                                uiOutput("coxUI_subvar"),
+                                uiOutput("coxUI_subval")
                               ),
                               mainPanel(
                                 tabsetPanel(type = "pills",
@@ -143,7 +146,10 @@ jsPropensityGadget <- function(data){
                                 uiOutput("kmUI_indep"),
                                 checkboxInput("km_cumhaz", "Show cumulative hazard", F),
                                 checkboxInput("km_pval", "Show p-value(log-rank test)", T),
-                                checkboxInput("km_table", "Show table", T)
+                                checkboxInput("km_table", "Show table", T),
+                                checkboxInput("km_subcheck", "Sub-group analysis"),
+                                uiOutput("km_subvar"),
+                                uiOutput("km_subval")
                               ),
                               mainPanel(
                                 tabsetPanel(type = "pills",
@@ -357,7 +363,7 @@ jsPropensityGadget <- function(data){
       )
 
       return(list(factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list,
-                  factor_01vars = factor_01vars, factor_01_list = factor_01_list, except_vars = except_vars, non_normal = non_normal)
+                  factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_list = group_list, except_vars = except_vars, non_normal = non_normal)
       )
 
     })
@@ -465,6 +471,31 @@ jsPropensityGadget <- function(data){
       )
     })
 
+    observeEvent(input$indep_cox, {
+      output$coxUI_subvar <- renderUI({
+        req(input$coxUI_subcheck == T)
+        factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
+        factor_subgroup <- setdiff(factor_vars, c(input$event_cox, input$indep_cox))
+        factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+
+        tagList(
+          selectInput("subvar_cox", "Sub-group variable",
+                      choice = factor_subgroup_list, multiple = F,
+                      selected = factor_subgroup[1])
+        )
+      })
+
+    })
+
+
+    output$coxUI_subval <- renderUI({
+      req(input$coxUI_subcheck == T)
+      req(input$subvar_cox)
+      selectInput("subval_cox", "Sub-group value",
+                  choice = data.label()[variable == input$subvar_cox, val_label], multiple = F,
+                  selected = data.label()[variable == input$subvar_cox, val_label][1])
+    })
+
 
 
     form.cox <- reactive({
@@ -479,6 +510,9 @@ jsPropensityGadget <- function(data){
     output$cox_original <- renderDT({
       data.cox <- mat.info()$data
       data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
+      if(input$coxUI_subcheck == T){
+        data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
+      }
       cc = substitute(survival::coxph(.form, data= data.cox), list(.form= form.cox()))
       res.cox = eval(cc)
       tb.cox <- jstable::cox2.display(res.cox, data = data.cox)
@@ -489,9 +523,12 @@ jsPropensityGadget <- function(data){
       sig <- ifelse(as.numeric(as.vector(sig)) <= 0.05, "**", NA)
       out.cox <- cbind(out.cox, sig)
       cap.cox <- paste("Cox's proportional hazard model on time ('", data.label()[variable == input$time_cox, var_label][1] , "') to event ('", data.label()[variable == input$event_cox, var_label][1], "')", sep="")
+      if(input$coxUI_subcheck == T){
+        cap.cox <- paste(cap.cox, " - ", data.label()[variable == input$subvar_cox, var_label][1], ": ", data.label()[variable == input$subvar_cox & level == input$subval_cox, val_label], sep = "")
+      }
       hide = which(colnames(out.cox) == c("sig"))
       datatable(out.cox, rownames=T, extensions= "Buttons", caption = cap.cox,
-                options = c(opt.tbreg(paste("cox_original", as.character(form.cox()), sep="_")),
+                options = c(opt.tbreg(cap.cox),
                             list(columnDefs = list(list(visible=FALSE, targets= hide))
                             )
                 )
@@ -503,6 +540,9 @@ jsPropensityGadget <- function(data){
     output$cox_ps <- renderDT({
       data.cox <- mat.info()$matdata
       data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
+      if(input$coxUI_subcheck == T){
+        data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
+      }
       cc = substitute(survival::coxph(.form, data= data.cox), list(.form= form.cox()))
       res.cox = eval(cc)
       tb.cox <- jstable::cox2.display(res.cox, data = data.cox)
@@ -513,9 +553,12 @@ jsPropensityGadget <- function(data){
       sig <- ifelse(as.numeric(as.vector(sig)) <= 0.05, "**", NA)
       out.cox <- cbind(out.cox, sig)
       cap.cox <- paste("Cox's proportional hazard model on time ('", data.label()[variable == input$time_cox, var_label][1] , "') to event ('", data.label()[variable == input$event_cox, var_label][1], "') - Matching data", sep="")
+      if(input$coxUI_subcheck == T){
+        cap.cox <- paste(cap.cox, " - ", data.label()[variable == input$subvar_cox, var_label][1], ": ", data.label()[variable == input$subvar_cox & level == input$subval_cox, val_label], sep = "")
+      }
       hide = which(colnames(out.cox) == c("sig"))
       datatable(out.cox, rownames=T, extensions= "Buttons", caption = cap.cox,
-                options = c(opt.tbreg(paste("cox_ps", as.character(form.cox()), sep="_")),
+                options = c(opt.tbreg(cap.cox),
                             list(columnDefs = list(list(visible=FALSE, targets= hide))
                             )
                 )
@@ -526,6 +569,9 @@ jsPropensityGadget <- function(data){
     output$cox_iptw <- renderDT({
       data.cox <- mat.info()$data
       data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
+      if(input$coxUI_subcheck == T){
+        data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
+      }
       data.design <- survey::svydesign(ids = ~ 1, data = data.cox, weights = ~ iptw)
 
       cc = substitute(survey::svycoxph(.form, design= data.design), list(.form= form.cox()))
@@ -538,9 +584,12 @@ jsPropensityGadget <- function(data){
       sig <- ifelse(as.numeric(as.vector(sig)) <= 0.05, "**", NA)
       out.cox <- cbind(out.cox, sig)
       cap.cox <- paste("Weighted cox's proportional hazard model on time ('", data.label()[variable == input$time_cox, var_label][1] , "') to event ('", data.label()[variable == input$event_cox, var_label][1], "') ", sep="")
+      if(input$coxUI_subcheck == T){
+        cap.cox <- paste(cap.cox, " - ", data.label()[variable == input$subvar_cox, var_label][1], ": ", data.label()[variable == input$subvar_cox & level == input$subval_cox, val_label], sep = "")
+      }
       hide = which(colnames(out.cox) == c("sig"))
       datatable(out.cox, rownames=T, extensions= "Buttons", caption = cap.cox,
-                options = c(opt.tbreg(paste("cox_iptw", as.character(form.cox()), sep="_")),
+                options = c(opt.tbreg(cap.cox),
                             list(columnDefs = list(list(visible=FALSE, targets= hide))
                             )
                 )
@@ -596,6 +645,30 @@ jsPropensityGadget <- function(data){
       )
     })
 
+    observeEvent(input$indep_km,{
+      output$km_subvar <- renderUI({
+        req(input$km_subcheck == T)
+        factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
+        factor_subgroup <- setdiff(factor_vars, c(input$event_km, input$indep_km))
+        factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+
+        tagList(
+          selectInput("subvar_km", "Sub-group variable",
+                      choice = factor_subgroup_list, multiple = F,
+                      selected = factor_subgroup[1])
+        )
+      })
+    })
+
+
+    output$km_subval <- renderUI({
+      req(input$km_subcheck == T)
+      req(input$subvar_km)
+      selectInput("subval_km", "Sub-group value",
+                  choice = data.label()[variable == input$subvar_km, val_label], multiple = F,
+                  selected = data.label()[variable == input$subvar_km, val_label][1])
+    })
+
 
 
     form.km <- reactive({
@@ -609,6 +682,9 @@ jsPropensityGadget <- function(data){
     km_original_input <- reactive({
       data.km <- mat.info()$data
       data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
+      if (input$km_subcheck == T){
+        data.km <- data.km[get(input$subvar_km) == input$subval_km, ]
+      }
       cc = substitute(survival::survfit(.form, data= data.km), list(.form= form.km()))
       res.km = eval(cc)
       yst.name = data.label()[variable == input$indep_km, var_label][1]
@@ -663,6 +739,9 @@ jsPropensityGadget <- function(data){
     km_ps_input <- reactive({
       data.km <- mat.info()$matdata
       data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
+      if (input$km_subcheck == T){
+        data.km <- data.km[get(input$subvar_km) == input$subval_km, ]
+      }
       cc = substitute(survival::survfit(.form, data= data.km), list(.form= form.km()))
       res.km = eval(cc)
       yst.name = data.label()[variable == input$indep_km, var_label][1]
@@ -717,6 +796,9 @@ jsPropensityGadget <- function(data){
     km_iptw_input <- reactive({
       data.km <- mat.info()$data
       data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
+      if (input$km_subcheck == T){
+        data.km <- data.km[get(input$subvar_km) == input$subval_km, ]
+      }
       data.design <- survey::svydesign(ids = ~ 1, data = data.km, weights = ~ iptw)
       cc = substitute(survey::svykm(.form, design = data.design), list(.form= form.km()))
       res.km = eval(cc)

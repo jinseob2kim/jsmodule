@@ -121,7 +121,7 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
   output$strata_ggpairs <- renderUI({
     strata_vars <- setdiff(setdiff(factor_vars, except_vars), input$vars)
     strata_list <- mklist(data_varStruct, strata_vars)
-    selectizeInput(session$ns("strata"), "Variables",
+    selectizeInput(session$ns("strata"), "Strata",
                    choices = c("None", strata_list), multiple = F,
                    selected = "None"
     )
@@ -365,7 +365,7 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
     }
     strata_vars <- setdiff(setdiff(vlist()$factor_vars, vlist()$except_vars), input$vars)
     strata_list <- mklist(data_varStruct(), strata_vars)
-    selectizeInput(session$ns("strata"), "Variables",
+    selectizeInput(session$ns("strata"), "Strata",
                    choices = c("None", strata_list), multiple = F,
                    selected = "None"
     )

@@ -77,7 +77,10 @@ regressModuleUI <- function(id) {
     uiOutput(ns("indep")),
     sliderInput(ns("decimal"), "Digits",
                 min = 1, max = 4, value = 2
-    )
+    ),
+    checkboxInput(ns("regressUI_subcheck"), "Sub-group analysis"),
+    uiOutput(ns("regressUI_subvar")),
+    uiOutput(ns("regressUI_subval"))
   )
 }
 
@@ -166,16 +169,49 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
     )
   })
 
+  observeEvent(input$indep_vars, {
+    output$regressUI_subvar <- renderUI({
+      req(input$regressUI_subcheck == T)
+      factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
+      factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars))
+      factor_subgroup_list <- mklist(data_varStruct, factor_subgroup)
+
+      tagList(
+        selectInput(session$ns("subvar_regress"), "Sub-group variable",
+                    choice = factor_subgroup_list, multiple = F,
+                    selected = factor_subgroup[1])
+      )
+    })
+  })
+
+
+
+  output$regressUI_subval <- renderUI({
+    req(input$regressUI_subcheck == T)
+    req(input$subvar_regress)
+    selectInput(session$ns("subval_regress"), "Sub-group value",
+                choice = data_label[variable == input$subvar_regress, val_label], multiple = F,
+                selected = data_label[variable == input$subvar_regress, val_label][1])
+  })
+
+
   out <- reactive({
+    data.regress <- data
+    if(input$regressUI_subcheck == T){
+      data.regress <- data.regress[get(input$subvar_regress) == input$subval_regress, ]
+    }
     y <- input$dep_vars
     xs <- input$indep_vars
     validate(
       need(!is.null(input$indep_vars) , "Please select at least 1 variable")
     )
     form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
-    res.linear = glm(form, data = data)
+    res.linear = glm(form, data = data.regress)
     tb.linear = jstable::glmshow.display(res.linear, decimal = input$decimal)
     cap.linear = paste("Linear regression predicting ", data_label[variable == y, var_label][1], sep="")
+    if(input$regressUI_subcheck == T){
+      cap.linear <- paste(cap.linear, " - ", data_label[variable == input$subvar_regress, var_label][1], ": ", data_label[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
+    }
     out.linear = jstable::LabelepiDisplay(tb.linear, label = T, ref = data_label)
     return(list(table = out.linear, caption = cap.linear))
   })
@@ -286,16 +322,50 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
     )
   })
 
+  observeEvent(input$indep_vars, {
+    output$regressUI_subvar <- renderUI({
+      req(input$regressUI_subcheck == T)
+      factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
+      factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars))
+      factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+
+      tagList(
+        selectInput(session$ns("subvar_regress"), "Sub-group variable",
+                    choice = factor_subgroup_list, multiple = F,
+                    selected = factor_subgroup[1])
+      )
+    })
+
+  })
+
+
+  output$regressUI_subval <- renderUI({
+    req(input$regressUI_subcheck == T)
+    req(input$subvar_regress)
+    selectInput(session$ns("subval_regress"), "Sub-group value",
+                choice = data_label()[variable == input$subvar_regress, val_label], multiple = F,
+                selected = data_label()[variable == input$subvar_regress, val_label][1])
+  })
+
+
+
   out <- reactive({
+    data.regress <- data()
+    if(input$regressUI_subcheck == T){
+      data.regress <- data.regress[get(input$subvar_regress) == input$subval_regress, ]
+    }
     y <- input$dep_vars
     xs <- input$indep_vars
     validate(
       need(!is.null(input$indep_vars) , "Please select at least 1 variable")
     )
     form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
-    res.linear = glm(form, data = data())
+    res.linear = glm(form, data = data.regress)
     tb.linear = jstable::glmshow.display(res.linear, decimal = input$decimal)
     cap.linear = paste("Linear regression predicting ", data_label()[variable == y, var_label][1], sep="")
+    if(input$regressUI_subcheck == T){
+      cap.linear <- paste(cap.linear, " - ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
+    }
     out.linear = jstable::LabelepiDisplay(tb.linear, label = T, ref = data_label())
     #out.linear = summary(res.linear)$coefficients
     #sig = ifelse(out.linear[, 4] <= 0.05, "**", "NA")
@@ -391,16 +461,50 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
     )
   })
 
+  observeEvent(input$indep_vars, {
+    output$regressUI_subvar <- renderUI({
+      req(input$regressUI_subcheck == T)
+      factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
+      factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars))
+      factor_subgroup_list <- mklist(data_varStruct, factor_subgroup)
+
+      tagList(
+        selectInput(session$ns("subvar_logistic"), "Sub-group variable",
+                    choice = factor_subgroup_list, multiple = F,
+                    selected = factor_subgroup[1])
+      )
+    })
+  })
+
+
+
+
+  output$regressUI_subval <- renderUI({
+    req(input$regressUI_subcheck == T)
+    req(input$subvar_logistic)
+    selectInput(session$ns("subval_logistic"), "Sub-group value",
+                choice = data_label[variable == input$subvar_logistic, val_label], multiple = F,
+                selected = data_label[variable == input$subvar_logistic, val_label][1])
+  })
+
+
   out <- reactive({
+    data.logistic <- data
+    if(input$regressUI_subcheck == T){
+      data.logistic <- data.logistic[get(input$subvar_logistic) == input$subval_logistic, ]
+    }
     y <- input$dep_vars
     xs <- input$indep_vars
     validate(
       need(!is.null(input$indep_vars) , "Please select at least 1 variable")
     )
     form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
-    res.logistic = glm(form, data = data, family = "binomial")
+    res.logistic = glm(form, data = data.logistic, family = "binomial")
     tb.logistic = jstable::glmshow.display(res.logistic,  decimal = input$decimal)
     cap.logistic = paste("Logistic regression predicting ", data_label[variable == y, var_label][1], sep="")
+    if(input$regressUI_subcheck == T){
+      cap.logistic <- paste(cap.logistic, " - ", data_label[variable == input$subvar_logistic, var_label][1], ": ", data_label[variable == input$subvar_logistic & level == input$subval_logistic, val_label], sep = "")
+    }
     out.logistic = jstable::LabelepiDisplay(tb.logistic, label = T, ref = data_label)
     return(list(table = out.logistic, caption = cap.logistic))
   })
@@ -511,16 +615,48 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     )
   })
 
+  observeEvent(input$indep_vars, {
+    output$regressUI_subvar <- renderUI({
+      req(input$regressUI_subcheck == T)
+      factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
+      factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars))
+      factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+
+      tagList(
+        selectInput(session$ns("subvar_logistic"), "Sub-group variable",
+                    choice = factor_subgroup_list, multiple = F,
+                    selected = factor_subgroup[1])
+      )
+    })
+
+  })
+
+
+  output$regressUI_subval <- renderUI({
+    req(input$regressUI_subcheck == T)
+    req(input$subvar_logistic)
+    selectInput(session$ns("subval_logistic"), "Sub-group value",
+                choice = data_label()[variable == input$subvar_logistic, val_label], multiple = F,
+                selected = data_label()[variable == input$subvar_logistic, val_label][1])
+  })
+
   out <- reactive({
+    data.logistic <- data()
+    if(input$regressUI_subcheck == T){
+      data.logistic <- data.logistic[get(input$subvar_logistic) == input$subval_logistic, ]
+    }
     y <- input$dep_vars
     xs <- input$indep_vars
     validate(
       need(!is.null(input$indep_vars) , "Please select at least 1 variable")
     )
     form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
-    res.logistic = glm(form, data = data(), family = binomial)
+    res.logistic = glm(form, data = data.logistic, family = binomial)
     tb.logistic = jstable::glmshow.display(res.logistic, decimal = input$decimal)
     cap.logistic = paste("Logistic regression predicting ", data_label()[variable == y, var_label][1], sep="")
+    if(input$regressUI_subcheck == T){
+      cap.logistic <- paste(cap.logistic, " - ", data_label()[variable == input$subvar_logistic, var_label][1], ": ", data_label()[variable == input$subvar_logistic & level == input$subval_logistic, val_label], sep = "")
+    }
     out.logistic = jstable::LabelepiDisplay(tb.logistic, label = T, ref = data_label())
     #out.logistic = summary(res.logistic)$coefficients
     #sig = ifelse(out.logistic[, 4] <= 0.05, "**", "NA")

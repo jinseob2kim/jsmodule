@@ -18,7 +18,8 @@ tb1simpleUI <- function(id) {
   ns <- NS(id)
 
   tagList(
-    uiOutput(ns("base"))
+    uiOutput(ns("base")),
+    uiOutput(ns("sub2"))
   )
 }
 
@@ -117,33 +118,75 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 
 
 
+
+  output$sub2 <- renderUI({
+    tagList(
+      selectInput(session$ns("group2_vars"), "2nd group (optional)",
+                  choices = c("None", mksetdiff(group_list, group_var)), multiple = F,
+                  selected = "None"),
+      checkboxInput(session$ns("psub"), "Subgroup p-values", F)
+    )
+
+  })
+
+
+
   labelled::var_label(data) = sapply(names(data), function(v){data_label[variable == v, var_label][1]}, simplify = F)
 
   out <- reactive({
-
     vars = setdiff(setdiff(names(data),except_vars),  group_var)
-    vars.tb1 = setdiff(vars, c(group_var, "pscore", "iptw"))
+    if (input$group2_vars == "None"){
+      vars.tb1 = setdiff(vars, c(group_var, "pscore", "iptw"))
 
-    vars.fisher = sapply(setdiff(factor_vars, group_var), function(x){is(tryCatch(chisq.test(table(data[[group_var()]], data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
-    vars.fisher = setdiff(factor_vars, group_var[vars.fisher])
+      vars.fisher = sapply(setdiff(factor_vars, group_var), function(x){is(tryCatch(chisq.test(table(data[[group_var]], data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
+      vars.fisher = setdiff(factor_vars, group_var)[unlist(vars.fisher)]
 
-    res = jstable::CreateTableOneJS(data = data,
-                                    vars = vars.tb1, strata = group_var, includeNA = F, test = T,
-                                    testApprox = chisq.test, argsApprox = list(correct = TRUE),
-                                    testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
-                                    testNormal = oneway.test, argsNormal = list(var.equal = F),
-                                    testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                    showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
-                                    catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
+      res = jstable::CreateTableOneJS(data = data,
+                                      vars = vars.tb1, strata = group_var, includeNA = F, test = T,
+                                      testApprox = chisq.test, argsApprox = list(correct = TRUE),
+                                      testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                      testNormal = oneway.test, argsNormal = list(var.equal = F),
+                                      testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+                                      showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                                      catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
 
-    res.ps = jstable::CreateTableOneJS(data = matdata,
-                                       vars = vars.tb1, strata = group_var, includeNA = F, test = T,
-                                       testApprox = chisq.test, argsApprox = list(correct = TRUE),
-                                       testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
-                                       testNormal = oneway.test, argsNormal = list(var.equal = F),
-                                       testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                       showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
-                                       catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
+      res.ps = jstable::CreateTableOneJS(data = matdata,
+                                         vars = vars.tb1, strata = group_var, includeNA = F, test = T,
+                                         testApprox = chisq.test, argsApprox = list(correct = TRUE),
+                                         testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
+                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+                                         showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
+
+    } else{
+      vars.tb1 = setdiff(vars, c(group_var, input$group2_vars, "pscore", "iptw"))
+
+      vars.fisher = sapply(setdiff(factor_vars, c(group_var, input$group2_vars)), function(x){is(tryCatch(chisq.test(table(data[[group_var]], data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
+      vars.fisher = setdiff(factor_vars, c(group_var, input$group2_vars))[unlist(vars.fisher)]
+
+      res = jstable::CreateTableOneJS(data = data,
+                                      vars = vars.tb1, strata = group_var, strata2 = input$group2_vars, includeNA = F, test = T,
+                                      testApprox = chisq.test, argsApprox = list(correct = TRUE),
+                                      testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                      testNormal = oneway.test, argsNormal = list(var.equal = F),
+                                      testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+                                      showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                                      catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
+
+      res.ps = jstable::CreateTableOneJS(data = matdata,
+                                         vars = vars.tb1, strata = group_var, strata2 = input$group2_vars, includeNA = F, test = T,
+                                         testApprox = chisq.test, argsApprox = list(correct = TRUE),
+                                         testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
+                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+                                         showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
+
+    }
+
+
+
 
     Svydesign <- survey::svydesign(ids = ~ 1, data = data, weights = ~ iptw)
 
@@ -230,34 +273,72 @@ tb1simple2 <- function(input, output, session, data, matdata, data_label, data_v
 
   })
 
+  output$sub2 <- renderUI({
+    tagList(
+      selectInput(session$ns("group2_vars"), "2nd group (optional)",
+                  choices = c("None", mksetdiff(vlist()$group_list, group_var())), multiple = F,
+                  selected = "None"),
+      checkboxInput(session$ns("psub"), "Subgroup p-values", F)
+    )
+
+  })
+
 
   out <- reactive({
     req(!is.null(group_var()))
     vars = setdiff(setdiff(names(data()),vlist()$except_vars),  group_var())
-    vars.tb1 = setdiff(vars, c(group_var(), "pscore", "iptw"))
+    if (input$group2_vars == "None"){
+      vars.tb1 = setdiff(vars, c(group_var(), "pscore", "iptw"))
 
-    vars.fisher = sapply(setdiff(vlist()$factor_vars, group_var()), function(x){is(tryCatch(chisq.test(table(data()[[group_var()]], data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
+      vars.fisher = sapply(setdiff(vlist()$factor_vars, group_var()), function(x){is(tryCatch(chisq.test(table(data()[[group_var()]], data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
+      vars.fisher = setdiff(vlist()$factor_vars, group_var())[unlist(vars.fisher)]
 
-    vars.fisher = setdiff(vlist()$factor_vars, group_var())[unlist(vars.fisher)]
+
+      res = jstable::CreateTableOneJS(data = data(),
+                                      vars = vars.tb1, strata = group_var(), includeNA = F, test = T,
+                                      testApprox = chisq.test, argsApprox = list(correct = TRUE),
+                                      testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                      testNormal = oneway.test, argsNormal = list(var.equal = F),
+                                      testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+                                      showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                                      catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
+
+      res.ps = jstable::CreateTableOneJS(data = matdata(),
+                                         vars = vars.tb1, strata = group_var(), includeNA = F, test = T,
+                                         testApprox = chisq.test, argsApprox = list(correct = TRUE),
+                                         testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
+                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+                                         showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
+    } else{
+      vars.tb1 = setdiff(vars, c(group_var(), input$group2_vars, "pscore", "iptw"))
+
+      vars.fisher = sapply(setdiff(factor_vars, c(group_var(), input$group2_vars)), function(x){is(tryCatch(chisq.test(table(data[[group_var()]], data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
+      vars.fisher = setdiff(factor_vars, c(group_var(), input$group2_vars))[unlist(vars.fisher)]
+
+      res = jstable::CreateTableOneJS(data = data(),
+                                      vars = vars.tb1, strata = group_var(), strata2 = input$group2_vars, includeNA = F, test = T,
+                                      testApprox = chisq.test, argsApprox = list(correct = TRUE),
+                                      testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                      testNormal = oneway.test, argsNormal = list(var.equal = F),
+                                      testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+                                      showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                                      catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
+
+      res.ps = jstable::CreateTableOneJS(data = matdata(),
+                                         vars = vars.tb1, strata = group_var(), strata2 = input$group2_vars, includeNA = F, test = T,
+                                         testApprox = chisq.test, argsApprox = list(correct = TRUE),
+                                         testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
+                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+                                         showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
+
+    }
 
 
-    res = jstable::CreateTableOneJS(data = data(),
-                                    vars = vars.tb1, strata = group_var(), includeNA = F, test = T,
-                                    testApprox = chisq.test, argsApprox = list(correct = TRUE),
-                                    testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
-                                    testNormal = oneway.test, argsNormal = list(var.equal = F),
-                                    testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                    showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
-                                    catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
 
-    res.ps = jstable::CreateTableOneJS(data = matdata(),
-                                    vars = vars.tb1, strata = group_var(), includeNA = F, test = T,
-                                    testApprox = chisq.test, argsApprox = list(correct = TRUE),
-                                    testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
-                                    testNormal = oneway.test, argsNormal = list(var.equal = F),
-                                    testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                    showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
-                                    catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
 
 
     ## iptw

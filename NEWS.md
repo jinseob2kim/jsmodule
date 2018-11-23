@@ -1,4 +1,14 @@
-# jsmodude 0.4.9
+# jsmodule 0.5.0
+
+## Update
+
+* Add sub-group analysis to `regressModule`, `logisticModule` and `jsPropensityGadget`
+
+## Typo
+
+* Strata variable in `ggpairsModule`, `ggpairsModule2`.
+
+# jsmodule 0.4.9
 
 ## Bug fixes 
 
