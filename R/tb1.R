@@ -259,8 +259,8 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
     } else if ((input$group2_vars == "None") | (input$group2_vars == input$group_vars)){
       vars.tb1 = setdiff(vars, input$group_vars)
 
-      vars.fisher = sapply(setdiff(factor_vars, input$group_vars), function(x){is(tryCatch(chisq.test(table(data[[input$group_vars]], data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
-      vars.fisher = setdiff(factor_vars, input$group_vars)[vars.fisher]
+      #vars.fisher = sapply(setdiff(factor_vars, input$group_vars), function(x){is(tryCatch(chisq.test(table(data[[input$group_vars]], data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
+      #vars.fisher = setdiff(factor_vars, input$group_vars)[vars.fisher]
 
       res = jstable::CreateTableOneJS(data = data,
                              vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
@@ -268,16 +268,16 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
                              testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                              testNormal = oneway.test, argsNormal = list(var.equal = F),
                              testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                             showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                             showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                              catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
 
       return(res)
     } else {
       vars.tb1 = setdiff(vars, c(input$group2_vars, input$group_vars))
-      vars.group = paste(data[[input$group_vars]], data[[input$group2_vars]], sep= ":")
+      #vars.group = paste(data[[input$group_vars]], data[[input$group2_vars]], sep= ":")
 
-      vars.fisher = sapply(setdiff(factor_vars, c(input$group2_vars, input$group_vars)), function(x){is(tryCatch(chisq.test(table(vars.group, data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
-      vars.fisher = setdiff(factor_vars, c(input$group2_vars, input$group_vars))[unlist(vars.fisher)]
+     # vars.fisher = sapply(setdiff(factor_vars, c(input$group2_vars, input$group_vars)), function(x){is(tryCatch(chisq.test(table(vars.group, data[[x]])),error=function(e) e, warning=function(w) w), "warning")})
+     # vars.fisher = setdiff(factor_vars, c(input$group2_vars, input$group_vars))[unlist(vars.fisher)]
 
       res = jstable::CreateTableOneJS(data = data,
                              vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
@@ -285,7 +285,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
                              testExact = fisher.test, argsExact = list(workspace = 2 * 10^5, hybrid = T),
                              testNormal = oneway.test, argsNormal = list(var.equal = F),
                              testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                             showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                             showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                              catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
 
       return(res)
@@ -522,9 +522,8 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
       } else if ((input$group2_vars == "None") | (input$group2_vars == input$group_vars)){
       vars.tb1 = setdiff(vars, input$group_vars)
 
-      vars.fisher = sapply(setdiff(vlist()$factor_vars, input$group_vars), function(x){is(tryCatch(chisq.test(table(data()[[input$group_vars]], data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
-
-      vars.fisher = setdiff(vlist()$factor_vars, input$group_vars)[unlist(vars.fisher)]
+      #vars.fisher = sapply(setdiff(vlist()$factor_vars, input$group_vars), function(x){is(tryCatch(chisq.test(table(data()[[input$group_vars]], data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
+      #vars.fisher = setdiff(vlist()$factor_vars, input$group_vars)[unlist(vars.fisher)]
 
 
       res = jstable::CreateTableOneJS(data = data(),
@@ -533,16 +532,16 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
                              testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                              testNormal = oneway.test, argsNormal = list(var.equal = F),
                              testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                             showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                             showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                              catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
 
       return(res)
     } else {
       vars.tb1 = setdiff(vars, c(input$group2_vars, input$group_vars))
-      vars.group = paste(data()[[input$group_vars]], data()[[input$group2_vars]], sep= ":")
+      #vars.group = paste(data()[[input$group_vars]], data()[[input$group2_vars]], sep= ":")
 
-      vars.fisher = sapply(setdiff(vlist()$factor_vars, c(input$group2_vars, input$group_vars)), function(x){is(tryCatch(chisq.test(table(vars.group, data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
-      vars.fisher = setdiff(vlist()$factor_vars, c(input$group2_vars, input$group_vars))[vars.fisher]
+      #vars.fisher = sapply(setdiff(vlist()$factor_vars, c(input$group2_vars, input$group_vars)), function(x){is(tryCatch(chisq.test(table(vars.group, data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
+      #vars.fisher = setdiff(vlist()$factor_vars, c(input$group2_vars, input$group_vars))[vars.fisher]
 
       res = jstable::CreateTableOneJS(data = data(),
                              vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
@@ -550,7 +549,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
                              testExact = fisher.test, argsExact = list(workspace = 2 * 10^5, hybrid = T),
                              testNormal = oneway.test, argsNormal = list(var.equal = F),
                              testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                             showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = vars.fisher, nonnormal = input$nonnormal_vars,
+                             showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                              catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
 
       return(res)
@@ -562,3 +561,4 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
 
 
 }
+

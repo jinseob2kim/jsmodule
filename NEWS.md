@@ -1,3 +1,7 @@
+# jsmodule 0.5.1
+
+* Modify `tb1module`, `tb1module2`, `tb1simple` ,`tb1simple2`: compatible with updated `jstable`
+
 # jsmodule 0.5.0
 
 ## Update
