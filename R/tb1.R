@@ -229,7 +229,8 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 
 
   output$sub2 <- renderUI({
-    req(!is.null(input$group_vars), req(!is.null(input$group2_vars)))
+    req(!is.null(input$group_vars))
+    req(!is.null(input$group2_vars))
     if ((input$group_vars == 'None') | (input$group2_vars == 'None') | (input$group2_vars == input$group_vars)) return(NULL)
     tagList(
       checkboxInput(session$ns("psub"), "Subgroup p-values", F)
@@ -487,7 +488,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
 
 
   output$sub2 <- renderUI({
-    req(!is.null(input$group_vars), req(!is.null(input$group2_vars)))
+    req(!is.null(input$group_vars), !is.null(input$group2_vars))
     if ((input$group_vars == 'None') | (input$group2_vars == 'None') | (input$group2_vars == input$group_vars)) return(NULL)
     tagList(
       checkboxInput(session$ns("psub"), "Subgroup p-values", F)

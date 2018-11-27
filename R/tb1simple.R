@@ -111,7 +111,10 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
       sliderInput(session$ns("decimal_tb1_p"), "Digits (p)",
                   min = 3, max = 5, value = 3
       ),
-      checkboxInput(session$ns("smd"), "Show SMD", T)
+      checkboxInput(session$ns("smd"), "Show SMD", T),
+      selectInput(session$ns("group2_vars"), "Stratified by (optional)",
+                  choices = c("None", mksetdiff(group_list, group_var)), multiple = F,
+                  selected = "None")
     )
 
   })
@@ -120,14 +123,10 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 
 
   output$sub2 <- renderUI({
+    req(!is.null(input$group2_vars))
+    if (input$group2_vars == 'None') return(NULL)
     tagList(
-      selectInput(session$ns("group2_vars"), "2nd group (optional)",
-                  choices = c("None", mksetdiff(group_list, group_var)), multiple = F,
-                  selected = "None"),
-      conditionalPanel(
-        condition = "input.group2_vars != 'None'",
-        checkboxInput(session$ns("psub"), "Subgroup p-values", T)
-      )
+      checkboxInput(session$ns("psub"), "Subgroup p-values", T)
     )
 
   })
@@ -176,7 +175,7 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
       #vars.fisher = setdiff(factor_vars, c(group_var, input$group2_vars))[unlist(vars.fisher)]
 
       res = jstable::CreateTableOneJS(data = data,
-                                      vars = vars.tb1, strata = group_var, strata2 = input$group2_vars, includeNA = F, test = T,
+                                      vars = vars.tb1, strata = input$group2_vars, strata2 = group_var, includeNA = F, test = T,
                                       testApprox = chisq.test, argsApprox = list(correct = TRUE),
                                       testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                       testNormal = oneway.test, argsNormal = list(var.equal = F),
@@ -185,7 +184,7 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
                                       catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
 
       res.ps = jstable::CreateTableOneJS(data = matdata,
-                                         vars = vars.tb1, strata = group_var, strata2 = input$group2_vars, includeNA = F, test = T,
+                                         vars = vars.tb1, strata = input$group2_vars, strata2 = group_var, includeNA = F, test = T,
                                          testApprox = chisq.test, argsApprox = list(correct = TRUE),
                                          testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
@@ -193,7 +192,7 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
                                          showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                          catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
 
-      res.iptw <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = group_var, strata2 = input$group2_vars, includeNA = F, test = T,
+      res.iptw <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group2_vars, strata2 = group_var, includeNA = F, test = T,
                                                showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                                catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
 
@@ -281,19 +280,20 @@ tb1simple2 <- function(input, output, session, data, matdata, data_label, data_v
                   min = 3, max = 5, value = 3
       ),
       checkboxInput(session$ns("smd"), "Show SMD", T)
+      ,
+      selectInput(session$ns("group2_vars"), "Stratified by (optional)",
+                  choices = c("None", mksetdiff(vlist()$group_list, group_var())), multiple = F,
+                  selected = "None")
       )
+
 
  })
 
   output$sub2 <- renderUI({
+    req(!is.null(input$group2_vars))
+    if (input$group2_vars == 'None') return(NULL)
     tagList(
-      selectInput(session$ns("group2_vars"), "2nd group (optional)",
-                  choices = c("None", mksetdiff(vlist()$group_list, group_var())), multiple = F,
-                  selected = "None"),
-      conditionalPanel(
-        condition = "input.group2_vars != 'None'",
-        checkboxInput(session$ns("psub"), "Subgroup p-values", T)
-      )
+      checkboxInput(session$ns("psub"), "Subgroup p-values", T)
     )
 
   })
@@ -339,7 +339,7 @@ tb1simple2 <- function(input, output, session, data, matdata, data_label, data_v
       #vars.fisher = setdiff(factor_vars, c(group_var(), input$group2_vars))[unlist(vars.fisher)]
 
       res = jstable::CreateTableOneJS(data = data(),
-                                      vars = vars.tb1, strata = group_var(), strata2 = input$group2_vars, includeNA = F, test = T,
+                                      vars = vars.tb1, strata = input$group2_vars, strata2 = group_var(), includeNA = F, test = T,
                                       testApprox = chisq.test, argsApprox = list(correct = TRUE),
                                       testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                       testNormal = oneway.test, argsNormal = list(var.equal = F),
@@ -348,7 +348,7 @@ tb1simple2 <- function(input, output, session, data, matdata, data_label, data_v
                                       catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
 
       res.ps = jstable::CreateTableOneJS(data = matdata(),
-                                         vars = vars.tb1, strata = group_var(), strata2 = input$group2_vars, includeNA = F, test = T,
+                                         vars = vars.tb1, strata = input$group2_vars, strata2 = group_var(), includeNA = F, test = T,
                                          testApprox = chisq.test, argsApprox = list(correct = TRUE),
                                          testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
@@ -356,7 +356,7 @@ tb1simple2 <- function(input, output, session, data, matdata, data_label, data_v
                                          showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                          catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
 
-      res.iptw <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = group_var(), strata2 = input$group2_vars, includeNA = F, test = T,
+      res.iptw <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group2_vars, strata2 = group_var(), includeNA = F, test = T,
                                                showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                                catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
 
