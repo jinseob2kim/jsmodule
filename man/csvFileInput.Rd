@@ -4,12 +4,12 @@
 \alias{csvFileInput}
 \title{csvFileInput: Shiny module UI for file upload.}
 \usage{
-csvFileInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat)")
+csvFileInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
 }
 \arguments{
 \item{id}{id}
 
-\item{label}{label, Default: 'csv/xlsx/sav/sas7bdat file'}
+\item{label}{label, Default: 'csv/xlsx/sav/sas7bdat/dta file'}
 }
 \value{
 Shiny UI

@@ -4,7 +4,7 @@
 \alias{FilePsInput}
 \title{FilePsInput: Shiny module UI for file upload for propensity score matching.}
 \usage{
-FilePsInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat)")
+FilePsInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
 }
 \arguments{
 \item{id}{id}

@@ -1,3 +1,8 @@
+# jsmodule 0.5.2
+
+* Update: Upload **Stata** `.dta` format.
+
+
 # jsmodule 0.5.1
 
 * Modify `tb1module`, `tb1module2`, `tb1simple` ,`tb1simple2`: compatible with updated `jstable`

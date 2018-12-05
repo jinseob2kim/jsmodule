@@ -2,7 +2,7 @@
 #' @title csvFileInput: Shiny module UI for file upload.
 #' @description Shiny module UI for file(csv or xlsx) upload.
 #' @param id id
-#' @param label label, Default: 'csv/xlsx/sav/sas7bdat file'
+#' @param label label, Default: 'csv/xlsx/sav/sas7bdat/dta file'
 #' @return Shiny UI
 #' @details DETAILS
 #' @examples
@@ -42,7 +42,7 @@
 #' @export
 #' @import shiny
 
-csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat)") {
+csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
   # Create a namespace function using the provided id
   ns <- NS(id)
 
@@ -100,7 +100,7 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat)") {
 #' @importFrom data.table fread data.table .SD :=
 #' @importFrom readxl read_excel
 #' @importFrom jstable mk.lev
-#' @importFrom haven read_sav read_sas
+#' @importFrom haven read_sav read_sas read_dta
 
 csvFile <- function(input, output, session) {
   # The selected file, if any
@@ -120,11 +120,13 @@ csvFile <- function(input, output, session) {
     if (grepl("csv", userFile()$name) == T){
       out = data.table::fread(userFile()$datapath, check.names = F)
     } else if (grepl("xlsx", userFile()$name) == T){
-      out = data.table::data.table(read_excel(userFile()$datapath), check.names = F)
+      out = data.table::data.table(readxl::read_excel(userFile()$datapath), check.names = F)
     } else if (grepl("sav", userFile()$name) == T){
-      out = data.table::data.table(read_sav(userFile()$datapath), check.names = F)
+      out = data.table::data.table(haven::read_sav(userFile()$datapath), check.names = F)
     } else if (grepl("sas7bdat", userFile()$name) == T){
-      out = data.table::data.table(read_sas(userFile()$datapath), check.names = F)
+      out = data.table::data.table(haven::read_sas(userFile()$datapath), check.names = F)
+    } else if (grepl("dta", userFile()$name) == T){
+      out = data.table::data.table(haven::read_dta(userFile()$datapath), check.names = F)
     } else {
       stop("Not supported format.")
     }

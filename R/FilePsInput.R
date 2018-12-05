@@ -51,7 +51,7 @@
 #' @export
 #' @import shiny
 
-FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat)") {
+FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
   # Create a namespace function using the provided id
   ns <- NS(id)
 
@@ -160,6 +160,10 @@ FilePs <- function(input, output, session) {
       out = data.table::data.table(haven::read_sav(userFile()$datapath), check.names = F)
     } else if (grepl("sas7bdat", userFile()$name) == T){
       out = data.table::data.table(haven::read_sas(userFile()$datapath), check.names = F)
+    } else if (grepl("dta", userFile()$name) == T){
+      out = data.table::data.table(haven::read_dta(userFile()$datapath), check.names = F)
+    } else{
+      stop("Not supported format.")
     }
 
 
