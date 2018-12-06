@@ -25,6 +25,7 @@ devtools::install_github(c('jinseob2kim/jstable', 'jinseob2kim/jsmodule'))
 ```r
 jsBasicGadget(mtcars)
 ```
+![](https://blog.anpanman.co.kr/posts/2018-11-24-basic-biostatistics/addin.gif)
 
 ### Propensity score analysis
 
