@@ -213,7 +213,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
     )
     lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
     validate(
-      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level][lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
     res.linear = glm(form, data = data.regress)
     tb.linear = jstable::glmshow.display(res.linear, decimal = input$decimal)
@@ -377,7 +377,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
     )
     lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
     validate(
-      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level][lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
     res.linear = glm(form, data = data.regress)
     tb.linear = jstable::glmshow.display(res.linear, decimal = input$decimal)
@@ -525,7 +525,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
     )
     lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
     validate(
-      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level][lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
     res.logistic = glm(form, data = data.logistic, family = "binomial")
     tb.logistic = jstable::glmshow.display(res.logistic,  decimal = input$decimal)
@@ -687,7 +687,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     )
     lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
     validate(
-      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level][lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
     res.logistic = glm(form, data = data.logistic, family = binomial)
     tb.logistic = jstable::glmshow.display(res.logistic, decimal = input$decimal)

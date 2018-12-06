@@ -6,7 +6,7 @@
 
 ## Bug fixes
 
-* `regressModule`, `logisticModule` can deal missing data issue.
+* `regressModule`, `logisticModule`, `jsPropensityGadget` can deal missing data issue.
 
 # jsmodule 0.5.2
 

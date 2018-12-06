@@ -27,6 +27,8 @@
 #' @importFrom jskm jskm svyjskm
 #' @importFrom ggplot2 ggsave
 #' @importFrom survey svykm
+#' @importFrom purrr map_lgl
+#' @importFrom stats model.frame
 
 jsPropensityGadget <- function(data){
 
@@ -513,6 +515,15 @@ jsPropensityGadget <- function(data){
       if(input$coxUI_subcheck == T){
         data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
       }
+      mf <- model.frame(form.cox(), data.cox)
+      validate(
+        need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
+      )
+      lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
+      validate(
+        need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+      )
+
       cc = substitute(survival::coxph(.form, data= data.cox, model = T), list(.form= form.cox()))
       res.cox = eval(cc)
       tb.cox <- jstable::cox2.display(res.cox)
@@ -543,6 +554,14 @@ jsPropensityGadget <- function(data){
       if(input$coxUI_subcheck == T){
         data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
       }
+      mf <- model.frame(form.cox(), data.cox)
+      validate(
+        need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
+      )
+      lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
+      validate(
+        need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+      )
       cc = substitute(survival::coxph(.form, data= data.cox, model = T), list(.form= form.cox()))
       res.cox = eval(cc)
       tb.cox <- jstable::cox2.display(res.cox)
@@ -573,6 +592,14 @@ jsPropensityGadget <- function(data){
         data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
       }
       data.design <- survey::svydesign(ids = ~ 1, data = data.cox, weights = ~ iptw)
+      mf <- model.frame(form.cox(), data.cox)
+      validate(
+        need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
+      )
+      lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
+      validate(
+        need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+      )
 
       cc = substitute(survey::svycoxph(.form, design= data.design), list(.form= form.cox()))
       res.cox = eval(cc)
