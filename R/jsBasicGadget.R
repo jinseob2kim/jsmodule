@@ -178,7 +178,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
     out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$lineartable <- renderDT({
-      hide = which(colnames(out_linear()$table) == c("P(F-test)",  "sig"))
+      hide = which(colnames(out_linear()$table) == "sig")
       datatable(out_linear()$table, rownames=T, extensions = "Buttons", caption = out_linear()$caption,
                 options = c(jstable::opt.tbreg(out_linear()$caption),
                             list(columnDefs = list(list(visible=FALSE, targets =hide))
@@ -191,7 +191,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
     out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$logistictable <- renderDT({
-      hide = which(colnames(out_logistic()$table) == c("P(F-test)",  "sig"))
+      hide = which(colnames(out_logistic()$table) == "sig")
       datatable(out_logistic()$table, rownames=T, extensions = "Buttons", caption = out_logistic()$caption,
                 options = c(jstable::opt.tbreg(out_logistic()$caption),
                             list(columnDefs = list(list(visible=FALSE, targets =hide))
