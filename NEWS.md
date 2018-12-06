@@ -2,11 +2,13 @@
 
 ## Update
 
-* New option: `nfactor.limit` in `regressModule`, `logisticModule`.
+* New option: `nfactor.limit` in `regressModule`, `logisticModule`, `jsBasicGadget`.
 
 ## Bug fixes
 
 * `regressModule`, `logisticModule`, `jsPropensityGadget` can deal missing data issue.
+
+* `csvFileInput`, `FilePSInput` change variable class **integer64** to **double**.
 
 # jsmodule 0.5.2
 

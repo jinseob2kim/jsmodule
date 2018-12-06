@@ -153,15 +153,15 @@ FilePs <- function(input, output, session) {
   data.info <- eventReactive(input$file, {
     validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T) | (grepl("sav", userFile()$name) == T) | (grepl("sas7bdat", userFile()$name) == T), message = "Please upload csv/xlsx/sav/sas7bdat file"))
     if (grepl("csv", userFile()$name) == T){
-      out = data.table::fread(userFile()$datapath, check.names = F)
+      out = data.table::fread(userFile()$datapath, check.names = F, integer64 = "double")
     } else if (grepl("xlsx", userFile()$name) == T){
-      out = data.table::data.table(readxl::read_excel(userFile()$datapath), check.names = F)
+      out = data.table::data.table(readxl::read_excel(userFile()$datapath), check.names = F, integer64 = "double")
     } else if (grepl("sav", userFile()$name) == T){
-      out = data.table::data.table(haven::read_sav(userFile()$datapath), check.names = F)
+      out = data.table::data.table(haven::read_sav(userFile()$datapath), check.names = F, integer64 = "double")
     } else if (grepl("sas7bdat", userFile()$name) == T){
-      out = data.table::data.table(haven::read_sas(userFile()$datapath), check.names = F)
+      out = data.table::data.table(haven::read_sas(userFile()$datapath), check.names = F, integer64 = "double")
     } else if (grepl("dta", userFile()$name) == T){
-      out = data.table::data.table(haven::read_dta(userFile()$datapath), check.names = F)
+      out = data.table::data.table(haven::read_dta(userFile()$datapath), check.names = F, integer64 = "double")
     } else{
       stop("Not supported format.")
     }

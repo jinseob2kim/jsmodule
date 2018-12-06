@@ -1,6 +1,7 @@
 #' @title jsBasicGadget: Shiny Gadget of Basic Statistics in Medical Research.
 #' @description Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plot
 #' @param data data
+#' @param nfactor.limit nlevels limit for categorical variables
 #' @return Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plot
 #' @details DETAILS
 #' @examples
@@ -22,7 +23,7 @@
 #' @import ggplot2
 #' @import shiny
 
-jsBasicGadget <- function(data) {
+jsBasicGadget <- function(data, nfactor.limit = 20) {
 
   change.vnlist = list(c(" ", "_"), c("=<", "_le_"), c("=>", "_ge_"), c("=", "_eq_"), c("\\(", "_open_"), c("\\)", "_close_"), c("%", "_percent_"), c("-", "_"), c("/", "_"),
                        c("\r\n", "_"), c(",", "_comma_"))
@@ -45,7 +46,7 @@ jsBasicGadget <- function(data) {
   #except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
   add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
 
-  data.list <- list(data = out, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= 20], factor_adds = add_vars)
+  data.list <- list(data = out, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars)
 
 
 
@@ -156,7 +157,7 @@ jsBasicGadget <- function(data) {
 
 
 
-    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL)
+    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$table1 <- renderDT({
       tb = out_tb1()$table
@@ -174,7 +175,7 @@ jsBasicGadget <- function(data) {
       return(out.tb1)
     })
 
-    out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL)
+    out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$lineartable <- renderDT({
       hide = which(colnames(out_linear()$table) == c("P(F-test)",  "sig"))
@@ -187,7 +188,7 @@ jsBasicGadget <- function(data) {
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
 
-    out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL)
+    out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$logistictable <- renderDT({
       hide = which(colnames(out_logistic()$table) == c("P(F-test)",  "sig"))
