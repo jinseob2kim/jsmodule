@@ -5,7 +5,7 @@
 \title{logisticModule2: Module for logistic regression using reactive data}
 \usage{
 logisticModule2(input, output, session, data, data_label,
-  data_varStruct = NULL)
+  data_varStruct = NULL, nfactor.limit = 10)
 }
 \arguments{
 \item{input}{input}
@@ -19,6 +19,8 @@ logisticModule2(input, output, session, data, data_label,
 \item{data_label}{reactive data_label}
 
 \item{data_varStruct}{data_varStruct, Default: NULL}
+
+\item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 }
 \value{
 logisticModule2

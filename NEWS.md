@@ -1,7 +1,16 @@
+# jsmodule 0.5.3
+
+## Update
+
+* New option: `nfactor.limit` in `regressModule`, `logisticModule`.
+
+## Bug fixes
+
+* `regressModule`, `logisticModule` can deal missing data issue.
+
 # jsmodule 0.5.2
 
 * Update: Upload **Stata** `.dta` format.
-
 
 # jsmodule 0.5.1
 

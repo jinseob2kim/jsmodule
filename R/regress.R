@@ -97,6 +97,7 @@ regressModuleUI <- function(id) {
 #' @param data data
 #' @param data_label data_label
 #' @param data_varStruct data_varStruct, Default: NULL
+#' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @return regressModule
 #' @details DETAILS
 #' @examples
@@ -110,12 +111,12 @@ regressModuleUI <- function(id) {
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula
+#' @importFrom stats glm as.formula model.frame
 #' @importFrom epiDisplay regress.display
 #' @importFrom jstable LabelepiDisplay
-#'
+#' @importFrom purrr map_lgl
 
-regressModule <- function(input, output, session, data, data_label, data_varStruct = NULL) {
+regressModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -133,10 +134,10 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 
   nclass_factor <- unlist(data[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
 
-  group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data)]
+  group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <= nfactor.limit & nclass_factor < nrow(data)]
   group_list <- mklist(data_varStruct, group_vars)
 
-  except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data)]
+  except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data)]
 
 
   output$dep <- renderUI({
@@ -206,6 +207,14 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
       need(!is.null(input$indep_vars) , "Please select at least 1 variable")
     )
     form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
+    mf <- model.frame(form, data.regress)
+    validate(
+      need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
+    )
+    lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
+    validate(
+      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level][lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+    )
     res.linear = glm(form, data = data.regress)
     tb.linear = jstable::glmshow.display(res.linear, decimal = input$decimal)
     cap.linear = paste("Linear regression predicting ", data_label[variable == y, var_label][1], sep="")
@@ -231,6 +240,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @param data reactive data
 #' @param data_label reactive data_label
 #' @param data_varStruct data_varStruct, Default: NULL
+#' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @return regressModule2
 #' @details DETAILS
 #' @examples
@@ -244,10 +254,11 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula
+#' @importFrom stats glm as.formula model.frame
 #' @importFrom epiDisplay regress.display
+#' @importFrom purrr map_lgl
 
-regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL) {
+regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))
@@ -279,10 +290,10 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
     nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
     #nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]]))})
 
-    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data())]
+    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <= nfactor.limit & nclass_factor < nrow(data())]
     group_list <- mklist(data_varStruct(), group_vars)
 
-    except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data())]
+    except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data())]
 
     return(list(factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list,
                 group_vars = group_vars, group_list = group_list, except_vars = except_vars)
@@ -360,6 +371,14 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
       need(!is.null(input$indep_vars) , "Please select at least 1 variable")
     )
     form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
+    mf <- model.frame(form, data.regress)
+    validate(
+      need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
+    )
+    lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
+    validate(
+      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level][lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+    )
     res.linear = glm(form, data = data.regress)
     tb.linear = jstable::glmshow.display(res.linear, decimal = input$decimal)
     cap.linear = paste("Linear regression predicting ", data_label()[variable == y, var_label][1], sep="")
@@ -388,6 +407,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @param data data
 #' @param data_label data_label
 #' @param data_varStruct data_varStruct, Default: NULL
+#' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @return logisticModule
 #' @details DETAILS
 #' @examples
@@ -401,12 +421,12 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula binomial
+#' @importFrom stats glm as.formula binomial model.frame
 #' @importFrom epiDisplay logistic.display
 #' @importFrom jstable LabelepiDisplay
-#'
+#' @importFrom purrr map_lgl
 
-logisticModule <- function(input, output, session, data, data_label, data_varStruct = NULL) {
+logisticModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -425,7 +445,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
   factor2_vars <- factor_vars[nclass_factor == 2]
   factor2_list <- mklist(data_varStruct, factor2_vars)
 
-  except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data)]
+  except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data)]
 
 
   output$dep <- renderUI({
@@ -499,6 +519,14 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
       need(!is.null(input$indep_vars) , "Please select at least 1 variable")
     )
     form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
+    mf <- model.frame(form, data.logistic)
+    validate(
+      need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
+    )
+    lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
+    validate(
+      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level][lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+    )
     res.logistic = glm(form, data = data.logistic, family = "binomial")
     tb.logistic = jstable::glmshow.display(res.logistic,  decimal = input$decimal)
     cap.logistic = paste("Logistic regression predicting ", data_label[variable == y, var_label][1], sep="")
@@ -526,6 +554,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @param data reactive data
 #' @param data_label reactive data_label
 #' @param data_varStruct data_varStruct, Default: NULL
+#' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @return logisticModule2
 #' @details DETAILS
 #' @examples
@@ -539,11 +568,12 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula binomial
+#' @importFrom stats glm as.formula binomial model.frame
 #' @importFrom epiDisplay logistic.display
+#' @importFrom purrr map_lgl
 
 
-logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL) {
+logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))
@@ -572,7 +602,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     factor2_vars <- factor_vars[nclass_factor == 2]
     factor2_list <- mklist(data_varStruct(), factor2_vars)
 
-    except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data())]
+    except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data())]
     return(list(factor_vars = factor_vars, factor_list = factor_list, nclass_factor = nclass_factor, factor2_vars = factor2_vars,
                 factor2_list = factor2_list, except_vars = except_vars)
            )
@@ -651,6 +681,14 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
       need(!is.null(input$indep_vars) , "Please select at least 1 variable")
     )
     form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
+    mf <- model.frame(form, data.logistic)
+    validate(
+      need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
+    )
+    lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
+    validate(
+      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level][lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+    )
     res.logistic = glm(form, data = data.logistic, family = binomial)
     tb.logistic = jstable::glmshow.display(res.logistic, decimal = input$decimal)
     cap.logistic = paste("Logistic regression predicting ", data_label()[variable == y, var_label][1], sep="")
