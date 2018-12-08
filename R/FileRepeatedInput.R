@@ -190,9 +190,7 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
   })
 
   outdata <- reactive({
-    validate(
-      need(input$repeated_vname, "Please select repeated measure variable")
-    )
+    req(input$repeated_vname)
     out <- data()$data
     out[, (data()$conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = data()$conti_original]
     if (length(input$factor_vname) > 0){
