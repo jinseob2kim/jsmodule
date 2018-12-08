@@ -204,7 +204,7 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
       w <- which(ref[["name.new"]] == vn)
       out.label[variable == vn, var_label := ref[["name.old"]][w]]
     }
-    return(list(data = out, label = out.label, naomit = data()$naomit))
+    return(list(data = out, label = out.label, naomit = data()$naomit, id.gee = input$repeated_vname))
   })
 
 

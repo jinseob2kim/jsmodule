@@ -2,7 +2,11 @@
 
 ## New module
 
-* Modules for repeated measure analysis: `FileRepeated`
+* Modules for repeated measure analysis: `FileRepeated`, `GEEModuleUI`, `GEEModuleLinear` and `GEEModuleLogistic`
+
+## New Gadget
+
+* Shiny Gadget for repeated measure analysis: `jsRepeatedGadget`
 
 # jsmodule 0.5.3
 

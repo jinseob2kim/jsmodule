@@ -8,3 +8,9 @@ Name: Propensity score analysis
 Description: Gatget including propensity score matching & IPTW analysis
 Binding: jsPropensityAddin
 Interactive: true
+
+
+Name: Repeated measure analysis
+Description: Gatget including Data, Label info, Table 1, GEE(liear, logistic), Basic plot.
+Binding: jsRepeatedAddin
+Interactive: true
