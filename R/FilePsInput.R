@@ -73,6 +73,7 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
 #' @param input input
 #' @param output output
 #' @param session session
+#' @param nfactor.limit nfactor limit to include, Default: 20
 #' @return server
 #' @details DETAILS
 #' @examples
@@ -127,7 +128,7 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
 #' @importFrom haven read_sav read_sas
 #' @importFrom MatchIt matchit match.data
 
-FilePs <- function(input, output, session) {
+FilePs <- function(input, output, session, nfactor.limit = 20) {
   # The selected file, if any
   userFile <- eventReactive(input$file, {
     # If no file is selected, don't do anything
@@ -189,7 +190,7 @@ FilePs <- function(input, output, session) {
     nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x))}), .SDcols = conti_vars])
     factor_adds_list = mklist(data_varStruct, names(nclass)[(nclass <= 20) & (nclass < nrow(out))])
 
-    except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
+    except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
     add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
     #factor_vars_ini <- union(factor_vars, add_vars)
     return(list(data = out, data_varStruct = data_varStruct,

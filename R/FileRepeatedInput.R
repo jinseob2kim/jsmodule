@@ -1,6 +1,5 @@
-
-#' @title csvFileInput: Shiny module UI for file upload.
-#' @description Shiny module UI for file(csv or xlsx) upload.
+#' @title FileRepeatedInput: File upload UI for repeated measure analysis.
+#' @description File upload UI for repeated measure analysis.
 #' @param id id
 #' @param label label, Default: 'csv/xlsx/sav/sas7bdat/dta file'
 #' @return Shiny UI
@@ -12,7 +11,7 @@
 #'  ui <- fluidPage(
 #'    sidebarLayout(
 #'      sidebarPanel(
-#'        csvFileInput("datafile")
+#'        FileRepeatedInput("datafile")
 #'      ),
 #'      mainPanel(
 #'        tabsetPanel(type = "pills",
@@ -24,7 +23,7 @@
 #'  )
 #'
 #'  server <- function(input, output, session) {
-#'    data <- callModule(csvFile, "datafile")
+#'    data <- callModule(FileRepeated, "datafile")
 #'
 #'    output$data <- renderDT({
 #'      data()$data
@@ -38,24 +37,25 @@
 #'  shinyApp(ui, server)
 #'  }
 #' }
-#' @rdname csvFileInput
+#' @rdname FileRepeatedInput
 #' @export
 #' @import shiny
 
-csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
+FileRepeatedInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
   # Create a namespace function using the provided id
   ns <- NS(id)
 
   tagList(
     fileInput(ns("file"), label),
-    uiOutput(ns("factor"))
+    uiOutput(ns("factor")),
+    uiOutput(ns("repeated"))
   )
 }
 
 
 
-#' @title csvFile: Shiny module Server for file upload.
-#' @description Shiny module Server for file(csv or xlsx) upload.
+#' @title FileRepeated: File upload server module for repeated measure analysis.
+#' @description File upload server module for repeated measure analysis.
 #' @param input input
 #' @param output output
 #' @param session session
@@ -69,7 +69,7 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #'  ui <- fluidPage(
 #'    sidebarLayout(
 #'      sidebarPanel(
-#'        csvFileInput("datafile")
+#'        FileRepeatedInput("datafile")
 #'      ),
 #'      mainPanel(
 #'        tabsetPanel(type = "pills",
@@ -81,7 +81,7 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #'  )
 #'
 #'  server <- function(input, output, session) {
-#'    data <- callModule(csvFile, "datafile")
+#'    data <- callModule(FileRepeated, "datafile")
 #'
 #'    output$data <- renderDT({
 #'      data()$data
@@ -95,7 +95,7 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #'  shinyApp(ui, server)
 #'  }
 #' }
-#' @rdname csvFile
+#' @rdname FileRepeated
 #' @export
 #' @import shiny
 #' @importFrom data.table fread data.table .SD :=
@@ -103,7 +103,8 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #' @importFrom jstable mk.lev
 #' @importFrom haven read_sav read_sas read_dta
 
-csvFile <- function(input, output, session, nfactor.limit = 20) {
+
+FileRepeated <- function(input, output, session, nfactor.limit = 20) {
   # The selected file, if any
   userFile <- eventReactive(input$file, {
     # If no file is selected, don't do anything
@@ -150,8 +151,8 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
     ref <- list(name.old = name.old, name.new = name.new)
 
 
-    numstart.vnum <- suppressWarnings(sapply(names(out),function(x){!is.na(as.numeric(substr(x, 1,1)))}))
-    names(out)[numstart.vnum] <- paste("n_", names(out)[numstart.vnum], sep = "")
+    #numstart.vnum <- suppressWarnings(sapply(names(out),function(x){!is.na(as.numeric(substr(x, 1,1)))}))
+    #names(out)[numstart.vnum] <- paste("n_", names(out)[numstart.vnum], sep = "")
 
     factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
     if (length(factor_vars) > 0){
@@ -174,6 +175,12 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
                 selected = data()$factor_adds)
   })
 
+  output$repeated <- renderUI({
+    selectInput(session$ns("repeated_vname"), label = "Repeated measure variables",
+                choices = names(data()$data), multiple = F,
+                selected = names(data()$data)[1])
+  })
+
 
 
   # We can run observers in here if we want to
@@ -183,11 +190,15 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
   })
 
   outdata <- reactive({
+    validate(
+      need(input$repeated_vname, "Please select repeated measure variable")
+    )
     out <- data()$data
     out[, (data()$conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = data()$conti_original]
     if (length(input$factor_vname) > 0){
       out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
     }
+    out <- out[!is.na(get(input$repeated_vname))][order(get(input$repeated_vname))]
 
     ref <- data()$ref
     out.label <- mk.lev(out)

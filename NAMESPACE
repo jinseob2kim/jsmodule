@@ -2,6 +2,8 @@
 
 export(FilePs)
 export(FilePsInput)
+export(FileRepeated)
+export(FileRepeatedInput)
 export(csvFile)
 export(csvFileInput)
 export(ggpairsModule)

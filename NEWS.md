@@ -1,8 +1,14 @@
+# jsmodule 0.5.5
+
+## New module
+
+* Modules for repeated measure analysis: `FileRepeated`
+
 # jsmodule 0.5.3
 
 ## Update
 
-* New option: `nfactor.limit` in `regressModule`, `logisticModule`, `jsBasicGadget`.
+* New option: `nfactor.limit` in `regressModule`, `logisticModule`, `jsBasicGadget`, `csvFileInput` and `FilePsInput`.
 
 ## Bug fixes
 

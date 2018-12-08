@@ -4,7 +4,7 @@
 \alias{FilePs}
 \title{FilePs: Shiny module Server for file upload for propensity score matching.}
 \usage{
-FilePs(input, output, session)
+FilePs(input, output, session, nfactor.limit = 20)
 }
 \arguments{
 \item{input}{input}
@@ -12,6 +12,8 @@ FilePs(input, output, session)
 \item{output}{output}
 
 \item{session}{session}
+
+\item{nfactor.limit}{nfactor limit to include, Default: 20}
 }
 \value{
 server
