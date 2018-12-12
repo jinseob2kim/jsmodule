@@ -12,5 +12,4 @@ r_github_packages:
 
 
 after_success:
-  - Rscript -e 'library(jsmodule); jsBasicAddin(mtcars)'
   - Rscript -e 'library(covr); codecov()'
