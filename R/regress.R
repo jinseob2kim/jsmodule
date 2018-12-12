@@ -12,7 +12,7 @@
 #'  }
 #' }
 #' @rdname mklist
-
+#' @export
 
 
 mklist <- function(varlist, vars){
@@ -39,6 +39,8 @@ mklist <- function(varlist, vars){
 #'  }
 #' }
 #' @rdname mksetdiff
+#' @export
+
 
 mksetdiff <- function(varlist, vars){
   lapply(varlist,

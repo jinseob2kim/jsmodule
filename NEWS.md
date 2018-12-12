@@ -1,3 +1,7 @@
+# jsmodule 0.5.6
+
+* Add **testthat**.
+
 # jsmodule 0.5.5
 
 ## New module
