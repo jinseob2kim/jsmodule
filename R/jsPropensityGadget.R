@@ -479,6 +479,9 @@ jsPropensityGadget <- function(data){
         factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
         factor_subgroup <- setdiff(factor_vars, c(input$event_cox, input$indep_cox))
         factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+        validate(
+          need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+        )
 
         tagList(
           selectInput("subvar_cox", "Sub-group variable",
@@ -513,6 +516,7 @@ jsPropensityGadget <- function(data){
       data.cox <- mat.info()$data
       data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
       if(input$coxUI_subcheck == T){
+        req(input$subvar_cox)
         data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
       }
       mf <- model.frame(form.cox(), data.cox)
@@ -552,6 +556,7 @@ jsPropensityGadget <- function(data){
       data.cox <- mat.info()$matdata
       data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
       if(input$coxUI_subcheck == T){
+        req(input$subvar_cox)
         data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
       }
       mf <- model.frame(form.cox(), data.cox)
@@ -589,6 +594,7 @@ jsPropensityGadget <- function(data){
       data.cox <- mat.info()$data
       data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
       if(input$coxUI_subcheck == T){
+        req(input$subvar_cox)
         data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
       }
       data.design <- survey::svydesign(ids = ~ 1, data = data.cox, weights = ~ iptw)
@@ -678,6 +684,9 @@ jsPropensityGadget <- function(data){
         factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
         factor_subgroup <- setdiff(factor_vars, c(input$event_km, input$indep_km))
         factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+        validate(
+          need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+        )
 
         tagList(
           selectInput("subvar_km", "Sub-group variable",
@@ -710,6 +719,7 @@ jsPropensityGadget <- function(data){
       data.km <- mat.info()$data
       data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
       if (input$km_subcheck == T){
+        req(input$subvar_km)
         data.km <- data.km[get(input$subvar_km) == input$subval_km, ]
       }
       cc = substitute(survival::survfit(.form, data= data.km), list(.form= form.km()))
@@ -767,6 +777,7 @@ jsPropensityGadget <- function(data){
       data.km <- mat.info()$matdata
       data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
       if (input$km_subcheck == T){
+        req(input$subvar_km)
         data.km <- data.km[get(input$subvar_km) == input$subval_km, ]
       }
       cc = substitute(survival::survfit(.form, data= data.km), list(.form= form.km()))
@@ -824,6 +835,7 @@ jsPropensityGadget <- function(data){
       data.km <- mat.info()$data
       data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
       if (input$km_subcheck == T){
+        req(input$subvar_km)
         data.km <- data.km[get(input$subvar_km) == input$subval_km, ]
       }
       data.design <- survey::svydesign(ids = ~ 1, data = data.km, weights = ~ iptw)

@@ -146,6 +146,9 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
       factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
       factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars, id.gee()))
       factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+      validate(
+        need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+      )
 
       tagList(
         selectInput(session$ns("subvar_regress"), "Sub-group variable",
@@ -171,6 +174,7 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
     data.regress <- data()
     id <- id.gee()
     if(input$regressUI_subcheck == T){
+      req(input$subvar_regress)
       data.regress <- data.regress[get(input$subvar_regress) == input$subval_regress, ]
     }
     y <- input$dep_vars
@@ -322,6 +326,9 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
       factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
       factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars, id.gee()))
       factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+      validate(
+        need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+      )
 
       tagList(
         selectInput(session$ns("subvar_regress"), "Sub-group variable",
@@ -347,6 +354,7 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
     data.logistic <- data()
     id <- id.gee()
     if(input$regressUI_subcheck == T){
+      req(input$subvar_regress)
       data.logistic <- data.logistic[get(input$subvar_regress) == input$subval_regress, ]
     }
     y <- input$dep_vars

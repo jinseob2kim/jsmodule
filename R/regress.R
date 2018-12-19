@@ -178,6 +178,9 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
       factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
       factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars))
       factor_subgroup_list <- mklist(data_varStruct, factor_subgroup)
+      validate(
+        need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+      )
 
       tagList(
         selectInput(session$ns("subvar_regress"), "Sub-group variable",
@@ -201,6 +204,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
   out <- reactive({
     data.regress <- data
     if(input$regressUI_subcheck == T){
+      req(input$subvar_regress)
       data.regress <- data.regress[get(input$subvar_regress) == input$subval_regress, ]
     }
     y <- input$dep_vars
@@ -213,6 +217,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
     validate(
       need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
     )
+
     lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
     validate(
       need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
@@ -341,6 +346,9 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
       factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
       factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars))
       factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+      validate(
+        need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+      )
 
       tagList(
         selectInput(session$ns("subvar_regress"), "Sub-group variable",
@@ -365,6 +373,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
   out <- reactive({
     data.regress <- data()
     if(input$regressUI_subcheck == T){
+      req(input$subvar_regress)
       data.regress <- data.regress[get(input$subvar_regress) == input$subval_regress, ]
     }
     y <- input$dep_vars
@@ -489,6 +498,9 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
       factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
       factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars))
       factor_subgroup_list <- mklist(data_varStruct, factor_subgroup)
+      validate(
+        need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+      )
 
       tagList(
         selectInput(session$ns("subvar_logistic"), "Sub-group variable",
@@ -513,6 +525,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
   out <- reactive({
     data.logistic <- data
     if(input$regressUI_subcheck == T){
+      req(input$subvar_logistic)
       data.logistic <- data.logistic[get(input$subvar_logistic) == input$subval_logistic, ]
     }
     y <- input$dep_vars
@@ -653,6 +666,9 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
       factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
       factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars))
       factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+      validate(
+        need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+      )
 
       tagList(
         selectInput(session$ns("subvar_logistic"), "Sub-group variable",
@@ -675,6 +691,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
   out <- reactive({
     data.logistic <- data()
     if(input$regressUI_subcheck == T){
+      req(input$subvar_logistic)
       data.logistic <- data.logistic[get(input$subvar_logistic) == input$subval_logistic, ]
     }
     y <- input$dep_vars

@@ -1,3 +1,7 @@
+# jsmodule 0.5.7
+
+* Bug fixes: **sub-group option** in `regressModule`, `logisticModule`, `jsPropensityGadget`, `GEEModuleLinear` and `GEEModuleLogistic`
+
 # jsmodule 0.5.6
 
 * Add **testthat**.
