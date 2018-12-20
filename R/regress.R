@@ -100,6 +100,7 @@ regressModuleUI <- function(id) {
 #' @param data_label data_label
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
+#' @param var.weights.survey weight variable if survey data. default: NULL
 #' @return regressModule
 #' @details DETAILS
 #' @examples
@@ -118,7 +119,7 @@ regressModuleUI <- function(id) {
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
 
-regressModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
+regressModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, var.weights.survey = NULL) {
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -132,6 +133,9 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
   factor_list <- mklist(data_varStruct, factor_vars)
 
   conti_vars <- setdiff(names(data), factor_vars)
+  if (!is.null(var.weights.survey)){
+    conti_vars <- setdiff(conti_vars, var.weights.survey)
+  }
   conti_list <- mklist(data_varStruct, conti_vars)
 
   nclass_factor <- unlist(data[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
@@ -154,14 +158,26 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 
   output$indep <- renderUI({
     req(!is.null(input$dep_vars))
-    vars <- setdiff(setdiff(names(data), except_vars),  input$dep_vars)
-    varsIni <- sapply(vars,
-                      function(v){
-                        forms <- as.formula(paste(input$dep_vars, "~", v))
-                        coef <- summary(glm(forms, data = data))$coefficients
-                        sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
-                        return(sigOK)
-                      })
+    if (is.null(var.weights.survey)){
+      vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  input$dep_vars)
+      varsIni <- sapply(vars,
+                        function(v){
+                          forms <- as.formula(paste(input$dep_vars, "~", v))
+                          coef <- summary(glm(forms, data = data()))$coefficients
+                          sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                          return(sigOK)
+                        })
+    } else{
+      vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  c(input$dep_vars, var.weights.survey))
+      varsIni <- sapply(vars,
+                        function(v){
+                          forms <- as.formula(paste(input$dep_vars, "~", v))
+                          data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey))
+                          coef <- summary(survey::svyglm(forms, design = data.design))$coefficients
+                          sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                          return(sigOK)
+                        })
+    }
 
 
     tagList(
@@ -222,13 +238,29 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
     validate(
       need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
-    res.linear = glm(form, data = data.regress)
-    tb.linear = jstable::glmshow.display(res.linear, decimal = input$decimal)
-    cap.linear = paste("Linear regression predicting ", data_label[variable == y, var_label][1], sep="")
-    if(input$regressUI_subcheck == T){
-      cap.linear <- paste(cap.linear, " - ", data_label[variable == input$subvar_regress, var_label][1], ": ", data_label[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
+
+    if (is.null(var.weights.survey)){
+      res.linear <- glm(form, data = data.regress)
+      tb.linear <- jstable::glmshow.display(res.linear, decimal = input$decimal)
+      cap.linear <- paste("Linear regression predicting ", data_label()[variable == y, var_label][1], sep="")
+      if(input$regressUI_subcheck == T){
+        cap.linear <- paste(cap.linear, " - ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
+      }
+      out.linear <- jstable::LabelepiDisplay(tb.linear, label = T, ref = data_label())
+    } else{
+      validate(
+        need(var.weights.survey %in% names(data.regress) , "Weight variable isn't in data-, Please select appropriate weight variable.")
+      )
+      data.design <- survey::svydesign(ids = ~ 1, data = data.regress, weights = ~ get(var.weights.survey))
+      res.svyglm <- survey::svyglm(form, design = data.design)
+      tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
+      cap.linear <- paste("Linear regression predicting ", data_label()[variable == y, var_label][1], "- survey data", sep="")
+      if(input$regressUI_subcheck == T){
+        cap.linear <- paste(cap.linear, " - ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
+      }
+      out.linear <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = data_label())
+
     }
-    out.linear = jstable::LabelepiDisplay(tb.linear, label = T, ref = data_label)
     return(list(table = out.linear, caption = cap.linear))
   })
 
@@ -248,6 +280,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @param data_label reactive data_label
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
+#' @param var.weights.survey weight variable if survey data. default: NULL
 #' @return regressModule2
 #' @details DETAILS
 #' @examples
@@ -265,7 +298,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @importFrom epiDisplay regress.display
 #' @importFrom purrr map_lgl
 
-regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
+regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, var.weights.survey = NULL) {
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))
@@ -292,6 +325,9 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 
 
     conti_vars <- setdiff(names(data()), factor_vars)
+    if (!is.null(var.weights.survey)){
+      conti_vars <- setdiff(conti_vars, var.weights.survey())
+    }
     conti_list <- mklist(data_varStruct(), conti_vars)
 
     nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
@@ -322,14 +358,27 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 
   output$indep <- renderUI({
     req(!is.null(input$dep_vars))
-    vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  input$dep_vars)
-    varsIni <- sapply(vars,
-                      function(v){
-                        forms <- as.formula(paste(input$dep_vars, "~", v))
-                        coef <- summary(glm(forms, data = data()))$coefficients
-                        sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
-                        return(sigOK)
-                      })
+    if (is.null(var.weights.survey)){
+      vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  input$dep_vars)
+      varsIni <- sapply(vars,
+                        function(v){
+                          forms <- as.formula(paste(input$dep_vars, "~", v))
+                          coef <- summary(glm(forms, data = data()))$coefficients
+                          sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                          return(sigOK)
+                        })
+    } else{
+      vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  c(input$dep_vars, var.weights.survey()))
+      varsIni <- sapply(vars,
+                        function(v){
+                          forms <- as.formula(paste(input$dep_vars, "~", v))
+                          data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
+                          coef <- summary(survey::svyglm(forms, design = data.design))$coefficients
+                          sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                          return(sigOK)
+                        })
+    }
+
 
 
     tagList(
@@ -390,13 +439,30 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
     validate(
       need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
-    res.linear = glm(form, data = data.regress)
-    tb.linear = jstable::glmshow.display(res.linear, decimal = input$decimal)
-    cap.linear = paste("Linear regression predicting ", data_label()[variable == y, var_label][1], sep="")
-    if(input$regressUI_subcheck == T){
-      cap.linear <- paste(cap.linear, " - ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
+
+    if (is.null(var.weights.survey)){
+      res.linear <- glm(form, data = data.regress)
+      tb.linear <- jstable::glmshow.display(res.linear, decimal = input$decimal)
+      cap.linear <- paste("Linear regression predicting ", data_label()[variable == y, var_label][1], sep="")
+      if(input$regressUI_subcheck == T){
+        cap.linear <- paste(cap.linear, " - ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
+      }
+      out.linear <- jstable::LabelepiDisplay(tb.linear, label = T, ref = data_label())
+    } else{
+      validate(
+        need(var.weights.survey() %in% names(data.regress) , "Weight variable isn't in data-, Please select appropriate weight variable.")
+      )
+      data.design <- survey::svydesign(ids = ~ 1, data = data.regress, weights = ~ get(var.weights.survey()))
+      res.svyglm <- survey::svyglm(form, design = data.design)
+      tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
+      cap.linear <- paste("Linear regression predicting ", data_label()[variable == y, var_label][1], "- survey data", sep="")
+      if(input$regressUI_subcheck == T){
+        cap.linear <- paste(cap.linear, " - ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
+      }
+      out.linear <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = data_label())
+
     }
-    out.linear = jstable::LabelepiDisplay(tb.linear, label = T, ref = data_label())
+
     #out.linear = summary(res.linear)$coefficients
     #sig = ifelse(out.linear[, 4] <= 0.05, "**", "NA")
     return(list(table = out.linear, caption = cap.linear))
@@ -419,6 +485,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @param data_label data_label
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
+#' @param var.weights.survey weight variable if survey data. default: NULL
 #' @return logisticModule
 #' @details DETAILS
 #' @examples
@@ -437,7 +504,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
 
-logisticModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
+logisticModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, var.weights.survey = NULL) {
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -475,13 +542,26 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
   output$indep <- renderUI({
     req(!is.null(input$dep_vars))
     vars <- setdiff(setdiff(names(data), except_vars),  input$dep_vars)
-    varsIni <- sapply(vars,
-                      function(v){
-                        forms <- as.formula(paste(input$dep_vars, "~", v))
-                        coef <- summary(glm(forms, data = data, family = binomial))$coefficients
-                        sigOK <- !all(coef[-1, 4] > 0.05)
-                        return(sigOK)
-                      })
+    if (is.null(var.weights.survey)){
+      vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  input$dep_vars)
+      varsIni <- sapply(vars,
+                        function(v){
+                          forms <- as.formula(paste(input$dep_vars, "~", v))
+                          coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
+                          sigOK <- !all(coef[-1, 4] > 0.05)
+                          return(sigOK)
+                        })
+    } else{
+      vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  c(input$dep_vars, var.weights.survey))
+      varsIni <- sapply(vars,
+                        function(v){
+                          forms <- as.formula(paste(input$dep_vars, "~", v))
+                          data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey))
+                          coef <- summary(survey::svyglm(forms, design = data.design, family = binomial))$coefficients
+                          sigOK <- !all(coef[-1, 4] > 0.05)
+                          return(sigOK)
+                        })
+    }
 
 
     tagList(
@@ -542,13 +622,31 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
     validate(
       need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
-    res.logistic = glm(form, data = data.logistic, family = "binomial")
-    tb.logistic = jstable::glmshow.display(res.logistic,  decimal = input$decimal)
-    cap.logistic = paste("Logistic regression predicting ", data_label[variable == y, var_label][1], sep="")
-    if(input$regressUI_subcheck == T){
-      cap.logistic <- paste(cap.logistic, " - ", data_label[variable == input$subvar_logistic, var_label][1], ": ", data_label[variable == input$subvar_logistic & level == input$subval_logistic, val_label], sep = "")
+
+    if (is.null(var.weights.survey)){
+      res.logistic = glm(form, data = data.logistic, family = binomial)
+      tb.logistic = jstable::glmshow.display(res.logistic, decimal = input$decimal)
+      cap.logistic = paste("Logistic regression predicting ", data_label()[variable == y, var_label][1], sep="")
+      if(input$regressUI_subcheck == T){
+        cap.logistic <- paste(cap.logistic, " - ", data_label()[variable == input$subvar_logistic, var_label][1], ": ", data_label()[variable == input$subvar_logistic & level == input$subval_logistic, val_label], sep = "")
+      }
+      out.logistic = jstable::LabelepiDisplay(tb.logistic, label = T, ref = data_label())
+      #out.logistic = summary(res.logistic)$coefficients
+      #sig = ifelse(out.logistic[, 4] <= 0.05, "**", "NA")
+    } else{
+      validate(
+        need(var.weights.survey %in% names(data.logistic) , "Weight variable isn't in data-, Please select appropriate weight variable.")
+      )
+      data.design <- survey::svydesign(ids = ~ 1, data = data.logistic, weights = ~ get(var.weights.survey))
+      res.svyglm <- survey::svyglm(form, design = data.design, family = binomial)
+      tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
+      cap.logistic <- paste("Logistic regression predicting ", data_label()[variable == y, var_label][1], "- survey data", sep="")
+      if(input$regressUI_subcheck == T){
+        cap.logistic <- paste(cap.logistic, " - ", data_label()[variable == input$subvar_logistic, var_label][1], ": ", data_label()[variable == input$subvar_logistic & level == input$subval_regress, val_label], sep = "")
+      }
+      out.logistic <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = data_label())
+
     }
-    out.logistic = jstable::LabelepiDisplay(tb.logistic, label = T, ref = data_label)
     return(list(table = out.logistic, caption = cap.logistic))
   })
 
@@ -570,6 +668,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @param data_label reactive data_label
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
+#' @param var.weights.survey weight variable if survey data. default: NULL
 #' @return logisticModule2
 #' @details DETAILS
 #' @examples
@@ -588,7 +687,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @importFrom purrr map_lgl
 
 
-logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
+logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, var.weights.survey = NULL) {
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))
@@ -642,15 +741,26 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
 
   output$indep <- renderUI({
     req(!is.null(input$dep_vars))
-    vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  input$dep_vars)
-    varsIni <- sapply(vars,
-                      function(v){
-                        forms <- as.formula(paste(input$dep_vars, "~", v))
-                        coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
-                        sigOK <- !all(coef[-1, 4] > 0.05)
-                        return(sigOK)
-                      })
-
+    if (is.null(var.weights.survey)){
+      vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  input$dep_vars)
+      varsIni <- sapply(vars,
+                        function(v){
+                          forms <- as.formula(paste(input$dep_vars, "~", v))
+                          coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
+                          sigOK <- !all(coef[-1, 4] > 0.05)
+                          return(sigOK)
+                        })
+    } else{
+      vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  c(input$dep_vars, var.weights.survey()))
+      varsIni <- sapply(vars,
+                        function(v){
+                          forms <- as.formula(paste(input$dep_vars, "~", v))
+                          data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
+                          coef <- summary(survey::svyglm(forms, design = data.design, family = binomial))$coefficients
+                          sigOK <- !all(coef[-1, 4] > 0.05)
+                          return(sigOK)
+                        })
+    }
 
     tagList(
       selectInput(session$ns("indep_vars"), "Independent variables",
@@ -708,15 +818,33 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     validate(
       need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
-    res.logistic = glm(form, data = data.logistic, family = binomial)
-    tb.logistic = jstable::glmshow.display(res.logistic, decimal = input$decimal)
-    cap.logistic = paste("Logistic regression predicting ", data_label()[variable == y, var_label][1], sep="")
-    if(input$regressUI_subcheck == T){
-      cap.logistic <- paste(cap.logistic, " - ", data_label()[variable == input$subvar_logistic, var_label][1], ": ", data_label()[variable == input$subvar_logistic & level == input$subval_logistic, val_label], sep = "")
+
+    if (is.null(var.weights.survey)){
+      res.logistic = glm(form, data = data.logistic, family = binomial)
+      tb.logistic = jstable::glmshow.display(res.logistic, decimal = input$decimal)
+      cap.logistic = paste("Logistic regression predicting ", data_label()[variable == y, var_label][1], sep="")
+      if(input$regressUI_subcheck == T){
+        cap.logistic <- paste(cap.logistic, " - ", data_label()[variable == input$subvar_logistic, var_label][1], ": ", data_label()[variable == input$subvar_logistic & level == input$subval_logistic, val_label], sep = "")
+      }
+      out.logistic = jstable::LabelepiDisplay(tb.logistic, label = T, ref = data_label())
+      #out.logistic = summary(res.logistic)$coefficients
+      #sig = ifelse(out.logistic[, 4] <= 0.05, "**", "NA")
+    } else{
+      validate(
+        need(var.weights.survey() %in% names(data.logistic) , "Weight variable isn't in data-, Please select appropriate weight variable.")
+      )
+      data.design <- survey::svydesign(ids = ~ 1, data = data.logistic, weights = ~ get(var.weights.survey()))
+      res.svyglm <- survey::svyglm(form, design = data.design, family = binomial)
+      tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
+      cap.logistic <- paste("Logistic regression predicting ", data_label()[variable == y, var_label][1], "- survey data", sep="")
+      if(input$regressUI_subcheck == T){
+        cap.logistic <- paste(cap.logistic, " - ", data_label()[variable == input$subvar_logistic, var_label][1], ": ", data_label()[variable == input$subvar_logistic & level == input$subval_logistic, val_label], sep = "")
+      }
+      out.logistic <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = data_label())
+
     }
-    out.logistic = jstable::LabelepiDisplay(tb.logistic, label = T, ref = data_label())
-    #out.logistic = summary(res.logistic)$coefficients
-    #sig = ifelse(out.logistic[, 4] <= 0.05, "**", "NA")
+
+
     return(list(table = out.logistic, caption = cap.logistic))
   })
 

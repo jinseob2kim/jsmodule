@@ -14,3 +14,8 @@ Name: Repeated measure analysis
 Description: Gatget including Data, Label info, Table 1, GEE(liear, logistic), Basic plot.
 Binding: jsRepeatedAddin
 Interactive: true
+
+Name: Survey data analysis
+Description: Gatget including Data, Label info, Table 1, svyglm, Basic plot.
+Binding: jsSurveydAddin
+Interactive: true

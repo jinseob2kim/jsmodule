@@ -1,3 +1,17 @@
+# jsmodule 0.6.0
+
+## New Gadget
+
+* Shiny Gadget for survey data analysis: `jsSurveyGadget`
+
+## New module
+
+* Module for **survey data analysis**: `FileSurvey` 
+
+## Update
+
+* Survey analysis option to `regressModule`, `logisticModule` and `tb1`.
+
 # jsmodule 0.5.7
 
 * Bug fixes: **sub-group option** in `regressModule`, `logisticModule`, `jsPropensityGadget`, `GEEModuleLinear` and `GEEModuleLogistic`

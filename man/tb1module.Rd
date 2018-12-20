@@ -5,7 +5,8 @@
 \title{tb1module: Shiny module Server for Table 1.}
 \usage{
 tb1module(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10)
+  data_varStruct = NULL, nfactor.limit = 10,
+  var.weights.survey = NULL)
 }
 \arguments{
 \item{input}{input}
@@ -21,6 +22,8 @@ tb1module(input, output, session, data, data_label,
 \item{data_varStruct}{Variable structure list of data, Default: NULL}
 
 \item{nfactor.limit}{maximum factor levels to include, Default: 10}
+
+\item{var.weights.survey}{weight variable if survey data. default: NULL}
 }
 \value{
 Shiny module

@@ -2,15 +2,15 @@
 % Please edit documentation in R/jsRepeatedGadget.R
 \name{jsRepeatedAddin}
 \alias{jsRepeatedAddin}
-\title{jsRepeatedAddin: Rstudio addin of jsRepeatedAddin}
+\title{jsRepeatedAddin: Rstudio addin of jsRepeatedGadjet}
 \usage{
 jsRepeatedAddin()
 }
 \value{
-Rstudio addin of jsRepeatedAddin
+Rstudio addin of jsRepeatedGadjet
 }
 \description{
-Rstudio addin of jsRepeatedAddin
+Rstudio addin of jsRepeatedGadjet
 }
 \details{
 DETAILS

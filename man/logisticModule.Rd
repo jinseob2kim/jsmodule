@@ -5,7 +5,8 @@
 \title{logisticModule: Module for logistic regression}
 \usage{
 logisticModule(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10)
+  data_varStruct = NULL, nfactor.limit = 10,
+  var.weights.survey = NULL)
 }
 \arguments{
 \item{input}{input}
@@ -21,6 +22,8 @@ logisticModule(input, output, session, data, data_label,
 \item{data_varStruct}{data_varStruct, Default: NULL}
 
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
+
+\item{var.weights.survey}{weight variable if survey data. default: NULL}
 }
 \value{
 logisticModule

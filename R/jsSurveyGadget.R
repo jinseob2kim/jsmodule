@@ -1,17 +1,17 @@
-#' @title jsRepeatedGadjet: Shiny Gadget of Repeated measure analysis.
-#' @description Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic plot
+#' @title jsSurveyGadget: Shiny Gadget of survey data analysis.
+#' @description Shiny Gadget including Data, Label info, Table 1, svyglm, Basic plot
 #' @param data data
 #' @param nfactor.limit nlevels limit for categorical variables
-#' @return Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic plot
+#' @return Shiny Gadget including Data, Label info, Table 1, svyglm, Basic plot
 #' @details DETAILS
 #' @examples
 #' \dontrun{
 #' if(interactive()){
 #'  library(survival)
-#'  jsRepeatedGadjet(lung)
+#'  jsSurveyGadget(lung)
 #'  }
 #' }
-#' @rdname jsRepeatedGadjet
+#' @rdname jsSurveyGadget
 #' @export
 #' @importFrom GGally ggpairs
 #' @importFrom stats as.formula binomial
@@ -19,11 +19,11 @@
 #' @importFrom DT datatable %>% formatStyle styleEqual renderDT DTOutput
 #' @importFrom shinycustomloader withLoader
 #' @importFrom jstable opt.data opt.tb1 opt.tbreg
-#' @importFrom geepack geeglm
+#' @importFrom survey svyglm
 #' @import ggplot2
 #' @import shiny
 
-jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
+jsSurveyGadget <- function(data, nfactor.limit = 20) {
 
   change.vnlist = list(c(" ", "_"), c("=<", "_le_"), c("=>", "_ge_"), c("=", "_eq_"), c("\\(", "_open_"), c("\\)", "_close_"), c("%", "_percent_"), c("-", "_"), c("/", "_"),
                        c("\r\n", "_"), c(",", "_comma_"))
@@ -50,12 +50,12 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
 
 
 
-  ui <- navbarPage("Repeated measure analysis",
+  ui <- navbarPage("Survey data analysis",
                    tabPanel("Data",
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("factor"),
-                                uiOutput("repeated")
+                                uiOutput("weights")
                               ),
                               mainPanel(
                                 tabsetPanel(type = "pills",
@@ -73,15 +73,15 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                               mainPanel(
                                 withLoader(DTOutput("table1"), type="html", loader="loader6"),
                                 wellPanel(
-                                  h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                  h5("Non-normal continuous variables are summarized with median [IQR] and kruskal-wallis test"),
-                                  h5("Categorical variables  are summarized with table")
+                                  h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
+                                  h5("Non-normal continuous variables are summarized with median [IQR] and complex sampling rank test"),
+                                  h5("Categorical variables  are summarized with table and svychisq test")
                                 )
                               )
                             )
 
                    ),
-                   navbarMenu("GEE",
+                   navbarMenu("Survey GLM",
                               tabPanel("Linear",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -128,10 +128,22 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                   selected = data.list$factor_adds)
     })
 
-    output$repeated <- renderUI({
-      selectInput("repeated_vname", label = "Repeated measure variables",
-                  choices = names(data.list$data), multiple = F,
-                  selected = names(data.list$data)[1])
+    observeEvent(input$factor_vname, {
+      output$weights <-  renderUI({
+        conti_new <- setdiff(data.list$conti_original, input$factor_vname)
+        validate(
+          need(length(conti_new) > 0, "No candidate variables to be weight.")
+        )
+        candidate.weight <- c("wt", "weight", "Weight", "WEIGHT", "WEIGHTS", "Weights", "weights")
+        selected.weight <- unlist(purrr::map(candidate.weight, ~grep(.x, conti_new)))
+        selected.final <- ifelse(length(selected.weight) > 0, conti_new[selected.weight[1]], conti_new[1])
+
+        tagList(
+          selectInput(session$ns("weights_vname"), label = "Weights variable",
+                      choices = conti_new, multiple = F,
+                      selected = selected.final)
+        )
+      })
     })
 
 
@@ -141,13 +153,14 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
       if (!is.null(input$factor_vname)){
         out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
       }
+      out <- out[!is.na(get(input$weights_vname))]
       out.label <- mk.lev(out)
       return(list(data = out, label = out.label))
     })
 
     data <- reactive(data.info()$data)
     data.label <- reactive(data.info()$label)
-    id.gee <- reactive(input$repeated_vname)
+    id.weight.survey <- reactive(input$weights_vname)
 
     output$data <- renderDT({
       datatable(data(), rownames=F, editable = F, extensions= "Buttons", caption = "Data",
@@ -165,7 +178,9 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
 
 
 
-    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+
+    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, var.weights.survey = id.weight.survey)
 
     output$table1 <- renderDT({
       tb = out_tb1()$table
@@ -183,7 +198,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
       return(out.tb1)
     })
 
-    out_linear <- callModule(GEEModuleLinear, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, id.gee = id.gee)
+    out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, var.weights.survey = id.weight.survey)
 
     output$lineartable <- renderDT({
       hide = which(colnames(out_linear()$table) == "sig")
@@ -196,7 +211,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
 
-    out_logistic <- callModule(GEEModuleLogistic, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, id.gee = id.gee)
+    out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, var.weights.survey = id.weight.survey)
 
     output$logistictable <- renderDT({
       hide = which(colnames(out_logistic()$table) == "sig")
@@ -226,9 +241,9 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
 
 
 
-#' @title jsRepeatedAddin: Rstudio addin of jsRepeatedGadjet
-#' @description Rstudio addin of jsRepeatedGadjet
-#' @return Rstudio addin of jsRepeatedGadjet
+#' @title jsSurveydAddin: Rstudio addin of jsSurveyGadget
+#' @description Rstudio addin of jsSurveyGadget
+#' @return Rstudio addin of jsSurveyGadget
 #' @details DETAILS
 #' @examples
 #' \dontrun{
@@ -238,16 +253,16 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
 #' }
 #' @seealso
 #'  \code{\link[rstudioapi]{rstudio-editors}}
-#' @rdname jsRepeatedAddin
+#' @rdname jsSurveydAddin
 #' @export
 #' @importFrom rstudioapi getActiveDocumentContext
 
 
-jsRepeatedAddin <- function(){
+jsSurveydAddin <- function(){
   context <- rstudioapi::getActiveDocumentContext()
   # Set the default data to use based on the selection.
   dataString <- context$selection[[1]]$text
   data <- get(dataString, envir = .GlobalEnv)
   #viewer <- dialogViewer("Subset", width = 1000, height = 800)
-  jsRepeatedGadjet(data, nfactor.limit = 20)
+  jsSurveyGadget(data, nfactor.limit = 20)
 }
