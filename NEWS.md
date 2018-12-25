@@ -1,3 +1,8 @@
+# jsmodule 0.6.1
+
+* Update : Apply **complex survey design** to `FileSurvey`, `regressModule`, `logisticModule` and `jsSurveyGadget`
+
+
 # jsmodule 0.6.0
 
 ## New Gadget

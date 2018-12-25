@@ -55,7 +55,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("factor"),
-                                uiOutput("weights")
+                                uiOutput("survey")
                               ),
                               mainPanel(
                                 tabsetPanel(type = "pills",
@@ -129,19 +129,38 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
     })
 
     observeEvent(input$factor_vname, {
-      output$weights <-  renderUI({
+      output$survey <-  renderUI({
         conti_new <- setdiff(data.list$conti_original, input$factor_vname)
-        validate(
-          need(length(conti_new) > 0, "No candidate variables to be weight.")
-        )
+        #validate(
+        #  need(length(conti_new) > 0, "No candidate variables to be weight.")
+        #)
+
         candidate.weight <- c("wt", "weight", "Weight", "WEIGHT", "WEIGHTS", "Weights", "weights")
         selected.weight <- unlist(purrr::map(candidate.weight, ~grep(.x, conti_new)))
-        selected.final <- ifelse(length(selected.weight) > 0, conti_new[selected.weight[1]], conti_new[1])
+        selected.weight.final <- ifelse(length(selected.weight) > 0, conti_new[selected.weight[1]], conti_new[1])
+
+        candidate.cluster <- c("psu", "id")
+        selected.cluster <- unlist(purrr::map(candidate.cluster, ~grep(.x, names(data.list$data))))
+        selected.cluster.final <- ifelse(length(selected.cluster) > 0, conti_new[selected.cluster[1]], names(data.list$data)[1])
+
+        candidate.strata <- c("strata")
+        selected.strata <- unlist(purrr::map(candidate.strata, ~grep(.x, names(data.list$data))))
+        selected.strata.final <- ifelse(length(selected.strata) > 0, conti_new[selected.strata[1]], names(data.list$data)[1])
+
 
         tagList(
-          selectInput(session$ns("weights_vname"), label = "Weights variable",
-                      choices = conti_new, multiple = F,
-                      selected = selected.final)
+          h4(tags$strong("Survey design")),
+          selectInput(session$ns("cluster_vname"), label = "Cluster ID",
+                      choices = c("None", names(data.list$data)), multiple = F,
+                      selected = selected.cluster.final),
+
+          selectInput(session$ns("strata_vname"), label = "Strata",
+                      choices = c("None", names(data.list$data)), multiple = F,
+                      selected = selected.strata.final),
+
+          selectInput(session$ns("weights_vname"), label = "Weights",
+                      choices = c("None", conti_new), multiple = F,
+                      selected = selected.weight.final)
         )
       })
     })
@@ -153,14 +172,37 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       if (!is.null(input$factor_vname)){
         out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
       }
-      out <- out[!is.na(get(input$weights_vname))]
+
+      if (input$cluster_vname == "None"){
+        cluster.survey <- as.formula("~ 1")
+      } else{
+        cluster.survey <- as.formula(paste("~", input$cluster_vname))
+        out <- out[!is.na(get(input$cluster_vname))]
+      }
+
+      if (input$strata_vname == "None"){
+        strata.survey <- NULL
+      } else{
+        strata.survey <- as.formula(paste("~", input$strata_vname))
+        out <- out[!is.na(get(input$strata_vname))]
+      }
+
+      if (input$weights_vname == "None"){
+        weights.survey <- NULL
+      } else{
+        weights.survey <- as.formula(paste("~", input$weights_vname))
+        out <- out[!is.na(get(input$weights_vname))]
+      }
+
+      surveydata <- survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out)
+
       out.label <- mk.lev(out)
-      return(list(data = out, label = out.label))
+      return(list(data = out, label = out.label, survey = surveydata))
     })
 
     data <- reactive(data.info()$data)
     data.label <- reactive(data.info()$label)
-    id.weight.survey <- reactive(input$weights_vname)
+    design.survey <- reactive(data.info()$survey)
 
     output$data <- renderDT({
       datatable(data(), rownames=F, editable = F, extensions= "Buttons", caption = "Data",
@@ -180,7 +222,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
 
 
 
-    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, var.weights.survey = id.weight.survey)
+    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey)
 
     output$table1 <- renderDT({
       tb = out_tb1()$table
@@ -198,7 +240,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       return(out.tb1)
     })
 
-    out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, var.weights.survey = id.weight.survey)
+    out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey)
 
     output$lineartable <- renderDT({
       hide = which(colnames(out_linear()$table) == "sig")
@@ -211,7 +253,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
 
-    out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, var.weights.survey = id.weight.survey)
+    out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey)
 
     output$logistictable <- renderDT({
       hide = which(colnames(out_logistic()$table) == "sig")

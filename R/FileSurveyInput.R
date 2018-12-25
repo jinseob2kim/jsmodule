@@ -48,7 +48,7 @@ FileSurveyInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)
   tagList(
     fileInput(ns("file"), label),
     uiOutput(ns("factor")),
-    uiOutput(ns("weights"))
+    uiOutput(ns("survey"))
   )
 }
 
@@ -178,19 +178,37 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
 
 
   observeEvent(input$factor_vname, {
-    output$weights <-  renderUI({
+    output$survey <-  renderUI({
       conti_new <- setdiff(data()$conti_original, input$factor_vname)
-      validate(
-        need(length(conti_new) > 0, "No candidate variables to be weight.")
-      )
+      #validate(
+      #  need(length(conti_new) > 0, "No candidate variables to be weight.")
+      #)
       candidate.weight <- c("wt", "weight", "Weight", "WEIGHT", "WEIGHTS", "Weights", "weights")
       selected.weight <- unlist(purrr::map(candidate.weight, ~grep(.x, conti_new)))
-      selected.final <- ifelse(length(selected.weight) > 0, conti_new[selected.weight[1]], conti_new[1])
+      selected.weight.final <- ifelse(length(selected.weight) > 0, conti_new[selected.weight[1]], conti_new[1])
+
+      candidate.cluster <- c("psu", "id")
+      selected.cluster <- unlist(purrr::map(candidate.cluster, ~grep(.x, names(data()$data))))
+      selected.cluster.final <- ifelse(length(selected.cluster) > 0, conti_new[selected.cluster[1]], names(data()$data)[1])
+
+      candidate.strata <- c("strata")
+      selected.strata <- unlist(purrr::map(candidate.strata, ~grep(.x, names(data()$data))))
+      selected.strata.final <- ifelse(length(selected.strata) > 0, conti_new[selected.strata[1]], names(data()$data)[1])
+
 
       tagList(
-        selectInput(session$ns("weights_vname"), label = "Weights variable",
-                    choices = conti_new, multiple = F,
-                    selected = selected.final)
+        h4(tags$strong("Survey design")),
+        selectInput(session$ns("cluster_vname"), label = "Cluster ID",
+                    choices = c("None", names(data()$data)), multiple = F,
+                    selected = selected.cluster.final),
+
+        selectInput(session$ns("strata_vname"), label = "Strata",
+                    choices = c("None", names(data()$data)), multiple = F,
+                    selected = selected.strata.final),
+
+        selectInput(session$ns("weights_vname"), label = "Weights",
+                    choices = c("None", conti_new), multiple = F,
+                    selected = selected.weight.final)
         )
       })
   })
@@ -212,7 +230,31 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
     if (length(input$factor_vname) > 0){
       out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
     }
-    out <- out[!is.na(get(input$weights_vname))]
+
+    ## Make survey object
+    if (input$cluster_vname == "None"){
+      cluster.survey <- as.formula("~ 1")
+    } else{
+      cluster.survey <- as.formula(paste("~", input$cluster_vname))
+      out <- out[!is.na(get(input$cluster_vname))]
+    }
+
+    if (input$strata_vname == "None"){
+      strata.survey <- NULL
+    } else{
+      strata.survey <- as.formula(paste("~", input$strata_vname))
+      out <- out[!is.na(get(input$strata_vname))]
+    }
+
+    if (input$weights_vname == "None"){
+      weights.survey <- NULL
+    } else{
+      weights.survey <- as.formula(paste("~", input$weights_vname))
+      out <- out[!is.na(get(input$weights_vname))]
+    }
+
+    surveydata <- survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out)
+
 
     ref <- data()$ref
     out.label <- mk.lev(out)
@@ -220,7 +262,7 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
       w <- which(ref[["name.new"]] == vn)
       out.label[variable == vn, var_label := ref[["name.old"]][w]]
     }
-    return(list(data = out, label = out.label, naomit = data()$naomit, id.weight.survey = input$weights_vname))
+    return(list(data = out, label = out.label, naomit = data()$naomit, survey = surveydata))
   })
 
 

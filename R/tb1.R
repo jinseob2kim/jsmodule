@@ -75,7 +75,7 @@ tb1moduleUI <- function(id) {
 #' @param data_label data label
 #' @param data_varStruct Variable structure list of data, Default: NULL
 #' @param nfactor.limit maximum factor levels to include, Default: 10
-#' @param var.weights.survey weight variable if survey data. default: NULL
+#' @param design.survey survey data. default: NULL
 #' @return Shiny module
 #' @details DETAILS
 #' @examples
@@ -133,7 +133,7 @@ tb1moduleUI <- function(id) {
 #' @importFrom methods is
 
 
-tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, var.weights.survey = NULL){
+tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL){
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -169,8 +169,8 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
   factor_list <- mklist(data_varStruct, factor_vars)
 
   conti_vars <- setdiff(names(data), factor_vars)
-  if (!is.null(var.weights.survey())){
-    conti_vars <- setdiff(conti_vars, var.weights.survey)
+  if (!is.null(design.survey)){
+    conti_vars <- setdiff(conti_vars, c(names(design.survey$allprob), names(design.survey$strata), names(design.survey$cluster)))
   }
   conti_list <- mklist(data_varStruct, conti_vars)
 
@@ -248,7 +248,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
     req(!is.null(input$group_vars))
     vars = setdiff(setdiff(names(data),except_vars),  input$group_vars)
 
-    if (is.null(var.weights.survey)){
+    if (is.null(design.survey)){
 
       if (input$group_vars == "None"){
         res <- jstable::CreateTableOneJS(data = data,
@@ -300,8 +300,10 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
       }
     } else{
 
-      Svydesign <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey))
-      vars <- setdiff(vars, var.weights.survey)
+      Svydesign <- design.survey
+      vars <- setdiff(vars, c(names(Svydesign$cluster), names(Svydesign$strata), names(Svydesign$allprob)))
+      #Svydesign <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey))
+      #vars <- setdiff(vars, var.weights.survey)
       if (input$group_vars == "None"){
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars, includeNA = F, test = F,
                                             showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
@@ -350,7 +352,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @param data_label reactive data label(reactive)
 #' @param data_varStruct Variable structure list of data, Default: NULL
 #' @param nfactor.limit maximum factor levels to include, Default: 10
-#' @param var.weights.survey weight variable if survey data. default: NULL
+#' @param design.survey Survey data. default: NULL
 #' @return Shiny module
 #' @details DETAILS
 #' @examples
@@ -424,7 +426,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @importFrom methods is
 
 
-tb1module2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, var.weights.survey = NULL){
+tb1module2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL){
 
 
   if (is.null(data_varStruct)){
@@ -451,8 +453,8 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
 
 
     conti_vars <- setdiff(names(data()), factor_vars)
-    if (!is.null(var.weights.survey)){
-      conti_vars <- setdiff(conti_vars, var.weights.survey())
+    if (!is.null(design.survey)){
+      conti_vars <- setdiff(conti_vars, c(names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
     }
     conti_list <- mklist(data_varStruct(), conti_vars)
 
@@ -550,7 +552,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
   out <- reactive({
     req(!is.null(input$group_vars))
     vars <- setdiff(setdiff(names(data()),vlist()$except_vars),  input$group_vars)
-    if (is.null(var.weights.survey)){
+    if (is.null(design.survey)){
 
       if (input$group_vars == "None"){
         res <- jstable::CreateTableOneJS(data = data(),
@@ -601,9 +603,11 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
         return(res)
       }
     } else{
+      Svydesign <- design.survey()
+      vars <- setdiff(vars, c(names(Svydesign$cluster), names(Svydesign$strata), names(Svydesign$allprob)))
 
-      Svydesign <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
-      vars <- setdiff(vars, var.weights.survey())
+      #Svydesign <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
+      #vars <- setdiff(vars, var.weights.survey())
       if (input$group_vars == "None"){
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars, includeNA = F, test = F,
                                             showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
