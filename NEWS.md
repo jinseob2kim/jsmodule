@@ -2,6 +2,8 @@
 
 * Bug fixes : Label information in `regressModule`, `logisticModule`.
 
+* Update: **default.unires** option to `regressModule`, `logisticModule`.
+
 # jsmodule 0.6.1
 
 * Update : Apply **complex survey design** to `FileSurvey`, `regressModule`, `logisticModule` and `jsSurveyGadget`

@@ -101,6 +101,7 @@ regressModuleUI <- function(id) {
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey survey data. default: NULL
+#' @param default.unires Set default independent variables using univariate analysis.
 #' @return regressModule
 #' @details DETAILS
 #' @examples
@@ -119,7 +120,7 @@ regressModuleUI <- function(id) {
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
 
-regressModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL) {
+regressModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -158,25 +159,35 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 
   output$indep <- renderUI({
     req(!is.null(input$dep_vars))
-    if (is.null(var.weights.survey)){
-      vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  input$dep_vars)
-      varsIni <- sapply(vars,
-                        function(v){
-                          forms <- as.formula(paste(input$dep_vars, "~", v))
-                          coef <- summary(glm(forms, data = data()))$coefficients
-                          sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
-                          return(sigOK)
-                        })
+    if (is.null(design.survey)){
+      vars <- setdiff(setdiff(names(data), except_vars),  input$dep_vars)
+      if (default.unires){
+        varsIni <- sapply(vars,
+                          function(v){
+                            forms <- as.formula(paste(input$dep_vars, "~", v))
+                            coef <- summary(glm(forms, data =data))$coefficients
+                            sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                            return(sigOK)
+                          })
+      } else{
+        varsIni <- c(T, rep(F, length(vars) -1))
+      }
+
     } else{
-      vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  c(input$dep_vars, var.weights.survey))
-      varsIni <- sapply(vars,
-                        function(v){
-                          forms <- as.formula(paste(input$dep_vars, "~", v))
-                          data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey))
-                          coef <- summary(survey::svyglm(forms, design = data.design))$coefficients
-                          sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
-                          return(sigOK)
-                        })
+      vars <- setdiff(setdiff(names(data), except_vars),  c(input$dep_vars, names(design.survey$allprob), names(design.survey$strata), names(design.survey$cluster)))
+      if (default.unires){
+        varsIni <- sapply(vars,
+                          function(v){
+                            forms <- as.formula(paste(input$dep_vars, "~", v))
+                            #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
+                            coef <- summary(survey::svyglm(forms, design = design.survey))$coefficients
+                            sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                            return(sigOK)
+                          })
+      } else{
+        varsIni <- c(T, rep(F, length(vars) -1))
+      }
+
     }
 
 
@@ -287,6 +298,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey survey data. default: NULL
+#' @param default.unires Set default independent variables using univariate analysis.
 #' @return regressModule2
 #' @details DETAILS
 #' @examples
@@ -304,7 +316,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @importFrom epiDisplay regress.display
 #' @importFrom purrr map_lgl
 
-regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL) {
+regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -366,23 +378,33 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
     req(!is.null(input$dep_vars))
     if (is.null(design.survey)){
       vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  input$dep_vars)
-      varsIni <- sapply(vars,
-                        function(v){
-                          forms <- as.formula(paste(input$dep_vars, "~", v))
-                          coef <- summary(glm(forms, data = data()))$coefficients
-                          sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
-                          return(sigOK)
-                        })
+      if (default.unires){
+        varsIni <- sapply(vars,
+                          function(v){
+                            forms <- as.formula(paste(input$dep_vars, "~", v))
+                            coef <- summary(glm(forms, data = data()))$coefficients
+                            sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                            return(sigOK)
+                          })
+      } else{
+        varsIni <- c(T, rep(F, length(vars) -1))
+      }
+
     } else{
       vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  c(input$dep_vars, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
-      varsIni <- sapply(vars,
-                        function(v){
-                          forms <- as.formula(paste(input$dep_vars, "~", v))
-                          #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
-                          coef <- summary(survey::svyglm(forms, design = design.survey()))$coefficients
-                          sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
-                          return(sigOK)
-                        })
+      if (default.unires){
+        varsIni <- sapply(vars,
+                          function(v){
+                            forms <- as.formula(paste(input$dep_vars, "~", v))
+                            #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
+                            coef <- summary(survey::svyglm(forms, design = design.survey()))$coefficients
+                            sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                            return(sigOK)
+                          })
+      } else{
+        varsIni <- c(T, rep(F, length(vars) -1))
+      }
+
     }
 
 
@@ -506,6 +528,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey survey data. default: NULL
+#' @param default.unires Set default independent variables using univariate analysis.
 #' @return logisticModule
 #' @details DETAILS
 #' @examples
@@ -524,7 +547,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
 
-logisticModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL) {
+logisticModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -564,25 +587,36 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 
   output$indep <- renderUI({
     req(!is.null(input$dep_vars))
+
     if (is.null(design.survey)){
       vars <- setdiff(setdiff(names(data), except_vars),  input$dep_vars)
-      varsIni <- sapply(vars,
-                        function(v){
-                          forms <- as.formula(paste(input$dep_vars, "~", v))
-                          coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
-                          sigOK <- !all(coef[-1, 4] > 0.05)
-                          return(sigOK)
-                        })
+      if (default.unires){
+        varsIni <- sapply(vars,
+                          function(v){
+                            forms <- as.formula(paste(input$dep_vars, "~", v))
+                            coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
+                            sigOK <- !all(coef[-1, 4] > 0.05)
+                            return(sigOK)
+                          })
+      } else{
+        varsIni <- c(T, rep(F, length(vars)-1))
+      }
+
     } else{
       vars <- setdiff(setdiff(names(data), except_vars),  c(input$dep_vars, names(design.survey$allprob), names(design.survey$strata), names(design.survey$cluster)))
-      varsIni <- sapply(vars,
-                        function(v){
-                          forms <- as.formula(paste(input$dep_vars, "~", v))
-                          #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey))
-                          coef <- summary(survey::svyglm(forms, design = design.survey, family = binomial))$coefficients
-                          sigOK <- !all(coef[-1, 4] > 0.05)
-                          return(sigOK)
-                        })
+      if (default.unires){
+        varsIni <- sapply(vars,
+                          function(v){
+                            forms <- as.formula(paste(input$dep_vars, "~", v))
+                            #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey))
+                            coef <- summary(survey::svyglm(forms, design = design.survey, family = binomial))$coefficients
+                            sigOK <- !all(coef[-1, 4] > 0.05)
+                            return(sigOK)
+                          })
+      } else{
+        varsIni <- c(T, rep(F, length(vars)-1))
+      }
+
     }
 
 
@@ -669,7 +703,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
         data.design <- subset(data.design, get(input$subvar_logistic) == input$subval_logistic)
       }
 
-      res.svyglm <- survey::svyglm(form, design = data.design, family = binomial)
+      res.svyglm <- survey::svyglm(form, design = data.design, family = quasibinomial())
       tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
       cap.logistic <- paste("Logistic regression predicting ", data_label()[variable == y, var_label][1], "- survey data", sep="")
       if(input$regressUI_subcheck == T){
@@ -700,6 +734,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey survey data. default: NULL
+#' @param default.unires Set default independent variables using univariate analysis.
 #' @return logisticModule2
 #' @details DETAILS
 #' @examples
@@ -718,7 +753,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @importFrom purrr map_lgl
 
 
-logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL) {
+logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))
@@ -777,24 +812,34 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     req(!is.null(input$dep_vars))
     if (is.null(design.survey)){
       vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  input$dep_vars)
-      varsIni <- sapply(vars,
-                        function(v){
-                          forms <- as.formula(paste(input$dep_vars, "~", v))
-                          coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
-                          sigOK <- !all(coef[-1, 4] > 0.05)
-                          return(sigOK)
-                        })
+      if (default.unires){
+        varsIni <- sapply(vars,
+                          function(v){
+                            forms <- as.formula(paste(input$dep_vars, "~", v))
+                            coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
+                            sigOK <- !all(coef[-1, 4] > 0.05)
+                            return(sigOK)
+                          })
+      } else{
+        varsIni <- c(T, rep(F, length(vars) - 1))
+      }
+
     } else{
       vars <- setdiff(setdiff(names(data()), vlist()$except_vars),  c(input$dep_vars, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
+      if (default.unires){
+        varsIni <- sapply(vars,
+                          function(v){
+                            forms <- as.formula(paste(input$dep_vars, "~", v))
+                            #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
+                            coef <- summary(survey::svyglm(forms, design = design.survey(), family = binomial))$coefficients
+                            sigOK <- !all(coef[-1, 4] > 0.05)
+                            return(sigOK)
+                          })
+      } else{
+        varsIni <- c(T, rep(F, length(vars) - 1))
+      }
 
-      varsIni <- sapply(vars,
-                        function(v){
-                          forms <- as.formula(paste(input$dep_vars, "~", v))
-                          #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
-                          coef <- summary(survey::svyglm(forms, design = design.survey(), family = binomial))$coefficients
-                          sigOK <- !all(coef[-1, 4] > 0.05)
-                          return(sigOK)
-                        })
+
     }
 
     tagList(
@@ -878,7 +923,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
         data.design <- subset(data.design, get(input$subvar_logistic) == input$subval_logistic)
       }
 
-      res.svyglm <- survey::svyglm(form, design = data.design, family = binomial)
+      res.svyglm <- survey::svyglm(form, design = data.design, family = quasibinomial())
       tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
       cap.logistic <- paste("Logistic regression predicting ", data_label()[variable == y, var_label][1], "- survey data", sep="")
       if(input$regressUI_subcheck == T){

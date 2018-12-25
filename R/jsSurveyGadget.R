@@ -240,7 +240,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       return(out.tb1)
     })
 
-    out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey)
+    out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey, default.unires = F)
 
     output$lineartable <- renderDT({
       hide = which(colnames(out_linear()$table) == "sig")
@@ -253,7 +253,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
 
-    out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey)
+    out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey, default.unires = F)
 
     output$logistictable <- renderDT({
       hide = which(colnames(out_logistic()$table) == "sig")

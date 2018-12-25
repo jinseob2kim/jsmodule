@@ -5,7 +5,8 @@
 \title{logisticModule: Module for logistic regression}
 \usage{
 logisticModule(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL)
+  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
+  default.unires = T)
 }
 \arguments{
 \item{input}{input}
@@ -23,6 +24,8 @@ logisticModule(input, output, session, data, data_label,
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 
 \item{design.survey}{survey data. default: NULL}
+
+\item{default.unires}{Set default independent variables using univariate analysis.}
 }
 \value{
 logisticModule
