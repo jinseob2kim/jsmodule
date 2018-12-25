@@ -212,8 +212,8 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
     req(input$regressUI_subcheck == T)
     req(input$subvar_regress)
     selectInput(session$ns("subval_regress"), "Sub-group value",
-                choice = data_label[variable == input$subvar_regress, val_label], multiple = F,
-                selected = data_label[variable == input$subvar_regress, val_label][1])
+                choice = data_label[variable == input$subvar_regress, level], multiple = F,
+                selected = data_label[variable == input$subvar_regress, level][1])
   })
 
 
@@ -422,34 +422,35 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
     req(input$regressUI_subcheck == T)
     req(input$subvar_regress)
     selectInput(session$ns("subval_regress"), "Sub-group value",
-                choice = data_label()[variable == input$subvar_regress, val_label], multiple = F,
-                selected = data_label()[variable == input$subvar_regress, val_label][1])
+                choice = data_label()[variable == input$subvar_regress, level], multiple = F,
+                selected = data_label()[variable == input$subvar_regress, level][1])
   })
 
 
 
   out <- reactive({
-    data.regress <- data()
-    if(input$regressUI_subcheck == T){
-      req(input$subvar_regress)
-      data.regress <- data.regress[get(input$subvar_regress) == input$subval_regress, ]
-    }
-    y <- input$dep_vars
-    xs <- input$indep_vars
     validate(
       need(!is.null(input$indep_vars) , "Please select at least 1 variable")
     )
-    form = as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
-    mf <- model.frame(form, data.regress)
-    validate(
-      need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
-    )
-    lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
-    validate(
-      need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
-    )
+    y <- input$dep_vars
+    xs <- input$indep_vars
+    form <- as.formula(paste(y, "~", paste(xs, collapse = " + "), sep = " "))
 
     if (is.null(design.survey)){
+      data.regress <- data()
+      if(input$regressUI_subcheck == T){
+        req(input$subvar_regress)
+        data.regress <- data.regress[get(input$subvar_regress) == input$subval_regress, ]
+      }
+      mf <- model.frame(form, data.regress)
+      validate(
+        need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
+      )
+      lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
+      validate(
+        need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+      )
+
       res.linear <- glm(form, data = data.regress)
       tb.linear <- jstable::glmshow.display(res.linear, decimal = input$decimal)
       cap.linear <- paste("Linear regression predicting ", data_label()[variable == y, var_label][1], sep="")
@@ -458,15 +459,20 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
       }
       out.linear <- jstable::LabelepiDisplay(tb.linear, label = T, ref = data_label())
     } else{
-      #validate(
-      #  need(var.weights.survey() %in% names(data.regress) , "Weight variable isn't in data-, Please select appropriate weight variable.")
-      #)
-      #data.design <- survey::svydesign(ids = ~ 1, data = data.regress, weights = ~ get(var.weights.survey()))
       data.design <- design.survey()
       if(input$regressUI_subcheck == T){
         req(input$subvar_regress)
         data.design <- subset(data.design, get(input$subvar_regress) == input$subval_regress)
       }
+
+      mf <- model.frame(form, data.design$variables)
+      validate(
+        need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
+      )
+      lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
+      validate(
+        need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
+      )
 
       res.svyglm <- survey::svyglm(form, design = data.design)
       tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
@@ -475,7 +481,6 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
         cap.linear <- paste(cap.linear, " - ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
       }
       out.linear <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = data_label())
-
     }
 
     #out.linear = summary(res.linear)$coefficients
@@ -617,8 +622,8 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
     req(input$regressUI_subcheck == T)
     req(input$subvar_logistic)
     selectInput(session$ns("subval_logistic"), "Sub-group value",
-                choice = data_label[variable == input$subvar_logistic, val_label], multiple = F,
-                selected = data_label[variable == input$subvar_logistic, val_label][1])
+                choice = data_label[variable == input$subvar_logistic, level], multiple = F,
+                selected = data_label[variable == input$subvar_logistic, level][1])
   })
 
 
@@ -827,8 +832,8 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     req(input$regressUI_subcheck == T)
     req(input$subvar_logistic)
     selectInput(session$ns("subval_logistic"), "Sub-group value",
-                choice = data_label()[variable == input$subvar_logistic, val_label], multiple = F,
-                selected = data_label()[variable == input$subvar_logistic, val_label][1])
+                choice = data_label()[variable == input$subvar_logistic, level], multiple = F,
+                selected = data_label()[variable == input$subvar_logistic, level][1])
   })
 
   out <- reactive({
