@@ -307,7 +307,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL) {
 
   if (is.null(data_varStruct)){
-    data_varStruct = reactive(list(variable = names(data())))
+    data_varStruct <- reactive(list(variable = names(data())))
   }
 
   vlist <- reactive({
