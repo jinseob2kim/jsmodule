@@ -542,7 +542,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula binomial model.frame
+#' @importFrom stats glm as.formula binomial model.frame quasibinomial
 #' @importFrom epiDisplay logistic.display
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
@@ -748,7 +748,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula binomial model.frame
+#' @importFrom stats glm as.formula binomial model.frame quasibinomial
 #' @importFrom epiDisplay logistic.display
 #' @importFrom purrr map_lgl
 

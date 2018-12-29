@@ -453,6 +453,8 @@ jsPropensityGadget <- function(data){
 
 
     output$coxUI_indep <- renderUI({
+      req(!is.null(input$event_cox))
+      req(!is.null(input$time_cox))
       indep.cox <- setdiff(names(mat.info()$matdata), c(vlist()$except_vars, input$event_cox, input$time_cox ))
       mklist <- function(varlist, vars){
         lapply(varlist,

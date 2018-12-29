@@ -1,3 +1,19 @@
+# jsmodule 0.6.4
+
+## New module
+
+* Module for **Survival analysis**: `coxUI`, `coxModule`
+
+## Update 
+
+* Add survival analysis to `jsBasicGadget`, `jsSurveyGadget`
+
+## Bug fixes
+
+* `jsPropensityGadget`
+
+
+
 # jsmodule 0.6.2
 
 * Bug fixes : Label information in `regressModule`, `logisticModule`.
