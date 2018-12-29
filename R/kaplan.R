@@ -228,6 +228,8 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
 
   kmInput <- reactive({
+    req(!is.null(input$event_km))
+    req(!is.null(input$time_km))
     data.km <- data()
     data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
     if(input$subcheck == T){
