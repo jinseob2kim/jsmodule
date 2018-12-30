@@ -238,8 +238,8 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
 
   out <- reactive({
-    req(!is.null(input$event_km))
-    req(!is.null(input$time_km))
+    req(!is.null(input$event_cox))
+    req(!is.null(input$time_cox))
     data.cox <- data()
     data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
     if(input$subcheck == T){
