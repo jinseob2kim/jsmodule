@@ -158,15 +158,15 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
 
         candidate.weight <- c("wt", "weight", "Weight", "WEIGHT", "WEIGHTS", "Weights", "weights")
         selected.weight <- unlist(purrr::map(candidate.weight, ~grep(.x, conti_new)))
-        selected.weight.final <- ifelse(length(selected.weight) > 0, conti_new[selected.weight[1]], conti_new[1])
+        selected.weight.final <- ifelse(length(selected.weight) > 0, conti_new[selected.weight[1]], "None")
 
         candidate.cluster <- c("psu", "id")
         selected.cluster <- unlist(purrr::map(candidate.cluster, ~grep(.x, names(data.list$data))))
-        selected.cluster.final <- ifelse(length(selected.cluster) > 0, conti_new[selected.cluster[1]], names(data.list$data)[1])
+        selected.cluster.final <- ifelse(length(selected.cluster) > 0, conti_new[selected.cluster[1]], "None")
 
         candidate.strata <- c("strata")
         selected.strata <- unlist(purrr::map(candidate.strata, ~grep(.x, names(data.list$data))))
-        selected.strata.final <- ifelse(length(selected.strata) > 0, conti_new[selected.strata[1]], names(data.list$data)[1])
+        selected.strata.final <- ifelse(length(selected.strata) > 0, conti_new[selected.strata[1]], "None")
 
 
         tagList(

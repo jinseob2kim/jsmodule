@@ -115,6 +115,10 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
   })
 
   output$eventtime <- renderUI({
+    req(!is.null(vlist()$factor_01vars))
+    validate(
+      need(!is.null(vlist()$conti_list), "No continuous variables to be time")
+    )
 
     tagList(
       selectInput(session$ns("event_cox"), "Event",

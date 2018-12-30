@@ -6,6 +6,8 @@
 
 * Add **Overall kaplan-meier plot** to `kaplanModule`
 
+* Set default **cluster, strata and weights** to **None** in `jsSurveyGadget`, `FileSurveyInput`
+
 # jsmodule 0.6.4
 
 ## New module
