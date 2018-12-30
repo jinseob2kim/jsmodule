@@ -12,6 +12,7 @@
 
 * Some error comments in `coxModule` and `kaplanModule`
 
+* Change default candidate dependent variables to **categorical variables with 0, 1** in `GEEModuleLogistic`, `jsRepeatedGadget`
 
 # jsmodule 0.6.4
 

@@ -273,13 +273,18 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
 
 
     nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
+    class01_factor <- unlist(data()[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])
 
-    factor2_vars <- factor_vars[nclass_factor == 2]
-    factor2_list <- mklist(data_varStruct(), factor2_vars)
+    validate(
+      need(length(class01_factor) >=1, "No categorical variables coded as 0, 1 in data")
+    )
+    factor_01vars <- factor_vars[class01_factor]
+    factor_01_list <- mklist(data_varStruct(), factor_01vars)
+
 
     except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data())]
-    return(list(factor_vars = factor_vars, factor_list = factor_list, nclass_factor = nclass_factor, factor2_vars = factor2_vars,
-                factor2_list = factor2_list, except_vars = except_vars)
+    return(list(factor_vars = factor_vars, factor_list = factor_list, nclass_factor = nclass_factor, factor_01vars = factor_01vars,
+                factor_01_list = factor_01_list, except_vars = except_vars)
     )
 
   })
@@ -288,12 +293,12 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
 
   output$dep <- renderUI({
     validate(
-      need(length(vlist()$factor2_vars) >=1 , "No candidate dependent variable")
+      need(length(vlist()$factor_01vars) >=1 , "No candidate dependent variable coded as 0, 1")
     )
     tagList(
       selectInput(session$ns("dep_vars"), "Dependent variable",
-                  choices = vlist()$factor2_list, multiple = F,
-                  selected = vlist()$factor2_vars[1]
+                  choices = vlist()$factor_01_list, multiple = F,
+                  selected = vlist()$factor_01vars[1]
       )
     )
   })
