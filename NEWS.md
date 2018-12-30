@@ -1,8 +1,18 @@
+# jsmodule 0.6.5
+
+## Update
+
+* Add **marginal cox model** option to `coxModule`, `kaplanModule` and `jsRepeatedGadget`
+
+* Add **Overall kaplan-meier plot** to `kaplanModule`
+
 # jsmodule 0.6.4
 
 ## New module
 
-* Module for **Survival analysis**: `coxUI`, `coxModule`
+* Module for **Survival analysis**: `coxUI`, `coxModule`, `kaplanUI` and `kaplanModule`
+
+* Module for **ggplot download UI**: `ggplotdownUI`
 
 ## Update 
 
@@ -16,9 +26,9 @@
 
 # jsmodule 0.6.2
 
-* Bug fixes : Label information in `regressModule`, `logisticModule`.
+* Bug fixes : Label information in `regressModule`, `logisticModule`
 
-* Update: **default.unires** option to `regressModule`, `logisticModule`.
+* Update: **default.unires** option to `regressModule`, `logisticModule`
 
 # jsmodule 0.6.1
 
@@ -37,7 +47,7 @@
 
 ## Update
 
-* Survey analysis option to `regressModule`, `logisticModule` and `tb1`.
+* Survey analysis option to `regressModule`, `logisticModule` and `tb1`
 
 # jsmodule 0.5.7
 
@@ -61,7 +71,7 @@
 
 ## Update
 
-* New option: `nfactor.limit` in `regressModule`, `logisticModule`, `jsBasicGadget`, `csvFileInput` and `FilePsInput`.
+* New option: `nfactor.limit` in `regressModule`, `logisticModule`, `jsBasicGadget`, `csvFileInput` and `FilePsInput`
 
 ## Bug fixes
 

@@ -41,6 +41,7 @@ coxUI <- function(id) {
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis.
+#' @param id.cluster reactive cluster variable if marginal cox model, Default: NULL
 #' @return regressModule
 #' @details DETAILS
 #' @examples
@@ -59,7 +60,7 @@ coxUI <- function(id) {
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
 
-coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
+coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, id.cluster = NULL) {
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -150,7 +151,11 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
         varsIni <- sapply(indep.cox,
                           function(v){
-                            forms <- as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", v, sep=""))
+                            if (is.null(id.cluster)){
+                              forms <- as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", v, sep=""))
+                            } else{
+                              forms <- as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", v, " + cluster(", id.cluster(), ")", sep=""))
+                            }
                             coef <- summary(survival::coxph(forms, data =data.cox))$coefficients
                             sigOK <- !all(coef[, "Pr(>|z|)"] > 0.05)
                             return(sigOK)
@@ -219,7 +224,11 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     validate(
       need(!is.null(input$indep_cox), "Please select at least 1 independent variable.")
     )
-    as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", paste(input$indep_cox, collapse="+"),sep=""))
+    if (is.null(id.cluster)){
+      return(as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", paste(input$indep_cox, collapse="+"), sep="")))
+    } else{
+      return(as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", paste(input$indep_cox, collapse="+"), " + cluster(", id.cluster(), ")", sep="")))
+    }
   })
 
 
@@ -250,7 +259,12 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       sig <- gsub("< ", "", sig)
       sig <- ifelse(as.numeric(as.vector(sig)) <= 0.05, "**", NA)
       out.cox <- cbind(out.cox, sig)
-      cap.cox <- paste("Cox's proportional hazard model on time ('", data_label()[variable == input$time_cox, var_label][1] , "') to event ('", data_label()[variable == input$event_cox, var_label][1], "')", sep="")
+      if (is.null(id.cluster)){
+        cap.cox <- paste("Cox's proportional hazard model on time ('", data_label()[variable == input$time_cox, var_label][1] , "') to event ('", data_label()[variable == input$event_cox, var_label][1], "')", sep="")
+      } else{
+        cap.cox <- paste("Marginal cox model on time ('", data_label()[variable == input$time_cox, var_label][1] , "') to event ('", data_label()[variable == input$event_cox, var_label][1], "')", sep="")
+      }
+
       if(input$subcheck == T){
         cap.cox <- paste(cap.cox, " - ", data_label()[variable == input$subvar_cox, var_label][1], ": ", data_label()[variable == input$subvar_cox & level == input$subval_cox, val_label], sep = "")
       }

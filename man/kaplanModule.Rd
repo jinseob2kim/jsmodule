@@ -5,7 +5,8 @@
 \title{kaplanModule: Module for kaplan-meier plot}
 \usage{
 kaplanModule(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL)
+  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
+  id.cluster = NULL)
 }
 \arguments{
 \item{input}{input}
@@ -23,6 +24,8 @@ kaplanModule(input, output, session, data, data_label,
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 
 \item{design.survey}{reactive survey data. default: NULL}
+
+\item{id.cluster}{reactive cluster variable if marginal model, Default: NULL}
 }
 \value{
 kaplanModule

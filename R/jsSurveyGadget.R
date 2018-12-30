@@ -306,7 +306,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       print(out_ggpairs())
     })
 
-    out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey)
+    out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey)
 
     output$kaplan_plot <- renderPlot({
       print(out_kaplan())

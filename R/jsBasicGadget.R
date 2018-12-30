@@ -222,7 +222,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
 
-    out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T)
+    out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
 
     output$coxtable <- renderDT({
       hide = which(colnames(out_cox()$table) == c("sig"))
@@ -241,7 +241,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       print(out_ggpairs())
     })
 
-    out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL)
+    out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$kaplan_plot <- renderPlot({
       print(out_kaplan())

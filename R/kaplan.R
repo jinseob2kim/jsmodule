@@ -70,6 +70,7 @@ ggplotdownUI <- function(id) {
 #' @param data_varStruct reactive data_varStruct, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
+#' @param id.cluster reactive cluster variable if marginal model, Default: NULL
 #' @return kaplanModule
 #' @details DETAILS
 #' @examples
@@ -89,7 +90,7 @@ ggplotdownUI <- function(id) {
 #' @importFrom purrr map_lgl
 
 
-kaplanModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL) {
+kaplanModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -183,8 +184,8 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
     tagList(
       selectInput(session$ns("indep_km"), "Independent variables",
-                  choices = mklist(data_varStruct(), indep.km), multiple = F,
-                  selected = indep.km[1]
+                  choices = c("None", mklist(data_varStruct(), indep.km)), multiple = F,
+                  selected = "None"
       )
     )
   })
@@ -223,7 +224,11 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     validate(
       need(!is.null(input$indep_km), "Please select at least 1 independent variable.")
     )
-    as.formula(paste("survival::Surv(",input$time_km,",", input$event_km,") ~ ", input$indep_km, sep=""))
+    if (input$indep_km == "None"){
+      return(as.formula(paste("survival::Surv(",input$time_km,",", input$event_km,") ~ ", "1", sep="")))
+    } else{
+      return(as.formula(paste("survival::Surv(",input$time_km,",", input$event_km,") ~ ", input$indep_km, sep="")))
+    }
   })
 
 
@@ -245,13 +250,27 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     if (is.null(design.survey)){
       cc = substitute(survival::survfit(.form, data= data.km), list(.form= form.km()))
       res.km = eval(cc)
-      yst.name = data_label()[variable == input$indep_km, var_label][1]
-      yst.lab = data_label()[variable == input$indep_km, val_label]
+      if (input$indep_km == "None"){
+        yst.name <- ""
+        yst.lab <- "All"
+      } else{
+        yst.name <- data_label()[variable == input$indep_km, var_label][1]
+        yst.lab <- data_label()[variable == input$indep_km, val_label]
+      }
       ylab = ifelse(input$cumhaz, "Cumulative hazard", "Survival")
-      return(
-        jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
-                   cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km)
-      )
+      if (is.null(id.cluster)){
+        return(
+          jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
+                     cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km)
+        )
+      } else{
+        return(
+          jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
+                     cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km)
+        )
+      }
+
+
 
     } else{
       data.design <- design.survey()
@@ -263,8 +282,13 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       }
       cc <- substitute(survey::svykm(.form, design= data.design, se = T), list(.form= form.km()))
       res.km <- eval(cc)
-      yst.name = data_label()[variable == input$indep_km, var_label][1]
-      yst.lab = data_label()[variable == input$indep_km, val_label]
+      if (input$indep_km == "None"){
+        yst.name <- ""
+        yst.lab <- "All"
+      } else{
+        yst.name <- data_label()[variable == input$indep_km, var_label][1]
+        yst.lab <- data_label()[variable == input$indep_km, val_label]
+      }
       ylab = ifelse(input$cumhaz, "Cumulative hazard", "Survival")
       return(
         jskm::svyjskm(res.km, pval = input$pval, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
@@ -297,7 +321,16 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
   output$downloadButton <- downloadHandler(
     filename =  function() {
-      paste(input$event_km, input$indep_km,"_kaplan_meier.",input$file_ext ,sep="")
+      if (is.null(design.survey)){
+        if (is.null(id.cluster)){
+          return(paste(input$event_km, "_", input$indep_km,"_kaplan_meier.",input$file_ext ,sep=""))
+        } else{
+          return(paste(input$event_km, "_", input$indep_km,"_kaplan_meier_marginal.",input$file_ext ,sep=""))
+        }
+      } else{
+        return(paste(input$event_km, "_", input$indep_km,"_surveykaplan_meier.",input$file_ext ,sep=""))
+      }
+
     },
     # content is a function with argument file. content writes the plot to the device
     content = function(file) {

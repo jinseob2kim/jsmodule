@@ -6,7 +6,7 @@
 \usage{
 coxModule(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
-  default.unires = T)
+  default.unires = T, id.cluster = NULL)
 }
 \arguments{
 \item{input}{input}
@@ -26,6 +26,8 @@ coxModule(input, output, session, data, data_label,
 \item{design.survey}{reactive survey data. default: NULL}
 
 \item{default.unires}{Set default independent variables using univariate analysis.}
+
+\item{id.cluster}{reactive cluster variable if marginal cox model, Default: NULL}
 }
 \value{
 regressModule

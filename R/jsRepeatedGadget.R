@@ -101,6 +101,16 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                                            withLoader(DTOutput("logistictable"), type="html", loader="loader6")
                                          )
                                        )
+                              ),
+                              tabPanel("Marginal cox model",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           coxUI("cox")
+                                         ),
+                                         mainPanel(
+                                           withLoader(DTOutput("coxtable"), type="html", loader="loader6")
+                                         )
+                                       )
                               )
 
                    ),
@@ -113,6 +123,17 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                                          mainPanel(
                                            withLoader(plotOutput("ggpairs_plot"), type="html", loader="loader6"),
                                            ggpairsModuleUI2("ggpairs")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Kaplan-meier plot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           kaplanUI("kaplan")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("kaplan_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("kaplan")
                                          )
                                        )
                               )
@@ -209,11 +230,29 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
 
+    out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, default.unires = T, id.cluster = id.gee)
+
+    output$coxtable <- renderDT({
+      hide = which(colnames(out_cox()$table) == c("sig"))
+      datatable(out_cox()$table, rownames=T, extensions= "Buttons", caption = out_cox()$caption,
+                options = c(opt.tbreg(out_cox()$caption),
+                            list(columnDefs = list(list(visible=FALSE, targets= hide))
+                            )
+                )
+      )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+    })
+
 
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL)
 
     output$ggpairs_plot <- renderPlot({
       print(out_ggpairs())
+    })
+
+    out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, nfactor.limit = nfactor.limit, data_varStruct = NULL, id.cluster = id.gee)
+
+    output$kaplan_plot <- renderPlot({
+      print(out_kaplan())
     })
   }
 
