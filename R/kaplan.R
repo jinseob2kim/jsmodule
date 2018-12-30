@@ -127,7 +127,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     class01_factor <- unlist(data()[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])
 
     validate(
-      need(!is.null(class01_factor), "No categorical variables coded as 0, 1 in data")
+      need(length(class01_factor) >= 1, "No categorical variables coded as 0, 1 in data")
     )
     factor_01vars <- factor_vars[class01_factor]
 
@@ -145,6 +145,10 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
   })
 
   output$eventtime <- renderUI({
+    validate(
+      need(length(vlist()$factor_01vars) >=1 , "No candidate event variables coded as 0, 1"),
+      need(length(vlist()$conti_list) >=1, "No candidate time variables")
+    )
 
     tagList(
       selectInput(session$ns("event_km"), "Event",

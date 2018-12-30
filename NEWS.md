@@ -8,6 +8,11 @@
 
 * Set default **cluster, strata and weights** to **None** in `jsSurveyGadget`, `FileSurveyInput`
 
+## Bug fixes
+
+* Some error comments in `coxModule` and `kaplanModule`
+
+
 # jsmodule 0.6.4
 
 ## New module
