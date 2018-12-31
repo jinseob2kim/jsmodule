@@ -193,7 +193,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 
     tagList(
       selectInput(session$ns("indep_vars"), "Independent variables",
-                  choices = vars, multiple = T,
+                  choices = mklist(data_varStruct, vars), multiple = T,
                   selected = vars[varsIni]
       )
     )
@@ -411,7 +411,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 
     tagList(
       selectInput(session$ns("indep_vars"), "Independent variables",
-                  choices = vars, multiple = T,
+                  choices = mklist(data_varStruct(), vars), multiple = T,
                   selected = vars[varsIni]
       )
     )
@@ -622,7 +622,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 
     tagList(
       selectInput(session$ns("indep_vars"), "Independent variables",
-                  choices = vars, multiple = T,
+                  choices = mklist(data_varStruct, vars), multiple = T,
                   selected = vars[varsIni]
       )
     )
@@ -844,7 +844,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
 
     tagList(
       selectInput(session$ns("indep_vars"), "Independent variables",
-                  choices = vars, multiple = T,
+                  choices = mklist(data_varStruct(), vars), multiple = T,
                   selected = vars[varsIni]
       )
     )

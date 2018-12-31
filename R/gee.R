@@ -134,7 +134,7 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 
     tagList(
       selectInput(session$ns("indep_vars"), "Independent variables",
-                  choices = vars, multiple = T,
+                  choices = mklist(data_varStruct(), vars), multiple = T,
                   selected = vars[1]
       )
     )
@@ -319,7 +319,7 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
 
     tagList(
       selectInput(session$ns("indep_vars"), "Independent variables",
-                  choices = vars, multiple = T,
+                  choices = mklist(data_varStruct(), vars), multiple = T,
                   selected = vars[1]
       )
     )

@@ -1,3 +1,10 @@
+# jsmodule 0.6.6
+
+## Bug fixes
+
+* Apply list tye independent variables to `regressModule`, `logisticModule`, `GEEModuleLinear` and `GEEModuleLogistic`
+
+
 # jsmodule 0.6.5
 
 ## Update
