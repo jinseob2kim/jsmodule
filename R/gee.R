@@ -140,7 +140,7 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
     )
   })
 
-  observeEvent(input$indep_vars, {
+  observeEvent(input$regressUI_subcheck, {
     output$regressUI_subvar <- renderUI({
       req(input$regressUI_subcheck == T)
       factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
@@ -157,16 +157,18 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
       )
     })
 
+    output$regressUI_subval <- renderUI({
+      req(input$regressUI_subcheck == T)
+      req(input$subvar_regress)
+      selectInput(session$ns("subval_regress"), "Sub-group value",
+                  choice = data_label()[variable == input$subvar_regress, val_label], multiple = F,
+                  selected = data_label()[variable == input$subvar_regress, val_label][1])
+    })
+
   })
 
 
-  output$regressUI_subval <- renderUI({
-    req(input$regressUI_subcheck == T)
-    req(input$subvar_regress)
-    selectInput(session$ns("subval_regress"), "Sub-group value",
-                choice = data_label()[variable == input$subvar_regress, val_label], multiple = F,
-                selected = data_label()[variable == input$subvar_regress, val_label][1])
-  })
+
 
 
 
@@ -325,7 +327,7 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
     )
   })
 
-  observeEvent(input$indep_vars, {
+  observeEvent(input$regressUI_subcheck, {
     output$regressUI_subvar <- renderUI({
       req(input$regressUI_subcheck == T)
       factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
@@ -342,16 +344,18 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
       )
     })
 
+    output$regressUI_subval <- renderUI({
+      req(input$regressUI_subcheck == T)
+      req(input$subvar_regress)
+      selectInput(session$ns("subval_regress"), "Sub-group value",
+                  choice = data_label()[variable == input$subvar_regress, val_label], multiple = F,
+                  selected = data_label()[variable == input$subvar_regress, val_label][1])
+    })
+
   })
 
 
-  output$regressUI_subval <- renderUI({
-    req(input$regressUI_subcheck == T)
-    req(input$subvar_regress)
-    selectInput(session$ns("subval_regress"), "Sub-group value",
-                choice = data_label()[variable == input$subvar_regress, val_label], multiple = F,
-                selected = data_label()[variable == input$subvar_regress, val_label][1])
-  })
+
 
 
 

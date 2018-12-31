@@ -4,6 +4,7 @@
 
 * Apply list tye independent variables to `regressModule`, `logisticModule`, `GEEModuleLinear` and `GEEModuleLogistic`
 
+* Change **sub-group analysis's reactive methods**: `regressModule`, `logisticModule`, `GEEModuleLinear` and `GEEModuleLogistic` 
 
 # jsmodule 0.6.5
 
