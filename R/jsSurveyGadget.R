@@ -65,21 +65,37 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
                               )
                             )
                    ),
-                   tabPanel("Table 1",
-                            sidebarLayout(
-                              sidebarPanel(
-                                tb1moduleUI("tb1")
+                   navbarMenu("Table 1",
+                              tabPanel("Unweighted",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           tb1moduleUI("untb1")
+                                         ),
+                                         mainPanel(
+                                           withLoader(DTOutput("untable1"), type="html", loader="loader6"),
+                                           wellPanel(
+                                             h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
+                                             h5("Non-normal continuous variables are summarized with median [IQR] and kruskal-wallis test"),
+                                             h5("Categorical variables  are summarized with table")
+                                           )
+                                         )
+                                       )
                               ),
-                              mainPanel(
-                                withLoader(DTOutput("table1"), type="html", loader="loader6"),
-                                wellPanel(
-                                  h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
-                                  h5("Non-normal continuous variables are summarized with median [IQR] and complex sampling rank test"),
-                                  h5("Categorical variables  are summarized with table and svychisq test")
-                                )
+                              tabPanel("Weighted",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           tb1moduleUI("tb1")
+                                         ),
+                                         mainPanel(
+                                           withLoader(DTOutput("table1"), type="html", loader="loader6"),
+                                           wellPanel(
+                                             h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
+                                             h5("Non-normal continuous variables are summarized with median [IQR] and complex sampling rank test"),
+                                             h5("Categorical variables  are summarized with table and svychisq test")
+                                           )
+                                         )
+                                       )
                               )
-                            )
-
                    ),
                    navbarMenu("Survey regression",
                               tabPanel("Linear",
@@ -238,7 +254,22 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       )
     })
 
-
+    out_untb1 <- callModule(tb1module2, "untb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    output$untable1 <- renderDT({
+      tb = out_untb1()$table
+      cap = out_untb1()$caption
+      out.tb1 = datatable(tb, rownames = T, extensions = "Buttons", caption = cap,
+                          options = c(jstable::opt.tb1("tb1"),
+                                      list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
+                                      ),
+                                      list(scrollX = TRUE)
+                          )
+      )
+      if ("sig" %in% colnames(tb)){
+        out.tb1 = out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+      }
+      return(out.tb1)
+    })
 
 
 

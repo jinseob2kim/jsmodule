@@ -1,5 +1,9 @@
 # jsmodule 0.6.6
 
+## Update
+
+* Add **unweighted table 1** to `jsSurveyGadget`
+
 ## Bug fixes
 
 * Apply list tye independent variables to `regressModule`, `logisticModule`, `GEEModuleLinear` and `GEEModuleLogistic`
