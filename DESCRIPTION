@@ -1,7 +1,7 @@
 Package: jsmodule
 Title: Shiny modules for medical research
-Version: 0.6.6
-Date: 2018-12-31
+Version: 0.6.7
+Date: 2019-01-03
 Authors@R: c(person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c("aut", "cre"),  comment = c(ORCID = "0000-0002-9403-605X")),
              person("Anpanman", role = c("cph", "fnd"))
              )

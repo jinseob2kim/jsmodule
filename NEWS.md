@@ -1,3 +1,13 @@
+# jsmodule 0.6.7
+
+## Update
+
+* Show **unweighted & weighted table 1** at same tab in `jsSurveyGadget`
+
+## Bug fixes
+
+* Initial cluster variable state in `jsSurveyGadget`
+
 # jsmodule 0.6.6
 
 ## Update

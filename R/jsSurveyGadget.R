@@ -65,37 +65,33 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
                               )
                             )
                    ),
-                   navbarMenu("Table 1",
-                              tabPanel("Unweighted",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           tb1moduleUI("untb1")
-                                         ),
-                                         mainPanel(
-                                           withLoader(DTOutput("untable1"), type="html", loader="loader6"),
-                                           wellPanel(
-                                             h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                             h5("Non-normal continuous variables are summarized with median [IQR] and kruskal-wallis test"),
-                                             h5("Categorical variables  are summarized with table")
-                                           )
-                                         )
-                                       )
+                   tabPanel("Table 1",
+                            sidebarLayout(
+                              sidebarPanel(
+                                tb1moduleUI("tb1")
                               ),
-                              tabPanel("Weighted",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           tb1moduleUI("tb1")
-                                         ),
-                                         mainPanel(
-                                           withLoader(DTOutput("table1"), type="html", loader="loader6"),
-                                           wellPanel(
-                                             h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
-                                             h5("Non-normal continuous variables are summarized with median [IQR] and complex sampling rank test"),
-                                             h5("Categorical variables  are summarized with table and svychisq test")
-                                           )
-                                         )
-                                       )
+                              mainPanel(
+                                tabsetPanel(type = "pills",
+                                            tabPanel("Unweighted",
+                                                     withLoader(DTOutput("untable1"), type="html", loader="loader6"),
+                                                     wellPanel(
+                                                       h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
+                                                       h5("Non-normal continuous variables are summarized with median [IQR] and kruskal-wallis test"),
+                                                       h5("Categorical variables  are summarized with table")
+                                                     )
+                                            ),
+                                            tabPanel("Weighted",
+                                                     withLoader(DTOutput("table1"), type="html", loader="loader6"),
+                                                     wellPanel(
+                                                       h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
+                                                       h5("Non-normal continuous variables are summarized with median [IQR] and complex sampling rank test"),
+                                                       h5("Categorical variables  are summarized with table and svychisq test")
+                                                     )
+                                            )
+                                )
+
                               )
+                            )
                    ),
                    navbarMenu("Survey regression",
                               tabPanel("Linear",
@@ -210,6 +206,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
         out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
       }
 
+      req(input$cluster_vname)
       if (input$cluster_vname == "None"){
         cluster.survey <- as.formula("~ 1")
       } else{
@@ -254,7 +251,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       )
     })
 
-    out_untb1 <- callModule(tb1module2, "untb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_untb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     output$untable1 <- renderDT({
       tb = out_untb1()$table
       cap = out_untb1()$caption
