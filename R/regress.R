@@ -252,6 +252,14 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
       need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
 
+    ## Warning when multicollinearity
+    warn <- NULL
+    zz <- tryCatch(solve(t(as.matrix(mf)) %*% as.matrix(mf)), error = function(e) e)
+    if ("error" %in% class(zz)) {
+      warn <- "There are strongly correlated independent values. Please see correlation in `Plot- Scatter plot` tab"
+    }
+
+
     if (is.null(design.survey)){
       res.linear <- glm(form, data = data.regress)
       tb.linear <- jstable::glmshow.display(res.linear, decimal = input$decimal)
@@ -280,7 +288,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
       out.linear <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = data_label())
 
     }
-    return(list(table = out.linear, caption = cap.linear))
+    return(list(table = out.linear, caption = cap.linear, warning = warn))
   })
 
   return(out)
@@ -476,6 +484,13 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
         need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
       )
 
+
+      ## Warning when multicollinearity
+      zz <- tryCatch(solve(t(as.matrix(mf)) %*% as.matrix(mf)), error = function(e) e)
+      if ("error" %in% class(zz)) {
+        warn <- "There are strongly correlated independent values. Please see correlation in `Plot- Scatter plot` tab"
+      } else{ warn <- NULL}
+
       res.linear <- glm(form, data = data.regress)
       tb.linear <- jstable::glmshow.display(res.linear, decimal = input$decimal)
       cap.linear <- paste("Linear regression predicting ", data_label()[variable == y, var_label][1], sep="")
@@ -499,6 +514,13 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
         need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
       )
 
+      ## Warning when multicollinearity
+      warn <- NULL
+      zz <- tryCatch(solve(t(as.matrix(mf)) %*% as.matrix(mf)), error = function(e) e)
+      if ("error" %in% class(zz)) {
+        warn <- "There are strongly correlated independent values. Please see correlation in `Plot- Scatter plot` tab"
+      }
+
       res.svyglm <- survey::svyglm(form, design = data.design)
       tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
       cap.linear <- paste("Linear regression predicting ", data_label()[variable == y, var_label][1], "- survey data", sep="")
@@ -510,7 +532,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 
     #out.linear = summary(res.linear)$coefficients
     #sig = ifelse(out.linear[, 4] <= 0.05, "**", "NA")
-    return(list(table = out.linear, caption = cap.linear))
+    return(list(table = out.linear, caption = cap.linear, warning = warn))
   })
 
   return(out)
@@ -715,7 +737,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
       out.logistic <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = data_label())
 
     }
-    return(list(table = out.logistic, caption = cap.logistic))
+    return(list(table = out.logistic, caption = cap.logistic, warning = warn))
   })
 
   return(out)
@@ -907,6 +929,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
       need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
 
+
     if (is.null(design.survey)){
       res.logistic = glm(form, data = data.logistic, family = binomial)
       tb.logistic = jstable::glmshow.display(res.logistic, decimal = input$decimal)
@@ -939,7 +962,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     }
 
 
-    return(list(table = out.logistic, caption = cap.logistic))
+    return(list(table = out.logistic, caption = cap.logistic, warning = warn))
   })
 
   return(out)

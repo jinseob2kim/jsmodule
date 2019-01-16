@@ -87,7 +87,9 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                            regressModuleUI("linear")
                                          ),
                                          mainPanel(
-                                           withLoader(DTOutput("lineartable"), type="html", loader="loader6")
+                                           withLoader(DTOutput("lineartable"), type="html", loader="loader6"),
+                                           br(),
+                                           uiOutput("warning_linear")
                                          )
                                        )
                               ),
@@ -207,6 +209,10 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                             list(scrollX = TRUE)
                 )
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+    })
+
+    output$warning_linear <- renderText({
+      paste("<b>", out_linear()$warning, "</b>")
     })
 
     out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)

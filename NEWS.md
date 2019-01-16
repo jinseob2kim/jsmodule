@@ -1,3 +1,9 @@
+# jsmodule 0.6.8
+
+## Update
+
+* Warning if there are stongly correlated independent variables in `regressModule`, `jsBasicGadget`.
+
 # jsmodule 0.6.7
 
 ## Update
