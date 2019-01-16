@@ -254,7 +254,8 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 
     ## Warning when multicollinearity
     warn <- NULL
-    zz <- tryCatch(solve(t(as.matrix(mf)) %*% as.matrix(mf)), error = function(e) e)
+    mm <- model.matrix(form, data.regress)
+    zz <- tryCatch(solve(t(as.matrix(mm)) %*% as.matrix(mm)), error = function(e) e)
     if ("error" %in% class(zz)) {
       warn <- "There are strongly correlated independent values. Please see correlation in `Plot- Scatter plot` tab"
     }
@@ -486,7 +487,8 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 
 
       ## Warning when multicollinearity
-      zz <- tryCatch(solve(t(as.matrix(mf)) %*% as.matrix(mf)), error = function(e) e)
+      mm <- model.matrix(form, data.regress)
+      zz <- tryCatch(solve(t(as.matrix(mm)) %*% as.matrix(mm)), error = function(e) e)
       if ("error" %in% class(zz)) {
         warn <- "There are strongly correlated independent values. Please see correlation in `Plot- Scatter plot` tab"
       } else{ warn <- NULL}
@@ -514,12 +516,6 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
         need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
       )
 
-      ## Warning when multicollinearity
-      warn <- NULL
-      zz <- tryCatch(solve(t(as.matrix(mf)) %*% as.matrix(mf)), error = function(e) e)
-      if ("error" %in% class(zz)) {
-        warn <- "There are strongly correlated independent values. Please see correlation in `Plot- Scatter plot` tab"
-      }
 
       res.svyglm <- survey::svyglm(form, design = data.design)
       tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
