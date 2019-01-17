@@ -1,0 +1,58 @@
+---
+title: "Introduce Rstudio Addins in jsmodule"
+author: "Jinseob Kim"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{addins}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = T
+)
+```
+
+
+## Install
+
+```{r, eval = F}
+remotes::install_github('jinseob2kim/jsmodule')
+```
+
+
+## Basic statistics 
+
+```r
+jsBasicGadget(mtcars)
+```
+
+![](https://blog.anpanman.co.kr/posts/2018-11-24-basic-biostatistics/addin.gif)
+
+## Propensity score analysis
+
+```r
+jsPropensityGadget(mtcars)
+```
+
+![](http://app.anpanman.co.kr/img/ps.png)
+
+
+## Repeated measure analysis
+
+```r
+jsRepeatedGadget(mtcars)
+```
+
+
+## Survey data analysis
+
+```r
+library(survey)
+data(api)
+jsRepeatedGadget(apistrat)
+```

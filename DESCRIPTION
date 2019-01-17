@@ -16,4 +16,7 @@ Remotes: jinseob2kim/jstable, jinseob2kim/jskm
 URL: https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

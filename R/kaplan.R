@@ -206,7 +206,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
       tagList(
         selectInput(session$ns("subvar_km"), "Sub-group variable",
-                    choice = factor_subgroup_list, multiple = F,
+                    choices = factor_subgroup_list, multiple = F,
                     selected = factor_subgroup[1])
       )
     })
@@ -218,7 +218,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     req(input$subcheck == T)
     req(input$subvar_km)
     selectInput(session$ns("subval_km"), "Sub-group value",
-                choice = data_label()[variable == input$subvar_km, val_label], multiple = F,
+                choices = data_label()[variable == input$subvar_km, val_label], multiple = F,
                 selected = data_label()[variable == input$subvar_km, val_label][1])
   })
 

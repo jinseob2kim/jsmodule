@@ -487,7 +487,7 @@ jsPropensityGadget <- function(data){
 
         tagList(
           selectInput("subvar_cox", "Sub-group variable",
-                      choice = factor_subgroup_list, multiple = F,
+                      choices = factor_subgroup_list, multiple = F,
                       selected = factor_subgroup[1])
         )
       })
@@ -499,7 +499,7 @@ jsPropensityGadget <- function(data){
       req(input$coxUI_subcheck == T)
       req(input$subvar_cox)
       selectInput("subval_cox", "Sub-group value",
-                  choice = data.label()[variable == input$subvar_cox, val_label], multiple = F,
+                  choices = data.label()[variable == input$subvar_cox, val_label], multiple = F,
                   selected = data.label()[variable == input$subvar_cox, val_label][1])
     })
 
@@ -692,7 +692,7 @@ jsPropensityGadget <- function(data){
 
         tagList(
           selectInput("subvar_km", "Sub-group variable",
-                      choice = factor_subgroup_list, multiple = F,
+                      choices = factor_subgroup_list, multiple = F,
                       selected = factor_subgroup[1])
         )
       })
@@ -703,7 +703,7 @@ jsPropensityGadget <- function(data){
       req(input$km_subcheck == T)
       req(input$subvar_km)
       selectInput("subval_km", "Sub-group value",
-                  choice = data.label()[variable == input$subvar_km, val_label], multiple = F,
+                  choices = data.label()[variable == input$subvar_km, val_label], multiple = F,
                   selected = data.label()[variable == input$subvar_km, val_label][1])
     })
 

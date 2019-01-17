@@ -23,7 +23,7 @@ Internal function
 \examples{
 \dontrun{
 if(interactive()){
- data_varStruct = list(variable = names(data))
+ data_varStruct <- list(variable = names(data))
  conti_list <- mklist(data_varStruct, conti_vars)
  }
 }

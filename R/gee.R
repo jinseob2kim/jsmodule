@@ -152,7 +152,7 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 
       tagList(
         selectInput(session$ns("subvar_regress"), "Sub-group variable",
-                    choice = factor_subgroup_list, multiple = F,
+                    choices = factor_subgroup_list, multiple = F,
                     selected = factor_subgroup[1])
       )
     })
@@ -161,7 +161,7 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
       req(input$regressUI_subcheck == T)
       req(input$subvar_regress)
       selectInput(session$ns("subval_regress"), "Sub-group value",
-                  choice = data_label()[variable == input$subvar_regress, val_label], multiple = F,
+                  choices = data_label()[variable == input$subvar_regress, val_label], multiple = F,
                   selected = data_label()[variable == input$subvar_regress, val_label][1])
     })
 
@@ -339,7 +339,7 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
 
       tagList(
         selectInput(session$ns("subvar_regress"), "Sub-group variable",
-                    choice = factor_subgroup_list, multiple = F,
+                    choices = factor_subgroup_list, multiple = F,
                     selected = factor_subgroup[1])
       )
     })
@@ -348,7 +348,7 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
       req(input$regressUI_subcheck == T)
       req(input$subvar_regress)
       selectInput(session$ns("subval_regress"), "Sub-group value",
-                  choice = data_label()[variable == input$subvar_regress, val_label], multiple = F,
+                  choices = data_label()[variable == input$subvar_regress, val_label], multiple = F,
                   selected = data_label()[variable == input$subvar_regress, val_label][1])
     })
 

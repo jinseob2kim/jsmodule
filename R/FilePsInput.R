@@ -8,43 +8,7 @@
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable);library(haven)
-#'  ui <- fluidPage(
-#'    sidebarLayout(
-#'      sidebarPanel(
-#'        FilePsInput("datafile")
-#'      ),
-#'      mainPanel(
-#'        tabsetPanel(type = "pills",
-#'            tabPanel("Data", withLoader(DTOutput("data"), type="html", loader="loader6")),
-#'            tabPanel("Matching data", withLoader(DTOutput("matdata"), type="html", loader="loader6")),
-#'            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type="html", loader="loader6"))
-#'        ),
-#'        htmlOutput("naomit")
-#'      )
-#'    )
-#'  )
-#'
-#'  server <- function(input, output, session) {
-#'    mat.info <- callModule(FilePs, "datafile")
-#'
-#'    output$data <- renderDT({
-#'      mat.info()$data
-#'    })
-#'
-#'    output$matdata <- renderDT({
-#'      mat.info()$matdata
-#'    })
-#'
-#'    output$label <- renderDT({
-#'      mat.info()$data.label
-#'    })
-#'    output$naomit <- renderText({
-#'      mat.info()$naomit
-#'    })
-#'  }
-#'
-#'  shinyApp(ui, server)
+#'  #EXAMPLE1
 #'  }
 #' }
 #' @rdname FilePsInput
@@ -79,44 +43,7 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable);library(haven)
-#'  ui <- fluidPage(
-#'    sidebarLayout(
-#'      sidebarPanel(
-#'        FilePsInput("datafile")
-#'      ),
-#'      mainPanel(
-#'        tabsetPanel(type = "pills",
-#'            tabPanel("Data", withLoader(DTOutput("data"), type="html", loader="loader6")),
-#'            tabPanel("Matching data", withLoader(DTOutput("matdata"), type="html", loader="loader6")),
-#'            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type="html", loader="loader6"))
-#'        ),
-#'        htmlOutput("naomit")
-#'      )
-#'    )
-#'  )
-#'
-#'  server <- function(input, output, session) {
-#'    mat.info <- callModule(FilePs, "datafile")
-#'
-#'    output$data <- renderDT({
-#'      mat.info()$data
-#'    })
-#'
-#'    output$matdata <- renderDT({
-#'      mat.info()$matdata
-#'    })
-#'
-#'    output$label <- renderDT({
-#'      mat.info()$data.label
-#'    })
-#'
-#'    output$naomit <- renderText({
-#'      mat.info()$naomit
-#'    })
-#'  }
-#'
-#'  shinyApp(ui, server)
+#'  #EXAMPLE1
 #'  }
 #' }
 #' @rdname FilePs

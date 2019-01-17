@@ -7,7 +7,7 @@
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  data_varStruct = list(variable = names(data))
+#'  data_varStruct <- list(variable = names(data))
 #'  conti_list <- mklist(data_varStruct, conti_vars)
 #'  }
 #' }
@@ -115,7 +115,7 @@ regressModuleUI <- function(id) {
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula model.frame
+#' @importFrom stats glm as.formula model.frame model.matrix
 #' @importFrom epiDisplay regress.display
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
@@ -211,7 +211,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 
       tagList(
         selectInput(session$ns("subvar_regress"), "Sub-group variable",
-                    choice = factor_subgroup_list, multiple = F,
+                    choices = factor_subgroup_list, multiple = F,
                     selected = factor_subgroup[1])
       )
     })
@@ -220,7 +220,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
       req(input$regressUI_subcheck == T)
       req(input$subvar_regress)
       selectInput(session$ns("subval_regress"), "Sub-group value",
-                  choice = data_label[variable == input$subvar_regress, level], multiple = F,
+                  choices = data_label[variable == input$subvar_regress, level], multiple = F,
                   selected = data_label[variable == input$subvar_regress, level][1])
     })
   })
@@ -323,7 +323,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula model.frame
+#' @importFrom stats glm as.formula model.frame model.matrix
 #' @importFrom epiDisplay regress.display
 #' @importFrom purrr map_lgl
 
@@ -443,7 +443,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 
       tagList(
         selectInput(session$ns("subvar_regress"), "Sub-group variable",
-                    choice = factor_subgroup_list, multiple = F,
+                    choices = factor_subgroup_list, multiple = F,
                     selected = factor_subgroup[1])
       )
     })
@@ -452,7 +452,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
       req(input$regressUI_subcheck == T)
       req(input$subvar_regress)
       selectInput(session$ns("subval_regress"), "Sub-group value",
-                  choice = data_label()[variable == input$subvar_regress, level], multiple = F,
+                  choices = data_label()[variable == input$subvar_regress, level], multiple = F,
                   selected = data_label()[variable == input$subvar_regress, level][1])
     })
 
@@ -664,7 +664,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 
       tagList(
         selectInput(session$ns("subvar_logistic"), "Sub-group variable",
-                    choice = factor_subgroup_list, multiple = F,
+                    choices = factor_subgroup_list, multiple = F,
                     selected = factor_subgroup[1])
       )
     })
@@ -673,7 +673,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
       req(input$regressUI_subcheck == T)
       req(input$subvar_logistic)
       selectInput(session$ns("subval_logistic"), "Sub-group value",
-                  choice = data_label[variable == input$subvar_logistic, level], multiple = F,
+                  choices = data_label[variable == input$subvar_logistic, level], multiple = F,
                   selected = data_label[variable == input$subvar_logistic, level][1])
     })
   })
@@ -886,7 +886,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
 
       tagList(
         selectInput(session$ns("subvar_logistic"), "Sub-group variable",
-                    choice = factor_subgroup_list, multiple = F,
+                    choices = factor_subgroup_list, multiple = F,
                     selected = factor_subgroup[1])
       )
     })
@@ -895,7 +895,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
       req(input$regressUI_subcheck == T)
       req(input$subvar_logistic)
       selectInput(session$ns("subval_logistic"), "Sub-group value",
-                  choice = data_label()[variable == input$subvar_logistic, level], multiple = F,
+                  choices = data_label()[variable == input$subvar_logistic, level], multiple = F,
                   selected = data_label()[variable == input$subvar_logistic, level][1])
     })
 
