@@ -1,3 +1,16 @@
+# jsmodule 0.6.9
+
+## Bug fixes
+
+* Fix some spell for cran release.
+
+## Update
+
+* Update **travis-ci**.
+
+* Add **appveyor** CI to test **window** environment. 
+
+
 # jsmodule 0.6.8
 
 ## Update

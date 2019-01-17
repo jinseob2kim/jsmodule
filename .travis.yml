@@ -4,12 +4,28 @@ cache: packages
 Imports: stats, data.table, shiny, readxl, DT, jstable, labelled, methods, epiDisplay, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt, survey, tableone, jskm, survival
 Remotes: jinseob2kim/jstable, jinseob2kim/jskm
 
-r_packages:
-  - covr
+matrix:
+  allow_failures:
+  - r: devel
 
-r_github_packages:
-  - jinseob2kim/jsmodule
-
-
-after_success:
-  - Rscript -e 'library(covr); codecov()'
+  include:
+  - r: devel
+  - r: release
+    r_packages:
+    - covr
+    r_github_packages:
+    - r-lib/pkgdown
+    after_success:
+    - Rscript -e 'covr::codecov()'
+    - Rscript -e 'pkgdown::build_site()'
+    deploy:
+      provider: pages
+      skip-cleanup: true
+      github-token: $GITHUB_TOKEN
+      keep-history: true
+      local-dir: docs
+      on:
+        branch: master
+  - r: release
+    os: osx
+  - r: oldrel
