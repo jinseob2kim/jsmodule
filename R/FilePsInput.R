@@ -22,6 +22,9 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
   tagList(
     fileInput(ns("file"), label),
     uiOutput(ns("factor")),
+    uiOutput(ns("subset_check")),
+    uiOutput(ns("subset_var")),
+    uiOutput(ns("subset_val")),
     uiOutput(ns("group_ps")),
     uiOutput(ns("indep_ps")),
     uiOutput(ns("pcut"))
@@ -120,7 +123,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
     add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
     #factor_vars_ini <- union(factor_vars, add_vars)
-    return(list(data = out, data_varStruct = data_varStruct,
+    return(list(data = out, data_varStruct = data_varStruct, factor_original = factor_vars,
                 conti_original = conti_vars, factor_adds_list = factor_adds_list,
                 factor_adds = add_vars, naCol = naCol, except_vars = except_vars, ref = ref)
            )
@@ -141,6 +144,38 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
                 selected = data.info()$factor_adds)
   })
 
+  observeEvent(c(data.info()$factor_original, input$factor_vname), {
+    output$subset_check <- renderUI({
+      checkboxInput(session$ns("check_subset"), "Subset data")
+    })
+  })
+
+  observeEvent(input$check_subset, {
+    output$subset_var <- renderUI({
+      req(input$check_subset == T)
+      factor_subset <- c(data.info()$factor_original, input$factor_vname)
+
+      validate(
+        need(length(factor_subset) > 0 , "No factor variable for subsetting")
+      )
+
+      tagList(
+        selectInput(session$ns("var_subset"), "Subset variable",
+                    choices = factor_subset, multiple = F,
+                    selected = factor_subset[1])
+      )
+    })
+
+    output$subset_val <- renderUI({
+      req(input$check_subset == T)
+      req(input$var_subset)
+      varlevel <- levels(as.factor(data.info()$data[[input$var_subset]]))
+      selectInput(session$ns("val_subset"), "Subset value",
+                  choices = varlevel, multiple = F,
+                  selected = varlevel[1])
+    })
+  })
+
 
 
   # We can run observers in here if we want to
@@ -157,6 +192,16 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     if (!is.null(input$factor_vname)){
       out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
     }
+    if (!is.null(input$check_subset)){
+      if (input$check_subset){
+        validate(
+          need(length(input$var_subset) > 0 , "No factor variable for subsetting")
+        )
+        out <- out[get(input$var_subset) == input$val_subset]
+        var.factor <- c(data()$factor_original, input$factor_vname)
+        out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+      }
+    }
     return(out)
     })
 
@@ -166,6 +211,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
       w <- which(data.info()$ref[["name.new"]] == vn)
       labeldata[variable ==vn, var_label := data.info()$ref[["name.old"]][w]]
     }
+
     return(labeldata)
     })
 
@@ -201,7 +247,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
         need(length(input$group_pscal) != 0, "No group variables in data")
       )
 
-      vars <- setdiff(setdiff(names(data()), data.info()$except_vars),  input$group_pscal)
+      vars <- setdiff(setdiff(names(data()), data.info()$except_vars),  c(input$var_subset, input$group_pscal))
       varsIni <- sapply(vars,
                         function(v){
                           forms <- as.formula(paste(input$group_pscal, "~", v))

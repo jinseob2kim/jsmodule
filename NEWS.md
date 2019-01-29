@@ -1,3 +1,17 @@
+# jsmodule 0.7.5
+
+## Update
+
+* Add **Subset data** feature to all Addins and input modules. You can select subset data before analysis.
+
+
+## Bug fixes
+
+* Fix `warn` variable error in `regressModule`, `logisticModule`.
+
+* Fix list of except variables in `ggpairsModule`.
+
+
 # jsmodule 0.6.9
 
 ## Bug fixes

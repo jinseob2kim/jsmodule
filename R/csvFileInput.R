@@ -48,7 +48,10 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 
   tagList(
     fileInput(ns("file"), label),
-    uiOutput(ns("factor"))
+    uiOutput(ns("factor")),
+    uiOutput(ns("subset_check")),
+    uiOutput(ns("subset_var")),
+    uiOutput(ns("subset_val"))
   )
 }
 
@@ -162,7 +165,7 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
     #except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
     add_vars <- names(nclass)[nclass >= 2 &  nclass <= 5]
     #factor_vars_ini <- union(factor_vars, add_vars)
-    return(list(data = out, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars, ref = ref, naomit = naomit))
+    return(list(data = out, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars, ref = ref, naomit = naomit))
   })
 
 
@@ -174,12 +177,49 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
                 selected = data()$factor_adds)
   })
 
+  observeEvent(c(data()$factor_original, input$factor_vname), {
+    output$subset_check <- renderUI({
+      checkboxInput(session$ns("check_subset"), "Subset data")
+    })
+  })
+
+  observeEvent(input$check_subset, {
+    output$subset_var <- renderUI({
+      req(input$check_subset == T)
+      factor_subset <- c(data()$factor_original, input$factor_vname)
+
+      validate(
+        need(length(factor_subset) > 0 , "No factor variable for subsetting")
+      )
+
+      tagList(
+        selectInput(session$ns("var_subset"), "Subset variable",
+                    choices = factor_subset, multiple = F,
+                    selected = factor_subset[1])
+      )
+    })
+
+    output$subset_val <- renderUI({
+      req(input$check_subset == T)
+      req(input$var_subset)
+      varlevel <- levels(as.factor(data()$data[[input$var_subset]]))
+      selectInput(session$ns("val_subset"), "Subset value",
+                  choices = varlevel, multiple = F,
+                  selected = varlevel[1])
+    })
+  })
+
+
 
 
   # We can run observers in here if we want to
   observe({
     msg <- sprintf("File %s was uploaded", userFile()$name)
     cat(msg, "\n")
+  })
+
+  observeEvent(input$factor_vname, {
+
   })
 
   outdata <- reactive({
@@ -194,6 +234,21 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
     for (vn in ref[["name.new"]]){
       w <- which(ref[["name.new"]] == vn)
       out.label[variable == vn, var_label := ref[["name.old"]][w]]
+    }
+
+    if (!is.null(input$check_subset)){
+      if (input$check_subset){
+        validate(
+          need(length(input$var_subset) > 0 , "No factor variable for subsetting")
+        )
+        out <- out[get(input$var_subset) == input$val_subset]
+        var.factor <- c(data()$factor_original, input$factor_vname)
+        out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+        out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
+        data.table::setkey(out.label, "variable", "class", "level")
+        data.table::setkey(out.label2, "variable", "class", "level")
+        out.label <- out.label[out.label2]
+      }
     }
     return(list(data = out, label = out.label, naomit = data()$naomit))
   })

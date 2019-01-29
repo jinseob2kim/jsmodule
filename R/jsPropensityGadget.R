@@ -50,9 +50,10 @@ jsPropensityGadget <- function(data){
     out[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
   }
 
+  factor_original <- factor_vars
   conti_original <- setdiff(names(out), factor_vars)
   nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x))}), .SDcols = conti_original])
-  factor_adds_list = mklist(data_varStruct1, names(nclass)[(nclass <= 20) & (nclass < nrow(out))])
+  factor_adds_list = mklist(data_varStruct1, names(nclass)[nclass <= 20])
 
   except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
   factor_adds <- names(nclass)[nclass >= 1 &  nclass <= 5]
@@ -66,6 +67,9 @@ jsPropensityGadget <- function(data){
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("factor"),
+                                uiOutput("subset_check"),
+                                uiOutput("subset_var"),
+                                uiOutput("subset_val"),
                                 uiOutput("group_ps"),
                                 uiOutput("indep_ps"),
                                 radioButtons("pcut_ps", label = "Default p-value cut for ps calculation",
@@ -194,12 +198,55 @@ jsPropensityGadget <- function(data){
                   selected = factor_adds)
     })
 
+    observeEvent(c(factor_original, input$factor_vname), {
+      output$subset_check <- renderUI({
+        checkboxInput("check_subset", "Subset data")
+      })
+    })
+
+    observeEvent(input$check_subset, {
+      output$subset_var <- renderUI({
+        req(input$check_subset == T)
+        factor_subset <- c(factor_original, input$factor_vname)
+
+        validate(
+          need(length(factor_subset) > 0 , "No factor variable for subsetting")
+        )
+
+        tagList(
+          selectInput("var_subset", "Subset variable",
+                      choices = factor_subset, multiple = F,
+                      selected = factor_subset[1])
+        )
+      })
+
+      output$subset_val <- renderUI({
+        req(input$check_subset == T)
+        req(input$var_subset)
+        varlevel <- levels(as.factor(out[[input$var_subset]]))
+        selectInput("val_subset", "Subset value",
+                    choices = varlevel, multiple = F,
+                    selected = varlevel[1])
+      })
+    })
+
     data1 <- reactive({
       out1 <- out
       out1[, (conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = conti_original]
       if (!is.null(input$factor_vname) & length(input$factor_vname) > 0){
         out1[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
       }
+      if (!is.null(input$check_subset)){
+        if (input$check_subset){
+          validate(
+            need(length(input$var_subset) > 0 , "No factor variable for subsetting")
+          )
+          out1 <- out1[get(input$var_subset) == input$val_subset]
+          var.factor <- c(factor_original, input$factor_vname)
+          out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+        }
+      }
+
       return(out1)
     })
 
@@ -244,7 +291,7 @@ jsPropensityGadget <- function(data){
           need(length(input$group_pscal) > 0, "No group variables in data")
         )
 
-        vars <- setdiff(setdiff(names(data1()), except_vars),  input$group_pscal)
+        vars <- setdiff(setdiff(names(data1()), except_vars),  c(input$var_subset, input$group_pscal))
         varsIni <- sapply(vars,
                           function(v){
                             forms <- as.formula(paste(input$group_pscal, "~", v))
@@ -889,24 +936,7 @@ jsPropensityGadget <- function(data){
       }
     )
 
-
-
-
-
-
-
-
-
-
-
-
-
   }
-
-
-
-
-
 
 
 

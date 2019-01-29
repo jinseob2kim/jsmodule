@@ -42,11 +42,11 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
   factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
   out[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
   conti_vars <- setdiff(names(out), factor_vars)
-  nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x))}), .SDcols = conti_vars])
+  nclass <- unlist(out[, lapply(.SD, function(x){length(levels(x))}), .SDcols = conti_vars])
   #except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
   add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
 
-  data.list <- list(data = out, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars)
+  data.list <- list(data = out, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars)
 
 
 
@@ -55,7 +55,10 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("factor"),
-                                uiOutput("repeated")
+                                uiOutput("repeated"),
+                                uiOutput("subset_check"),
+                                uiOutput("subset_var"),
+                                uiOutput("subset_val")
                               ),
                               mainPanel(
                                 tabsetPanel(type = "pills",
@@ -155,6 +158,38 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                   selected = names(data.list$data)[1])
     })
 
+    observeEvent(c(data.list$factor_original, input$factor_vname, input$repeated_vname), {
+      output$subset_check <- renderUI({
+        checkboxInput("check_subset", "Subset data")
+      })
+    })
+
+    observeEvent(input$check_subset, {
+      output$subset_var <- renderUI({
+        req(input$check_subset == T)
+        factor_subset <- setdiff(c(data.list$factor_original, input$factor_vname), input$repeated_vname)
+
+        validate(
+          need(length(factor_subset) > 0 , "No factor variable for subsetting")
+        )
+
+        tagList(
+          selectInput("var_subset", "Subset variable",
+                      choices = factor_subset, multiple = F,
+                      selected = factor_subset[1])
+        )
+      })
+
+      output$subset_val <- renderUI({
+        req(input$check_subset == T)
+        req(input$var_subset)
+        varlevel <- levels(as.factor(data.list$data[[input$var_subset]]))
+        selectInput("val_subset", "Subset value",
+                    choices = varlevel, multiple = F,
+                    selected = varlevel[1])
+      })
+    })
+
 
     data.info <- reactive({
       out <- data.list$data
@@ -163,6 +198,22 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
         out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
       }
       out.label <- mk.lev(out)
+
+      if (!is.null(input$check_subset)){
+        if (input$check_subset){
+          validate(
+            need(length(input$var_subset) > 0 , "No factor variable for subsetting")
+          )
+          out <- out[get(input$var_subset) == input$val_subset]
+          var.factor <- c(data.list$factor_original, input$factor_vname)
+          out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+          out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
+          data.table::setkey(out.label, "variable", "class", "level")
+          data.table::setkey(out.label2, "variable", "class", "level")
+          out.label <- out.label[out.label2]
+        }
+      }
+
       return(list(data = out, label = out.label))
     })
 

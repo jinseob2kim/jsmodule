@@ -287,6 +287,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
         cap.linear <- paste(cap.linear, " - ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
       }
       out.linear <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = data_label())
+      warn <- NULL
 
     }
     return(list(table = out.linear, caption = cap.linear, warning = warn))
@@ -524,6 +525,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
         cap.linear <- paste(cap.linear, " - ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
       }
       out.linear <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = data_label())
+      warn <- NULL
     }
 
     #out.linear = summary(res.linear)$coefficients
@@ -733,7 +735,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
       out.logistic <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = data_label())
 
     }
-    return(list(table = out.logistic, caption = cap.logistic, warning = warn))
+    return(list(table = out.logistic, caption = cap.logistic))
   })
 
   return(out)
@@ -958,7 +960,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     }
 
 
-    return(list(table = out.logistic, caption = cap.logistic, warning = warn))
+    return(list(table = out.logistic, caption = cap.logistic))
   })
 
   return(out)

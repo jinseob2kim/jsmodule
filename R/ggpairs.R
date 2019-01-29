@@ -97,10 +97,10 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
   if (!("data.table" %in% class(data_label))) {data_label = data.table(data_label)}
 
   factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
-  #data[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
+  data[, (factor_vars) := lapply(.SD, factor), .SDcols= factor_vars]
   factor_list <- mklist(data_varStruct, factor_vars)
 
-  nclass_factor <- unlist(data[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
+  nclass_factor <- unlist(data[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
 
   group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data)]
   group_list <- mklist(data_varStruct, group_vars)
@@ -320,18 +320,20 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
 
     }
 
-    factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
+    data <- data.table(data(), stringsAsFactors = T)
+
+    factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
     #data[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
     factor_list <- mklist(data_varStruct(), factor_vars)
 
-    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
+    nclass_factor <- unlist(data[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
 
     group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data)]
     group_list <- mklist(data_varStruct(), group_vars)
 
     except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data)]
 
-    select_vars <- setdiff(names(data()), except_vars)
+    select_vars <- setdiff(names(data), except_vars)
     select_list <- mklist(data_varStruct(), select_vars)
 
 
