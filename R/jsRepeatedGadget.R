@@ -42,7 +42,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
   factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
   out[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
   conti_vars <- setdiff(names(out), factor_vars)
-  nclass <- unlist(out[, lapply(.SD, function(x){length(levels(x))}), .SDcols = conti_vars])
+  nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x))}), .SDcols = conti_vars])
   #except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
   add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
 
