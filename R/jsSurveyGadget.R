@@ -277,8 +277,8 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
           var.factor <- c(data.list$factor_original, input$factor_vname)
           out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
           out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
-          setkey(out.label, "variable", "class", "level")
-          setkey(out.label2, "variable", "class", "level")
+          data.table::setkey(out.label, "variable", "class", "level")
+          data.table::setkey(out.label2, "variable", "class", "level")
           out.label <- out.label[out.label2]
         }
       }
