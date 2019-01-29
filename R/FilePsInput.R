@@ -198,7 +198,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
           need(length(input$var_subset) > 0 , "No factor variable for subsetting")
         )
         out <- out[get(input$var_subset) == input$val_subset]
-        var.factor <- c(data()$factor_original, input$factor_vname)
+        var.factor <- c(data.info()$factor_original, input$factor_vname)
         out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
       }
     }
