@@ -210,26 +210,35 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
     observeEvent(input$check_subset, {
       output$subset_var <- renderUI({
         req(input$check_subset == T)
-        factor_subset <- setdiff(c(data.list$factor_original, input$factor_vname), c(input$repeated_vname, input$strata_vname, input$weights_vname))
+        #factor_subset <- setdiff(c(data.list$factor_original, input$factor_vname), c(input$repeated_vname, input$strata_vname, input$weights_vname))
 
-        validate(
-          need(length(factor_subset) > 0 , "No factor variable for subsetting")
-        )
+        #validate(
+        #  need(length(factor_subset) > 0 , "No factor variable for subsetting")
+        #)
 
         tagList(
           selectInput("var_subset", "Subset variable",
-                      choices = factor_subset, multiple = F,
-                      selected = factor_subset[1])
+                      choices = names(data.list$data), multiple = F,
+                      selected = names(data.list$data)[1])
         )
       })
 
       output$subset_val <- renderUI({
         req(input$check_subset == T)
         req(input$var_subset)
-        varlevel <- levels(as.factor(data.list$data[[input$var_subset]]))
-        selectInput("val_subset", "Subset value",
-                    choices = varlevel, multiple = F,
-                    selected = varlevel[1])
+        var.factor <- c(data.list$factor_original, input$factor_vname)
+
+        if (input$var_subset %in% var.factor){
+          varlevel <- levels(as.factor(data.list$data[[input$var_subset]]))
+          selectInput(session$ns("val_subset"), "Subset value",
+                      choices = varlevel, multiple = T,
+                      selected = varlevel[1])
+        } else{
+          val <- stats::quantile(data.list$data[[input$var_subset]], na.rm = T)
+          sliderInput(session$ns("val_subset"), "Subset range",
+                      min = val[1], max = val[5],
+                      value = c(val[2], val[4]))
+        }
       })
     })
 
@@ -270,16 +279,30 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       if (!is.null(input$check_subset)){
         if (input$check_subset){
           validate(
-            need(length(input$var_subset) > 0 , "No factor variable for subsetting")
+            need(length(input$var_subset) > 0 , "No variables for subsetting")
           )
-          out <- out[get(input$var_subset) == input$val_subset]
-          surveydata <- survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out)
           var.factor <- c(data.list$factor_original, input$factor_vname)
-          out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
-          out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
-          data.table::setkey(out.label, "variable", "class", "level")
-          data.table::setkey(out.label2, "variable", "class", "level")
-          out.label <- out.label[out.label2]
+
+          if (input$var_subset %in% var.factor){
+            out <- out[get(input$var_subset) %in% input$val_subset]
+            surveydata <- survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out)
+            #var.factor <- c(data()$factor_original, input$factor_vname)
+            out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+            out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
+            data.table::setkey(out.label, "variable", "class", "level")
+            data.table::setkey(out.label2, "variable", "class", "level")
+            out.label <- out.label[out.label2]
+          } else{
+            out <- out[get(input$var_subset) >= input$val_subset[1] & get(input$var_subset) <= input$val_subset[2]]
+            surveydata <- survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out)
+            #var.factor <- c(data()$factor_original, input$factor_vname)
+            out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+            out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
+            data.table::setkey(out.label, "variable", "class", "level")
+            data.table::setkey(out.label2, "variable", "class", "level")
+            out.label <- out.label[out.label2]
+          }
+
         }
       }
 

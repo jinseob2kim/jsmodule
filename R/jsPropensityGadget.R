@@ -207,26 +207,35 @@ jsPropensityGadget <- function(data){
     observeEvent(input$check_subset, {
       output$subset_var <- renderUI({
         req(input$check_subset == T)
-        factor_subset <- c(factor_original, input$factor_vname)
+        #factor_subset <- c(factor_original, input$factor_vname)
 
-        validate(
-          need(length(factor_subset) > 0 , "No factor variable for subsetting")
-        )
+        #validate(
+        #  need(length(factor_subset) > 0 , "No factor variable for subsetting")
+        #)
 
         tagList(
           selectInput("var_subset", "Subset variable",
-                      choices = factor_subset, multiple = F,
-                      selected = factor_subset[1])
+                      choices = names(out), multiple = F,
+                      selected = names(out)[1])
         )
       })
 
       output$subset_val <- renderUI({
         req(input$check_subset == T)
         req(input$var_subset)
-        varlevel <- levels(as.factor(out[[input$var_subset]]))
-        selectInput("val_subset", "Subset value",
-                    choices = varlevel, multiple = F,
-                    selected = varlevel[1])
+        var.factor <- c(factor_original, input$factor_vname)
+
+        if (input$var_subset %in% var.factor){
+          varlevel <- levels(as.factor(out[[input$var_subset]]))
+          selectInput(session$ns("val_subset"), "Subset value",
+                      choices = varlevel, multiple = T,
+                      selected = varlevel[1])
+        } else{
+          val <- stats::quantile(out[[input$var_subset]], na.rm = T)
+          sliderInput(session$ns("val_subset"), "Subset range",
+                      min = val[1], max = val[5],
+                      value = c(val[2], val[4]))
+        }
       })
     })
 
@@ -239,11 +248,21 @@ jsPropensityGadget <- function(data){
       if (!is.null(input$check_subset)){
         if (input$check_subset){
           validate(
-            need(length(input$var_subset) > 0 , "No factor variable for subsetting")
+            need(length(input$var_subset) > 0 , "No variable for subsetting")
           )
-          out1 <- out1[get(input$var_subset) == input$val_subset]
           var.factor <- c(factor_original, input$factor_vname)
-          out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+
+          if (input$var_subset %in% var.factor){
+            out1 <- out1[get(input$var_subset) %in% input$val_subset]
+            #var.factor <- c(data()$factor_original, input$factor_vname)
+            out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+
+          } else{
+            out1 <- out1[get(input$var_subset) >= input$val_subset[1] & get(input$var_subset) <= input$val_subset[2]]
+            #var.factor <- c(data()$factor_original, input$factor_vname)
+            out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+          }
+
         }
       }
 

@@ -203,7 +203,7 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
       req(input$check_subset == T)
       req(input$var_subset)
       var.factor <- c(data()$factor_original, input$factor_vname)
-      var.conti <- setdiff(data()$conti_original, input$factor_vname)
+      #var.conti <- setdiff(data()$conti_original, input$factor_vname)
 
       if (input$var_subset %in% var.factor){
         varlevel <- levels(as.factor(data()$data[[input$var_subset]]))
@@ -253,7 +253,7 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
           need(length(input$var_subset) > 0 , "No variables for subsetting")
         )
         var.factor <- c(data()$factor_original, input$factor_vname)
-        var.conti <- setdiff(data()$conti_original, input$factor_vname)
+        #var.conti <- setdiff(data()$conti_original, input$factor_vname)
 
         if (input$var_subset %in% var.factor){
           out <- out[get(input$var_subset) %in% input$val_subset]

@@ -161,24 +161,23 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
 
       tagList(
         selectInput(session$ns("var_subset"), "Subset variable",
-                    choices = data.info()$data, multiple = F,
-                    selected = data.info()$data)
+                    choices = names(data.info()$data), multiple = F,
+                    selected = names(data.info()$data)[1])
       )
     })
 
     output$subset_val <- renderUI({
       req(input$check_subset == T)
       req(input$var_subset)
-      var.factor <- c(data()$factor_original, input$factor_vname)
-      var.conti <- setdiff(data()$conti_original, input$factor_vname)
+      var.factor <- c(data.info()$factor_original, input$factor_vname)
 
       if (input$var_subset %in% var.factor){
-        varlevel <- levels(as.factor(data()$data[[input$var_subset]]))
+        varlevel <- levels(as.factor(data.info()$data[[input$var_subset]]))
         selectInput(session$ns("val_subset"), "Subset value",
                     choices = varlevel, multiple = T,
                     selected = varlevel[1])
       } else{
-        val <- stats::quantile(data()$data[[input$var_subset]], na.rm = T)
+        val <- stats::quantile(data.info()$data[[input$var_subset]], na.rm = T)
         sliderInput(session$ns("val_subset"), "Subset range",
                     min = val[1], max = val[5],
                     value = c(val[2], val[4]))
@@ -208,8 +207,8 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
           need(length(input$var_subset) > 0 , "No variables for subsetting")
         )
 
-        var.factor <- c(data()$factor_original, input$factor_vname)
-        var.conti <- setdiff(data()$conti_original, input$factor_vname)
+        var.factor <- c(data.info()$factor_original, input$factor_vname)
+        #var.conti <- setdiff(data()$conti_original, input$factor_vname)
 
         if (input$var_subset %in% var.factor){
           out <- out[get(input$var_subset) %in% input$val_subset]
