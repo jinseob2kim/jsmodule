@@ -1,3 +1,7 @@
+# jsmodule 0.7.6
+
+* You can get **Subset data** based on the range of continuous variables.  
+
 # jsmodule 0.7.5
 
 ## Update

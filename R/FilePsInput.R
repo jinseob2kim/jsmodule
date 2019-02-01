@@ -153,26 +153,36 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
   observeEvent(input$check_subset, {
     output$subset_var <- renderUI({
       req(input$check_subset == T)
-      factor_subset <- c(data.info()$factor_original, input$factor_vname)
+      #factor_subset <- c(data.info()$factor_original, input$factor_vname)
 
-      validate(
-        need(length(factor_subset) > 0 , "No factor variable for subsetting")
-      )
+      #validate(
+      #  need(length(factor_subset) > 0 , "No factor variable for subsetting")
+      #)
 
       tagList(
         selectInput(session$ns("var_subset"), "Subset variable",
-                    choices = factor_subset, multiple = F,
-                    selected = factor_subset[1])
+                    choices = data.info()$data, multiple = F,
+                    selected = data.info()$data)
       )
     })
 
     output$subset_val <- renderUI({
       req(input$check_subset == T)
       req(input$var_subset)
-      varlevel <- levels(as.factor(data.info()$data[[input$var_subset]]))
-      selectInput(session$ns("val_subset"), "Subset value",
-                  choices = varlevel, multiple = F,
-                  selected = varlevel[1])
+      var.factor <- c(data()$factor_original, input$factor_vname)
+      var.conti <- setdiff(data()$conti_original, input$factor_vname)
+
+      if (input$var_subset %in% var.factor){
+        varlevel <- levels(as.factor(data()$data[[input$var_subset]]))
+        selectInput(session$ns("val_subset"), "Subset value",
+                    choices = varlevel, multiple = T,
+                    selected = varlevel[1])
+      } else{
+        val <- stats::quantile(data()$data[[input$var_subset]], na.rm = T)
+        sliderInput(session$ns("val_subset"), "Subset range",
+                    min = val[1], max = val[5],
+                    value = c(val[2], val[4]))
+      }
     })
   })
 
@@ -195,11 +205,23 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     if (!is.null(input$check_subset)){
       if (input$check_subset){
         validate(
-          need(length(input$var_subset) > 0 , "No factor variable for subsetting")
+          need(length(input$var_subset) > 0 , "No variables for subsetting")
         )
-        out <- out[get(input$var_subset) == input$val_subset]
-        var.factor <- c(data.info()$factor_original, input$factor_vname)
-        out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+
+        var.factor <- c(data()$factor_original, input$factor_vname)
+        var.conti <- setdiff(data()$conti_original, input$factor_vname)
+
+        if (input$var_subset %in% var.factor){
+          out <- out[get(input$var_subset) %in% input$val_subset]
+          #var.factor <- c(data()$factor_original, input$factor_vname)
+          out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+
+        } else{
+          out <- out[get(input$var_subset) >= input$val_subset[1] & get(input$var_subset) <= input$val_subset[2]]
+          #var.factor <- c(data()$factor_original, input$factor_vname)
+          out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+        }
+
       }
     }
     return(out)
