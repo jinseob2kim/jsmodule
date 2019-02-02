@@ -12,7 +12,7 @@
 <script src="pkgdown.js"></script><!-- docsearch --><script src="docsearch.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.1/docsearch.min.css" integrity="sha256-QOSRU/ra9ActyXkIBbiIB144aDBdtvXBcNc3OTNuX/Q=" crossorigin="anonymous">
 <link href="docsearch.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script><meta property="og:title" content="jsmodule: Rstudio Addins and Shiny Modules for Medical Research">
-<meta property="og:description" content="Rstudio Addins and Shiny Modules for Medical Research.">
+<meta property="og:description" content="Rstudio addins and shiny modules for descriptive statistics, regression and survival analysis.">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -20,7 +20,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-home">
+    <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">jsmodule</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.7.6</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.7.7</span>
       </span>
     </div>
 
@@ -86,16 +86,17 @@
 
       
       </header><div class="row">
-  <div class="contents col-md-9">
-<div id="jsmodule" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#jsmodule" class="anchor"></a>jsmodule</h1></div>
+  <div class="col-md-9 contents">
+    
+
+    
+    
 
 <p>Rstudio Addins and Shiny Modules for Medical Research</p>
 <div id="install" class="section level2">
 <h2 class="hasAnchor">
 <a href="#install" class="anchor"></a>Install</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">'jinseob2kim/jstable'</span>, <span class="st">'jinseob2kim/jsmodule'</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'jinseob2kim/jsmodule'</span>)</a></code></pre></div>
 </div>
 <div id="gadget" class="section level2">
 <h2 class="hasAnchor">
@@ -123,7 +124,6 @@
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(survey)</a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(api)</a>
 <a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw">jsRepeatedGadget</span>(apistrat)</a></code></pre></div>
-</div>
 </div>
 </div>
   </div>
@@ -154,23 +154,23 @@
 </ul>
 </div>
 
-  <div class="dev-status">
+      <div class="dev-status">
 <h2>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://travis-ci.org/jinseob2kim/jsmodule"><img src="https://travis-ci.org/jinseob2kim/jsmodule.svg?branch=master" alt="Build Status"></a></li>
 <li><a href="https://ci.appveyor.com/project/jinseob2kim/jsmodule"><img src="https://ci.appveyor.com/api/projects/status/github/jinseob2kim/jsmodule?branch=master&amp;svg=true" alt="AppVeyor build status"></a></li>
 <li><a href="https://cran.r-project.org/package=jsmodule"><img src="https://www.r-pkg.org/badges/version/jsmodule" alt="CRAN_Status_Badge"></a></li>
+<li><a href="https://cran.rstudio.com/web/packages/jsmodule/index.html"><img src="https://cranlogs.r-pkg.org/badges/jsmodule" alt="CRAN_Download_Badge"></a></li>
 <li><a href="https://codecov.io/github/jinseob2kim/jsmodule"><img src="https://codecov.io/github/jinseob2kim/jsmodule/branch/master/graphs/badge.svg" alt="codecov"></a></li>
 <li><a href="https://github.com/jinseob2kim/jsmodule/issues"><img src="https://img.shields.io/github/issues/jinseob2kim/jsmodule.svg" alt="GitHub issues"></a></li>
-<li><a href="https://github.com/jinseob2kim/jsmodule/network"><img src="https://img.shields.io/github/forks/jinseob2kim/jsmodule.svg" alt="GitHub forks"></a></li>
 <li><a href="https://github.com/jinseob2kim/jsmodule/stargazers"><img src="https://img.shields.io/github/stars/jinseob2kim/jsmodule.svg" alt="GitHub stars"></a></li>
 <li><a href="https://github.com/jinseob2kim/jsmodule/blob/master/LICENSE"><img src="https://img.shields.io/github/license/jinseob2kim/jsmodule.svg" alt="GitHub license"></a></li>
-<li><a href="https://github.com/jinseob2kim/jsmodule"><img src="https://img.shields.io/github/last-commit/google/skia.svg" alt="GitHub last commit"></a></li>
-<li><a href="https://github.com/jinseob2kim/jsmodule/graphs/contributors"><img src="https://img.shields.io/github/contributors/jinseob2kim/jsmodule.svg?maxAge=2592000" alt="GitHub contributors"></a></li>
 </ul>
 </div>
 </div>
+
 </div>
+
 
       <footer><div class="copyright">
   <p>Developed by <a href="https://github.com/jinseob2kim">Jinseob Kim</a>, <a href="https://www.anpanman.co.kr"><img src="https://raw.githubusercontent.com/anpanmancorp/Anpanman/master/horizontal_anpanman_transparent.png" height="24"></a>.</p>
