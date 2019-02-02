@@ -5,12 +5,10 @@
 #' @return Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic plot
 #' @details DETAILS
 #' @examples
-#' \dontrun{
 #' if(interactive()){
 #'  library(survival)
 #'  jsRepeatedGadjet(lung)
 #'  }
-#' }
 #' @rdname jsRepeatedGadjet
 #' @export
 #' @importFrom GGally ggpairs

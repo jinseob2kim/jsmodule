@@ -74,11 +74,7 @@ ggplotdownUI <- function(id) {
 #' @return kaplanModule
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname kaplanModule
 #' @export
 #' @import shiny
@@ -91,6 +87,9 @@ ggplotdownUI <- function(id) {
 
 
 kaplanModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
+
+  ## To remove NOTE.
+  val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))

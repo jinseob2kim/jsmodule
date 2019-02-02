@@ -6,7 +6,6 @@
 #' @return Shiny UI
 #' @details DETAILS
 #' @examples
-#' \dontrun{
 #' if(interactive()){
 #'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #'  ui <- fluidPage(
@@ -37,12 +36,12 @@
 #'
 #'  shinyApp(ui, server)
 #'  }
-#' }
 #' @rdname csvFileInput
 #' @export
 #' @import shiny
 
 csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
+
   # Create a namespace function using the provided id
   ns <- NS(id)
 
@@ -66,7 +65,6 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #' @return server
 #' @details DETAILS
 #' @examples
-#' \dontrun{
 #' if(interactive()){
 #'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #'  ui <- fluidPage(
@@ -97,7 +95,6 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #'
 #'  shinyApp(ui, server)
 #'  }
-#' }
 #' @rdname csvFile
 #' @export
 #' @import shiny
@@ -107,6 +104,10 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #' @importFrom haven read_sav read_sas read_dta
 
 csvFile <- function(input, output, session, nfactor.limit = 20) {
+
+  ## To remove NOTE.
+  variable <- NULL
+
   # The selected file, if any
   userFile <- eventReactive(input$file, {
     # If no file is selected, don't do anything

@@ -1,4 +1,7 @@
-# jsmodule
+---
+title: "jsmodule"
+output: github_document
+---
 
 [![Build Status](https://travis-ci.org/jinseob2kim/jsmodule.svg?branch=master)](https://travis-ci.org/jinseob2kim/jsmodule)
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/jinseob2kim/jsmodule?branch=master&svg=true)](https://ci.appveyor.com/project/jinseob2kim/jsmodule)
@@ -11,6 +14,10 @@
 
 
 Rstudio Addins and Shiny Modules for Medical Research
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 ## Install
 
@@ -25,12 +32,15 @@ remotes::install_github('jinseob2kim/jsmodule')
 ```r
 jsBasicGadget(mtcars)
 ```
+![](https://blog.anpanman.co.kr/posts/2018-11-24-basic-biostatistics/addin.gif)
 
 ### Propensity score analysis
 
 ```r
 jsPropensityGadget(mtcars)
 ```
+
+![](http://app.anpanman.co.kr/img/ps.png)
 
 
 ### Repeated measure analysis

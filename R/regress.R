@@ -5,12 +5,8 @@
 #' @return Intersect varlist
 #' @details Internal function
 #' @examples
-#' \dontrun{
-#' if(interactive()){
-#'  data_varStruct <- list(variable = names(data))
-#'  conti_list <- mklist(data_varStruct, conti_vars)
-#'  }
-#' }
+#'  data_varStruct <- list(variable = names(mtcars))
+#'  mklist(data_varStruct, names(mtcars))
 #' @rdname mklist
 #' @export
 
@@ -33,11 +29,7 @@ mklist <- function(varlist, vars){
 #' @return Setdiff varlist
 #' @details Internal function
 #' @examples
-#' \dontrun{
-#' if(interactive()){
-#'  # exam
-#'  }
-#' }
+#'  # Example
 #' @rdname mksetdiff
 #' @export
 
@@ -62,11 +54,7 @@ mksetdiff <- function(varlist, vars){
 #' @return regressModuleUI
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname regressModuleUI
 #' @export
 
@@ -105,11 +93,7 @@ regressModuleUI <- function(id) {
 #' @return regressModule
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname regressModule
 #' @export
 #' @import shiny
@@ -121,6 +105,9 @@ regressModuleUI <- function(id) {
 #' @importFrom purrr map_lgl
 
 regressModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
+
+  ## To remove NOTE.
+  level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -314,11 +301,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @return regressModule2
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname regressModule2
 #' @export
 #' @import shiny
@@ -329,6 +312,9 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @importFrom purrr map_lgl
 
 regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
+
+  ## To remove NOTE.
+  level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -555,11 +541,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @return logisticModule
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname logisticModule
 #' @export
 #' @import shiny
@@ -571,6 +553,9 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @importFrom purrr map_lgl
 
 logisticModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
+
+  ## To remove NOTE.
+  level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -761,11 +746,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @return logisticModule2
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname logisticModule2
 #' @export
 #' @import shiny
@@ -777,6 +758,9 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 
 
 logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
+
+  ## To remove NOTE.
+  level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))

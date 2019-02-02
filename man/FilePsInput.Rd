@@ -21,9 +21,5 @@ Shiny module UI for file upload for propensity score matching.
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }

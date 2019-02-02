@@ -19,9 +19,5 @@ tb1 module UI for propensity score analysis
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }

@@ -21,10 +21,6 @@ make intersect varlist
 Internal function
 }
 \examples{
-\dontrun{
-if(interactive()){
- data_varStruct <- list(variable = names(data))
- conti_list <- mklist(data_varStruct, conti_vars)
- }
-}
+ data_varStruct <- list(variable = names(mtcars))
+ mklist(data_varStruct, names(mtcars))
 }

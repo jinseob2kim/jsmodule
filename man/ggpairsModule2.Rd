@@ -30,9 +30,5 @@ ggpairs module for reactive data
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }

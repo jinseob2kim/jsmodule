@@ -5,7 +5,6 @@
 #' @return Shiny UI
 #' @details DETAILS
 #' @examples
-#' \dontrun{
 #' if(interactive()){
 #'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #'  ui <- fluidPage(
@@ -36,7 +35,6 @@
 #'
 #'  shinyApp(ui, server)
 #'  }
-#' }
 #' @rdname FileSurveyInput
 #' @export
 #' @import shiny
@@ -66,7 +64,6 @@ FileSurveyInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)
 #' @return server
 #' @details DETAILS
 #' @examples
-#' \dontrun{
 #' if(interactive()){
 #'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #'  ui <- fluidPage(
@@ -97,7 +94,6 @@ FileSurveyInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)
 #'
 #'  shinyApp(ui, server)
 #'  }
-#' }
 #' @rdname FileSurvey
 #' @export
 #' @import shiny
@@ -108,6 +104,10 @@ FileSurveyInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)
 
 
 FileSurvey <- function(input, output, session, nfactor.limit = 20) {
+
+  ## To remove NOTE.
+  variable <- NULL
+
   # The selected file, if any
   userFile <- eventReactive(input$file, {
     # If no file is selected, don't do anything

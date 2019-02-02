@@ -9,11 +9,8 @@
 #' @return regress table
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
-#'  #EXAMPLE1
-#'  }
-#' }
+#' model1 <- glm(mpg ~ cyl + disp + vs, data = mtcars)
+#' regress.display2(model1, crude = TRUE, crude.p.value = TRUE, decimal = 3)
 #' @rdname regress.display2
 #' @export
 #' @importFrom stats as.formula lm glm logLik qnorm qt
@@ -215,11 +212,8 @@ regress.display2 <- function (regress.model, alpha = 0.05, crude = FALSE, crude.
 #' @return logistic table
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
-#'  #EXAMPLE1
-#'  }
-#' }
+#' model1 <- glm(am ~ cyl + disp, data = mtcars, family = binomial)
+#' logistic.display2(model1, crude = TRUE, crude.p.value = TRUE, decimal = 3)
 #' @rdname logistic.display2
 #' @export
 #' @importFrom stats as.formula lm glm logLik qnorm qt

@@ -37,9 +37,5 @@ Module for linear regression
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }

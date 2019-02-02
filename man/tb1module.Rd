@@ -34,9 +34,5 @@ Shiny module Server for Table 1.
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }

@@ -21,7 +21,6 @@ File upload UI for survey data analysis.
 DETAILS
 }
 \examples{
-\dontrun{
 if(interactive()){
  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
  ui <- fluidPage(
@@ -52,5 +51,4 @@ if(interactive()){
 
  shinyApp(ui, server)
  }
-}
 }

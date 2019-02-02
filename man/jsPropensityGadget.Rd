@@ -19,11 +19,9 @@ Shiny Gadget for propensity score analysis.
 DETAILS
 }
 \examples{
-\dontrun{
 if(interactive()){
  jsPropensityGadget(mtcars)
  }
-}
 }
 \seealso{
 \code{\link[data.table]{data.table}}

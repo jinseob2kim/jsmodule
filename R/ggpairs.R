@@ -5,11 +5,7 @@
 #' @return ggpairsModuleUI1
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname ggpairsModuleUI1
 #' @export
 
@@ -34,11 +30,7 @@ ggpairsModuleUI1 <- function(id) {
 #' @return ggpairsModuleUI2
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname ggpairsModuleUI2
 #' @export
 
@@ -74,11 +66,7 @@ ggpairsModuleUI2 <- function(id) {
 #' @return ggpairsModule
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname ggpairsModule
 #' @export
 #' @import shiny
@@ -88,6 +76,9 @@ ggpairsModuleUI2 <- function(id) {
 
 
 ggpairsModule <- function(input, output, session, data, data_label, data_varStruct = NULL) {
+
+  ## To remove NOTE.
+  val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -286,11 +277,7 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
 #' @return ggpairsModule2
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname ggpairsModule2
 #' @export
 #' @import shiny
@@ -299,6 +286,9 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
 #' @importFrom GGally ggpairs
 
 ggpairsModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL) {
+
+  ## To remove NOTE.
+  val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))

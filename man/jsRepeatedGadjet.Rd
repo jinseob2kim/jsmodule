@@ -21,10 +21,8 @@ Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic p
 DETAILS
 }
 \examples{
-\dontrun{
 if(interactive()){
  library(survival)
  jsRepeatedGadjet(lung)
  }
-}
 }

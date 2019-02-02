@@ -6,11 +6,7 @@
 #' @return Shiny UI
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname FilePsInput
 #' @export
 #' @import shiny
@@ -44,11 +40,7 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
 #' @return server
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname FilePs
 #' @export
 #' @import shiny
@@ -59,6 +51,10 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
 #' @importFrom MatchIt matchit match.data
 
 FilePs <- function(input, output, session, nfactor.limit = 20) {
+
+  ## To remove NOTE.
+  variable <- NULL
+
   # The selected file, if any
   userFile <- eventReactive(input$file, {
     # If no file is selected, don't do anything

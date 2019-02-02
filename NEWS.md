@@ -1,3 +1,7 @@
+# jsmodule 0.7.7
+
+* Fix **NOTE** and examples for cran upload
+
 # jsmodule 0.7.6
 
 * You can get **Subset data** based on the range of continuous variables.  

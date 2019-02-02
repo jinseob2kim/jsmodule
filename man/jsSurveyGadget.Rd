@@ -21,10 +21,8 @@ Shiny Gadget including Data, Label info, Table 1, svyglm, Basic plot
 DETAILS
 }
 \examples{
-\dontrun{
 if(interactive()){
  library(survival)
  jsSurveyGadget(lung)
  }
-}
 }

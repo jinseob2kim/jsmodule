@@ -19,9 +19,5 @@ ModuleUI for GEE
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }

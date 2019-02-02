@@ -5,11 +5,7 @@
 #' @return GEEModuleUI
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname GEEModuleUI
 #' @export
 
@@ -45,11 +41,7 @@ GEEModuleUI <- function(id) {
 #' @return GEEModuleLinear
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname GEEModuleLinear
 #' @export
 #' @import shiny
@@ -61,6 +53,9 @@ GEEModuleUI <- function(id) {
 #' @importFrom geepack geeglm
 
 GEEModuleLinear <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, id.gee) {
+
+  ## To remove NOTE.
+  level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))
@@ -230,11 +225,7 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 #' @return GEEModuleLogistic
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname GEEModuleLogistic
 #' @export
 #' @import shiny
@@ -246,6 +237,9 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 #' @importFrom geepack geeglm
 
 GEEModuleLogistic <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, id.gee) {
+
+  ## To remove NOTE.
+  level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))

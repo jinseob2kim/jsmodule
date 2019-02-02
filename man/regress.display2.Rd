@@ -30,9 +30,6 @@ regress.display function for reactive data
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
- #EXAMPLE1
- }
-}
+model1 <- glm(mpg ~ cyl + disp + vs, data = mtcars)
+regress.display2(model1, crude = TRUE, crude.p.value = TRUE, decimal = 3)
 }

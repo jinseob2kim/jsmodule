@@ -21,7 +21,6 @@ Shiny module UI for file(csv or xlsx) upload.
 DETAILS
 }
 \examples{
-\dontrun{
 if(interactive()){
  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
  ui <- fluidPage(
@@ -52,5 +51,4 @@ if(interactive()){
 
  shinyApp(ui, server)
  }
-}
 }

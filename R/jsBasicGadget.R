@@ -5,12 +5,10 @@
 #' @return Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plot
 #' @details DETAILS
 #' @examples
-#' \dontrun{
 #' if(interactive()){
 #'  library(survival)
 #'  jsBasicGadget(lung)
 #'  }
-#' }
 #' @rdname jsBasicGadget
 #' @export
 #' @importFrom GGally ggpairs

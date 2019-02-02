@@ -30,9 +30,6 @@ Modified epiDisplay's logistic.display function for reactive data.
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
- #EXAMPLE1
- }
-}
+model1 <- glm(am ~ cyl + disp, data = mtcars, family = binomial)
+logistic.display2(model1, crude = TRUE, crude.p.value = TRUE, decimal = 3)
 }

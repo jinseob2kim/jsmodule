@@ -36,11 +36,7 @@ tb1 module for propensity score analysis
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }
 \seealso{
 \code{\link[jstable]{CreateTableOneJS}}

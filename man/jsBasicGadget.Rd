@@ -21,10 +21,8 @@ Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), 
 DETAILS
 }
 \examples{
-\dontrun{
 if(interactive()){
  library(survival)
  jsBasicGadget(lung)
  }
-}
 }

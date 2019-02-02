@@ -5,11 +5,9 @@
 #' @return Gadget
 #' @details DETAILS
 #' @examples
-#' \dontrun{
 #' if(interactive()){
 #'  jsPropensityGadget(mtcars)
 #'  }
-#' }
 #' @seealso
 #'  \code{\link[data.table]{data.table}}
 #'  \code{\link[MatchIt]{matchit}},\code{\link[MatchIt]{match.data}}
@@ -31,6 +29,9 @@
 #' @importFrom stats model.frame
 
 jsPropensityGadget <- function(data){
+
+  ## To remove NOTE.
+  level <- val_label <- variable <- NULL
 
   ## Data label
   out.old <- data.table::data.table(data)

@@ -19,9 +19,5 @@ Shiny module UI for Table 1.
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }

@@ -19,9 +19,5 @@ ModuleUI for cox model
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }

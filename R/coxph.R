@@ -4,11 +4,7 @@
 #' @return coxUI
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname coxUI
 #' @export
 
@@ -45,11 +41,7 @@ coxUI <- function(id) {
 #' @return regressModule
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname coxModule
 #' @export
 #' @import shiny
@@ -61,6 +53,9 @@ coxUI <- function(id) {
 #' @importFrom purrr map_lgl
 
 coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, id.cluster = NULL) {
+
+  ## To remove NOTE.
+  level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))

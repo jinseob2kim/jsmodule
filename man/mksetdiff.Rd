@@ -21,9 +21,5 @@ make setdiff varlist
 Internal function
 }
 \examples{
-\dontrun{
-if(interactive()){
- # exam
- }
-}
+ # Example
 }

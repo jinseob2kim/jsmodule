@@ -5,12 +5,10 @@
 #' @return Shiny Gadget including Data, Label info, Table 1, svyglm, Basic plot
 #' @details DETAILS
 #' @examples
-#' \dontrun{
 #' if(interactive()){
 #'  library(survival)
 #'  jsSurveyGadget(lung)
 #'  }
-#' }
 #' @rdname jsSurveyGadget
 #' @export
 #' @importFrom GGally ggpairs

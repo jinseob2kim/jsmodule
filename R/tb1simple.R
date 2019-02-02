@@ -5,11 +5,7 @@
 #' @return UI
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname tb1simpleUI
 #' @export
 
@@ -42,11 +38,7 @@ tb1simpleUI <- function(id) {
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @seealso
 #'  \code{\link[labelled]{var_label}}
 #'  \code{\link[jstable]{CreateTableOneJS}}
@@ -61,6 +53,9 @@ tb1simpleUI <- function(id) {
 
 
 tb1simple <- function(input, output, session, data, matdata, data_label, data_varStruct = NULL, group_var){
+
+  ## To remove NOTE.
+  variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct = list(variable = names(data))
@@ -242,11 +237,7 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @seealso
 #'  \code{\link[jstable]{CreateTableOneJS}}
 #'  \code{\link[survey]{svydesign}}

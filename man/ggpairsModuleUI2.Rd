@@ -19,9 +19,5 @@ Option & download module UI for ggpairs
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }
