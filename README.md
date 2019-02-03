@@ -9,7 +9,7 @@
 [![GitHub license](https://img.shields.io/github/license/jinseob2kim/jsmodule.svg)](https://github.com/jinseob2kim/jsmodule/blob/master/LICENSE)
 
 
-Rstudio Addins and Shiny Modules for Medical Research
+RStudio Addins and Shiny Modules for Medical Research
 
 ## Install
 

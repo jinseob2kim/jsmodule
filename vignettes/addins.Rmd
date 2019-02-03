@@ -1,5 +1,5 @@
 ---
-title: "Introduce Rstudio Addins in jsmodule"
+title: "Introduce RStudio Addins in jsmodule"
 author: "Jinseob Kim"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
