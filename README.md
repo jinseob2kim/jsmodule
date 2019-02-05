@@ -25,12 +25,15 @@ remotes::install_github('jinseob2kim/jsmodule')
 jsBasicGadget(mtcars)
 ```
 
+![](https://blog.anpanman.co.kr/posts/2018-11-24-basic-biostatistics/addin.gif)
+
 ### Propensity score analysis
 
 ```r
 jsPropensityGadget(mtcars)
 ```
 
+![](http://app.anpanman.co.kr/img/ps.png)
 
 ### Repeated measure analysis
 
@@ -38,6 +41,7 @@ jsPropensityGadget(mtcars)
 jsRepeatedGadget(mtcars)
 ```
 
+![](https://community.rstudio.com/uploads/default/original/2X/8/886b35e85e9ee2e9d03d02788f6b09f4e93b29cc.png)
 
 ### Survey data analysis
 
@@ -47,3 +51,4 @@ data(api)
 jsRepeatedGadget(apistrat)
 ```
 
+![](https://community.rstudio.com/uploads/default/original/2X/6/66f7190f409df1b0c5d4c41bbf0b63237c4cfd9e.png)
