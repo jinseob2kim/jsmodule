@@ -1,11 +1,11 @@
 Package: jsmodule
-Title: RStudio Addins and Shiny Modules for Medical Research
+Title: 'RStudio' Addins and 'Shiny' Modules for Medical Research
 Version: 0.7.7
 Date: 2019-02-02
 Authors@R: c(person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c("aut", "cre"),  comment = c(ORCID = "0000-0002-9403-605X")),
              person("Anpanman", role = c("cph", "fnd"))
              )
-Description: RStudio addins and shiny modules for descriptive statistics, regression and survival analysis.
+Description: 'RStudio' addins and 'Shiny' modules for descriptive statistics, regression and survival analysis.
 Depends: R (>= 3.4.0)
 License: Apache License 2.0 
 Encoding: UTF-8

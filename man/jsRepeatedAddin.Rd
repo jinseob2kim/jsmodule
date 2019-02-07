@@ -16,11 +16,7 @@ Rstudio addin of jsRepeatedGadjet
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }
 \seealso{
 \code{\link[rstudioapi]{rstudio-editors}}

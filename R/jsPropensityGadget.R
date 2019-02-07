@@ -973,11 +973,7 @@ jsPropensityGadget <- function(data){
 #' @return Rstudio addin of jsPropensityGadget
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @seealso
 #'  \code{\link[rstudioapi]{rstudio-editors}}
 #' @rdname jsPropensityAddin

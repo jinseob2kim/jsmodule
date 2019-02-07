@@ -273,11 +273,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @return Shiny module
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname tb1module2
 #' @export
 #' @import shiny

@@ -4,11 +4,7 @@
 #' @return kaplanUI
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname kaplanUI
 #' @export
 
@@ -36,11 +32,7 @@ kaplanUI <- function(id) {
 #' @return ggplotdownUI
 #' @details DETAILS
 #' @examples
-#' \dontrun{
-#' if(interactive()){
 #'  #EXAMPLE1
-#'  }
-#' }
 #' @rdname ggplotdownUI
 #' @export
 

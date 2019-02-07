@@ -34,9 +34,5 @@ Shiny module Server for Table 1 using reactive data.
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
  #EXAMPLE1
- }
-}
 }
