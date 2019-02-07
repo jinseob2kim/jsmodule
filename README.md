@@ -1,67 +1,71 @@
-# jsmodule
+jsmodule
+================
 
-[![Build Status](https://travis-ci.org/jinseob2kim/jsmodule.svg?branch=master)](https://travis-ci.org/jinseob2kim/jsmodule)
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/jinseob2kim/jsmodule?branch=master&svg=true)](https://ci.appveyor.com/project/jinseob2kim/jsmodule)
-[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/jsmodule)](https://cran.r-project.org/package=jsmodule)
-[![codecov](https://codecov.io/github/jinseob2kim/jsmodule/branch/master/graphs/badge.svg)](https://codecov.io/github/jinseob2kim/jsmodule)
-[![GitHub issues](https://img.shields.io/github/issues/jinseob2kim/jsmodule.svg)](https://github.com/jinseob2kim/jsmodule/issues)
-[![GitHub stars](https://img.shields.io/github/stars/jinseob2kim/jsmodule.svg)](https://github.com/jinseob2kim/jsmodule/stargazers)
-[![GitHub license](https://img.shields.io/github/license/jinseob2kim/jsmodule.svg)](https://github.com/jinseob2kim/jsmodule/blob/master/LICENSE)
-
+[![Build Status](https://travis-ci.org/jinseob2kim/jsmodule.svg?branch=master)](https://travis-ci.org/jinseob2kim/jsmodule) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/jinseob2kim/jsmodule?branch=master&svg=true)](https://ci.appveyor.com/project/jinseob2kim/jsmodule) [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/jsmodule)](https://cran.r-project.org/package=jsmodule) [![codecov](https://codecov.io/github/jinseob2kim/jsmodule/branch/master/graphs/badge.svg)](https://codecov.io/github/jinseob2kim/jsmodule) [![GitHub issues](https://img.shields.io/github/issues/jinseob2kim/jsmodule.svg)](https://github.com/jinseob2kim/jsmodule/issues) [![GitHub stars](https://img.shields.io/github/stars/jinseob2kim/jsmodule.svg)](https://github.com/jinseob2kim/jsmodule/stargazers) [![GitHub license](https://img.shields.io/github/license/jinseob2kim/jsmodule.svg)](https://github.com/jinseob2kim/jsmodule/blob/master/LICENSE)
 
 RStudio Addins and Shiny Modules for Medical Research
 
-## Install
+Install
+-------
 
-```r
+``` r
 remotes::install_github('jinseob2kim/jsmodule')
 ```
 
-## RStudio Addins
+RStudio Addins
+--------------
 
-### Basic statistics 
+### Basic statistics
 
-```r
+``` r
 jsBasicGadget(mtcars)
 ```
 
+![](https://blog.anpanman.co.kr/posts/2018-11-24-basic-biostatistics/addin.gif)
+
 ### Propensity score analysis
 
-```r
+``` r
 jsPropensityGadget(mtcars)
 ```
 
+![](http://app.anpanman.co.kr/img/ps.png)
 
 ### Repeated measure analysis
 
-```r
+``` r
 jsRepeatedGadget(mtcars)
 ```
 
-
 ### Survey data analysis
 
-```r
+``` r
 library(survey)
 data(api)
 jsRepeatedGadget(apistrat)
 ```
 
-## Web applications
+Web applications
+----------------
 
 ### Basic statistics
 
-http://app.anpanman.co.kr/basic
+<http://app.anpanman.co.kr/basic>
 
+![](https://community.rstudio.com/uploads/default/optimized/2X/e/e1430df807c5135ed7a24fee9f9bb8c390307811_1_690x360.gif)
 
-### Propensity score analysis 
+### Propensity score analysis
 
-http://app.anpanman.co.kr/ps
+<http://app.anpanman.co.kr/ps>
 
 ### Repeated measure analysis
 
-http://app.anpanman.co.kr/repeated
+<http://app.anpanman.co.kr/repeated>
+
+![](https://community.rstudio.com/uploads/default/original/2X/8/886b35e85e9ee2e9d03d02788f6b09f4e93b29cc.png)
 
 ### Survey data analysis
 
-http://app.anpanman.co.kr/survey
+<http://app.anpanman.co.kr/survey>
+
+![](https://community.rstudio.com/uploads/default/original/2X/6/66f7190f409df1b0c5d4c41bbf0b63237c4cfd9e.png)
