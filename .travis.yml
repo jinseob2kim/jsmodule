@@ -13,19 +13,15 @@ matrix:
   - r: release
     r_packages:
     - covr
-    r_github_packages:
-    - r-lib/pkgdown
     after_success:
     - Rscript -e 'covr::codecov()'
-    - Rscript -e 'pkgdown::build_site()'
+    before_deploy: Rscript -e 'remotes::install_cran("pkgdown")'
     deploy:
-      provider: pages
+      provider: script
+      script: Rscript -e 'pkgdown::deploy_site_github()'
       skip-cleanup: true
-      github-token: $GITHUB_TOKEN
-      keep-history: true
-      local-dir: docs
-      on:
-        branch: master
   - r: release
     os: osx
   - r: oldrel
+
+
