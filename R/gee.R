@@ -138,26 +138,36 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
   observeEvent(input$regressUI_subcheck, {
     output$regressUI_subvar <- renderUI({
       req(input$regressUI_subcheck == T)
-      factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
-      factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars, id.gee()))
-      factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+
+      var_subgroup <- setdiff(names(data()), c(input$dep_vars, input$indep_vars, id.gee()))
+      var_subgroup_list <- mklist(data_varStruct(), var_subgroup)
       validate(
-        need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+        need(length(var_subgroup) > 0 , "No variables for sub-group analysis")
       )
 
       tagList(
         selectInput(session$ns("subvar_regress"), "Sub-group variable",
-                    choices = factor_subgroup_list, multiple = F,
-                    selected = factor_subgroup[1])
+                    choices = var_subgroup_list, multiple = F,
+                    selected = var_subgroup[1])
       )
+
     })
 
     output$regressUI_subval <- renderUI({
       req(input$regressUI_subcheck == T)
       req(input$subvar_regress)
-      selectInput(session$ns("subval_regress"), "Sub-group value",
-                  choices = data_label()[variable == input$subvar_regress, val_label], multiple = F,
-                  selected = data_label()[variable == input$subvar_regress, val_label][1])
+
+      if (input$subvar_regress %in% vlist()$factor_vars){
+        selectInput(session$ns("subval_regress"), "Sub-group value",
+                    choices = data_label()[variable == input$subvar_regress, level], multiple = T,
+                    selected = data_label()[variable == input$subvar_regress, level][1])
+      } else{
+        val <- stats::quantile(data()[[input$subvar_regress]], na.rm = T)
+        sliderInput(session$ns("subval_regress"), "Sub-group range",
+                    min = val[1], max = val[5],
+                    value = c(val[2], val[4]))
+      }
+
     })
 
   })
@@ -169,10 +179,20 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 
   out <- reactive({
     data.regress <- data()
+    label.regress <- data_label()
     id <- id.gee()
     if(input$regressUI_subcheck == T){
       req(input$subvar_regress)
-      data.regress <- data.regress[get(input$subvar_regress) == input$subval_regress, ]
+      if (input$subvar_regress %in% vlist()$factor_vars){
+        data.regress <- data.regress[get(input$subvar_regress) %in% input$subval_regress]
+      } else{
+        data.regress <- data.regress[get(input$subvar_regress) >= input$subval_regress[1] & get(input$subvar_regress) <= input$subval_regress[2]]
+      }
+      data.regress[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
+      label.regress2 <- mk.lev(data.regress)[, c("variable", "class", "level")]
+      data.table::setkey(data_label(), "variable", "class", "level")
+      data.table::setkey(label.regress2, "variable", "class", "level")
+      label.regress <- data_label()[label.regress2]
     }
     y <- input$dep_vars
     xs <- input$indep_vars
@@ -193,12 +213,16 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
     res.gee <- geepack::geeglm(form, data = data.regress, family = "gaussian", id = get(id), corstr = "exchangeable")
     info.gee <- jstable::geeglm.display(res.gee, decimal = input$decimal)
     info.gee$caption = gsub("id", id, info.gee$caption)
-    ltb.gee <- jstable::LabeljsGeeglm(info.gee, ref = data_label())
+    ltb.gee <- jstable::LabeljsGeeglm(info.gee, ref = label.regress)
     out.tb <- rbind(ltb.gee$table, ltb.gee$metric)
     cap.gee <- ltb.gee$caption
 
     if(input$regressUI_subcheck == T){
-      cap.gee <- paste(cap.gee, " : ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
+      if (input$subvar_regress %in% vlist()$factor_vars){
+        cap.gee <- paste(cap.gee, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(label.regress[variable == input$subvar_regress & level %in% input$subval_regress, val_label], collapse = ", "), sep = "")
+      } else{
+        cap.gee <- paste(cap.gee, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(input$subval_regress, collapse = "~"), sep = "")
+      }
     }
     sig <- ifelse(out.tb[, ncol(out.tb)] == "< 0.001", "**", ifelse(as.numeric(out.tb[, ncol(out.tb)]) <= 0.05, "**", NA))
     out.gee <- cbind(out.tb, sig)
@@ -324,26 +348,33 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
   observeEvent(input$regressUI_subcheck, {
     output$regressUI_subvar <- renderUI({
       req(input$regressUI_subcheck == T)
-      factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
-      factor_subgroup <- setdiff(factor_vars, c(input$dep_vars, input$indep_vars, id.gee()))
-      factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+      var_subgroup <- setdiff(names(data()), c(input$dep_vars, input$indep_vars, id.gee()))
+      var_subgroup_list <- mklist(data_varStruct(), var_subgroup)
       validate(
-        need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+        need(length(var_subgroup) > 0 , "No variables for sub-group analysis")
       )
 
       tagList(
         selectInput(session$ns("subvar_regress"), "Sub-group variable",
-                    choices = factor_subgroup_list, multiple = F,
-                    selected = factor_subgroup[1])
+                    choices = var_subgroup_list, multiple = F,
+                    selected = var_subgroup[1])
       )
     })
 
     output$regressUI_subval <- renderUI({
       req(input$regressUI_subcheck == T)
       req(input$subvar_regress)
-      selectInput(session$ns("subval_regress"), "Sub-group value",
-                  choices = data_label()[variable == input$subvar_regress, val_label], multiple = F,
-                  selected = data_label()[variable == input$subvar_regress, val_label][1])
+
+      if (input$subvar_regress %in% vlist()$factor_vars){
+        selectInput(session$ns("subval_regress"), "Sub-group value",
+                    choices = data_label()[variable == input$subvar_regress, level], multiple = T,
+                    selected = data_label()[variable == input$subvar_regress, level][1])
+      } else{
+        val <- stats::quantile(data()[[input$subvar_regress]], na.rm = T)
+        sliderInput(session$ns("subval_regress"), "Sub-group range",
+                    min = val[1], max = val[5],
+                    value = c(val[2], val[4]))
+      }
     })
 
   })
@@ -355,10 +386,20 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
 
   out <- reactive({
     data.logistic <- data()
+    label.regress <- data_label()
     id <- id.gee()
     if(input$regressUI_subcheck == T){
       req(input$subvar_regress)
-      data.logistic <- data.logistic[get(input$subvar_regress) == input$subval_regress, ]
+      if (input$subvar_regress %in% vlist()$factor_vars){
+        data.logistic <- data.logistic[get(input$subvar_regress) %in% input$subval_regress]
+      } else{
+        data.logistic <- data.logistic[get(input$subvar_regress) >= input$subval_regress[1] & get(input$subvar_regress) <= input$subval_regress[2]]
+      }
+      data.logistic[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
+      label.regress2 <- mk.lev(data.logistic)[, c("variable", "class", "level")]
+      data.table::setkey(data_label(), "variable", "class", "level")
+      data.table::setkey(label.regress2, "variable", "class", "level")
+      label.regress <- data_label()[label.regress2]
     }
     y <- input$dep_vars
     xs <- input$indep_vars
@@ -381,12 +422,16 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
     res.gee <- geepack::geeglm(form, data = data.logistic, family = "binomial", id = get(id), corstr = "exchangeable")
     info.gee <- jstable::geeglm.display(res.gee, decimal = input$decimal)
     info.gee$caption = gsub("id", id, info.gee$caption)
-    ltb.gee <- jstable::LabeljsGeeglm(info.gee, ref = data_label())
+    ltb.gee <- jstable::LabeljsGeeglm(info.gee, ref = label.regress)
     out.tb <- rbind(ltb.gee$table, ltb.gee$metric)
     cap.gee <- ltb.gee$caption
 
     if(input$regressUI_subcheck == T){
-      cap.gee <- paste(cap.gee, " : ", data_label()[variable == input$subvar_regress, var_label][1], ": ", data_label()[variable == input$subvar_regress & level == input$subval_regress, val_label], sep = "")
+      if (input$subvar_regress %in% vlist()$factor_vars){
+        cap.gee <- paste(cap.gee, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(label.regress[variable == input$subvar_regress & level %in% input$subval_regress, val_label], collapse = ", "), sep = "")
+      } else{
+        cap.gee <- paste(cap.gee, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(input$subval_regress, collapse = "~"), sep = "")
+      }
     }
     sig <- ifelse(out.tb[, ncol(out.tb)] == "< 0.001", "**", ifelse(as.numeric(out.tb[, ncol(out.tb)]) <= 0.05, "**", NA))
     out.gee <- cbind(out.tb, sig)

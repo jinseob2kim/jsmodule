@@ -81,7 +81,7 @@ ggplotdownUI <- function(id) {
 kaplanModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
 
   ## To remove NOTE.
-  val_label <- variable <- NULL
+  level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -185,21 +185,29 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     )
   })
 
-  observeEvent(input$indep_km, {
+  observeEvent(input$subcheck, {
     output$subvar <- renderUI({
       req(input$subcheck == T)
-      factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
-      factor_subgroup <- setdiff(factor_vars, c(input$event_km, input$indep_km))
-      factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
+
+      var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$time_km, input$event_km, input$indep_km))
+      if (!is.null(id.cluster)){
+        var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$time_km, input$event_km, input$indep_km, id.cluster()))
+      } else if (!is.null(design.survey)){
+        var_subgroup <- setdiff(names(data()), union(c(names(design.survey()$strata), names(design.survey()$cluster), names(design.survey()$allprob)), c(vlist()$except_vars, input$time_km, input$event_km, input$indep_km)))
+      }
+
+      var_subgroup_list <- mklist(data_varStruct(), var_subgroup)
       validate(
-        need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
+        need(length(var_subgroup) > 0 , "No variables for sub-group analysis")
       )
 
       tagList(
         selectInput(session$ns("subvar_km"), "Sub-group variable",
-                    choices = factor_subgroup_list, multiple = F,
-                    selected = factor_subgroup[1])
+                    choices = var_subgroup_list, multiple = F,
+                    selected = var_subgroup[1])
       )
+
+
     })
 
   })
@@ -208,9 +216,18 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
   output$subval <- renderUI({
     req(input$subcheck == T)
     req(input$subvar_km)
-    selectInput(session$ns("subval_km"), "Sub-group value",
-                choices = data_label()[variable == input$subvar_km, val_label], multiple = F,
-                selected = data_label()[variable == input$subvar_km, val_label][1])
+
+    if (input$subvar_km %in% vlist()$factor_vars){
+      selectInput(session$ns("subval_km"), "Sub-group value",
+                  choices = data_label()[variable == input$subvar_km, level], multiple = T,
+                  selected = data_label()[variable == input$subvar_km, level][1])
+    } else{
+      val <- stats::quantile(data()[[input$subvar_km]], na.rm = T)
+      sliderInput(session$ns("subval_km"), "Sub-group range",
+                  min = val[1], max = val[5],
+                  value = c(val[2], val[4]))
+    }
+
   })
 
 
@@ -231,11 +248,24 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     req(!is.null(input$event_km))
     req(!is.null(input$time_km))
     data.km <- data()
+    label.regress <- data_label()
     data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
     if(input$subcheck == T){
       req(input$subvar_km)
       req(input$subval_km)
-      data.km <- data.km[get(input$subvar_km) == input$subval_km, ]
+
+      if (input$subvar_km %in% vlist()$factor_vars){
+        data.km <- data.km[get(input$subvar_km) %in% input$subval_km]
+      } else{
+        data.km <- data.km[get(input$subvar_km) >= input$subval_km[1] & get(input$subvar_km) <= input$subval_km[2]]
+      }
+      data.km[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
+      label.regress2 <- mk.lev(data.km)[, c("variable", "class", "level")]
+      data.table::setkey(data_label(), "variable", "class", "level")
+      data.table::setkey(label.regress2, "variable", "class", "level")
+      label.regress <- data_label()[label.regress2]
+      data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
+
     }
     mf <- model.frame(form.km(), data.km)
     validate(
@@ -249,8 +279,8 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         yst.name <- ""
         yst.lab <- "All"
       } else{
-        yst.name <- data_label()[variable == input$indep_km, var_label][1]
-        yst.lab <- data_label()[variable == input$indep_km, val_label]
+        yst.name <- label.regress[variable == input$indep_km, var_label][1]
+        yst.lab <- label.regress[variable == input$indep_km, val_label]
       }
       ylab = ifelse(input$cumhaz, "Cumulative hazard", "Survival")
       if (is.null(id.cluster)){
@@ -269,11 +299,24 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
     } else{
       data.design <- design.survey()
+      label.regress <- data_label()
       data.design$variables[[input$event_km]] <- as.numeric(as.vector(data.design$variables[[input$event_km]]))
       if(input$subcheck == T){
         req(input$subvar_km)
         req(input$subval_km)
-        data.design <- subset(data.design, get(input$subvar_km) == input$subval_km)
+
+        if (input$subvar_km %in% vlist()$factor_vars){
+          data.design <- subset(data.design, get(input$subvar_km) %in% input$subval_km)
+        } else{
+          data.design <- subset(data.design, get(input$subvar_km) >= input$subval_km[1] & get(input$subvar_km) <= input$subval_km[2])
+        }
+        data.design$variables[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
+        label.regress2 <- mk.lev(data.design$variables)[, c("variable", "class", "level")]
+        data.table::setkey(data_label(), "variable", "class", "level")
+        data.table::setkey(label.regress2, "variable", "class", "level")
+        label.regress <- data_label()[label.regress2]
+        data.design$variables[[input$event_km]] <- as.numeric(as.vector(data.design$variables[[input$event_km]]))
+
       }
       cc <- substitute(survey::svykm(.form, design= data.design, se = T), list(.form= form.km()))
       res.km <- eval(cc)
@@ -281,8 +324,8 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         yst.name <- ""
         yst.lab <- "All"
       } else{
-        yst.name <- data_label()[variable == input$indep_km, var_label][1]
-        yst.lab <- data_label()[variable == input$indep_km, val_label]
+        yst.name <- label.regress[variable == input$indep_km, var_label][1]
+        yst.lab <- label.regress[variable == input$indep_km, val_label]
       }
       ylab = ifelse(input$cumhaz, "Cumulative hazard", "Survival")
       return(

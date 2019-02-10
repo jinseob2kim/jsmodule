@@ -1,3 +1,12 @@
+# jsmodule 0.7.8
+
+## Update
+
+* Add sub-group analysis based on the range of **continuous variable**.
+
+* Add **multiple factor choice** option when doing sub-group analysis based on **categorical variable**. 
+
+
 # jsmodule 0.7.7
 
 * Fix **NOTE** and examples for cran upload
