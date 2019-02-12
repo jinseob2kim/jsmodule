@@ -1,6 +1,11 @@
 # jsmodule 0.7.8.9000
 
+## Update
+
 * Add **progress bar** to download handlers of scatterplot and kaplan-meier plot. 
+
+* Kaplan-meier plot in `Basic statistics` can use **continuous variables as group variables**. The module suggest best 5 cuts based on the p-values of logrank test. 
+
 
 # jsmodule 0.7.8
 

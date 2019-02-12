@@ -15,6 +15,7 @@ kaplanUI <- function(id) {
   tagList(
     uiOutput(ns("eventtime")),
     uiOutput(ns("indep")),
+    uiOutput(ns("cutconti")),
     checkboxInput(ns("cumhaz"), "Show cumulative hazard", F),
     checkboxInput(ns("pval"), "Show p-value(log-rank test)", T),
     checkboxInput(ns("table"), "Show table", T),
@@ -168,12 +169,12 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     }
 
 
-    if (is.null(design.survey)){
-      indep.km <- setdiff(vlist()$factor_vars, c(vlist()$except_vars, input$event_km, input$time_km ))
-
-    } else{
+    if (!is.null(design.survey)){
       indep.km <- setdiff(vlist()$factor_vars, c(vlist()$except_vars, input$event_km, input$time_km, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
-
+    } else if (!is.null(id.cluster)){
+      indep.km <- setdiff(vlist()$factor_vars, c(vlist()$except_vars, input$event_km, input$time_km, id.cluster()))
+    } else{
+      indep.km <- setdiff(names(data()), c(vlist()$except_vars, input$event_km, input$time_km ))
     }
 
 
@@ -184,6 +185,32 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       )
     )
   })
+
+  observeEvent(input$indep_km,{
+    output$cutconti = renderUI({
+      if (input$indep_km %in% c("None", vlist()$factor_vars)){
+        return(NULL)
+      } else if (!is.null(design.survey) | !is.null(id.cluster)){
+        return(NULL)
+      } else{
+        req(!is.null(input$event_km))
+        req(!is.null(input$time_km))
+        data.km <- data()
+        data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
+        mstat <- maxstat::maxstat.test(as.formula(paste("survival::Surv(",input$time_km,",", input$event_km,") ~ ", input$indep_km, sep="")), data= data.km, smethod="LogRank", pmethod="condMC", B=999)
+        cut5 <- mstat$cuts[order(-mstat$stats)][1:5]
+        tagList(
+          selectizeInput(session$ns("cut5"), "Best cut (Top 5)",
+                         choices = cut5, multiple = F,
+                         selected = cut5[1]
+          )
+        )
+      }
+    })
+  })
+
+
+
 
   observeEvent(input$subcheck, {
     output$subvar <- renderUI({
@@ -238,8 +265,10 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     )
     if (input$indep_km == "None"){
       return(as.formula(paste("survival::Surv(",input$time_km,",", input$event_km,") ~ ", "1", sep="")))
-    } else{
+    } else if (input$indep_km %in% vlist()$factor_vars) {
       return(as.formula(paste("survival::Surv(",input$time_km,",", input$event_km,") ~ ", input$indep_km, sep="")))
+    } else{
+      return(as.formula(paste("survival::Surv(",input$time_km,",", input$event_km,") ~ ", "xcat", sep="")))
     }
   })
 
@@ -247,13 +276,13 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
   kmInput <- reactive({
     req(!is.null(input$event_km))
     req(!is.null(input$time_km))
+    req(input$indep_km)
     data.km <- data()
     label.regress <- data_label()
     data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
     if(input$subcheck == T){
       req(input$subvar_km)
       req(input$subval_km)
-
       if (input$subvar_km %in% vlist()$factor_vars){
         data.km <- data.km[get(input$subvar_km) %in% input$subval_km]
       } else{
@@ -267,20 +296,28 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
 
     }
+
+    if (input$indep_km %in% vlist()$conti_vars){
+      data.km$xcat <- ifelse(data.km[[input$indep_km]] > input$cut5, 1, 0)
+    }
+
     mf <- model.frame(form.km(), data.km)
     validate(
       need(nrow(mf) > 0, paste("No complete data due to missingness."))
     )
 
     if (is.null(design.survey)){
-      cc = substitute(survival::survfit(.form, data= data.km), list(.form= form.km()))
-      res.km = eval(cc)
+      cc <- substitute(survival::survfit(.form, data= data.km), list(.form= form.km()))
+      res.km <- eval(cc)
       if (input$indep_km == "None"){
         yst.name <- ""
         yst.lab <- "All"
-      } else{
+      } else if (input$indep_km %in% vlist()$factor_vars){
         yst.name <- label.regress[variable == input$indep_km, var_label][1]
         yst.lab <- label.regress[variable == input$indep_km, val_label]
+      } else{
+        yst.name <- paste(label.regress[variable == input$indep_km, var_label], "group")
+        yst.lab <- paste(label.regress[variable == input$indep_km, var_label], paste(c(">", "≤"), input$cut5, sep=""))
       }
       ylab = ifelse(input$cumhaz, "Cumulative hazard", "Survival")
       if (is.null(id.cluster)){
