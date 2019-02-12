@@ -327,7 +327,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         )
       } else{
         return(
-          jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
+          jskm::jskm(res.km, pval = F, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
                      cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km)
         )
       }
