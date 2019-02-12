@@ -317,7 +317,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         yst.lab <- label.regress[variable == input$indep_km, val_label]
       } else{
         yst.name <- paste(label.regress[variable == input$indep_km, var_label], "group")
-        yst.lab <- paste(label.regress[variable == input$indep_km, var_label], paste(c(">", "≤"), input$cut5, sep=""))
+        yst.lab <- paste(label.regress[variable == input$indep_km, var_label], paste(c(">", "\u2264"), input$cut5, sep=""))
       }
       ylab = ifelse(input$cumhaz, "Cumulative hazard", "Survival")
       if (is.null(id.cluster)){
