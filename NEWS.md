@@ -1,4 +1,4 @@
-# jsmodule 0.7.8.9000
+# jsmodule 0.7.9
 
 ## Update
 
