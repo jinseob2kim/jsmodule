@@ -1,3 +1,7 @@
+# jsmodule 0.7.8.9000
+
+* Add **progress bar** to download handlers of scatterplot and kaplan-meier plot. 
+
 # jsmodule 0.7.8
 
 ## Update

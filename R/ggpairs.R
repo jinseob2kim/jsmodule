@@ -254,7 +254,15 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
       },
       # content is a function with argument file. content writes the plot to the device
       content = function(file) {
-        ggsave(file,ggpairsInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+        withProgress(message = 'Download in progress',
+                     detail = 'This may take a while...', value = 0, {
+                       for (i in 1:15) {
+                         incProgress(1/15)
+                         Sys.sleep(0.01)
+                         }
+
+                       ggsave(file,ggpairsInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                       })
 
       }
     )
@@ -499,7 +507,15 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
     },
     # content is a function with argument file. content writes the plot to the device
     content = function(file) {
-      ggsave(file,ggpairsInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+      withProgress(message = 'Download in progress',
+                   detail = 'This may take a while...', value = 0, {
+                     for (i in 1:15) {
+                       incProgress(1/15)
+                       Sys.sleep(0.01)
+                     }
+
+                     ggsave(file,ggpairsInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                   })
 
     }
   )
