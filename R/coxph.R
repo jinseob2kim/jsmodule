@@ -51,6 +51,7 @@ coxUI <- function(id) {
 #' @importFrom epiDisplay regress.display
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
+#' @importFrom survival cluster coxph Surv
 
 coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, id.cluster = NULL) {
 
@@ -156,11 +157,11 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
         varsIni <- sapply(indep.cox,
                           function(v){
                             if (is.null(id.cluster)){
-                              forms <- as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", v, sep=""))
+                              forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, sep = ""))
                             } else{
-                              forms <- as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", v, " + cluster(", id.cluster(), ")", sep=""))
+                              forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, " + cluster(", id.cluster(), ")", sep = ""))
                             }
-                            coef <- summary(survival::coxph(forms, data =data.cox, model = T))$coefficients
+                            coef <- summary(survival::coxph(forms, data = data.cox))$coefficients
                             sigOK <- !all(coef[, "Pr(>|z|)"] > 0.05)
                             return(sigOK)
                           })
