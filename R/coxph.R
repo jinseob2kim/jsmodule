@@ -160,7 +160,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
                             } else{
                               forms <- as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", v, " + cluster(", id.cluster(), ")", sep=""))
                             }
-                            coef <- summary(survival::coxph(forms, data =data.cox))$coefficients
+                            coef <- summary(survival::coxph(forms, data =data.cox, model = T))$coefficients
                             sigOK <- !all(coef[, "Pr(>|z|)"] > 0.05)
                             return(sigOK)
                           })
