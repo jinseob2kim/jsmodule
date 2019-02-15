@@ -366,7 +366,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       }
       ylab = ifelse(input$cumhaz, "Cumulative hazard", "Survival")
       return(
-        jskm::svyjskm(res.km, pval = input$pval, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
+        jskm::svyjskm(res.km, pval = input$pval, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
                    cumhaz= input$cumhaz, design = data.design)
       )
     }

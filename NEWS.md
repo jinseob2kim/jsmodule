@@ -6,6 +6,8 @@
 
 * Kaplan-meier plot in `Basic statistics` can use **continuous variables as group variables**. The module suggest best 5 cuts based on the p-values of logrank test. 
 
+* Add **number at risk** table option to weighted kalan-meier plot.
+
 ## Bug fixes
 
 * Add namespace **survival::cluster** for marginal cox model.
