@@ -348,7 +348,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         data.design$variables[[input$event_km]] <- as.numeric(as.vector(data.design$variables[[input$event_km]]))
 
       }
-      cc <- substitute(survey::svykm(.form, design= data.design, se = T), list(.form= form.km()))
+      cc <- substitute(survey::svykm(.form, design= data.design, se = F), list(.form= form.km()))
       res.km <- eval(cc)
       if (input$indep_km == "None"){
         yst.name <- ""
