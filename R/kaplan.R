@@ -16,6 +16,7 @@ kaplanUI <- function(id) {
     uiOutput(ns("eventtime")),
     uiOutput(ns("indep")),
     uiOutput(ns("cutconti")),
+    uiOutput(ns("ranges")),
     checkboxInput(ns("cumhaz"), "Show cumulative hazard", F),
     checkboxInput(ns("pval"), "Show p-value(log-rank test)", T),
     checkboxInput(ns("table"), "Show table", T),
@@ -73,7 +74,7 @@ ggplotdownUI <- function(id) {
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula model.frame
+#' @importFrom stats glm as.formula model.frame na.omit
 #' @importFrom epiDisplay regress.display
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
@@ -207,6 +208,33 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         )
       }
     })
+
+
+
+    output$ranges = renderUI({
+      if (is.null(design.survey)){
+        cname <- setdiff(c(input$time_km, input$event_km, input$indep_km), "None")
+        if (!is.null(id.cluster)){
+          cname <- setdiff(c(input$time_km, input$event_km, input$indep_km, id.cluster()), "None")
+        }
+      } else{
+        cname <- setdiff(c(input$time_km, input$event_km, input$indep_km, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)), "None")
+      }
+      data.simple <- data()[, cname, with = F]
+      xmax <- max(na.omit(data.simple[[input$time_km]]))
+
+      tagList(
+        sliderInput(session$ns("timeby"), "Time by",
+                    min = 1, max = xmax, value = signif(xmax/7, 1)),
+
+        sliderInput(session$ns("xlims"), "X axis range(time)",
+                    min = 0, max = xmax, value = c(0, xmax)),
+        sliderInput(session$ns("ylims"), "Y axis range(probability)",
+                    min = 0, max = 1, value = c(0, 1))
+      )
+    })
+
+
   })
 
 
@@ -277,6 +305,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     req(!is.null(input$event_km))
     req(!is.null(input$time_km))
     req(input$indep_km)
+    req(input$timeby)
     data.km <- data()
     label.regress <- data_label()
     data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
@@ -322,12 +351,12 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       ylab = ifelse(input$cumhaz, "Cumulative hazard", "Survival")
       if (is.null(id.cluster)){
         return(
-          jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
+          jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
                      cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km)
         )
       } else{
         return(
-          jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
+          jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
                      cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km)
         )
       }
@@ -366,7 +395,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       }
       ylab = ifelse(input$cumhaz, "Cumulative hazard", "Survival")
       return(
-        jskm::svyjskm(res.km, pval = input$pval, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F,
+        jskm::svyjskm(res.km, pval = input$pval, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
                    cumhaz= input$cumhaz, design = data.design)
       )
     }

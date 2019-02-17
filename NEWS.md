@@ -1,3 +1,7 @@
+# jsmodule 0.7.10
+
+* Add Kaplan-meier plot options: **timeby, x/y-axis ranges**.
+
 # jsmodule 0.7.9
 
 ## Update
