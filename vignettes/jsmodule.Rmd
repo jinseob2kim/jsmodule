@@ -20,39 +20,63 @@ knitr::opts_chunk$set(
 
 ## Install
 
-```{r, eval = F}
+```r
 remotes::install_github('jinseob2kim/jsmodule')
 ```
 
+## RStudio Addins
 
-## Basic statistics 
+### Basic statistics 
 
 ```r
 jsBasicGadget(mtcars)
 ```
+![](figures/addin.gif)
 
-![](https://blog.anpanman.co.kr/posts/2018-11-24-basic-biostatistics/addin.gif)
-
-## Propensity score analysis
+### Propensity score analysis
 
 ```r
 jsPropensityGadget(mtcars)
 ```
 
-![](http://app.anpanman.co.kr/img/ps.png)
+![](figures/ps.png)
 
 
-## Repeated measure analysis
+### Repeated measure analysis
 
 ```r
 jsRepeatedGadget(mtcars)
 ```
 
-
-## Survey data analysis
+### Survey data analysis
 
 ```r
 library(survey)
 data(api)
 jsRepeatedGadget(apistrat)
 ```
+
+## Web applications
+
+### Basic statistics
+
+http://app.anpanman.co.kr/basic
+
+![](figures/basic.gif)
+
+
+### Propensity score analysis 
+
+http://app.anpanman.co.kr/ps
+
+### Repeated measure analysis
+
+http://app.anpanman.co.kr/repeated
+
+![](figures/repeated.png)
+
+### Survey data analysis
+
+http://app.anpanman.co.kr/survey
+
+![](figures/survey.png)

@@ -21,7 +21,7 @@ RStudio Addins
 jsBasicGadget(mtcars)
 ```
 
-![](man/figures/addin.gif)
+![](vignettes/figures/addin.gif)
 
 ### Propensity score analysis
 
@@ -29,7 +29,7 @@ jsBasicGadget(mtcars)
 jsPropensityGadget(mtcars)
 ```
 
-![](man/figures/ps.png)
+![](vignettes/figures/ps.png)
 
 ### Repeated measure analysis
 
@@ -52,7 +52,7 @@ Web applications
 
 <http://app.anpanman.co.kr/basic>
 
-![](man/figures/basic.gif)
+![](vignettes/figures/basic.gif)
 
 ### Propensity score analysis
 
@@ -62,10 +62,10 @@ Web applications
 
 <http://app.anpanman.co.kr/repeated>
 
-![](man/figures/repeated.png)
+![](vignettes/figures/repeated.png)
 
 ### Survey data analysis
 
 <http://app.anpanman.co.kr/survey>
 
-![](man/figures/survey.png)
+![](vignettes/figures/survey.png)
