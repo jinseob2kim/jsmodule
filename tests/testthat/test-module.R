@@ -23,9 +23,19 @@ test_that("Run Modules", {
 
 test_that("Run shiny: basic", {
 
-  skip_on_cran()
+  app <- ShinyDriver$new(test_path("apps/basic"))
+  widgets <- app$listWidgets()
+  inputs <- widgets$input
 
-  shinytest::expect_pass(shinytest::testApp("apps/basic", compareImages = FALSE))
+  ## list widget
+  expect_is(widgets, "list")
+
+  expect_equal(
+    sort(inputs),
+    sort(c("factor_vname", "factor_vname-selectized", "check_subset", "linear-decimal", "linear-regressUI_subcheck", "logistic-decimal",
+           "logistic-regressUI_subcheck", "cox-decimal", "cox-subcheck", "ggpairs-theme", "ggpairs-theme-selectized", "kaplan-cumhaz", "kaplan-pval",
+           "kaplan-table", "kaplan-subcheck"))
+  )
 
 
   ## checkboxInput
