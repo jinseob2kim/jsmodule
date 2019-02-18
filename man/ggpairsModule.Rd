@@ -27,7 +27,7 @@ ggpairsModule
 ggpairs module
 }
 \details{
-DETAILS
+ggpairs module
 }
 \examples{
  #EXAMPLE1

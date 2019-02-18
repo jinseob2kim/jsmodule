@@ -6,8 +6,7 @@
 #' @details DETAILS
 #' @examples
 #' if(interactive()){
-#'  library(survival)
-#'  jsBasicGadget(lung)
+#'  jsBasicGadjet(mtcars)
 #'  }
 #' @rdname jsBasicGadget
 #' @export
@@ -341,9 +340,11 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 #' @title jsBasicAddin: Rstudio addin of jsBasicGadget
 #' @description Rstudio addin of jsBasicGadget
 #' @return Rstudio addin of jsBasicGadget
-#' @details DETAILS
+#' @details Rstudio addin of jsBasicGadget
 #' @examples
-#'  #EXAMPLE1
+#' if(interactive()){
+#'  jsBasicGadjet(mtcars)
+#'  }
 #' @seealso
 #'  \code{\link[rstudioapi]{rstudio-editors}}
 #' @rdname jsBasicAddin

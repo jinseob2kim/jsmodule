@@ -16,8 +16,8 @@ ggpairsModuleUI2
 Option & download module UI for ggpairs
 }
 \details{
-DETAILS
+Option & download module UI for ggpairs
 }
 \examples{
- #EXAMPLE1
+ ggpairsModuleUI2(1)
 }

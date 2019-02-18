@@ -21,7 +21,7 @@ RStudio Addins
 jsBasicGadget(mtcars)
 ```
 
-![](https://blog.anpanman.co.kr/posts/2018-11-24-basic-biostatistics/addin.gif)
+![](man/figures/addin.gif)
 
 ### Propensity score analysis
 
@@ -29,7 +29,7 @@ jsBasicGadget(mtcars)
 jsPropensityGadget(mtcars)
 ```
 
-![](http://app.anpanman.co.kr/img/ps.png)
+![](man/figures/ps.png)
 
 ### Repeated measure analysis
 
@@ -52,7 +52,7 @@ Web applications
 
 <http://app.anpanman.co.kr/basic>
 
-![](https://community.rstudio.com/uploads/default/optimized/2X/e/e1430df807c5135ed7a24fee9f9bb8c390307811_1_690x360.gif)
+![](man/figures/basic.gif)
 
 ### Propensity score analysis
 
@@ -62,10 +62,10 @@ Web applications
 
 <http://app.anpanman.co.kr/repeated>
 
-![](https://community.rstudio.com/uploads/default/original/2X/8/886b35e85e9ee2e9d03d02788f6b09f4e93b29cc.png)
+![](man/figures/repeated.png)
 
 ### Survey data analysis
 
 <http://app.anpanman.co.kr/survey>
 
-![](https://community.rstudio.com/uploads/default/original/2X/6/66f7190f409df1b0c5d4c41bbf0b63237c4cfd9e.png)
+![](man/figures/survey.png)

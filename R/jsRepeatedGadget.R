@@ -3,7 +3,7 @@
 #' @param data data
 #' @param nfactor.limit nlevels limit for categorical variables
 #' @return Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic plot
-#' @details DETAILS
+#' @details Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic plot
 #' @examples
 #' if(interactive()){
 #'  library(survival)

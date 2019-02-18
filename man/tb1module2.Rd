@@ -31,7 +31,7 @@ Shiny module
 Shiny module Server for Table 1 using reactive data.
 }
 \details{
-DETAILS
+Shiny module Server for Table 1 using reactive data.
 }
 \examples{
  #EXAMPLE1

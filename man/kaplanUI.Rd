@@ -16,8 +16,8 @@ kaplanUI
 ModuleUI for kaplan-meier plot
 }
 \details{
-DETAILS
+ModuleUI for kaplan-meier plot
 }
 \examples{
- #EXAMPLE1
+ kaplanUI(1)
 }

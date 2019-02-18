@@ -1,9 +1,8 @@
-
 #' @title GEEModuleUI: ModuleUI for GEE
 #' @description ModuleUI for GEE
 #' @param id id
 #' @return GEEModuleUI
-#' @details DETAILS
+#' @details ModuleUI for GEE
 #' @examples
 #'  #EXAMPLE1
 #' @rdname GEEModuleUI
@@ -39,7 +38,7 @@ GEEModuleUI <- function(id) {
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param id.gee reactive repeated measure variable
 #' @return GEEModuleLinear
-#' @details DETAILS
+#' @details Module for linear GEE using reactive data
 #' @examples
 #'  #EXAMPLE1
 #' @rdname GEEModuleLinear

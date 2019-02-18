@@ -3,9 +3,8 @@
 #' @param id id
 #' @param label label, Default: 'csv/xlsx/sav/sas7bdat/dta file'
 #' @return Shiny UI
-#' @details DETAILS
+#' @details File upload UI for repeated measure analysis.
 #' @examples
-#' if(interactive()){
 #'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #'  ui <- fluidPage(
 #'    sidebarLayout(
@@ -31,9 +30,6 @@
 #'    output$label <- renderDT({
 #'      data()$label
 #'    })
-#'  }
-#'
-#'  shinyApp(ui, server)
 #'  }
 #' @rdname FileRepeatedInput
 #' @export
@@ -62,9 +58,8 @@ FileRepeatedInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dt
 #' @param session session
 #' @param nfactor.limit nfactor limit to include, Default: 20
 #' @return server
-#' @details DETAILS
+#' @details File upload server module for repeated measure analysis.
 #' @examples
-#' if(interactive()){
 #'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #'  ui <- fluidPage(
 #'    sidebarLayout(
@@ -90,9 +85,6 @@ FileRepeatedInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dt
 #'    output$label <- renderDT({
 #'      data()$label
 #'    })
-#'  }
-#'
-#'  shinyApp(ui, server)
 #'  }
 #' @rdname FileRepeated
 #' @export

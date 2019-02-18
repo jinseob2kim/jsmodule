@@ -31,7 +31,7 @@ Shiny module
 Shiny module Server for Table 1.
 }
 \details{
-DETAILS
+Shiny module Server for Table 1.
 }
 \examples{
  #EXAMPLE1

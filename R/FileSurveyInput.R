@@ -3,9 +3,8 @@
 #' @param id id
 #' @param label label, Default: 'csv/xlsx/sav/sas7bdat/dta file'
 #' @return Shiny UI
-#' @details DETAILS
+#' @details File upload UI for survey data analysis.
 #' @examples
-#' if(interactive()){
 #'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #'  ui <- fluidPage(
 #'    sidebarLayout(
@@ -31,9 +30,6 @@
 #'    output$label <- renderDT({
 #'      data()$label
 #'    })
-#'  }
-#'
-#'  shinyApp(ui, server)
 #'  }
 #' @rdname FileSurveyInput
 #' @export
@@ -62,9 +58,8 @@ FileSurveyInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)
 #' @param session session
 #' @param nfactor.limit nfactor limit to include, Default: 20
 #' @return server
-#' @details DETAILS
+#' @details File upload server module for survey data analysis.
 #' @examples
-#' if(interactive()){
 #'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #'  ui <- fluidPage(
 #'    sidebarLayout(
@@ -90,9 +85,6 @@ FileSurveyInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)
 #'    output$label <- renderDT({
 #'      data()$label
 #'    })
-#'  }
-#'
-#'  shinyApp(ui, server)
 #'  }
 #' @rdname FileSurvey
 #' @export

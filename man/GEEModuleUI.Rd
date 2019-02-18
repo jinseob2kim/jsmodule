@@ -16,7 +16,7 @@ GEEModuleUI
 ModuleUI for GEE
 }
 \details{
-DETAILS
+ModuleUI for GEE
 }
 \examples{
  #EXAMPLE1

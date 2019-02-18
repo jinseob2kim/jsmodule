@@ -22,10 +22,9 @@ server
 File upload server module for survey data analysis.
 }
 \details{
-DETAILS
+File upload server module for survey data analysis.
 }
 \examples{
-if(interactive()){
  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
  ui <- fluidPage(
    sidebarLayout(
@@ -51,8 +50,5 @@ if(interactive()){
    output$label <- renderDT({
      data()$label
    })
- }
-
- shinyApp(ui, server)
  }
 }

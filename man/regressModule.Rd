@@ -34,7 +34,7 @@ regressModule
 Module for linear regression
 }
 \details{
-DETAILS
+Module for linear regression
 }
 \examples{
  #EXAMPLE1

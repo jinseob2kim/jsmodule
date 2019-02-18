@@ -16,7 +16,7 @@ Gadget
 Shiny Gadget for propensity score analysis.
 }
 \details{
-DETAILS
+Shiny Gadget for propensity score analysis.
 }
 \examples{
 if(interactive()){

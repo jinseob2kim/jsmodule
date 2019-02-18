@@ -16,8 +16,8 @@ regressModuleUI
 ModuleUI for regression
 }
 \details{
-DETAILS
+ModuleUI for regression
 }
 \examples{
- #EXAMPLE1
+ regressModuleUI(1)
 }

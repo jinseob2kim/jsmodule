@@ -25,13 +25,13 @@ tb1simple(input, output, session, data, matdata, data_label,
 \item{group_var}{group_var}
 }
 \value{
-OUTPUT_DESCRIPTION
+tb1 module for propensity score analysis
 }
 \description{
 tb1 module for propensity score analysis
 }
 \details{
-DETAILS
+tb1 module for propensity score analysis
 }
 \examples{
  #EXAMPLE1

@@ -34,7 +34,7 @@ regressModule2
 Module for linear regression using reactive data
 }
 \details{
-DETAILS
+Module for linear regression using reactive data
 }
 \examples{
  #EXAMPLE1

@@ -52,9 +52,9 @@ mksetdiff <- function(varlist, vars){
 #' @description ModuleUI for regression
 #' @param id id
 #' @return regressModuleUI
-#' @details DETAILS
+#' @details ModuleUI for regression
 #' @examples
-#'  #EXAMPLE1
+#'  regressModuleUI(1)
 #' @rdname regressModuleUI
 #' @export
 
@@ -91,7 +91,7 @@ regressModuleUI <- function(id) {
 #' @param design.survey survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis.
 #' @return regressModule
-#' @details DETAILS
+#' @details Module for linear regression
 #' @examples
 #'  #EXAMPLE1
 #' @rdname regressModule
@@ -299,7 +299,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @param design.survey survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis.
 #' @return regressModule2
-#' @details DETAILS
+#' @details Module for linear regression using reactive data
 #' @examples
 #'  #EXAMPLE1
 #' @rdname regressModule2
@@ -575,7 +575,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @param design.survey survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis.
 #' @return logisticModule
-#' @details DETAILS
+#' @details Module for logistic regression
 #' @examples
 #'  #EXAMPLE1
 #' @rdname logisticModule
@@ -780,7 +780,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @param design.survey survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis.
 #' @return logisticModule2
-#' @details DETAILS
+#' @details Module for logistic regression using reactive data
 #' @examples
 #'  #EXAMPLE1
 #' @rdname logisticModule2

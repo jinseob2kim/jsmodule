@@ -16,8 +16,8 @@ UI
 tb1 module UI for propensity score analysis
 }
 \details{
-DETAILS
+tb1 module UI for propensity score analysis
 }
 \examples{
- #EXAMPLE1
+ tb1simpleUI(1)
 }

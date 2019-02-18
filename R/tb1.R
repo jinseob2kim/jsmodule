@@ -3,9 +3,9 @@
 #' @description Shiny module UI for Table 1.
 #' @param id id
 #' @return Shiny UI
-#' @details DETAILS
+#' @details Shiny module UI for Table 1.
 #' @examples
-#'  #EXAMPLE1
+#'  tb1moduleUI(1)
 #' @rdname tb1moduleUI
 #' @export
 #' @import shiny
@@ -34,7 +34,7 @@ tb1moduleUI <- function(id) {
 #' @param nfactor.limit maximum factor levels to include, Default: 10
 #' @param design.survey survey data. default: NULL
 #' @return Shiny module
-#' @details DETAILS
+#' @details Shiny module Server for Table 1.
 #' @examples
 #'  #EXAMPLE1
 #' @rdname tb1module
@@ -271,7 +271,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @param nfactor.limit maximum factor levels to include, Default: 10
 #' @param design.survey Survey data. default: NULL
 #' @return Shiny module
-#' @details DETAILS
+#' @details Shiny module Server for Table 1 using reactive data.
 #' @examples
 #'  #EXAMPLE1
 #' @rdname tb1module2

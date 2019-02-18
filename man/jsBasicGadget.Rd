@@ -22,7 +22,6 @@ DETAILS
 }
 \examples{
 if(interactive()){
- library(survival)
- jsBasicGadget(lung)
+ jsBasicGadjet(mtcars)
  }
 }

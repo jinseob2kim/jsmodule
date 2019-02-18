@@ -3,9 +3,9 @@
 #' @description Variable selection module UI for ggpairs
 #' @param id id
 #' @return ggpairsModuleUI1
-#' @details DETAILS
+#' @details Variable selection module UI for ggpairs
 #' @examples
-#'  #EXAMPLE1
+#'  ggpairsModuleUI1(1)
 #' @rdname ggpairsModuleUI1
 #' @export
 
@@ -28,9 +28,9 @@ ggpairsModuleUI1 <- function(id) {
 #' @description Option & download module UI for ggpairs
 #' @param id id
 #' @return ggpairsModuleUI2
-#' @details DETAILS
+#' @details Option & download module UI for ggpairs
 #' @examples
-#'  #EXAMPLE1
+#'  ggpairsModuleUI2(1)
 #' @rdname ggpairsModuleUI2
 #' @export
 
@@ -64,7 +64,7 @@ ggpairsModuleUI2 <- function(id) {
 #' @param data_label data_label
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @return ggpairsModule
-#' @details DETAILS
+#' @details ggpairs module
 #' @examples
 #'  #EXAMPLE1
 #' @rdname ggpairsModule

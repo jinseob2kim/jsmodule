@@ -13,10 +13,12 @@ Rstudio addin of jsBasicGadget
 Rstudio addin of jsBasicGadget
 }
 \details{
-DETAILS
+Rstudio addin of jsBasicGadget
 }
 \examples{
- #EXAMPLE1
+if(interactive()){
+ jsBasicGadjet(mtcars)
+ }
 }
 \seealso{
 \code{\link[rstudioapi]{rstudio-editors}}

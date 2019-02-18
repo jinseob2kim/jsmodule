@@ -16,8 +16,8 @@ Shiny UI
 Shiny module UI for Table 1.
 }
 \details{
-DETAILS
+Shiny module UI for Table 1.
 }
 \examples{
- #EXAMPLE1
+ tb1moduleUI(1)
 }

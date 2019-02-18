@@ -16,8 +16,8 @@ ggpairsModuleUI1
 Variable selection module UI for ggpairs
 }
 \details{
-DETAILS
+Variable selection module UI for ggpairs
 }
 \examples{
- #EXAMPLE1
+ ggpairsModuleUI1(1)
 }

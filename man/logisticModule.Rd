@@ -34,7 +34,7 @@ logisticModule
 Module for logistic regression
 }
 \details{
-DETAILS
+Module for logistic regression
 }
 \examples{
  #EXAMPLE1

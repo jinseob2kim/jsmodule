@@ -3,7 +3,7 @@
 #' @description Shiny Gadget for propensity score analysis.
 #' @param data data
 #' @return Gadget
-#' @details DETAILS
+#' @details Shiny Gadget for propensity score analysis.
 #' @examples
 #' if(interactive()){
 #'  jsPropensityGadget(mtcars)

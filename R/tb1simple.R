@@ -3,9 +3,9 @@
 #' @description tb1 module UI for propensity score analysis
 #' @param id id
 #' @return UI
-#' @details DETAILS
+#' @details tb1 module UI for propensity score analysis
 #' @examples
-#'  #EXAMPLE1
+#'  tb1simpleUI(1)
 #' @rdname tb1simpleUI
 #' @export
 
@@ -35,8 +35,8 @@ tb1simpleUI <- function(id) {
 #' @param data_label data_label
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @param group_var group_var
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
+#' @return tb1 module for propensity score analysis
+#' @details tb1 module for propensity score analysis
 #' @examples
 #'  #EXAMPLE1
 #' @seealso

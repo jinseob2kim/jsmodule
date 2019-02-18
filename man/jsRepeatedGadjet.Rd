@@ -18,7 +18,7 @@ Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic p
 Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic plot
 }
 \details{
-DETAILS
+Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic plot
 }
 \examples{
 if(interactive()){

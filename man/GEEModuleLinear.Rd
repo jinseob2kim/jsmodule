@@ -31,7 +31,7 @@ GEEModuleLinear
 Module for linear GEE using reactive data
 }
 \details{
-DETAILS
+Module for linear GEE using reactive data
 }
 \examples{
  #EXAMPLE1

@@ -16,8 +16,8 @@ ggplotdownUI
 Option & download module UI for ggplot
 }
 \details{
-DETAILS
+Option & download module UI for ggplot
 }
 \examples{
- #EXAMPLE1
+ ggplotdownUI(1)
 }

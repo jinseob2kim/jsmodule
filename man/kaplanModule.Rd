@@ -34,7 +34,7 @@ kaplanModule
 Module for kaplan-meier plot
 }
 \details{
-DETAILS
+Module for kaplan-meier plot
 }
 \examples{
  #EXAMPLE1

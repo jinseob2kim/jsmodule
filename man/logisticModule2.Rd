@@ -34,7 +34,7 @@ logisticModule2
 Module for logistic regression using reactive data
 }
 \details{
-DETAILS
+Module for logistic regression using reactive data
 }
 \examples{
  #EXAMPLE1

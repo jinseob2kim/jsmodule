@@ -2,9 +2,9 @@
 #' @description ModuleUI for kaplan-meier plot
 #' @param id id
 #' @return kaplanUI
-#' @details DETAILS
+#' @details ModuleUI for kaplan-meier plot
 #' @examples
-#'  #EXAMPLE1
+#'  kaplanUI(1)
 #' @rdname kaplanUI
 #' @export
 
@@ -32,9 +32,9 @@ kaplanUI <- function(id) {
 #' @description Option & download module UI for ggplot
 #' @param id id
 #' @return ggplotdownUI
-#' @details DETAILS
+#' @details Option & download module UI for ggplot
 #' @examples
-#'  #EXAMPLE1
+#'  ggplotdownUI(1)
 #' @rdname ggplotdownUI
 #' @export
 
@@ -66,7 +66,7 @@ ggplotdownUI <- function(id) {
 #' @param design.survey reactive survey data. default: NULL
 #' @param id.cluster reactive cluster variable if marginal model, Default: NULL
 #' @return kaplanModule
-#' @details DETAILS
+#' @details Module for kaplan-meier plot
 #' @examples
 #'  #EXAMPLE1
 #' @rdname kaplanModule
