@@ -11,6 +11,7 @@ matrix:
     r_packages:
     - covr
     after_success:
+    - Rscript -e 'shinytest::installDependencies()'
     - Rscript -e 'covr::codecov()'
     before_deploy: Rscript -e 'remotes::install_cran("pkgdown")'
     deploy:

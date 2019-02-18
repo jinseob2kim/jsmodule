@@ -22,5 +22,24 @@ test_that("Run Modules", {
 })
 
 
+test_that("Run shiny: basic", {
+
+  app <- ShinyDriver$new(test_path("apps/basic"))
+
+  ## selectInput
+  expect_identical(
+    app$findWidget("factor_vname")$setValue("mpg")$getValue(),
+    "mpg"
+  )
+
+  ## checkboxInput
+  expect_true(
+    app$findWidget("check_subset")$setValue(TRUE)$getValue()
+  )
+  expect_false(
+    app$findWidget("check_subset")$setValue(FALSE)$getValue()
+  )
+
+})
 
 
