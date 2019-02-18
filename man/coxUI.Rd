@@ -19,5 +19,5 @@ ModuleUI for cox model
 DETAILS
 }
 \examples{
- #EXAMPLE1
+ coxUI(1)
 }

@@ -4,7 +4,7 @@
 #' @return coxUI
 #' @details DETAILS
 #' @examples
-#'  #EXAMPLE1
+#'  coxUI(1)
 #' @rdname coxUI
 #' @export
 
