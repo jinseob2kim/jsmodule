@@ -21,31 +21,11 @@ test_that("Run Modules", {
 
 })
 
-test_that("Run shiny: basic", {
 
-  app <- ShinyDriver$new(test_path("apps/basic"))
-  widgets <- app$listWidgets()
-  inputs <- widgets$input
+context("basic")
 
-  ## list widget
-  expect_is(widgets, "list")
-
-  expect_equal(
-    sort(inputs),
-    sort(c("factor_vname", "factor_vname-selectized", "check_subset", "linear-decimal", "linear-regressUI_subcheck", "logistic-decimal",
-           "logistic-regressUI_subcheck", "cox-decimal", "cox-subcheck", "ggpairs-theme", "ggpairs-theme-selectized", "kaplan-cumhaz", "kaplan-pval",
-           "kaplan-table", "kaplan-subcheck"))
-  )
-
-
-  ## checkboxInput
-  expect_true(
-    app$findWidget("check_subset")$setValue(TRUE)$getValue()
-  )
-  expect_false(
-    app$findWidget("check_subset")$setValue(FALSE)$getValue()
-  )
-
+test_that("shinytest will be passed", {
+  skip_on_cran()
+  shinytest::expect_pass(shinytest::testApp("shinytest/basic"))
 })
-
 
