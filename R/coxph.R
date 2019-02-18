@@ -2,7 +2,7 @@
 #' @description ModuleUI for cox model
 #' @param id id
 #' @return coxUI
-#' @details DETAILS
+#' @details ModuleUI for cox model
 #' @examples
 #'  coxUI(1)
 #' @rdname coxUI
@@ -39,7 +39,7 @@ coxUI <- function(id) {
 #' @param default.unires Set default independent variables using univariate analysis.
 #' @param id.cluster reactive cluster variable if marginal cox model, Default: NULL
 #' @return regressModule
-#' @details DETAILS
+#' @details Module for cox model
 #' @examples
 #'  #EXAMPLE1
 #' @rdname coxModule
