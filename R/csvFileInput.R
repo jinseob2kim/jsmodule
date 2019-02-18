@@ -59,38 +59,34 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #' @param session session
 #' @param nfactor.limit nfactor limit to include, Default: 20
 #' @return server
-#' @details DETAILS
+#' @details Shiny module Server for file(csv or xlsx) upload.
 #' @examples
-#' if(interactive()){
-#'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
-#'  ui <- fluidPage(
-#'    sidebarLayout(
-#'      sidebarPanel(
-#'        csvFileInput("datafile")
-#'      ),
-#'      mainPanel(
-#'        tabsetPanel(type = "pills",
-#'                    tabPanel("Data", DTOutput("data")),
-#'                    tabPanel("Label", DTOutput("data_label", width = "100%"))
-#'                    )
-#'      )
+#' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(
+#'       csvFileInput("datafile")
+#'     ),
+#'     mainPanel(
+#'       tabsetPanel(type = "pills",
+#'                   tabPanel("Data", DTOutput("data")),
+#'                   tabPanel("Label", DTOutput("data_label", width = "100%"))
+#'                  )
 #'    )
 #'  )
+#')
 #'
-#'  server <- function(input, output, session) {
-#'    data <- callModule(csvFile, "datafile")
+#' server <- function(input, output, session) {
+#'   data <- callModule(csvFile, "datafile")
 #'
-#'    output$data <- renderDT({
-#'      data()$data
-#'    })
+#'   output$data <- renderDT({
+#'     data()$data
+#'   })
 #'
-#'    output$label <- renderDT({
-#'      data()$label
-#'    })
-#'  }
-#'
-#'  shinyApp(ui, server)
-#'  }
+#'   output$label <- renderDT({
+#'     data()$label
+#'   })
+#'}
 #' @rdname csvFile
 #' @export
 #' @import shiny

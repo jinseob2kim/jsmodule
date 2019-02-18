@@ -16,7 +16,7 @@ coxUI
 ModuleUI for cox model
 }
 \details{
-DETAILS
+ModuleUI for cox model
 }
 \examples{
  coxUI(1)

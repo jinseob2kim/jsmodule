@@ -27,7 +27,7 @@ regress table
 regress.display function for reactive data
 }
 \details{
-DETAILS
+regress.display function for reactive data
 }
 \examples{
 model1 <- glm(mpg ~ cyl + disp + vs, data = mtcars)

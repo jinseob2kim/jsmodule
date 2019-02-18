@@ -27,7 +27,7 @@ logistic table
 Modified epiDisplay's logistic.display function for reactive data.
 }
 \details{
-DETAILS
+Modified epiDisplay's logistic.display function for reactive data.
 }
 \examples{
 model1 <- glm(am ~ cyl + disp, data = mtcars, family = binomial)

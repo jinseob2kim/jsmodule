@@ -36,7 +36,7 @@ regressModule
 Module for cox model
 }
 \details{
-DETAILS
+Module for cox model
 }
 \examples{
  #EXAMPLE1

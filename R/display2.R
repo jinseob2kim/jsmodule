@@ -7,7 +7,7 @@
 #' @param decimal decimal, Default: 2
 #' @param simplified simplified, Default: FALSE
 #' @return regress table
-#' @details DETAILS
+#' @details regress.display function for reactive data
 #' @examples
 #' model1 <- glm(mpg ~ cyl + disp + vs, data = mtcars)
 #' regress.display2(model1, crude = TRUE, crude.p.value = TRUE, decimal = 3)
@@ -210,7 +210,7 @@ regress.display2 <- function (regress.model, alpha = 0.05, crude = FALSE, crude.
 #' @param decimal decimal, Default: 2
 #' @param simplified simplified, Default: FALSE
 #' @return logistic table
-#' @details DETAILS
+#' @details Modified epiDisplay's logistic.display function for reactive data.
 #' @examples
 #' model1 <- glm(am ~ cyl + disp, data = mtcars, family = binomial)
 #' logistic.display2(model1, crude = TRUE, crude.p.value = TRUE, decimal = 3)

@@ -4,9 +4,39 @@
 #' @param id id
 #' @param label label, Default: 'csv/xlsx/sav/sas7bdat file'
 #' @return Shiny UI
-#' @details DETAILS
+#' @details Shiny module UI for file upload for propensity score matching.
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(
+#'       FilePsInput("datafile")
+#'     ),
+#'     mainPanel(
+#'       tabsetPanel(type = "pills",
+#'                   tabPanel("Data", DTOutput("data")),
+#'                   tabPanel("Matching data", DTOutput("matdata")),
+#'                   tabPanel("Label", DTOutput("data_label", width = "100%"))
+#'                  )
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'   mat.info <- callModule(FilePs, "datafile")
+#'
+#'   output$data <- renderDT({
+#'     mat.info()$data
+#'   })
+#'
+#'   output$matdata <- renderDT({
+#'     mat.info()$matdata
+#'   })
+#'
+#'   output$label <- renderDT({
+#'     mat.info()$label
+#'   })
+#'}
 #' @rdname FilePsInput
 #' @export
 #' @import shiny
@@ -38,9 +68,39 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
 #' @param session session
 #' @param nfactor.limit nfactor limit to include, Default: 20
 #' @return server
-#' @details DETAILS
+#' @details Shiny module Server for file upload for propensity score matching.
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(
+#'       FilePsInput("datafile")
+#'     ),
+#'     mainPanel(
+#'       tabsetPanel(type = "pills",
+#'                   tabPanel("Data", DTOutput("data")),
+#'                   tabPanel("Matching data", DTOutput("matdata")),
+#'                   tabPanel("Label", DTOutput("data_label", width = "100%"))
+#'                  )
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'   mat.info <- callModule(FilePs, "datafile")
+#'
+#'   output$data <- renderDT({
+#'     mat.info()$data
+#'   })
+#'
+#'   output$matdata <- renderDT({
+#'     mat.info()$matdata
+#'   })
+#'
+#'   output$label <- renderDT({
+#'     mat.info()$label
+#'   })
+#'}
 #' @rdname FilePs
 #' @export
 #' @import shiny
