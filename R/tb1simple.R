@@ -412,7 +412,7 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 
 
 #' @title tb1simple2: tb1 module for propensity score analysis for reactive data
-#' @description tb1 module for propensity score analysis
+#' @description tb1 module for propensity score analysis for reactive data
 #' @param input input
 #' @param output output
 #' @param session session
@@ -422,8 +422,8 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @param vlist variable lists
 #' @param group_var reactive group_var
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
+#' @return tb1 module for propensity score analysis for reactive data
+#' @details tb1 module for propensity score analysis for reactive data
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #' library(haven);library(survey)

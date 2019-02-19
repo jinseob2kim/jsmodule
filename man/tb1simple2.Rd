@@ -27,13 +27,13 @@ tb1simple2(input, output, session, data, matdata, data_label,
 \item{group_var}{reactive group_var}
 }
 \value{
-OUTPUT_DESCRIPTION
+tb1 module for propensity score analysis for reactive data
 }
 \description{
-tb1 module for propensity score analysis
+tb1 module for propensity score analysis for reactive data
 }
 \details{
-DETAILS
+tb1 module for propensity score analysis for reactive data
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
