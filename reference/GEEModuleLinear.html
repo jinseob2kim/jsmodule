@@ -178,8 +178,38 @@
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'> #EXAMPLE1
-</div></pre>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>shiny</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>DT</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>data.table</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>jstable</span>)
+<span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/fluidPage'>fluidPage</a></span>(
+   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/sidebarLayout'>sidebarLayout</a></span>(
+   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/sidebarPanel'>sidebarPanel</a></span>(
+     <span class='fu'><a href='GEEModuleUI.html'>GEEModuleUI</a></span>(<span class='st'>"linear"</span>)
+   ),
+   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/mainPanel'>mainPanel</a></span>(
+     <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>DTOutput</a></span>(<span class='st'>"lineartable"</span>)
+   )
+ )
+)
+
+<span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
+
+  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/reactive'>reactive</a></span>(<span class='no'>mtcars</span>)
+  <span class='no'>data.label</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/reactive'>reactive</a></span>(<span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/jstable/topics/mk.lev'>mk.lev</a></span>(<span class='no'>mtcars</span>))
+  <span class='no'>id.gee</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/reactive'>reactive</a></span>(<span class='st'>"mpg"</span>)
+
+  <span class='no'>out_linear</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/callModule'>callModule</a></span>(<span class='no'>GEEModuleLinear</span>, <span class='st'>"linear"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>,
+                           <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>id.gee</span> <span class='kw'>=</span> <span class='no'>id.gee</span>)
+
+  <span class='no'>output</span>$<span class='no'>lineartable</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>renderDT</a></span>({
+    <span class='no'>hide</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/which'>which</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/colnames'>colnames</a></span>(<span class='fu'>out_linear</span>()$<span class='no'>table</span>) <span class='kw'>==</span> <span class='st'>"sig"</span>)
+    <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/datatable'>datatable</a></span>(<span class='fu'>out_linear</span>()$<span class='no'>table</span>, <span class='kw'>rownames</span><span class='kw'>=</span><span class='no'>T</span>, <span class='kw'>extension</span><span class='kw'>=</span> <span class='st'>"Buttons"</span>, <span class='kw'>caption</span> <span class='kw'>=</span> <span class='fu'>out_linear</span>()$<span class='no'>caption</span>,
+              <span class='kw'>options</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/jstable/topics/opt.tbreg'>opt.tbreg</a></span>(<span class='fu'>out_linear</span>()$<span class='no'>caption</span>),
+                          <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>columnDefs</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>visible</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>targets</span> <span class='kw'>=</span><span class='no'>hide</span>))
+                          ),
+                          <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>scrollX</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+              )
+    ) <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/formatCurrency'>formatStyle</a></span>(<span class='st'>"sig"</span>, <span class='kw'>target</span> <span class='kw'>=</span> <span class='st'>'row'</span>,<span class='kw'>backgroundColor</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/styleInterval'>styleEqual</a></span>(<span class='st'>"**"</span>, <span class='st'>'yellow'</span>))
+  })
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
