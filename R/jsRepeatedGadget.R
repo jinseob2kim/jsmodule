@@ -6,8 +6,7 @@
 #' @details Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic plot
 #' @examples
 #' if(interactive()){
-#'  library(survival)
-#'  jsRepeatedGadjet(lung)
+#'  jsRepeatedGadjet(mtcars)
 #'  }
 #' @rdname jsRepeatedGadjet
 #' @export
@@ -339,9 +338,11 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
 #' @title jsRepeatedAddin: Rstudio addin of jsRepeatedGadjet
 #' @description Rstudio addin of jsRepeatedGadjet
 #' @return Rstudio addin of jsRepeatedGadjet
-#' @details DETAILS
+#' @details Rstudio addin of jsRepeatedGadjet
 #' @examples
-#'  #EXAMPLE1
+#' if(interactive()){
+#'  jsRepeatedGadjet(mtcars)
+#'  }
 #' @seealso
 #'  \code{\link[rstudioapi]{rstudio-editors}}
 #' @rdname jsRepeatedAddin

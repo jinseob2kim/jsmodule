@@ -13,10 +13,12 @@ Rstudio addin of jsRepeatedGadjet
 Rstudio addin of jsRepeatedGadjet
 }
 \details{
-DETAILS
+Rstudio addin of jsRepeatedGadjet
 }
 \examples{
- #EXAMPLE1
+if(interactive()){
+ jsRepeatedGadjet(mtcars)
+ }
 }
 \seealso{
 \code{\link[rstudioapi]{rstudio-editors}}

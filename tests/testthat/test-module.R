@@ -26,6 +26,7 @@ context("basic")
 
 test_that("shinytest will be passed", {
   skip_on_cran()
+  skip_on_travis()
   shinytest::expect_pass(shinytest::testApp("shinytest/basic"))
 })
 

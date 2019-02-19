@@ -13,10 +13,12 @@ Rstudio addin of jsSurveyGadget
 Rstudio addin of jsSurveyGadget
 }
 \details{
-DETAILS
+Rstudio addin of jsSurveyGadget
 }
 \examples{
- #EXAMPLE1
+if(interactive()){
+ jsSurveyGadget(mtcars)
+ }
 }
 \seealso{
 \code{\link[rstudioapi]{rstudio-editors}}

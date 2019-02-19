@@ -22,7 +22,6 @@ Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic p
 }
 \examples{
 if(interactive()){
- library(survival)
- jsRepeatedGadjet(lung)
+ jsRepeatedGadjet(mtcars)
  }
 }

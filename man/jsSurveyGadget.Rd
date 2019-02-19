@@ -22,7 +22,6 @@ Shiny Gadget including Data, Label info, Table 1, svyglm, Basic plot
 }
 \examples{
 if(interactive()){
- library(survival)
- jsSurveyGadget(lung)
+ jsSurveyGadget(mtcars)
  }
 }

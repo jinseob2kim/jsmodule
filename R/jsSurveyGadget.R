@@ -6,8 +6,7 @@
 #' @details Shiny Gadget including Data, Label info, Table 1, svyglm, Basic plot
 #' @examples
 #' if(interactive()){
-#'  library(survival)
-#'  jsSurveyGadget(lung)
+#'  jsSurveyGadget(mtcars)
 #'  }
 #' @rdname jsSurveyGadget
 #' @export
@@ -427,9 +426,11 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
 #' @title jsSurveydAddin: Rstudio addin of jsSurveyGadget
 #' @description Rstudio addin of jsSurveyGadget
 #' @return Rstudio addin of jsSurveyGadget
-#' @details DETAILS
+#' @details Rstudio addin of jsSurveyGadget
 #' @examples
-#'  #EXAMPLE1
+#' if(interactive()){
+#'  jsSurveyGadget(mtcars)
+#'  }
 #' @seealso
 #'  \code{\link[rstudioapi]{rstudio-editors}}
 #' @rdname jsSurveydAddin

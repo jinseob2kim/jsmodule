@@ -4,7 +4,38 @@
 #' @return GEEModuleUI
 #' @details ModuleUI for GEE
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      GEEModuleUI("linear")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("lineartable")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'   id.gee <- reactive("mpg")
+#'
+#'   out_linear <- callModule(GEEModuleLinear, "linear", data = data, data_label = data.label,
+#'                            data_varStruct = NULL, id.gee = id.gee)
+#'
+#'   output$lineartable <- renderDT({
+#'     hide = which(colnames(out_linear()$table) == "sig")
+#'     datatable(out_linear()$table, rownames=T, extension= "Buttons", caption = out_linear()$caption,
+#'               options = c(opt.tbreg(out_linear()$caption),
+#'                           list(columnDefs = list(list(visible=FALSE, targets =hide))
+#'                           ),
+#'                           list(scrollX = TRUE)
+#'               )
+#'     ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+#'   })
+#'}
 #' @rdname GEEModuleUI
 #' @export
 
@@ -40,7 +71,38 @@ GEEModuleUI <- function(id) {
 #' @return GEEModuleLinear
 #' @details Module for linear GEE using reactive data
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      GEEModuleUI("linear")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("lineartable")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'   id.gee <- reactive("mpg")
+#'
+#'   out_linear <- callModule(GEEModuleLinear, "linear", data = data, data_label = data.label,
+#'                            data_varStruct = NULL, id.gee = id.gee)
+#'
+#'   output$lineartable <- renderDT({
+#'     hide = which(colnames(out_linear()$table) == "sig")
+#'     datatable(out_linear()$table, rownames=T, extension= "Buttons", caption = out_linear()$caption,
+#'               options = c(opt.tbreg(out_linear()$caption),
+#'                           list(columnDefs = list(list(visible=FALSE, targets =hide))
+#'                           ),
+#'                           list(scrollX = TRUE)
+#'               )
+#'     ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+#'   })
+#'}
 #' @rdname GEEModuleLinear
 #' @export
 #' @import shiny
@@ -246,9 +308,41 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param id.gee reactive repeated measure variable
 #' @return GEEModuleLogistic
-#' @details DETAILS
+#' @details Module for logistic GEE using reactive data
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      GEEModuleUI("logistic")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("logistictable")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'   id.gee <- reactive("mpg")
+#'
+#'   out_logistic <- callModule(GEEModuleLogistic, "logistic", data = data, data_label = data.label,
+#'                              data_varStruct = NULL, id.gee = id.gee)
+#'
+#'   output$logistictable <- renderDT({
+#'     hide = which(colnames(out_logistic()$table) == "sig")
+#'     datatable(out_logistic()$table, rownames=T, extension= "Buttons",
+#'               caption = out_logistic()$caption,
+#'               options = c(opt.tbreg(out_logistic()$caption),
+#'                           list(columnDefs = list(list(visible=FALSE, targets =hide))
+#'                           ),
+#'                           list(scrollX = TRUE)
+#'               )
+#'     ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+#'   })
+#'}
 #' @rdname GEEModuleLogistic
 #' @export
 #' @import shiny
