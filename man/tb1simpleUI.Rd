@@ -19,5 +19,99 @@ tb1 module UI for propensity score analysis
 tb1 module UI for propensity score analysis
 }
 \examples{
- tb1simpleUI(1)
+library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
+library(haven);library(survey)
+ui <- fluidPage(
+   sidebarLayout(
+   sidebarPanel(
+     FilePsInput("datafile"),
+     tb1simpleUI("tb1")
+   ),
+   mainPanel(
+     DTOutput("table1_original"),
+     DTOutput("table1_ps"),
+     DTOutput("table1_iptw")
+   )
+ )
+)
+
+server <- function(input, output, session) {
+
+  mat.info <- callModule(FilePs, "datafile")
+
+  data <- reactive(mat.info()$data)
+  matdata <- reactive(mat.info()$matdata)
+  data.label <- reactive(mat.info()$data.label)
+
+
+  vlist <- eventReactive(mat.info(), {
+    mklist <- function(varlist, vars){
+      lapply(varlist,
+             function(x){
+               inter <- intersect(x, vars)
+               if (length(inter) == 1){
+                 inter <- c(inter, "")
+               }
+               return(inter)
+             })
+    }
+    factor_vars <- names(data())[data()[, lapply(.SD, class) \%in\% c("factor", "character")]]
+    factor_list <- mklist(data_varStruct(), factor_vars)
+    conti_vars <- setdiff(names(data()), c(factor_vars, "pscore", "iptw"))
+    conti_list <- mklist(data_varStruct(), conti_vars)
+    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}),
+                                   .SDcols = factor_vars])
+    class01_factor <- unlist(data()[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}),
+                                    .SDcols = factor_vars])
+    validate(
+      need(!is.null(class01_factor), "No categorical variables coded as 0, 1 in data")
+   )
+    factor_01vars <- factor_vars[class01_factor]
+    factor_01_list <- mklist(data_varStruct(), factor_01vars)
+    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data())]
+    group_list <- mklist(data_varStruct(), group_vars)
+    except_vars <- factor_vars[nclass_factor>10 | nclass_factor==1 | nclass_factor==nrow(data())]
+
+    ## non-normal: shapiro test
+      f <- function(x) {
+        if (diff(range(x, na.rm = T)) == 0) return(F) else return(shapiro.test(x)$p.value <= 0.05)
+      }
+
+      non_normal <- ifelse(nrow(data()) <=3 | nrow(data()) >= 5000,
+                           rep(F, length(conti_vars)),
+                           sapply(conti_vars, function(x){f(data()[[x]])})
+      )
+      return(list(factor_vars = factor_vars, factor_list = factor_list,
+                  conti_vars = conti_vars, conti_list = conti_list, factor_01vars = factor_01vars,
+                  factor_01_list = factor_01_list, group_list = group_list,
+                  except_vars = except_vars, non_normal = non_normal)
+      )
+
+    })
+
+  out.tb1 <- callModule(tb1simple2, "tb1", data = data, matdata = matdata, data_label = data.label,
+                        data_varStruct = NULL, vlist = vlist,
+                        group_var = reactive(mat.info()$group_var))
+
+  output$table1_original <- renderDT({
+    tb <- out.tb1()$original$table
+    cap <- out.tb1()$original$caption
+    out <- datatable(tb, rownames = T, extension= "Buttons", caption = cap)
+    return(out)
+  })
+
+  output$table1_ps <- renderDT({
+    tb <- out.tb1()$ps$table
+    cap <- out.tb1()$ps$caption
+    out <- datatable(tb, rownames = T, extension= "Buttons", caption = cap)
+    return(out)
+  })
+
+  output$table1_iptw <- renderDT({
+    tb <- out.tb1()$iptw$table
+    cap <- out.tb1()$iptw$caption
+    out <- datatable(tb, rownames = T, extension= "Buttons", caption = cap)
+    return(out)
+  })
+}
 }

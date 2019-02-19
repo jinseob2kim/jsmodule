@@ -17,7 +17,7 @@ Rstudio addin of jsRepeatedGadjet
 }
 \examples{
 if(interactive()){
- jsRepeatedGadjet(mtcars)
+ jsRepeatedAddin()
  }
 }
 \seealso{

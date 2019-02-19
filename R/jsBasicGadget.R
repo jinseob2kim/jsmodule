@@ -343,7 +343,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 #' @details Rstudio addin of jsBasicGadget
 #' @examples
 #' if(interactive()){
-#'  jsBasicGadjet(mtcars)
+#'  jsBasicAddin()
 #'  }
 #' @seealso
 #'  \code{\link[rstudioapi]{rstudio-editors}}

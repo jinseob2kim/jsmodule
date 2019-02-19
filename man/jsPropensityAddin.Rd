@@ -17,7 +17,7 @@ Rstudio addin of jsPropensityGadget
 }
 \examples{
 if(interactive()){
- jsPropensityGadget(mtcars)
+ jsPropensityAddin()
  }
 }
 \seealso{

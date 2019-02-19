@@ -5,7 +5,33 @@
 #' @return ggpairsModuleUI1
 #' @details Variable selection module UI for ggpairs
 #' @examples
-#'  ggpairsModuleUI1(1)
+#' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
+#' library(GGally)
+#'
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      ggpairsModuleUI1("ggpairs")
+#'    ),
+#'    mainPanel(
+#'      plotOutput("ggpairs_plot"),
+#'      ggpairsModuleUI2("ggpairs")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label,
+#'                             data_varStruct = NULL)
+#'
+#'   output$kaplan_plot <- renderPlot({
+#'     print(out_ggpairs())
+#'   })
+#'}
 #' @rdname ggpairsModuleUI1
 #' @export
 
@@ -30,7 +56,33 @@ ggpairsModuleUI1 <- function(id) {
 #' @return ggpairsModuleUI2
 #' @details Option & download module UI for ggpairs
 #' @examples
-#'  ggpairsModuleUI2(1)
+#' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
+#' library(GGally)
+#'
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      ggpairsModuleUI1("ggpairs")
+#'    ),
+#'    mainPanel(
+#'      plotOutput("ggpairs_plot"),
+#'      ggpairsModuleUI2("ggpairs")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label,
+#'                             data_varStruct = NULL)
+#'
+#'   output$kaplan_plot <- renderPlot({
+#'     print(out_ggpairs())
+#'   })
+#'}
 #' @rdname ggpairsModuleUI2
 #' @export
 
@@ -66,7 +118,33 @@ ggpairsModuleUI2 <- function(id) {
 #' @return ggpairsModule
 #' @details ggpairs module
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
+#' library(GGally)
+#'
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      ggpairsModuleUI1("ggpairs")
+#'    ),
+#'    mainPanel(
+#'      plotOutput("ggpairs_plot"),
+#'      ggpairsModuleUI2("ggpairs")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- mtcars
+#'   data.label <- jstable::mk.lev(mtcars)
+#'
+#'   out_ggpairs <- callModule(ggpairsModule, "ggpairs", data = data, data_label = data.label,
+#'                             data_varStruct = NULL)
+#'
+#'   output$kaplan_plot <- renderPlot({
+#'     print(out_ggpairs())
+#'   })
+#'}
 #' @rdname ggpairsModule
 #' @export
 #' @import shiny
@@ -283,9 +361,35 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
 #' @param data_label reactive data_label
 #' @param data_varStruct data_varStruct, Default: NULL
 #' @return ggpairsModule2
-#' @details DETAILS
+#' @details ggpairs module for reactive data
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
+#' library(GGally)
+#'
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      ggpairsModuleUI1("ggpairs")
+#'    ),
+#'    mainPanel(
+#'      plotOutput("ggpairs_plot"),
+#'      ggpairsModuleUI2("ggpairs")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label,
+#'                             data_varStruct = NULL)
+#'
+#'   output$kaplan_plot <- renderPlot({
+#'     print(out_ggpairs())
+#'   })
+#'}
 #' @rdname ggpairsModule2
 #' @export
 #' @import shiny

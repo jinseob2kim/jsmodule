@@ -341,7 +341,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
 #' @details Rstudio addin of jsRepeatedGadjet
 #' @examples
 #' if(interactive()){
-#'  jsRepeatedGadjet(mtcars)
+#'  jsRepeatedAddin()
 #'  }
 #' @seealso
 #'  \code{\link[rstudioapi]{rstudio-editors}}

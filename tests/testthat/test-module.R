@@ -11,6 +11,7 @@ test_that("Run Modules", {
   expect_is(FileSurveyInput(1), "list")
   expect_is(FileSurveyInput(1), "list")
   expect_is(ggplotdownUI(1), "list")
+  expect_is(GEEModuleUI(1), "list")
   expect_is(kaplanUI(1), "list")
   expect_is(regressModuleUI(1), "list")
   expect_is(tb1moduleUI(1), "list")

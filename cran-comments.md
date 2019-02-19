@@ -1,3 +1,12 @@
+## Resubmission
+
+This is a resubmission. In this version I have:
+
+* Add examples and tests for the non-UI functionality.
+
+* Add examples to all Rd files.
+
+
 ## Test environments
 * local Ubuntu 18.10 install, R 3.5.2
 * Ubuntu 14.04.5 LTS  (on travis-ci), R 3.5.1

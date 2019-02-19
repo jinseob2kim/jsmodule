@@ -17,7 +17,7 @@ Rstudio addin of jsBasicGadget
 }
 \examples{
 if(interactive()){
- jsBasicGadjet(mtcars)
+ jsBasicAddin()
  }
 }
 \seealso{

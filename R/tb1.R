@@ -5,7 +5,33 @@
 #' @return Shiny UI
 #' @details Shiny module UI for Table 1.
 #' @examples
-#'  tb1moduleUI(1)
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      tb1moduleUI("tb1")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("table1")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label,
+#'                         data_varStruct = NULL)
+#'
+#'   output$table1 <- renderDT({
+#'   tb <- out_tb1()$table
+#'   cap <- out_tb1()$caption
+#'   out.tb1 <- datatable(tb, rownames = T, extension= "Buttons", caption = cap)
+#'   return(out.tb1)
+#'   })
+#'}
 #' @rdname tb1moduleUI
 #' @export
 #' @import shiny
@@ -36,7 +62,33 @@ tb1moduleUI <- function(id) {
 #' @return Shiny module
 #' @details Shiny module Server for Table 1.
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      tb1moduleUI("tb1")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("table1")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- mtcars
+#'   data.label <- jstable::mk.lev(mtcars)
+#'
+#'   out_tb1 <- callModule(tb1module, "tb1", data = data, data_label = data.label,
+#'                         data_varStruct = NULL)
+#'
+#'   output$table1 <- renderDT({
+#'   tb <- out_tb1()$table
+#'   cap <- out_tb1()$caption
+#'   out.tb1 <- datatable(tb, rownames = T, extension= "Buttons", caption = cap)
+#'   return(out.tb1)
+#'   })
+#'}
 #' @rdname tb1module
 #' @export
 #' @import shiny
@@ -273,7 +325,33 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @return Shiny module
 #' @details Shiny module Server for Table 1 using reactive data.
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      tb1moduleUI("tb1")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("table1")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label,
+#'                         data_varStruct = NULL)
+#'
+#'   output$table1 <- renderDT({
+#'   tb <- out_tb1()$table
+#'   cap <- out_tb1()$caption
+#'   out.tb1 <- datatable(tb, rownames = T, extension= "Buttons", caption = cap)
+#'   return(out.tb1)
+#'   })
+#'}
 #' @rdname tb1module2
 #' @export
 #' @import shiny

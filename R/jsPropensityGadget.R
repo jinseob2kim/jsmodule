@@ -974,7 +974,7 @@ jsPropensityGadget <- function(data){
 #' @details Rstudio addin of jsPropensityGadget
 #' @examples
 #' if(interactive()){
-#'  jsPropensityGadget(mtcars)
+#'  jsPropensityAddin()
 #'  }
 #' @seealso
 #'  \code{\link[rstudioapi]{rstudio-editors}}

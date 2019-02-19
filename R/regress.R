@@ -54,7 +54,30 @@ mksetdiff <- function(varlist, vars){
 #' @return regressModuleUI
 #' @details ModuleUI for regression
 #' @examples
-#'  regressModuleUI(1)
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      regressModuleUI("linear")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("lineartable")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label,
+#'                            data_varStruct = NULL)
+#'
+#'   output$lineartable <- renderDT({
+#'     datatable(out_linear()$table, rownames=T, caption = out_linear()$caption)
+#'   })
+#'}
 #' @rdname regressModuleUI
 #' @export
 
@@ -93,7 +116,30 @@ regressModuleUI <- function(id) {
 #' @return regressModule
 #' @details Module for linear regression
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      regressModuleUI("linear")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("lineartable")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- mtcars
+#'   data.label <- jstable::mk.lev(mtcars)
+#'
+#'   out_linear <- callModule(regressModule, "linear", data = data, data_label = data.label,
+#'                            data_varStruct = NULL)
+#'
+#'   output$lineartable <- renderDT({
+#'     datatable(out_linear()$table, rownames=T, caption = out_linear()$caption)
+#'   })
+#'}
 #' @rdname regressModule
 #' @export
 #' @import shiny
@@ -301,7 +347,30 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @return regressModule2
 #' @details Module for linear regression using reactive data
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      regressModuleUI("linear")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("lineartable")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label,
+#'                            data_varStruct = NULL)
+#'
+#'   output$lineartable <- renderDT({
+#'     datatable(out_linear()$table, rownames=T, caption = out_linear()$caption)
+#'   })
+#'}
 #' @rdname regressModule2
 #' @export
 #' @import shiny
@@ -577,7 +646,30 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @return logisticModule
 #' @details Module for logistic regression
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      regressModuleUI("logistic")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("logistictable")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- mtcars
+#'   data.label <- jstable::mk.lev(mtcars)
+#'
+#'   out_logistic <- callModule(logisticModule, "logistic", data = data, data_label = data.label,
+#'                            data_varStruct = NULL)
+#'
+#'   output$logistictable <- renderDT({
+#'     datatable(out_logistic()$table, rownames=T, caption = out_logistic()$caption)
+#'   })
+#'}
 #' @rdname logisticModule
 #' @export
 #' @import shiny
@@ -782,7 +874,30 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @return logisticModule2
 #' @details Module for logistic regression using reactive data
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      regressModuleUI("logistic")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("logistictable")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label,
+#'                            data_varStruct = NULL)
+#'
+#'   output$logistictable <- renderDT({
+#'     datatable(out_logistic()$table, rownames=T, caption = out_logistic()$caption)
+#'   })
+#'}
 #' @rdname logisticModule2
 #' @export
 #' @import shiny

@@ -17,7 +17,7 @@ Rstudio addin of jsSurveyGadget
 }
 \examples{
 if(interactive()){
- jsSurveyGadget(mtcars)
+ jsSurveydAddin()
  }
 }
 \seealso{

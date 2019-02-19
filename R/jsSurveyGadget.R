@@ -429,7 +429,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
 #' @details Rstudio addin of jsSurveyGadget
 #' @examples
 #' if(interactive()){
-#'  jsSurveyGadget(mtcars)
+#'  jsSurveydAddin()
 #'  }
 #' @seealso
 #'  \code{\link[rstudioapi]{rstudio-editors}}
