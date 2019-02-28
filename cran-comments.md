@@ -2,6 +2,12 @@
 
 This is a resubmission. In this version I have:
 
+* Delete some image files to reduce size < 5 mb
+
+## Resubmission
+
+This is a resubmission. In this version I have:
+
 * Add examples and tests for the non-UI functionality.
 
 * Add examples to all Rd files.

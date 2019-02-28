@@ -58,25 +58,12 @@ jsRepeatedGadget(apistrat)
 
 ## Web applications
 
-### Basic statistics
-
-http://app.anpanman.co.kr/basic
-
-![](figures/basic.gif)
+* Basic statistics: http://app.anpanman.co.kr/basic
 
 
-### Propensity score analysis 
+* Propensity score analysis: http://app.anpanman.co.kr/ps
 
-http://app.anpanman.co.kr/ps
 
-### Repeated measure analysis
+* Repeated measure analysis: http://app.anpanman.co.kr/repeated
 
-http://app.anpanman.co.kr/repeated
-
-![](figures/repeated.png)
-
-### Survey data analysis
-
-http://app.anpanman.co.kr/survey
-
-![](figures/survey.png)
+* Survey data analysis: http://app.anpanman.co.kr/survey
