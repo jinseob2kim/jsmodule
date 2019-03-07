@@ -10,7 +10,7 @@ ggpairsModuleUI1(id)
 \item{id}{id}
 }
 \value{
-ggpairsModuleUI1
+Variable selection module UI for ggpairs
 }
 \description{
 Variable selection module UI for ggpairs

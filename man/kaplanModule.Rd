@@ -2,7 +2,7 @@
 % Please edit documentation in R/kaplan.R
 \name{kaplanModule}
 \alias{kaplanModule}
-\title{kaplanModule: Module for kaplan-meier plot}
+\title{kaplanModule: shiny module server for kaplan-meier plot.}
 \usage{
 kaplanModule(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
@@ -15,26 +15,26 @@ kaplanModule(input, output, session, data, data_label,
 
 \item{session}{session}
 
-\item{data}{reactive data}
+\item{data}{Reactive data}
 
-\item{data_label}{reactuve data_label}
+\item{data_label}{Reactuve data label}
 
-\item{data_varStruct}{reactive data_varStruct, Default: NULL}
+\item{data_varStruct}{Reactive List of variable structure, Default: NULL}
 
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 
-\item{design.survey}{reactive survey data. default: NULL}
+\item{design.survey}{Reactive survey data. default: NULL}
 
-\item{id.cluster}{reactive cluster variable if marginal model, Default: NULL}
+\item{id.cluster}{Reactive cluster variable if marginal model, Default: NULL}
 }
 \value{
-kaplanModule
+Shiny module server for kaplan-meier plot.
 }
 \description{
-Module for kaplan-meier plot
+Shiny module server for kaplan-meier plot.
 }
 \details{
-Module for kaplan-meier plot
+Shiny module server for kaplan-meier plot.
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)

@@ -1,8 +1,8 @@
-#' @title GEEModuleUI: ModuleUI for GEE
-#' @description ModuleUI for GEE
+#' @title GEEModuleUI: shiny modulde UI for generalized estimating equation(GEE).
+#' @description Shiny modulde UI for generalized estimating equation(GEE).
 #' @param id id
-#' @return GEEModuleUI
-#' @details ModuleUI for GEE
+#' @return Shiny modulde UI for generalized estimating equation(GEE).
+#' @details Shiny modulde UI for generalized estimating equation(GEE).
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(
@@ -58,18 +58,18 @@ GEEModuleUI <- function(id) {
 
 
 
-#' @title GEEModuleLinear: Module for linear GEE using reactive data
-#' @description Module for linear GEE using reactive data
+#' @title GEEModuleLinear: shiny modulde server for gaussian generalized estimating equation(GEE) using reactive data.
+#' @description Shiny modulde server for gaussian generalized estimating equation(GEE) using reactive data.
 #' @param input input
 #' @param output output
 #' @param session session
 #' @param data reactive data, ordered by id.
-#' @param data_label reactive data_label
-#' @param data_varStruct data_varStruct, Default: NULL
+#' @param data_label reactive data label
+#' @param data_varStruct List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param id.gee reactive repeated measure variable
-#' @return GEEModuleLinear
-#' @details Module for linear GEE using reactive data
+#' @return Shiny modulde server for gaussian generalized estimating equation(GEE).
+#' @details Shiny modulde server for gaussian generalized estimating equation(GEE) using reactive data.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(
@@ -297,18 +297,18 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 
 
 
-#' @title GEEModuleLogistic: Module for logistic GEE using reactive data
-#' @description Module for logistic GEE using reactive data
+#' @title GEEModuleLogistic: shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data.
+#' @description Shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data.
 #' @param input input
 #' @param output output
 #' @param session session
 #' @param data reactive data, ordered by id.
-#' @param data_label reactive data_label
-#' @param data_varStruct data_varStruct, Default: NULL
+#' @param data_label reactive data label
+#' @param data_varStruct List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param id.gee reactive repeated measure variable
-#' @return GEEModuleLogistic
-#' @details Module for logistic GEE using reactive data
+#' @return Shiny modulde server for binomial gaussian generalized estimating equation(GEE).
+#' @details Shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(

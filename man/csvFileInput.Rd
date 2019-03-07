@@ -12,7 +12,7 @@ csvFileInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
 \item{label}{label, Default: 'csv/xlsx/sav/sas7bdat/dta file'}
 }
 \value{
-Shiny UI
+Shiny module UI for file(csv or xlsx) upload.
 }
 \description{
 Shiny module UI for file(csv or xlsx) upload.

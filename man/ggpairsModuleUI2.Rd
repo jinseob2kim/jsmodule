@@ -10,7 +10,7 @@ ggpairsModuleUI2(id)
 \item{id}{id}
 }
 \value{
-ggpairsModuleUI2
+Option & download module UI for ggpairs
 }
 \description{
 Option & download module UI for ggpairs

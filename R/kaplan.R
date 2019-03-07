@@ -1,8 +1,8 @@
-#' @title kaplanUI: ModuleUI for kaplan-meier plot
-#' @description ModuleUI for kaplan-meier plot
+#' @title kaplanUI: shiny module UI for kaplan-meier plot
+#' @description Shiny module UI for kaplan-meier plot
 #' @param id id
-#' @return kaplanUI
-#' @details ModuleUI for kaplan-meier plot
+#' @return Shiny module UI for kaplan-meier plot
+#' @details Shiny module UI for kaplan-meier plot
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
 #' ui <- fluidPage(
@@ -55,7 +55,7 @@ kaplanUI <- function(id) {
 #' @title ggplotdownUI: Option & download module UI for ggplot
 #' @description Option & download module UI for ggplot
 #' @param id id
-#' @return ggplotdownUI
+#' @return Option & download module UI for ggplot
 #' @details Option & download module UI for ggplot
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
@@ -102,19 +102,19 @@ ggplotdownUI <- function(id) {
 
 
 
-#' @title kaplanModule: Module for kaplan-meier plot
-#' @description Module for kaplan-meier plot
+#' @title kaplanModule: shiny module server for kaplan-meier plot.
+#' @description Shiny module server for kaplan-meier plot.
 #' @param input input
 #' @param output output
 #' @param session session
-#' @param data reactive data
-#' @param data_label reactuve data_label
-#' @param data_varStruct reactive data_varStruct, Default: NULL
+#' @param data Reactive data
+#' @param data_label Reactuve data label
+#' @param data_varStruct Reactive List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
-#' @param design.survey reactive survey data. default: NULL
-#' @param id.cluster reactive cluster variable if marginal model, Default: NULL
-#' @return kaplanModule
-#' @details Module for kaplan-meier plot
+#' @param design.survey Reactive survey data. default: NULL
+#' @param id.cluster Reactive cluster variable if marginal model, Default: NULL
+#' @return Shiny module server for kaplan-meier plot.
+#' @details Shiny module server for kaplan-meier plot.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
 #' ui <- fluidPage(

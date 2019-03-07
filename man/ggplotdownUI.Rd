@@ -10,7 +10,7 @@ ggplotdownUI(id)
 \item{id}{id}
 }
 \value{
-ggplotdownUI
+Option & download module UI for ggplot
 }
 \description{
 Option & download module UI for ggplot

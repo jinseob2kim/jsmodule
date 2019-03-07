@@ -2,7 +2,7 @@
 % Please edit documentation in R/coxph.R
 \name{coxModule}
 \alias{coxModule}
-\title{coxModule: Module for cox model}
+\title{coxModule: shiny modulde server for Cox's model.}
 \usage{
 coxModule(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
@@ -17,9 +17,9 @@ coxModule(input, output, session, data, data_label,
 
 \item{data}{reactive data}
 
-\item{data_label}{reactuve data_label}
+\item{data_label}{reactuve data label}
 
-\item{data_varStruct}{reactive data_varStruct, Default: NULL}
+\item{data_varStruct}{reactive list of variable structure, Default: NULL}
 
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 
@@ -30,14 +30,37 @@ coxModule(input, output, session, data, data_label,
 \item{id.cluster}{reactive cluster variable if marginal cox model, Default: NULL}
 }
 \value{
-regressModule
+Shiny modulde server for Cox's model.
 }
 \description{
-Module for cox model
+Shiny modulde server for Cox's model.
 }
 \details{
-Module for cox model
+Shiny modulde server for Cox's model.
 }
 \examples{
- #EXAMPLE1
+library(shiny);library(DT);library(data.table);library(jstable)
+ui <- fluidPage(
+   sidebarLayout(
+   sidebarPanel(
+     coxUI("cox")
+   ),
+   mainPanel(
+     DTOutput("coxtable")
+   )
+ )
+)
+
+server <- function(input, output, session) {
+
+  data <- reactive(mtcars)
+  data.label <- reactive(jstable::mk.lev(mtcars))
+
+  out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label,
+                           data_varStruct = NULL)
+
+  output$coxtable <- renderDT({
+    datatable(out_cox()$table, rownames=T, caption = out_cox()$caption)
+  })
+}
 }

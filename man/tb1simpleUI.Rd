@@ -10,10 +10,10 @@ tb1simpleUI(id)
 \item{id}{id}
 }
 \value{
-UI
+Table 1 UI for propensity score analysis
 }
 \description{
-tb1 module UI for propensity score analysis
+Table 1 module UI for propensity score analysis.
 }
 \details{
 tb1 module UI for propensity score analysis

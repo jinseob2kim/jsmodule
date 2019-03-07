@@ -2,7 +2,7 @@
 % Please edit documentation in R/tb1.R
 \name{tb1module2}
 \alias{tb1module2}
-\title{tb1module2: Shiny module Server for Table 1 using reactive data.}
+\title{tb1module: table 1 shiny module server for reactive data.}
 \usage{
 tb1module2(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL)
@@ -14,24 +14,24 @@ tb1module2(input, output, session, data, data_label,
 
 \item{session}{session}
 
-\item{data}{reactive data}
+\item{data}{Reactive data}
 
-\item{data_label}{reactive data label(reactive)}
+\item{data_label}{Reactive data label}
 
 \item{data_varStruct}{Variable structure list of data, Default: NULL}
 
 \item{nfactor.limit}{maximum factor levels to include, Default: 10}
 
-\item{design.survey}{Survey data. default: NULL}
+\item{design.survey}{Reactive survey data of survey package. default: NULL}
 }
 \value{
-Shiny module
+Table 1 shiny module server for descriptive statistics.
 }
 \description{
-Shiny module Server for Table 1 using reactive data.
+Table 1 shiny module server for descriptive statistics for reactive data.
 }
 \details{
-Shiny module Server for Table 1 using reactive data.
+Table 1 shiny module server for descriptive statistics.
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable)

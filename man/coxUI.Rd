@@ -2,7 +2,7 @@
 % Please edit documentation in R/coxph.R
 \name{coxUI}
 \alias{coxUI}
-\title{coxUI: ModuleUI for cox model}
+\title{coxUI: shiny modulde UI for Cox's model.}
 \usage{
 coxUI(id)
 }
@@ -13,10 +13,10 @@ coxUI(id)
 coxUI
 }
 \description{
-ModuleUI for cox model
+Shiny modulde UI for Cox's model.
 }
 \details{
-ModuleUI for cox model
+Shiny modulde UI for Cox's model.
 }
 \examples{
  coxUI(1)

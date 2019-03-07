@@ -2,7 +2,7 @@
 % Please edit documentation in R/tb1simple.R
 \name{tb1simple}
 \alias{tb1simple}
-\title{tb1simple: tb1 module for propensity score analysis}
+\title{tb1simple: tb1 module server for propensity score analysis}
 \usage{
 tb1simple(input, output, session, data, matdata, data_label,
   data_varStruct = NULL, group_var)
@@ -14,24 +14,24 @@ tb1simple(input, output, session, data, matdata, data_label,
 
 \item{session}{session}
 
-\item{data}{data}
+\item{data}{Original data with propensity score}
 
-\item{matdata}{matdata}
+\item{matdata}{Matching data}
 
-\item{data_label}{data_label}
+\item{data_label}{Data label}
 
-\item{data_varStruct}{data_varStruct, Default: NULL}
+\item{data_varStruct}{List of variable structure, Default: NULL}
 
-\item{group_var}{group_var}
+\item{group_var}{Group variable to run propensity score analysis.}
 }
 \value{
-tb1 module for propensity score analysis
+Table 1 with original data/matching data/IPTW data
 }
 \description{
-tb1 module for propensity score analysis
+Table 1 module server for propensity score analysis
 }
 \details{
-tb1 module for propensity score analysis
+Table 1 module server for propensity score analysis
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(readxl);library(jstable)

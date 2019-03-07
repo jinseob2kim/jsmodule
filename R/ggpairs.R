@@ -2,7 +2,7 @@
 #' @title ggpairsModuleUI1: Variable selection module UI for ggpairs
 #' @description Variable selection module UI for ggpairs
 #' @param id id
-#' @return ggpairsModuleUI1
+#' @return Variable selection module UI for ggpairs
 #' @details Variable selection module UI for ggpairs
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
@@ -53,7 +53,7 @@ ggpairsModuleUI1 <- function(id) {
 #' @title ggpairsModuleUI2: Option & download module UI for ggpairs
 #' @description Option & download module UI for ggpairs
 #' @param id id
-#' @return ggpairsModuleUI2
+#' @return Option & download module UI for ggpairs
 #' @details Option & download module UI for ggpairs
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
@@ -107,16 +107,16 @@ ggpairsModuleUI2 <- function(id) {
 
 
 
-#' @title ggpairsModule: ggpairs module
-#' @description ggpairs module
+#' @title ggpairsModule: shiny module server for basic/scatter plot.
+#' @description Shiny module server for basic/scatter plot.
 #' @param input input
 #' @param output output
 #' @param session session
 #' @param data data
-#' @param data_label data_label
-#' @param data_varStruct data_varStruct, Default: NULL
-#' @return ggpairsModule
-#' @details ggpairs module
+#' @param data_label data label
+#' @param data_varStruct List of variable structure, Default: NULL
+#' @return Shiny module server for basic/scatter plot.
+#' @details Shiny module server for basic/scatter plot.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
 #' library(GGally)
@@ -352,16 +352,16 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
 
 
 
-#' @title ggpairsModule2: ggpairs module for reactive data
-#' @description ggpairs module for reactive data
+#' @title ggpairsModule2: shiny module server for basic/scatter plot for reactive data.
+#' @description Shiny module server for basic/scatter plot for reactive data.
 #' @param input input
 #' @param output output
 #' @param session session
-#' @param data reactive data
-#' @param data_label reactive data_label
-#' @param data_varStruct data_varStruct, Default: NULL
-#' @return ggpairsModule2
-#' @details ggpairs module for reactive data
+#' @param data Reactive data
+#' @param data_label Reactive data label
+#' @param data_varStruct List of variable structure, Default: NULL
+#' @return Shiny module server for basic/scatter plot
+#' @details Shiny module server for basic/scatter plot for reactive data.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
 #' library(GGally)

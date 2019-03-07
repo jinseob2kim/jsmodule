@@ -1,9 +1,9 @@
 
-#' @title tb1moduleUI: Shiny module UI for Table 1.
-#' @description Shiny module UI for Table 1.
+#' @title tb1moduleUI: table 1 module UI.
+#' @description Table 1 shiny module UI for descriptive statistics.
 #' @param id id
-#' @return Shiny UI
-#' @details Shiny module UI for Table 1.
+#' @return Table 1 module UI.
+#' @details Table 1 shiny module UI for descriptive statistics.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(
@@ -49,18 +49,18 @@ tb1moduleUI <- function(id) {
 
 
 
-#' @title tb1module: Shiny module Server for Table 1.
-#' @description Shiny module Server for Table 1.
+#' @title tb1module: table 1 shiny module server.
+#' @description Table 1 shiny module server for descriptive statistics.
 #' @param input input
 #' @param output output
 #' @param session session
-#' @param data data
-#' @param data_label data label
+#' @param data Data
+#' @param data_label Data label
 #' @param data_varStruct Variable structure list of data, Default: NULL
 #' @param nfactor.limit maximum factor levels to include, Default: 10
-#' @param design.survey survey data. default: NULL
-#' @return Shiny module
-#' @details Shiny module Server for Table 1.
+#' @param design.survey survey data of survey package. default: NULL
+#' @return Table 1 shiny module server for descriptive statistics.
+#' @details Table 1 shiny module server for descriptive statistics.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(
@@ -312,18 +312,18 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 
 
 
-#' @title tb1module2: Shiny module Server for Table 1 using reactive data.
-#' @description Shiny module Server for Table 1 using reactive data.
+#' @title tb1module: table 1 shiny module server for reactive data.
+#' @description Table 1 shiny module server for descriptive statistics for reactive data.
 #' @param input input
 #' @param output output
 #' @param session session
-#' @param data reactive data
-#' @param data_label reactive data label(reactive)
+#' @param data Reactive data
+#' @param data_label Reactive data label
 #' @param data_varStruct Variable structure list of data, Default: NULL
 #' @param nfactor.limit maximum factor levels to include, Default: 10
-#' @param design.survey Survey data. default: NULL
-#' @return Shiny module
-#' @details Shiny module Server for Table 1 using reactive data.
+#' @param design.survey Reactive survey data of survey package. default: NULL
+#' @return Table 1 shiny module server for descriptive statistics.
+#' @details Table 1 shiny module server for descriptive statistics.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(

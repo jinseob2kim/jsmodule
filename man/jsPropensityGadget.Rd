@@ -10,13 +10,13 @@ jsPropensityGadget(data)
 \item{data}{data}
 }
 \value{
-Gadget
+Shiny Gadget including original/matching/IPTW data, Label info, Table 1, Cox model, Basic/kaplan-meier plot.
 }
 \description{
-Shiny Gadget for propensity score analysis.
+Shiny Gadget including original/matching/IPTW data, Label info, Table 1, Cox model, Basic/kaplan-meier plot.
 }
 \details{
-Shiny Gadget for propensity score analysis.
+Shiny Gadget including original/matching/IPTW data, Label info, Table 1, Cox model, Basic/kaplan-meier plot.
 }
 \examples{
 if(interactive()){

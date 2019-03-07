@@ -16,7 +16,7 @@ FileRepeated(input, output, session, nfactor.limit = 20)
 \item{nfactor.limit}{nfactor limit to include, Default: 20}
 }
 \value{
-server
+File upload server module for repeated measure analysis.
 }
 \description{
 File upload server module for repeated measure analysis.

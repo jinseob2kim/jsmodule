@@ -1,8 +1,8 @@
-#' @title mklist: make intersect varlist
-#' @description make intersect varlist
-#' @param varlist varlist
-#' @param vars vars
-#' @return Intersect varlist
+#' @title mklist: function to make variable list lncluding specific variables.
+#' @description Function to make variable list lncluding specific variables.
+#' @param varlist Original variable list.
+#' @param vars variable to include.
+#' @return variable list lncluding specific variables.
 #' @details Internal function
 #' @examples
 #'  data_varStruct <- list(variable = names(mtcars))
@@ -22,14 +22,15 @@ mklist <- function(varlist, vars){
          })
 }
 
-#' @title mksetdiff: make setdiff varlist
-#' @description make setdiff varlist
-#' @param varlist varlist
-#' @param vars vars
-#' @return Setdiff varlist
+#' @title mksetdiff: function to make variable list excluding specific variables.
+#' @description Function to make variable list excluding specific variables.
+#' @param varlist Original variable list
+#' @param vars variable to exclude.
+#' @return variable list excluding specific variables.
 #' @details Internal function
 #' @examples
-#'  # Example
+#'  data_varStruct <- list(variable = names(mtcars))
+#'  mksetdiff(data_varStruct, "mpg")
 #' @rdname mksetdiff
 #' @export
 
@@ -48,11 +49,11 @@ mksetdiff <- function(varlist, vars){
 
 
 
-#' @title regressModuleUI: ModuleUI for regression
-#' @description ModuleUI for regression
+#' @title regressModuleUI: shiny modulde UI for linear regression.
+#' @description Shiny modulde UI for linear regression.
 #' @param id id
-#' @return regressModuleUI
-#' @details ModuleUI for regression
+#' @return Shiny modulde UI for linear regression.
+#' @details Shiny modulde UI for linear regression.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(
@@ -102,19 +103,19 @@ regressModuleUI <- function(id) {
 
 
 
-#' @title regressModule: Module for linear regression
-#' @description Module for linear regression
+#' @title regressModule: Shiny modulde server for linear regression.
+#' @description Shiny modulde server for linear regression.
 #' @param input input
 #' @param output output
 #' @param session session
 #' @param data data
-#' @param data_label data_label
-#' @param data_varStruct data_varStruct, Default: NULL
+#' @param data_label data label
+#' @param data_varStruct List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey survey data. default: NULL
-#' @param default.unires Set default independent variables using univariate analysis.
-#' @return regressModule
-#' @details Module for linear regression
+#' @param default.unires Set default independent variables using univariate analysis, Default: T
+#' @return Shiny modulde server for linear regression.
+#' @details Shiny modulde server for linear regression.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(
@@ -333,19 +334,19 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 
 
 
-#' @title regressModule2: Module for linear regression using reactive data
-#' @description Module for linear regression using reactive data
+#' @title regressModule2: Shiny modulde server for linear regression for reactive data.
+#' @description Shiny modulde server for linear regression for reactive data.
 #' @param input input
 #' @param output output
 #' @param session session
 #' @param data reactive data
-#' @param data_label reactive data_label
-#' @param data_varStruct data_varStruct, Default: NULL
+#' @param data_label reactive data label
+#' @param data_varStruct List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
-#' @param design.survey survey data. default: NULL
-#' @param default.unires Set default independent variables using univariate analysis.
-#' @return regressModule2
-#' @details Module for linear regression using reactive data
+#' @param design.survey reactive survey data. default: NULL
+#' @param default.unires Set default independent variables using univariate analysis, Default: T
+#' @return Shiny modulde server for linear regression.
+#' @details Shiny modulde server for linear regression.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(
@@ -632,19 +633,19 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 
 
 
-#' @title logisticModule: Module for logistic regression
-#' @description Module for logistic regression
+#' @title logisticModule: Shiny modulde server for logistic regression.
+#' @description Shiny modulde server for logistic regression.
 #' @param input input
 #' @param output output
 #' @param session session
 #' @param data data
-#' @param data_label data_label
-#' @param data_varStruct data_varStruct, Default: NULL
+#' @param data_label data label
+#' @param data_varStruct List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey survey data. default: NULL
-#' @param default.unires Set default independent variables using univariate analysis.
-#' @return logisticModule
-#' @details Module for logistic regression
+#' @param default.unires Set default independent variables using univariate analysis, Default: T
+#' @return Shiny modulde server for logistic regression.
+#' @details Shiny modulde server for logistic regression.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(
@@ -860,19 +861,19 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 
 
 
-#' @title logisticModule2: Module for logistic regression using reactive data
-#' @description Module for logistic regression using reactive data
+#' @title logisticModule2: Shiny modulde server for logistic regression for reactive data.
+#' @description Shiny modulde server for logistic regression for reactive data.
 #' @param input input
 #' @param output output
 #' @param session session
 #' @param data reactive data
-#' @param data_label reactive data_label
-#' @param data_varStruct data_varStruct, Default: NULL
+#' @param data_label reactive data label
+#' @param data_varStruct List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
-#' @param design.survey survey data. default: NULL
-#' @param default.unires Set default independent variables using univariate analysis.
-#' @return logisticModule2
-#' @details Module for logistic regression using reactive data
+#' @param design.survey reactive survey data. default: NULL
+#' @param default.unires Set default independent variables using univariate analysis, Default: T
+#' @return Shiny modulde server for logistic regression.
+#' @details Shiny modulde server for logistic regression.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable)
 #' ui <- fluidPage(

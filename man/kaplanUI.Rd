@@ -2,7 +2,7 @@
 % Please edit documentation in R/kaplan.R
 \name{kaplanUI}
 \alias{kaplanUI}
-\title{kaplanUI: ModuleUI for kaplan-meier plot}
+\title{kaplanUI: shiny module UI for kaplan-meier plot}
 \usage{
 kaplanUI(id)
 }
@@ -10,13 +10,13 @@ kaplanUI(id)
 \item{id}{id}
 }
 \value{
-kaplanUI
+Shiny module UI for kaplan-meier plot
 }
 \description{
-ModuleUI for kaplan-meier plot
+Shiny module UI for kaplan-meier plot
 }
 \details{
-ModuleUI for kaplan-meier plot
+Shiny module UI for kaplan-meier plot
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)

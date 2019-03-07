@@ -2,7 +2,7 @@
 % Please edit documentation in R/ggpairs.R
 \name{ggpairsModule}
 \alias{ggpairsModule}
-\title{ggpairsModule: ggpairs module}
+\title{ggpairsModule: shiny module server for basic/scatter plot.}
 \usage{
 ggpairsModule(input, output, session, data, data_label,
   data_varStruct = NULL)
@@ -16,18 +16,18 @@ ggpairsModule(input, output, session, data, data_label,
 
 \item{data}{data}
 
-\item{data_label}{data_label}
+\item{data_label}{data label}
 
-\item{data_varStruct}{data_varStruct, Default: NULL}
+\item{data_varStruct}{List of variable structure, Default: NULL}
 }
 \value{
-ggpairsModule
+Shiny module server for basic/scatter plot.
 }
 \description{
-ggpairs module
+Shiny module server for basic/scatter plot.
 }
 \details{
-ggpairs module
+Shiny module server for basic/scatter plot.
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)

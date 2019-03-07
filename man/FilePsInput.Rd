@@ -12,7 +12,7 @@ FilePsInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
 \item{label}{label, Default: 'csv/xlsx/sav/sas7bdat file'}
 }
 \value{
-Shiny UI
+Shiny module UI for file upload for propensity score matching.
 }
 \description{
 Shiny module UI for file upload for propensity score matching.

@@ -3,7 +3,7 @@
 #' @description Shiny module UI for file upload for propensity score matching.
 #' @param id id
 #' @param label label, Default: 'csv/xlsx/sav/sas7bdat file'
-#' @return Shiny UI
+#' @return Shiny module UI for file upload for propensity score matching.
 #' @details Shiny module UI for file upload for propensity score matching.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
@@ -67,7 +67,7 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
 #' @param output output
 #' @param session session
 #' @param nfactor.limit nfactor limit to include, Default: 20
-#' @return server
+#' @return Shiny module Server for file upload for propensity score matching.
 #' @details Shiny module Server for file upload for propensity score matching.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)

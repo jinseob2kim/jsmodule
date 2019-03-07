@@ -2,7 +2,7 @@
 % Please edit documentation in R/regress.R
 \name{regressModuleUI}
 \alias{regressModuleUI}
-\title{regressModuleUI: ModuleUI for regression}
+\title{regressModuleUI: shiny modulde UI for linear regression.}
 \usage{
 regressModuleUI(id)
 }
@@ -10,13 +10,13 @@ regressModuleUI(id)
 \item{id}{id}
 }
 \value{
-regressModuleUI
+Shiny modulde UI for linear regression.
 }
 \description{
-ModuleUI for regression
+Shiny modulde UI for linear regression.
 }
 \details{
-ModuleUI for regression
+Shiny modulde UI for linear regression.
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable)

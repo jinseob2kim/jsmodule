@@ -2,7 +2,7 @@
 % Please edit documentation in R/ggpairs.R
 \name{ggpairsModule2}
 \alias{ggpairsModule2}
-\title{ggpairsModule2: ggpairs module for reactive data}
+\title{ggpairsModule2: shiny module server for basic/scatter plot for reactive data.}
 \usage{
 ggpairsModule2(input, output, session, data, data_label,
   data_varStruct = NULL)
@@ -14,20 +14,20 @@ ggpairsModule2(input, output, session, data, data_label,
 
 \item{session}{session}
 
-\item{data}{reactive data}
+\item{data}{Reactive data}
 
-\item{data_label}{reactive data_label}
+\item{data_label}{Reactive data label}
 
-\item{data_varStruct}{data_varStruct, Default: NULL}
+\item{data_varStruct}{List of variable structure, Default: NULL}
 }
 \value{
-ggpairsModule2
+Shiny module server for basic/scatter plot
 }
 \description{
-ggpairs module for reactive data
+Shiny module server for basic/scatter plot for reactive data.
 }
 \details{
-ggpairs module for reactive data
+Shiny module server for basic/scatter plot for reactive data.
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)

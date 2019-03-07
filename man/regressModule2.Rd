@@ -2,7 +2,7 @@
 % Please edit documentation in R/regress.R
 \name{regressModule2}
 \alias{regressModule2}
-\title{regressModule2: Module for linear regression using reactive data}
+\title{regressModule2: Shiny modulde server for linear regression for reactive data.}
 \usage{
 regressModule2(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
@@ -17,24 +17,24 @@ regressModule2(input, output, session, data, data_label,
 
 \item{data}{reactive data}
 
-\item{data_label}{reactive data_label}
+\item{data_label}{reactive data label}
 
-\item{data_varStruct}{data_varStruct, Default: NULL}
+\item{data_varStruct}{List of variable structure, Default: NULL}
 
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 
-\item{design.survey}{survey data. default: NULL}
+\item{design.survey}{reactive survey data. default: NULL}
 
-\item{default.unires}{Set default independent variables using univariate analysis.}
+\item{default.unires}{Set default independent variables using univariate analysis, Default: T}
 }
 \value{
-regressModule2
+Shiny modulde server for linear regression.
 }
 \description{
-Module for linear regression using reactive data
+Shiny modulde server for linear regression for reactive data.
 }
 \details{
-Module for linear regression using reactive data
+Shiny modulde server for linear regression.
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable)

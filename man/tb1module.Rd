@@ -2,7 +2,7 @@
 % Please edit documentation in R/tb1.R
 \name{tb1module}
 \alias{tb1module}
-\title{tb1module: Shiny module Server for Table 1.}
+\title{tb1module: table 1 shiny module server.}
 \usage{
 tb1module(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL)
@@ -14,24 +14,24 @@ tb1module(input, output, session, data, data_label,
 
 \item{session}{session}
 
-\item{data}{data}
+\item{data}{Data}
 
-\item{data_label}{data label}
+\item{data_label}{Data label}
 
 \item{data_varStruct}{Variable structure list of data, Default: NULL}
 
 \item{nfactor.limit}{maximum factor levels to include, Default: 10}
 
-\item{design.survey}{survey data. default: NULL}
+\item{design.survey}{survey data of survey package. default: NULL}
 }
 \value{
-Shiny module
+Table 1 shiny module server for descriptive statistics.
 }
 \description{
-Shiny module Server for Table 1.
+Table 1 shiny module server for descriptive statistics.
 }
 \details{
-Shiny module Server for Table 1.
+Table 1 shiny module server for descriptive statistics.
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable)

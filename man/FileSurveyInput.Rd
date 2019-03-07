@@ -12,7 +12,7 @@ FileSurveyInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
 \item{label}{label, Default: 'csv/xlsx/sav/sas7bdat/dta file'}
 }
 \value{
-Shiny UI
+File upload UI for survey data analysis.
 }
 \description{
 File upload UI for survey data analysis.

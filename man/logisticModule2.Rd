@@ -2,7 +2,7 @@
 % Please edit documentation in R/regress.R
 \name{logisticModule2}
 \alias{logisticModule2}
-\title{logisticModule2: Module for logistic regression using reactive data}
+\title{logisticModule2: Shiny modulde server for logistic regression for reactive data.}
 \usage{
 logisticModule2(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
@@ -17,24 +17,24 @@ logisticModule2(input, output, session, data, data_label,
 
 \item{data}{reactive data}
 
-\item{data_label}{reactive data_label}
+\item{data_label}{reactive data label}
 
-\item{data_varStruct}{data_varStruct, Default: NULL}
+\item{data_varStruct}{List of variable structure, Default: NULL}
 
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 
-\item{design.survey}{survey data. default: NULL}
+\item{design.survey}{reactive survey data. default: NULL}
 
-\item{default.unires}{Set default independent variables using univariate analysis.}
+\item{default.unires}{Set default independent variables using univariate analysis, Default: T}
 }
 \value{
-logisticModule2
+Shiny modulde server for logistic regression.
 }
 \description{
-Module for logistic regression using reactive data
+Shiny modulde server for logistic regression for reactive data.
 }
 \details{
-Module for logistic regression using reactive data
+Shiny modulde server for logistic regression.
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable)

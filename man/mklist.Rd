@@ -2,20 +2,20 @@
 % Please edit documentation in R/regress.R
 \name{mklist}
 \alias{mklist}
-\title{mklist: make intersect varlist}
+\title{mklist: function to make variable list lncluding specific variables.}
 \usage{
 mklist(varlist, vars)
 }
 \arguments{
-\item{varlist}{varlist}
+\item{varlist}{Original variable list.}
 
-\item{vars}{vars}
+\item{vars}{variable to include.}
 }
 \value{
-Intersect varlist
+variable list lncluding specific variables.
 }
 \description{
-make intersect varlist
+Function to make variable list lncluding specific variables.
 }
 \details{
 Internal function

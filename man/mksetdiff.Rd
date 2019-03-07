@@ -2,24 +2,25 @@
 % Please edit documentation in R/regress.R
 \name{mksetdiff}
 \alias{mksetdiff}
-\title{mksetdiff: make setdiff varlist}
+\title{mksetdiff: function to make variable list excluding specific variables.}
 \usage{
 mksetdiff(varlist, vars)
 }
 \arguments{
-\item{varlist}{varlist}
+\item{varlist}{Original variable list}
 
-\item{vars}{vars}
+\item{vars}{variable to exclude.}
 }
 \value{
-Setdiff varlist
+variable list excluding specific variables.
 }
 \description{
-make setdiff varlist
+Function to make variable list excluding specific variables.
 }
 \details{
 Internal function
 }
 \examples{
- # Example
+ data_varStruct <- list(variable = names(mtcars))
+ mksetdiff(data_varStruct, "mpg")
 }

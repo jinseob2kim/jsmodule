@@ -2,7 +2,7 @@
 % Please edit documentation in R/gee.R
 \name{GEEModuleLogistic}
 \alias{GEEModuleLogistic}
-\title{GEEModuleLogistic: Module for logistic GEE using reactive data}
+\title{GEEModuleLogistic: shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data.}
 \usage{
 GEEModuleLogistic(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, id.gee)
@@ -16,22 +16,22 @@ GEEModuleLogistic(input, output, session, data, data_label,
 
 \item{data}{reactive data, ordered by id.}
 
-\item{data_label}{reactive data_label}
+\item{data_label}{reactive data label}
 
-\item{data_varStruct}{data_varStruct, Default: NULL}
+\item{data_varStruct}{List of variable structure, Default: NULL}
 
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 
 \item{id.gee}{reactive repeated measure variable}
 }
 \value{
-GEEModuleLogistic
+Shiny modulde server for binomial gaussian generalized estimating equation(GEE).
 }
 \description{
-Module for logistic GEE using reactive data
+Shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data.
 }
 \details{
-Module for logistic GEE using reactive data
+Shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data.
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable)

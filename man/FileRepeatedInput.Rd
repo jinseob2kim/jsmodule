@@ -12,7 +12,7 @@ FileRepeatedInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
 \item{label}{label, Default: 'csv/xlsx/sav/sas7bdat/dta file'}
 }
 \value{
-Shiny UI
+File upload UI for repeated measure analysis.
 }
 \description{
 File upload UI for repeated measure analysis.

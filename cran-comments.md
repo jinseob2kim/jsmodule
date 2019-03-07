@@ -2,6 +2,13 @@
 
 This is a resubmission. In this version I have:
 
+* Elaborate in Description and in add information about the arguments of each method to .Rd files. 
+
+
+## Resubmission
+
+This is a resubmission. In this version I have:
+
 * Delete some image files to reduce size < 5 mb
 
 ## Resubmission

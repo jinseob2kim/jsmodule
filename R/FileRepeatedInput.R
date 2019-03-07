@@ -2,7 +2,7 @@
 #' @description File upload UI for repeated measure analysis.
 #' @param id id
 #' @param label label, Default: 'csv/xlsx/sav/sas7bdat/dta file'
-#' @return Shiny UI
+#' @return File upload UI for repeated measure analysis.
 #' @details File upload UI for repeated measure analysis.
 #' @examples
 #'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
@@ -57,7 +57,7 @@ FileRepeatedInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dt
 #' @param output output
 #' @param session session
 #' @param nfactor.limit nfactor limit to include, Default: 20
-#' @return server
+#' @return File upload server module for repeated measure analysis.
 #' @details File upload server module for repeated measure analysis.
 #' @examples
 #'  library(shiny);library(DT);library(data.table);library(readxl);library(jstable)

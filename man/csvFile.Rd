@@ -16,7 +16,7 @@ csvFile(input, output, session, nfactor.limit = 20)
 \item{nfactor.limit}{nfactor limit to include, Default: 20}
 }
 \value{
-server
+Shiny module Server for file(csv or xlsx) upload.
 }
 \description{
 Shiny module Server for file(csv or xlsx) upload.

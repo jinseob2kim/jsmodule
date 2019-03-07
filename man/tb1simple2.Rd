@@ -14,26 +14,26 @@ tb1simple2(input, output, session, data, matdata, data_label,
 
 \item{session}{session}
 
-\item{data}{reactive data}
+\item{data}{Original reactive data with propensity score}
 
-\item{matdata}{reactive matdata}
+\item{matdata}{Matching reactive data}
 
-\item{data_label}{reactive data_label}
+\item{data_label}{Reactive data label}
 
-\item{data_varStruct}{data_varStruct, Default: NULL}
+\item{data_varStruct}{List of variable structure, Default: NULL}
 
-\item{vlist}{variable lists}
+\item{vlist}{List including factor/continuous/binary/except/non-normal variables}
 
-\item{group_var}{reactive group_var}
+\item{group_var}{Group variable to run propensity score analysis.}
 }
 \value{
-tb1 module for propensity score analysis for reactive data
+Table 1 with original data/matching data/IPTW data
 }
 \description{
 tb1 module for propensity score analysis for reactive data
 }
 \details{
-tb1 module for propensity score analysis for reactive data
+Table 1 module server for propensity score analysis
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(readxl);library(jstable)

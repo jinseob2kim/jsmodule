@@ -1,8 +1,8 @@
 
 #' @title tb1simpleUI : tb1 module UI for propensity score analysis
-#' @description tb1 module UI for propensity score analysis
+#' @description Table 1 module UI for propensity score analysis.
 #' @param id id
-#' @return UI
+#' @return Table 1 UI for propensity score analysis
 #' @details tb1 module UI for propensity score analysis
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
@@ -119,18 +119,18 @@ tb1simpleUI <- function(id) {
 
 
 
-#' @title tb1simple: tb1 module for propensity score analysis
-#' @description tb1 module for propensity score analysis
+#' @title tb1simple: tb1 module server for propensity score analysis
+#' @description Table 1 module server for propensity score analysis
 #' @param input input
 #' @param output output
 #' @param session session
-#' @param data data
-#' @param matdata matdata
-#' @param data_label data_label
-#' @param data_varStruct data_varStruct, Default: NULL
-#' @param group_var group_var
-#' @return tb1 module for propensity score analysis
-#' @details tb1 module for propensity score analysis
+#' @param data Original data with propensity score
+#' @param matdata Matching data
+#' @param data_label Data label
+#' @param data_varStruct List of variable structure, Default: NULL
+#' @param group_var Group variable to run propensity score analysis.
+#' @return Table 1 with original data/matching data/IPTW data
+#' @details Table 1 module server for propensity score analysis
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #' library(haven);library(survey)
@@ -416,14 +416,14 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 #' @param input input
 #' @param output output
 #' @param session session
-#' @param data reactive data
-#' @param matdata reactive matdata
-#' @param data_label reactive data_label
-#' @param data_varStruct data_varStruct, Default: NULL
-#' @param vlist variable lists
-#' @param group_var reactive group_var
-#' @return tb1 module for propensity score analysis for reactive data
-#' @details tb1 module for propensity score analysis for reactive data
+#' @param data Original reactive data with propensity score
+#' @param matdata Matching reactive data
+#' @param data_label Reactive data label
+#' @param data_varStruct List of variable structure, Default: NULL
+#' @param vlist List including factor/continuous/binary/except/non-normal variables
+#' @param group_var Group variable to run propensity score analysis.
+#' @return Table 1 with original data/matching data/IPTW data
+#' @details Table 1 module server for propensity score analysis
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
 #' library(haven);library(survey)

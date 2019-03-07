@@ -1,8 +1,8 @@
-#' @title coxUI: ModuleUI for cox model
-#' @description ModuleUI for cox model
+#' @title coxUI: shiny modulde UI for Cox's model.
+#' @description Shiny modulde UI for Cox's model.
 #' @param id id
 #' @return coxUI
-#' @details ModuleUI for cox model
+#' @details Shiny modulde UI for Cox's model.
 #' @examples
 #'  coxUI(1)
 #' @rdname coxUI
@@ -26,22 +26,45 @@ coxUI <- function(id) {
 
 
 
-#' @title coxModule: Module for cox model
-#' @description Module for cox model
+#' @title coxModule: shiny modulde server for Cox's model.
+#' @description Shiny modulde server for Cox's model.
 #' @param input input
 #' @param output output
 #' @param session session
 #' @param data reactive data
-#' @param data_label reactuve data_label
-#' @param data_varStruct reactive data_varStruct, Default: NULL
+#' @param data_label reactuve data label
+#' @param data_varStruct reactive list of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis.
 #' @param id.cluster reactive cluster variable if marginal cox model, Default: NULL
-#' @return regressModule
-#' @details Module for cox model
+#' @return Shiny modulde server for Cox's model.
+#' @details Shiny modulde server for Cox's model.
 #' @examples
-#'  #EXAMPLE1
+#' library(shiny);library(DT);library(data.table);library(jstable)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      coxUI("cox")
+#'    ),
+#'    mainPanel(
+#'      DTOutput("coxtable")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label,
+#'                            data_varStruct = NULL)
+#'
+#'   output$coxtable <- renderDT({
+#'     datatable(out_cox()$table, rownames=T, caption = out_cox()$caption)
+#'   })
+#'}
 #' @rdname coxModule
 #' @export
 #' @import shiny

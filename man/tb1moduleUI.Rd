@@ -2,7 +2,7 @@
 % Please edit documentation in R/tb1.R
 \name{tb1moduleUI}
 \alias{tb1moduleUI}
-\title{tb1moduleUI: Shiny module UI for Table 1.}
+\title{tb1moduleUI: table 1 module UI.}
 \usage{
 tb1moduleUI(id)
 }
@@ -10,13 +10,13 @@ tb1moduleUI(id)
 \item{id}{id}
 }
 \value{
-Shiny UI
+Table 1 module UI.
 }
 \description{
-Shiny module UI for Table 1.
+Table 1 shiny module UI for descriptive statistics.
 }
 \details{
-Shiny module UI for Table 1.
+Table 1 shiny module UI for descriptive statistics.
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable)

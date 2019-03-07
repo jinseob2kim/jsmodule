@@ -2,7 +2,7 @@
 % Please edit documentation in R/gee.R
 \name{GEEModuleUI}
 \alias{GEEModuleUI}
-\title{GEEModuleUI: ModuleUI for GEE}
+\title{GEEModuleUI: shiny modulde UI for generalized estimating equation(GEE).}
 \usage{
 GEEModuleUI(id)
 }
@@ -10,13 +10,13 @@ GEEModuleUI(id)
 \item{id}{id}
 }
 \value{
-GEEModuleUI
+Shiny modulde UI for generalized estimating equation(GEE).
 }
 \description{
-ModuleUI for GEE
+Shiny modulde UI for generalized estimating equation(GEE).
 }
 \details{
-ModuleUI for GEE
+Shiny modulde UI for generalized estimating equation(GEE).
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable)

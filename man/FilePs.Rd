@@ -16,7 +16,7 @@ FilePs(input, output, session, nfactor.limit = 20)
 \item{nfactor.limit}{nfactor limit to include, Default: 20}
 }
 \value{
-server
+Shiny module Server for file upload for propensity score matching.
 }
 \description{
 Shiny module Server for file upload for propensity score matching.

@@ -3,7 +3,7 @@
 #' @description Shiny module UI for file(csv or xlsx) upload.
 #' @param id id
 #' @param label label, Default: 'csv/xlsx/sav/sas7bdat/dta file'
-#' @return Shiny UI
+#' @return Shiny module UI for file(csv or xlsx) upload.
 #' @details Shiny module UI for file(csv or xlsx) upload.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
@@ -58,7 +58,7 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #' @param output output
 #' @param session session
 #' @param nfactor.limit nfactor limit to include, Default: 20
-#' @return server
+#' @return Shiny module Server for file(csv or xlsx) upload.
 #' @details Shiny module Server for file(csv or xlsx) upload.
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
