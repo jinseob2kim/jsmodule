@@ -332,6 +332,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 
   #viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
+  #viewer <- paneViewer()
   runGadget(ui, server, viewer = viewer)
 }
 

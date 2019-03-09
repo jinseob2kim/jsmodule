@@ -129,6 +129,7 @@ tb1simpleUI <- function(id) {
 #' @param data_label Data label
 #' @param data_varStruct List of variable structure, Default: NULL
 #' @param group_var Group variable to run propensity score analysis.
+#' @param showAllLevels Show All label information with 2 categorical variables, Default: T
 #' @return Table 1 with original data/matching data/IPTW data
 #' @details Table 1 module server for propensity score analysis
 #' @examples
@@ -240,7 +241,7 @@ tb1simpleUI <- function(id) {
 #' @importFrom tableone svyCreateTableOne
 
 
-tb1simple <- function(input, output, session, data, matdata, data_label, data_varStruct = NULL, group_var){
+tb1simple <- function(input, output, session, data, matdata, data_label, data_varStruct = NULL, group_var, showAllLevels = T){
 
   ## To remove NOTE.
   variable <- NULL
@@ -334,7 +335,7 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
                                       testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                       testNormal = oneway.test, argsNormal = list(var.equal = F),
                                       testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                      showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                      showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                       catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
 
       res.ps = jstable::CreateTableOneJS(data = matdata,
@@ -343,11 +344,11 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
                                          testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                         showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                          catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
 
       res.iptw <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = group_var, includeNA = F, test = T,
-                                               showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
+                                               showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                                catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
 
 
@@ -363,7 +364,7 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
                                       testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                       testNormal = oneway.test, argsNormal = list(var.equal = F),
                                       testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                      showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                      showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                       catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
 
       res.ps = jstable::CreateTableOneJS(data = matdata,
@@ -372,11 +373,11 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
                                          testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                         showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                          catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
 
       res.iptw <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group2_vars, strata2 = group_var, includeNA = F, test = T,
-                                               showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
+                                               showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                                catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
 
 
@@ -422,6 +423,7 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 #' @param data_varStruct List of variable structure, Default: NULL
 #' @param vlist List including factor/continuous/binary/except/non-normal variables
 #' @param group_var Group variable to run propensity score analysis.
+#' @param showAllLevels Show All label information with 2 categorical variables, Default: T
 #' @return Table 1 with original data/matching data/IPTW data
 #' @details Table 1 module server for propensity score analysis
 #' @examples
@@ -530,7 +532,7 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 #' @importFrom survey svydesign
 #' @importFrom tableone svyCreateTableOne
 #'
-tb1simple2 <- function(input, output, session, data, matdata, data_label, data_varStruct = NULL, vlist, group_var ){
+tb1simple2 <- function(input, output, session, data, matdata, data_label, data_varStruct = NULL, vlist, group_var, showAllLevels = T){
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))
@@ -589,7 +591,7 @@ tb1simple2 <- function(input, output, session, data, matdata, data_label, data_v
                                       testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                       testNormal = oneway.test, argsNormal = list(var.equal = F),
                                       testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                      showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                      showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                       catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
 
       res.ps = jstable::CreateTableOneJS(data = matdata(),
@@ -598,11 +600,11 @@ tb1simple2 <- function(input, output, session, data, matdata, data_label, data_v
                                          testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                         showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                          catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
 
       res.iptw <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = group_var(), includeNA = F, test = T,
-                                               showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
+                                               showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                                catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
 
     } else{
@@ -617,7 +619,7 @@ tb1simple2 <- function(input, output, session, data, matdata, data_label, data_v
                                       testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                       testNormal = oneway.test, argsNormal = list(var.equal = F),
                                       testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                      showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                      showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                       catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
 
       res.ps = jstable::CreateTableOneJS(data = matdata(),
@@ -626,11 +628,11 @@ tb1simple2 <- function(input, output, session, data, matdata, data_label, data_v
                                          testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                         showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                          catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
 
       res.iptw <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group2_vars, strata2 = group_var(), includeNA = F, test = T,
-                                               showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
+                                               showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                                catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
 
 

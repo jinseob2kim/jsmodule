@@ -33,14 +33,6 @@ jsBasicGadget(mtcars)
 ```
 ![](figures/addin.gif)
 
-### Propensity score analysis
-
-```r
-jsPropensityGadget(mtcars)
-```
-
-![](figures/ps.png)
-
 
 ### Repeated measure analysis
 
@@ -53,17 +45,23 @@ jsRepeatedGadget(mtcars)
 ```r
 library(survey)
 data(api)
-jsRepeatedGadget(apistrat)
+jsSurveyGadget(apistrat)
 ```
+
+### Propensity score analysis(experimental)
+
+```r
+jsPropensityGadget(mtcars)
+```
+
+![](figures/ps.png)
 
 ## Web applications
 
-* Basic statistics: http://app.anpanman.co.kr/basic
+* Basic statistics: http://app.zarathu.com/basic
 
+* Repeated measure analysis: http://app.zarathu.com/repeated
 
-* Propensity score analysis: http://app.anpanman.co.kr/ps
+* Survey data analysis: http://app.zarathu.com/survey
 
-
-* Repeated measure analysis: http://app.anpanman.co.kr/repeated
-
-* Survey data analysis: http://app.anpanman.co.kr/survey
+* Propensity score analysis(experimental): http://app.zarathu.com/ps

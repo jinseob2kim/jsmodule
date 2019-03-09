@@ -59,6 +59,7 @@ tb1moduleUI <- function(id) {
 #' @param data_varStruct Variable structure list of data, Default: NULL
 #' @param nfactor.limit maximum factor levels to include, Default: 10
 #' @param design.survey survey data of survey package. default: NULL
+#' @param showAllLevels Show All label information with 2 categorical variables, Default: T
 #' @return Table 1 shiny module server for descriptive statistics.
 #' @details Table 1 shiny module server for descriptive statistics.
 #' @examples
@@ -99,7 +100,7 @@ tb1moduleUI <- function(id) {
 #' @importFrom methods is
 
 
-tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL){
+tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T){
 
   ## To remove NOTE.
   variable <- NULL
@@ -226,7 +227,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
                                          testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                         showAllLevels = T, printToggle = F, quote = F, smd = F, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = F, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                          catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, labeldata = data_label)
 
         return(res)
@@ -245,7 +246,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
                                          testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                         showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                          catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
 
         return(res)
@@ -262,7 +263,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
                                          testExact = fisher.test, argsExact = list(workspace = 2 * 10^5, hybrid = T),
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                         showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                          catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
 
         return(res)
@@ -275,7 +276,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
       #vars <- setdiff(vars, var.weights.survey)
       if (input$group_vars == "None"){
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars, includeNA = F, test = F,
-                                            showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
+                                            showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                             catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
 
         return(res)
@@ -288,7 +289,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
         #vars.fisher = setdiff(vlist()$factor_vars, input$group_vars)[unlist(vars.fisher)]
 
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
-                                            showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
+                                            showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                             catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
 
         return(res)
@@ -296,7 +297,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
         vars.tb1 = setdiff(vars, c(input$group2_vars, input$group_vars))
 
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
-                                            showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
+                                            showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                             catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
 
         return(res)
@@ -321,7 +322,8 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @param data_label Reactive data label
 #' @param data_varStruct Variable structure list of data, Default: NULL
 #' @param nfactor.limit maximum factor levels to include, Default: 10
-#' @param design.survey Reactive survey data of survey package. default: NULL
+#' @param design.survey Reactive survey data of survey package. Default: NULL
+#' @param showAllLevels Show All label information with 2 categorical variables, Default: F
 #' @return Table 1 shiny module server for descriptive statistics.
 #' @details Table 1 shiny module server for descriptive statistics.
 #' @examples
@@ -362,7 +364,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @importFrom methods is
 
 
-tb1module2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL){
+tb1module2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T){
 
 
   if (is.null(data_varStruct)){
@@ -497,7 +499,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
                                         testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                        showAllLevels = T, printToggle = F, quote = F, smd = F, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                        showAllLevels = showAllLevels, printToggle = F, quote = F, smd = F, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, labeldata = data_label())
 
         return(res)
@@ -516,7 +518,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
                                         testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                        showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                        showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
 
         return(res)
@@ -533,8 +535,9 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
                                         testExact = fisher.test, argsExact = list(workspace = 2 * 10^5, hybrid = T),
                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
-                                        showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
-                                        catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
+                                        showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
+                                        catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(),
+                                        psub = input$psub)
 
         return(res)
       }
@@ -546,7 +549,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
       #vars <- setdiff(vars, var.weights.survey())
       if (input$group_vars == "None"){
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars, includeNA = F, test = F,
-                                            showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
+                                            showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                             catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
 
         return(res)
@@ -559,7 +562,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
         #vars.fisher = setdiff(vlist()$factor_vars, input$group_vars)[unlist(vars.fisher)]
 
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
-                                            showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
+                                            showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                             catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
 
         return(res)
@@ -567,7 +570,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
         vars.tb1 = setdiff(vars, c(input$group2_vars, input$group_vars))
 
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
-                                            showAllLevels = T, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
+                                            showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
                                             catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
 
               return(res)
