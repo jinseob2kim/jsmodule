@@ -256,7 +256,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
 
 
 
-    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, showAllLevels = F)
 
     output$table1 <- renderDT({
       tb = out_tb1()$table

@@ -323,7 +323,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       )
     })
 
-    out_untb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_untb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, showAllLevels = F)
     output$untable1 <- renderDT({
       tb = out_untb1()$table
       cap = out_untb1()$caption
@@ -343,7 +343,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
 
 
 
-    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey)
+    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey, showAllLevels = F)
 
     output$table1 <- renderDT({
       tb = out_tb1()$table

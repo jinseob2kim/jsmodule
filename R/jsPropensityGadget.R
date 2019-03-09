@@ -441,7 +441,7 @@ jsPropensityGadget <- function(data){
 
 
     out.tb1 <- callModule(tb1simple2, "tb1", data = data, matdata = matdata, data_label = data.label, data_varStruct = data_varStruct,
-                          vlist = vlist, group_var = group_var)
+                          vlist = vlist, group_var = group_var, showAllLevels = F)
 
     output$table1_original <- renderDT({
       tb = out.tb1()$original$table
