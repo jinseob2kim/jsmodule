@@ -5,7 +5,7 @@
 \title{tb1simple: tb1 module server for propensity score analysis}
 \usage{
 tb1simple(input, output, session, data, matdata, data_label,
-  data_varStruct = NULL, group_var)
+  data_varStruct = NULL, group_var, showAllLevels = T)
 }
 \arguments{
 \item{input}{input}
@@ -23,6 +23,8 @@ tb1simple(input, output, session, data, matdata, data_label,
 \item{data_varStruct}{List of variable structure, Default: NULL}
 
 \item{group_var}{Group variable to run propensity score analysis.}
+
+\item{showAllLevels}{Show All label information with 2 categorical variables, Default: T}
 }
 \value{
 Table 1 with original data/matching data/IPTW data

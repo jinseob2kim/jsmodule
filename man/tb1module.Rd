@@ -5,7 +5,8 @@
 \title{tb1module: table 1 shiny module server.}
 \usage{
 tb1module(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL)
+  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
+  showAllLevels = T)
 }
 \arguments{
 \item{input}{input}
@@ -23,6 +24,8 @@ tb1module(input, output, session, data, data_label,
 \item{nfactor.limit}{maximum factor levels to include, Default: 10}
 
 \item{design.survey}{survey data of survey package. default: NULL}
+
+\item{showAllLevels}{Show All label information with 2 categorical variables, Default: T}
 }
 \value{
 Table 1 shiny module server for descriptive statistics.

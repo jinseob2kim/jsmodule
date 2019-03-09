@@ -5,7 +5,7 @@
 \title{tb1simple2: tb1 module for propensity score analysis for reactive data}
 \usage{
 tb1simple2(input, output, session, data, matdata, data_label,
-  data_varStruct = NULL, vlist, group_var)
+  data_varStruct = NULL, vlist, group_var, showAllLevels = T)
 }
 \arguments{
 \item{input}{input}
@@ -25,6 +25,8 @@ tb1simple2(input, output, session, data, matdata, data_label,
 \item{vlist}{List including factor/continuous/binary/except/non-normal variables}
 
 \item{group_var}{Group variable to run propensity score analysis.}
+
+\item{showAllLevels}{Show All label information with 2 categorical variables, Default: T}
 }
 \value{
 Table 1 with original data/matching data/IPTW data
