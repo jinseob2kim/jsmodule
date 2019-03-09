@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.7.10</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.7.11</span>
       </span>
     </div>
 
@@ -98,33 +98,33 @@
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="reference/jsBasicGadget.html">jsBasicGadget</a></span>(mtcars)</a></code></pre></div>
 <p><img src="articles/figures/addin.gif"></p>
 </div>
-<div id="propensity-score-analysis" class="section level3">
-<h3 class="hasAnchor">
-<a href="#propensity-score-analysis" class="anchor"></a>Propensity score analysis</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw"><a href="reference/jsPropensityGadget.html">jsPropensityGadget</a></span>(mtcars)</a></code></pre></div>
-<p><img src="articles/figures/ps.png"></p>
-</div>
 <div id="repeated-measure-analysis" class="section level3">
 <h3 class="hasAnchor">
 <a href="#repeated-measure-analysis" class="anchor"></a>Repeated measure analysis</h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">jsRepeatedGadget</span>(mtcars)</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">jsRepeatedGadget</span>(mtcars)</a></code></pre></div>
 </div>
 <div id="survey-data-analysis" class="section level3">
 <h3 class="hasAnchor">
 <a href="#survey-data-analysis" class="anchor"></a>Survey data analysis</h3>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(survey)</a>
-<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(api)</a>
-<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw">jsRepeatedGadget</span>(apistrat)</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(survey)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(api)</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="kw"><a href="reference/jsSurveyGadget.html">jsSurveyGadget</a></span>(apistrat)</a></code></pre></div>
+</div>
+<div id="propensity-score-analysis-experimental" class="section level3">
+<h3 class="hasAnchor">
+<a href="#propensity-score-analysis-experimental" class="anchor"></a>Propensity score analysis (experimental)</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw"><a href="reference/jsPropensityGadget.html">jsPropensityGadget</a></span>(mtcars)</a></code></pre></div>
+<p><img src="articles/figures/ps.png"></p>
 </div>
 </div>
 <div id="web-applications" class="section level2">
 <h2 class="hasAnchor">
 <a href="#web-applications" class="anchor"></a>Web applications</h2>
 <ul>
-<li><p>Basic statistics: <a href="http://app.anpanman.co.kr/basic" class="uri">http://app.anpanman.co.kr/basic</a></p></li>
-<li><p>Propensity score analysis: <a href="http://app.anpanman.co.kr/ps" class="uri">http://app.anpanman.co.kr/ps</a></p></li>
-<li><p>Repeated measure analysis: <a href="http://app.anpanman.co.kr/repeated" class="uri">http://app.anpanman.co.kr/repeated</a></p></li>
-<li><p>Survey data analysis: <a href="http://app.anpanman.co.kr/survey" class="uri">http://app.anpanman.co.kr/survey</a></p></li>
+<li><p>Basic statistics: <a href="http://app.zarathu.com/basic" class="uri">http://app.zarathu.com/basic</a></p></li>
+<li><p>Repeated measure analysis: <a href="http://app.zarathu.com/repeated" class="uri">http://app.zarathu.com/repeated</a></p></li>
+<li><p>Survey data analysis: <a href="http://app.zarathu.com/survey" class="uri">http://app.zarathu.com/survey</a></p></li>
+<li><p>Propensity score analysis(experimental): <a href="http://app.zarathu.com/ps" class="uri">http://app.zarathu.com/ps</a></p></li>
 </ul>
 </div>
   </div>
@@ -133,6 +133,8 @@
     <div class="links">
 <h2>Links</h2>
 <ul class="list-unstyled">
+<li>Download from CRAN at <br><a href="https://cloud.r-project.org/package=jsmodule">https://​cloud.r-project.org/​package=jsmodule</a>
+</li>
 <li>Browse source code at <br><a href="https://github.com/jinseob2kim/jsmodule">https://​github.com/​jinseob2kim/​jsmodule</a>
 </li>
 <li>Report a bug at <br><a href="https://github.com/jinseob2kim/jsmodule/issues">https://​github.com/​jinseob2kim/​jsmodule/​issues</a>
@@ -161,6 +163,7 @@
 <li><a href="https://travis-ci.org/jinseob2kim/jsmodule"><img src="https://travis-ci.org/jinseob2kim/jsmodule.svg?branch=master" alt="Build Status"></a></li>
 <li><a href="https://ci.appveyor.com/project/jinseob2kim/jsmodule"><img src="https://ci.appveyor.com/api/projects/status/github/jinseob2kim/jsmodule?branch=master&amp;svg=true" alt="AppVeyor build status"></a></li>
 <li><a href="https://cran.r-project.org/package=jsmodule"><img src="https://www.r-pkg.org/badges/version/jsmodule" alt="CRAN_Status_Badge"></a></li>
+<li><a href="https://CRAN.R-project.org/package=jsmodule"><img src="https://cranlogs.r-pkg.org/badges/jsmodule" alt="CRAN_Download_Badge"></a></li>
 <li><a href="https://codecov.io/github/jinseob2kim/jsmodule"><img src="https://codecov.io/github/jinseob2kim/jsmodule/branch/master/graphs/badge.svg" alt="codecov"></a></li>
 <li><a href="https://github.com/jinseob2kim/jsmodule/issues"><img src="https://img.shields.io/github/issues/jinseob2kim/jsmodule.svg" alt="GitHub issues"></a></li>
 <li><a href="https://github.com/jinseob2kim/jsmodule/stargazers"><img src="https://img.shields.io/github/stars/jinseob2kim/jsmodule.svg" alt="GitHub stars"></a></li>
