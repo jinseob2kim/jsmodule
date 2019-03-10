@@ -251,12 +251,12 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 
 
 
-    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, showAllLevels = F)
+    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, showAllLevels = T)
 
     output$table1 <- renderDT({
-      tb = out_tb1()$table
-      cap = out_tb1()$caption
-      out.tb1 = datatable(tb, rownames = T, extensions = "Buttons", caption = cap,
+      tb <- out_tb1()$table
+      cap <- out_tb1()$caption
+      out.tb1 <- datatable(tb, rownames = T, extensions = "Buttons", caption = cap,
                           options = c(jstable::opt.tb1("tb1"),
                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
                                       ),

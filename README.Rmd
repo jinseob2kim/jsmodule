@@ -22,7 +22,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Install
 
 ```r
+install.packages("jsmodule")
+library(jsmodule)
+
+## From github: latest version
 remotes::install_github('jinseob2kim/jsmodule')
+
 ```
 
 ## RStudio Addins

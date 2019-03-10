@@ -9,6 +9,10 @@ Install
 -------
 
 ``` r
+install.packages("jsmodule")
+library(jsmodule)
+
+## From github: latest version
 remotes::install_github('jinseob2kim/jsmodule')
 ```
 
@@ -34,7 +38,7 @@ jsRepeatedGadget(mtcars)
 ``` r
 library(survey)
 data(api)
-jsRepeatedGadget(apistrat)
+jsSurveyGadget(apistrat)
 ```
 
 ### Propensity score analysis (experimental)

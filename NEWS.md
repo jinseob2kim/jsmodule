@@ -1,6 +1,3 @@
-# jsmodule 0.7.11
-
-* Change label informations of table 1, show only 1 level when the categorical variable has 2 levels. 
 
 # jsmodule 0.7.10
 
