@@ -457,17 +457,11 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         value.timeby <- timeby
       }
 
-      xmin <- 0
-      if (!is.null(range.x)){
-        xmin <- range.x[1]
-        xmax <- range.x[2]
+      if(is.null(range.x)){
+        range.x <- c(xmin, xmax)
       }
-
-      ymin <- 0
-      ymax <- 1
-      if (!is.null(range.y)){
-        ymin <- range.y[1]
-        ymax <- range.y[2]
+      if(is.null(range.y)){
+        range.y <- c(0, 1)
       }
 
 
@@ -477,9 +471,9 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
                     min = 1, max = xmax, value = value.timeby, step = 5),
 
         sliderInput(session$ns("xlims"), "X axis range(time)",
-                    min = xmin, max = xmax, value = c(0, xmax), step = 5),
+                    min = 0, max = xmax, value = range.x, step = 5),
         sliderInput(session$ns("ylims"), "Y axis range(probability)",
-                    min = ymin, max = ymax, value = c(0, 1), step = 0.05)
+                    min = 0, max = 1, value = range.y , step = 0.05)
       )
     })
   })
