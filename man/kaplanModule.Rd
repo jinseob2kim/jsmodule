@@ -6,7 +6,8 @@
 \usage{
 kaplanModule(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
-  id.cluster = NULL, timeby = NULL, range.x = NULL, range.y = NULL)
+  id.cluster = NULL, timeby = NULL, range.x = NULL, range.y = NULL,
+  pval.coord = NULL)
 }
 \arguments{
 \item{input}{input}
@@ -32,6 +33,8 @@ kaplanModule(input, output, session, data, data_label,
 \item{range.x}{range of x axis, Default: NULL}
 
 \item{range.y}{range of y axis, Default: NULL}
+
+\item{pval.coord}{pval.coord, Default: NULL}
 }
 \value{
 Shiny module server for kaplan-meier plot.

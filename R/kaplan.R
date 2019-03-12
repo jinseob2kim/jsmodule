@@ -116,6 +116,7 @@ ggplotdownUI <- function(id) {
 #' @param timeby timeby, Default: NULL
 #' @param range.x range of x axis, Default: NULL
 #' @param range.y range of y axis, Default: NULL
+#' @param pval.coord pval.coord, Default: NULL
 #' @return Shiny module server for kaplan-meier plot.
 #' @details Shiny module server for kaplan-meier plot.
 #' @examples
@@ -156,7 +157,7 @@ ggplotdownUI <- function(id) {
 
 
 kaplanModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL,
-                         timeby = NULL, range.x = NULL, range.y = NULL) {
+                         timeby = NULL, range.x = NULL, range.y = NULL, pval.coord = NULL) {
 
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
@@ -493,18 +494,18 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       if (is.null(id.cluster)){
         return(
           jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                     cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km)
+                     cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord)
         )
       } else{
         return(
           jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                     cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km)
+                     cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord)
         )
       }
     } else{
       return(
         jskm::svyjskm(res.km, pval = input$pval, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                      cumhaz= input$cumhaz, design = data.km)
+                      cumhaz= input$cumhaz, design = data.km, pval.coord = pval.coord)
       )
     }
   })
