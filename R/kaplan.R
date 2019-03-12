@@ -113,6 +113,9 @@ ggplotdownUI <- function(id) {
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey Reactive survey data. default: NULL
 #' @param id.cluster Reactive cluster variable if marginal model, Default: NULL
+#' @param timeby timeby, Default: NULL
+#' @param range.x range of x axis, Default: NULL
+#' @param range.y range of y axis, Default: NULL
 #' @return Shiny module server for kaplan-meier plot.
 #' @details Shiny module server for kaplan-meier plot.
 #' @examples
@@ -152,7 +155,8 @@ ggplotdownUI <- function(id) {
 #' @importFrom purrr map_lgl
 
 
-kaplanModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
+kaplanModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL,
+                         timeby = NULL, range.x = NULL, range.y = NULL) {
 
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
@@ -448,14 +452,34 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         }
       }
 
+      value.timeby <- signif(xmax/7, 1)
+      if (!is.null(timeby)){
+        value.timeby <- timeby
+      }
+
+      xmin <- 0
+      if (!is.null(range.x)){
+        xmin <- range.x[1]
+        xmax <- range.x[2]
+      }
+
+      ymin <- 0
+      ymax <- 1
+      if (!is.null(range.y)){
+        ymin <- range.y[1]
+        ymax <- range.y[2]
+      }
+
+
+
       tagList(
         sliderInput(session$ns("timeby"), "Time by",
-                    min = 1, max = xmax, value = signif(xmax/7, 1)),
+                    min = 1, max = xmax, value = value.timeby, step = 5),
 
         sliderInput(session$ns("xlims"), "X axis range(time)",
-                    min = 0, max = xmax, value = c(0, xmax)),
+                    min = xmin, max = xmax, value = c(0, xmax), step = 5),
         sliderInput(session$ns("ylims"), "Y axis range(probability)",
-                    min = 0, max = 1, value = c(0, 1))
+                    min = ymin, max = ymax, value = c(0, 1), step = 0.05)
       )
     })
   })

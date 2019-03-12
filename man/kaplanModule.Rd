@@ -6,7 +6,7 @@
 \usage{
 kaplanModule(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
-  id.cluster = NULL)
+  id.cluster = NULL, timeby = NULL, range.x = NULL, range.y = NULL)
 }
 \arguments{
 \item{input}{input}
@@ -26,6 +26,12 @@ kaplanModule(input, output, session, data, data_label,
 \item{design.survey}{Reactive survey data. default: NULL}
 
 \item{id.cluster}{Reactive cluster variable if marginal model, Default: NULL}
+
+\item{timeby}{timeby, Default: NULL}
+
+\item{range.x}{range of x axis, Default: NULL}
+
+\item{range.y}{range of y axis, Default: NULL}
 }
 \value{
 Shiny module server for kaplan-meier plot.
