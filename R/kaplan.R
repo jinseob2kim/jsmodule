@@ -459,7 +459,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       }
 
       if(is.null(range.x)){
-        range.x <- c(xmin, xmax)
+        range.x <- c(0, xmax)
       }
       if(is.null(range.y)){
         range.y <- c(0, 1)
