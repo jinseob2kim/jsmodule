@@ -17,6 +17,8 @@
 #' @importFrom DT datatable %>% formatStyle styleEqual renderDT DTOutput
 #' @importFrom shinycustomloader withLoader
 #' @importFrom jstable opt.data opt.tb1 opt.tbreg
+#' @importFrom survival Surv
+#' @importFrom survC1 kmcens
 #' @import ggplot2
 #' @import shiny
 
