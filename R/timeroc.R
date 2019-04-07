@@ -86,10 +86,10 @@ timerocUI <- function(id) {
 
 timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey = NULL, id.cluster = NULL) {
   data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
-  form <- paste0("Surv(", var.time, ",", var.event, ") ~ " , paste(vars.ind, collapse = "+"))
+  form <- paste0("survival::Surv(", var.time, ",", var.event, ") ~ " , paste(vars.ind, collapse = "+"))
 
   if (!is.null(id.cluster)){
-    forms <- as.formula(paste0("Surv(", var.time, ",", var.event, ") ~ " , paste(vars.ind, collapse = "+"), "+ cluster(", id.cluster, ")"))
+    forms <- as.formula(paste0("survival::Surv(", var.time, ",", var.event, ") ~ " , paste(vars.ind, collapse = "+"), "+ cluster(", id.cluster, ")"))
     #forms <- as.formula(paste0(form, "+ cluster(", id.cluster, ")"))
     #data <- na.omit(data[, .SD, .SDcols = c(var.event, var.time, vars.ind, id.cluster)])
   } else{
@@ -201,9 +201,9 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
   mm <- lapply(list.vars.ind,
                function(x){
                  if (!is.null(id.cluster)){
-                   stats::model.matrix(survival::coxph(as.formula(paste0("Surv(", var.time, ",", var.event, ") ~ " , paste(x, collapse = "+") , "+ cluster(", id.cluster, ")")), data = data))
+                   stats::model.matrix(survival::coxph(as.formula(paste0("survival::Surv(", var.time, ",", var.event, ") ~ " , paste(x, collapse = "+") , "+ cluster(", id.cluster, ")")), data = data))
                } else{
-                 stats::model.matrix(survival::coxph(as.formula(paste0("Surv(", var.time, ",", var.event, ") ~ " , paste(x, collapse = "+"))), data = data))
+                 stats::model.matrix(survival::coxph(as.formula(paste0("survival::Surv(", var.time, ",", var.event, ") ~ " , paste(x, collapse = "+"))), data = data))
                  }
                }
 
@@ -480,12 +480,22 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
     }
 
     if (is.null(design.survey)){
-      res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, id.cluster = id.cluster())})
-      res.tb <- cbind(timeROC_table(res.roc),
-                      survIDINRI_helper(input$event_km, input$time_km,
-                                        list.vars.ind = indeps(),
-                                        t = input$time_to_roc,
-                                        data = data.km, id.cluster = id.cluster()))
+      if (is.null(id.cluster)){
+        res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km)})
+        res.tb <- cbind(timeROC_table(res.roc),
+                        survIDINRI_helper(input$event_km, input$time_km,
+                                          list.vars.ind = indeps(),
+                                          t = input$time_to_roc,
+                                          data = data.km))
+      } else{
+        res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, id.cluster = id.cluster())})
+        res.tb <- cbind(timeROC_table(res.roc),
+                        survIDINRI_helper(input$event_km, input$time_km,
+                                          list.vars.ind = indeps(),
+                                          t = input$time_to_roc,
+                                          data = data.km, id.cluster = id.cluster()))
+
+      }
       #res.tb <- timeROC_table(res.roc)
 
 
