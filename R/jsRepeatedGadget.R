@@ -21,7 +21,9 @@
 #' @import shiny
 
 jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
-  library(survival);library(survC1)
+  if (!require("survC1")) {
+    library(survC1)
+  }
   change.vnlist = list(c(" ", "_"), c("=<", "_le_"), c("=>", "_ge_"), c("=", "_eq_"), c("\\(", "_open_"), c("\\)", "_close_"), c("%", "_percent_"), c("-", "_"), c("/", "_"),
                        c("\r\n", "_"), c(",", "_comma_"))
 
