@@ -139,6 +139,20 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                        )
                               )
 
+                   ),
+                   navbarMenu("ROC analysis",
+                              tabPanel("Time-dependent ROC",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           timerocUI("timeroc")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("plot_timeroc"), type="html", loader="loader6"),
+                                           ggplotdownUI("timeroc"),
+                                           withLoader(DTOutput("table_timeroc"), type="html", loader="loader6")
+                                         )
+                                       )
+                              )
                    )
   )
 
@@ -322,6 +336,18 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 
     output$kaplan_plot <- renderPlot({
       print(out_kaplan())
+    })
+
+
+    out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL)
+
+    output$plot_timeroc <- renderPlot({
+      print(out_timeroc()$plot)
+    })
+
+    output$table_timeroc <- renderDT({
+      datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
+                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
 
   }

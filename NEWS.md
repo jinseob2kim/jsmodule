@@ -1,3 +1,11 @@
+# jsmodule 0.8.0
+
+## New module
+
+* Shiny module for time-dependent ROC analysis : `timerocUI` `timerocModule`.
+
+* Add this module to `jsBasicGadget` and `jsRepeatedGadjet`.
+
 
 # jsmodule 0.7.10
 

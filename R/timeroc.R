@@ -5,6 +5,7 @@
 #' @details Shiny module UI for time-dependent roc analysis
 #' @examples
 #' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
+#' library(timeROC);library(survIDINRI)
 #' ui <- fluidPage(
 #'    sidebarLayout(
 #'    sidebarPanel(
@@ -12,7 +13,7 @@
 #'    ),
 #'    mainPanel(
 #'      plotOutput("plot_timeroc"),
-#'      ggplotdownUI("downloadButton_timeroc"),
+#'      ggplotdownUI("timeroc"),
 #'      DTOutput("table_timeroc")
 #'    )
 #'  )
@@ -21,13 +22,19 @@
 #' server <- function(input, output, session) {
 #'
 #'   data <- reactive(mtcars)
-#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'   data.label <- jstable::mk.lev(mtcars)
 #'
-#'   out_kaplan <- callModule(timerocModule, "kaplan", data = data, data_label = data.label,
-#'                            data_varStruct = NULL)
+#'   out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label,
+#'                             data_varStruct = NULL)
 #'
 #'   output$plot_timeroc <- renderPlot({
-#'     print(out_timeroc())
+#'     print(out_timeroc()$plot)
+#'   })
+#'
+#'   output$table_timeroc <- renderDT({
+#'     datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons",
+#'               caption = "ROC results",
+#'               options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
 #'   })
 #'}
 #' @rdname timerocUI
@@ -52,8 +59,8 @@ timerocUI <- function(id) {
 
 #' @title timeROChelper: Helper function for timerocModule
 #' @description Helper function for timerocModule
-#' @param event event
-#' @param time time
+#' @param var.event event
+#' @param var.time time
 #' @param vars.ind independent variable
 #' @param t time
 #' @param data data
@@ -62,8 +69,8 @@ timerocUI <- function(id) {
 #' @return timeROC object
 #' @details Helper function for timerocModule
 #' @examples
-#' library(survival)
-#' timeROChelper(status, time, c("age", "sex"), t = 365, data = lung)
+#' #library(survival)
+#' #timeROChelper("status", "time", c("age", "sex"), t = 365, data = lung)
 #' @seealso
 #'  \code{\link[survival]{coxph}}
 #'  \code{\link[survey]{svycoxph}}
@@ -77,37 +84,145 @@ timerocUI <- function(id) {
 
 
 
-timeROChelper <- function(event, time, vars.ind, t, data, design.survey = NULL, id.cluster = NULL) {
-  data[[event]] <- as.numeric(as.vector(data[[event]]))
-  form <- paste0("Surv(", time, ",", event, ") ~ " , paste(vars.ind, collapse = "+"))
+timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey = NULL, id.cluster = NULL) {
+  data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
+  form <- paste0("Surv(", var.time, ",", var.event, ") ~ " , paste(vars.ind, collapse = "+"))
 
   if (!is.null(id.cluster)){
-    forms <- as.formula(paste0(form, "+ cluster(", id.cluster, ")"))
-    data <- na.omit(data[, .SD, .SDcols = c(event, time, vars.ind, id.cluster)])
+    forms <- as.formula(paste0("Surv(", var.time, ",", var.event, ") ~ " , paste(vars.ind, collapse = "+"), "+ cluster(", id.cluster, ")"))
+    #forms <- as.formula(paste0(form, "+ cluster(", id.cluster, ")"))
+    #data <- na.omit(data[, .SD, .SDcols = c(var.event, var.time, vars.ind, id.cluster)])
   } else{
     forms <- as.formula(form)
-    data <- na.omit(data[, .SD, .SDcols = c(event, time, vars.ind)])
+    #data <- na.omit(data[, .SD, .SDcols = c(var.event, var.time, vars.ind)])
   }
 
   cmodel <- NULL
   if (is.null(design.survey)){
-    cmodel <- survival::coxph(forms, data = data)
+    cmodel <- survival::coxph(forms, data = data, y = T)
   } else{
-    cmodel <- survey::svycoxph(as.formula(form), design = design.survey)
+    cmodel <- survey::svycoxph(forms, design = design.survey, y = T)
   }
-  data$lp <- stats::predict(cmodel, type = "lp")
-  out <- timeROC::timeROC(T = data[[time]],
-                          delta = data[[event]],
-                          marker = data$lp,
+  lp <- stats::predict(cmodel, type = "lp")
+  vec.y <- sapply(cmodel$y, `[[`, 1)
+  out <- timeROC::timeROC(T = vec.y[1:(length(vec.y)/2)],
+                          delta = vec.y[(length(vec.y)/2 +1):length(vec.y)],
+                          marker = lp,
                           cause = 1,
                           weighting="marginal",
-                          time = t,
+                          times = t,
                           iid = TRUE)
 
   return(out)
 }
 
 
+
+
+#' @title timeROC_table: extract AUC information from list of timeROC object.
+#' @description extract AUC information from list of timeROC object.
+#' @param ListModel list of timeROC object
+#' @param dec.auc digits for AUC, Default: 3
+#' @param dec.p digits for p value, Default: 3
+#' @return table of AUC information
+#' @details extract AUC information from list of timeROC object.
+#' @examples
+#' #library(survival)
+#' #list.timeROC <- lapply(list("age", c("age", "sex")),
+#' #                      function(x){
+#' #                        timeROChelper("status", "time", x, t = 365, data = lung)
+#' #                       })
+#' #timeROC_table(list.timeROC)
+#' @seealso
+#'  \code{\link[stats]{confint}}
+#'  \code{\link[data.table]{data.table-package}}
+#' @rdname timeROC_table
+#' @importFrom stats confint
+#' @importFrom data.table data.table
+
+timeROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
+  auc <- round(sapply(ListModel, function(x){x$AUC[[2]]}), dec.auc)
+  auc.ci <- sapply(ListModel, function(x){paste(round(stats::confint(x)$CI_AUC/100, dec.auc), collapse = "-")})
+  auc.pdiff <- c(NA, sapply(seq_along(ListModel)[-1],
+                            function(x){
+                              p <- timeROC::compare(ListModel[[x]], ListModel[[x-1]])$p_values_AUC[2]
+                              p <- ifelse(p < 0.001, "< 0.001", round(p, dec.p))
+                              return(p)
+                            }))
+
+  out <- data.table::data.table(paste0("Model ", seq_along(ListModel)), auc, auc.ci, auc.pdiff)
+  names(out) <- c("Prediction Model", "AUC", "95% CI", "P-value for AUC Difference")
+  return(out[])
+}
+
+
+
+
+#' @title survIDINRI_helper: Helper function for IDI.INF.OUT in survIDINRI packages
+#' @description Helper function for IDI.INF.OUT in survIDINRI packages
+#' @param var.event event
+#' @param var.time time
+#' @param list.vars.ind list of independent variable
+#' @param t time
+#' @param data data
+#' @param dec.auc digits for AUC, Default: 3
+#' @param dec.p digits for p value, Default: 3
+#' @param id.cluster cluster variable if marginal model, Default: NULL
+#' @return IDI, NRI
+#' @details Helper function for IDI.INF.OUT in survIDINRI packages
+#' @examples
+#' #library(survival)
+#' #survIDINRI_helper("status", "time", list.vars.ind = list("age", c("age", "sex")),
+#' #                  t = 365, data = lung)
+#' @seealso
+#'  \code{\link[data.table]{data.table-package}}
+#'  \code{\link[stats]{model.matrix}}
+#'  \code{\link[survival]{coxph}}
+#'  \code{\link[survival]{Surv}}
+#'  \code{\link[survIDINRI]{IDI.INF.OUT}}
+#'  \code{\link[survIDINRI]{IDI.INF}}
+#' @rdname survIDINRI_helper
+#' @importFrom data.table data.table
+#' @importFrom stats model.matrix
+#' @importFrom survival coxph Surv
+#' @importFrom survIDINRI IDI.INF.OUT IDI.INF
+
+survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.auc =3, dec.p = 3, id.cluster = NULL){
+  data <- data.table::data.table(data)
+  data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
+  vars <- c(Reduce(union, list(var.event, var.time, unlist(list.vars.ind))))
+
+  if (!is.null(id.cluster)){
+    data <- na.omit(data[, .SD, .SDcols = c(vars, id.cluster)])
+  } else{
+    data <- na.omit(data[, .SD, .SDcols = vars])
+  }
+
+  mm <- lapply(list.vars.ind,
+               function(x){
+                 if (!is.null(id.cluster)){
+                   stats::model.matrix(survival::coxph(as.formula(paste0("Surv(", var.time, ",", var.event, ") ~ " , paste(x, collapse = "+") , "+ cluster(", id.cluster, ")")), data = data))
+               } else{
+                 stats::model.matrix(survival::coxph(as.formula(paste0("Surv(", var.time, ",", var.event, ") ~ " , paste(x, collapse = "+"))), data = data))
+                 }
+               }
+
+  )
+
+  res <- lapply(seq_along(list.vars.ind)[-1],
+                function(x){
+                  resIDINRI <- survIDINRI::IDI.INF.OUT(survIDINRI::IDI.INF(data[, .SD, .SDcols = c(var.time, var.event)], mm[[x-1]], mm[[x]], t, npert=200))
+                  zz <- lapply(list(resIDINRI[1, ], resIDINRI[2, ]),
+                               function(x){
+                                 c(round(x[1], dec.auc), paste0(round(x[2], dec.auc), "-", round(x[3], dec.auc)), ifelse(x[4] < 0.001, "< 0.001", round(x[4], dec.p)))
+                               })
+                  return(unlist(zz))
+                })
+  out <- data.table::data.table(Reduce(rbind, c(list(rep(NA, 6)), res)))
+  names(out) <- c("IDI", "95% CI", "P-value for IDI", "continuous NRI", "95% CI", "P-value for NRI")
+  return(out[])
+
+}
 
 
 #' @title timerocModule: shiny module server for time-dependent roc analysis
@@ -124,22 +239,52 @@ timeROChelper <- function(event, time, vars.ind, t, data, design.survey = NULL, 
 #' @return shiny module server for time-dependent roc analysis
 #' @details shiny module server for time-dependent roc analysis
 #' @examples
-#' \dontrun{
-#' if(interactive()){
-#'  #EXAMPLE1
-#'  }
-#' }
+#' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
+#' library(timeROC);library(survIDINRI)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      timerocUI("timeroc")
+#'    ),
+#'    mainPanel(
+#'      plotOutput("plot_timeroc"),
+#'      ggplotdownUI("timeroc"),
+#'      DTOutput("table_timeroc")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- jstable::mk.lev(mtcars)
+#'
+#'   out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label,
+#'                             data_varStruct = NULL)
+#'
+#'   output$plot_timeroc <- renderPlot({
+#'     print(out_timeroc()$plot)
+#'   })
+#'
+#'   output$table_timeroc <- renderDT({
+#'     datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons",
+#'               caption = "ROC results",
+#'               options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+#'   })
+#'}
 #' @seealso
 #'  \code{\link[stats]{quantile}}
 #'  \code{\link[data.table]{setkey}}
+#'  \code{\link[data.table]{data.table}}
+#'  \code{\link[data.table]{rbindlist}}
 #' @rdname timerocModule
 #' @export
-#' @importFrom stats quantile
-#' @importFrom data.table setkey
+#' @importFrom stats quantile median
+#' @importFrom data.table setkey rbindlist data.table
 timerocModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
 
   ## To remove NOTE.
-  level <- val_label <- variable <- NULL
+  compare <- level <- variable <- FP <- TP <- model <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -250,6 +395,12 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 
   indeps <-  reactive(lapply(1:input$n_model, function(i){input[[paste0("indep_km", i)]]}))
 
+  output$time <- renderUI({
+    req(input$time_km)
+    tvar <- data()[[input$time_km]]
+    sliderInput(session$ns("time_to_roc"), "Time to analyze", min = min(tvar, na.rm= T), max = max(tvar, na.rm= T), value = median(tvar, na.rm= T))
+  })
+
 
   observeEvent(input$subcheck, {
     output$subvar <- renderUI({
@@ -298,17 +449,17 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
   })
 
 
-  output$time <- renderUI({
-    req(input$time_km)
-    tvar <- data()[[input$time_km]]
-    sliderInput("time_to_roc", "Time to analyze", min = min(tvar, na.rm= T), max = max(tvar, na.rm= T), value = median(tvar, na.rm= T))
-  })
 
 
 
   timerocList <- reactive({
     req(!is.null(input$event_km))
     req(!is.null(input$time_km))
+    #req(!is.null(input$indep_km1))
+    #req(!is.null(input$indep_km2))
+    for (i in 1:input$n_model){req(!is.null(input[[paste0("indep_km", i)]]))}
+    req(!is.null(indeps()))
+
     data.km <- data()
     label.regress <- data_label()
     data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
@@ -329,8 +480,15 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
     }
 
     if (is.null(design.survey)){
-      res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km)})
-      #res.roc <- timeROC_helper(input$event_km, input$time_km, vars.ind =  "Group.Gy.", t = input$time_to_roc, data = data.km)
+      res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, id.cluster = id.cluster())})
+      res.tb <- cbind(timeROC_table(res.roc),
+                      survIDINRI_helper(input$event_km, input$time_km,
+                                        list.vars.ind = indeps(),
+                                        t = input$time_to_roc,
+                                        data = data.km, id.cluster = id.cluster()))
+      #res.tb <- timeROC_table(res.roc)
+
+
 
     } else{
       data.design <- design.survey()
@@ -353,24 +511,81 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
         data.design$variables[[input$event_km]] <- as.numeric(as.vector(data.design$variables[[input$event_km]]))
 
       }
-      res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, design.survey = data.design)})
+      res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x,
+                                                            t = input$time_to_roc, data = data.km, design.survey = data.design)})
+      res.tb <- cbind(timeROC_table(res.roc),
+                      survIDINRI_helper(input$event_km, input$time_km,
+                                        list.vars.ind = indeps(),
+                                        t = input$time_to_roc, data = data.km))
     }
-    return(res.roc)
+
+    data.rocplot <- data.table::rbindlist(
+      lapply(1:length(res.roc),
+             function(x){
+               data.table::data.table(FP = res.roc[[x]]$FP[, which(res.roc[[x]]$times == input$time_to_roc)],
+                                      TP = res.roc[[x]]$TP[, which(res.roc[[x]]$times == input$time_to_roc)],
+                                      model = paste0("model ", x))
+               }))
+
+    p <- ggplot(data.rocplot, aes(FP, TP, colour = model)) + geom_line() + geom_abline(slope = 1, lty = 2) + xlab("1-Specificity") + ylab("Sensitivity")
+
+    return(list(plot = p, tb = res.tb))
   })
 
 
-  rocplot <- reactive({
-    plot(timerocList()[[1]], col = 1, title = F, time =  input$time_to_roc, lty = 1)
-    if (input$n_model > 1){
-      for (i in 2:input$n_model){
-        plot(timerocList()[[i]], col = i, add =T, time = input$time_to_roc, lty = i)
+
+
+
+  output$downloadControls <- renderUI({
+    tagList(
+      column(4,
+             selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
+                            choices = c("jpg","pdf", "tiff", "svg"), multiple = F,
+                            selected = "jpg"
+             )
+      ),
+      column(4,
+             sliderInput(session$ns("fig_width"), "Width (in):",
+                         min = 5, max = 15, value = 8
+             )
+      ),
+      column(4,
+             sliderInput(session$ns("fig_height"), "Height (in):",
+                         min = 5, max = 15, value = 6
+             )
+      )
+    )
+  })
+
+  output$downloadButton <- downloadHandler(
+    filename =  function() {
+      if (is.null(design.survey)){
+        if (is.null(id.cluster)){
+          return(paste(input$event_km, "_", input$time_km,"_timeROC.",input$file_ext ,sep=""))
+        } else{
+          return(paste(input$event_km, "_", input$time_km,"_timeROC_marginal.",input$file_ext ,sep=""))
+        }
+      } else{
+        return(paste(input$event_km, "_", input$time_km,"__timeROC_survey.",input$file_ext ,sep=""))
       }
+
+    },
+    # content is a function with argument file. content writes the plot to the device
+    content = function(file) {
+      withProgress(message = 'Download in progress',
+                   detail = 'This may take a while...', value = 0, {
+                     for (i in 1:15) {
+                       incProgress(1/15)
+                       Sys.sleep(0.01)
+                     }
+
+                     ggsave(file, timerocList()$plot, dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                   })
+
     }
-    legend("bottomright", paste0("model ", 1:input$n_model), col=1:input$n_model,lty=1:input$n_model)
-  })
+  )
 
-  return(rocplot)
-
+  return(timerocList)
 
 
 
