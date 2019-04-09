@@ -398,7 +398,15 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
   output$time <- renderUI({
     req(input$time_km)
     tvar <- data()[[input$time_km]]
-    sliderInput(session$ns("time_to_roc"), "Time to analyze", min = min(tvar, na.rm= T), max = max(tvar, na.rm= T), value = median(tvar, na.rm= T))
+    if (min(tvar, na.rm = T) >= 365){
+      sliderInput(session$ns("time_to_roc"), "Time to analyze", min = min(tvar, na.rm= T), max = max(tvar, na.rm= T), value = median(tvar, na.rm= T))
+    } else if (max(tvar, na.rm = T) >= 365){
+      sliderInput(session$ns("time_to_roc"), "Time to analyze", min = min(tvar, na.rm= T), max = max(tvar, na.rm= T), value = 365, step = 5)
+    } else if (max(tvar, na.rm = T) >= 12){
+      sliderInput(session$ns("time_to_roc"), "Time to analyze", min = min(tvar, na.rm= T), max = max(tvar, na.rm= T), value = 12)
+    } else{
+      sliderInput(session$ns("time_to_roc"), "Time to analyze", min = min(tvar, na.rm= T), max = max(tvar, na.rm= T), value = median(tvar, na.rm= T))
+    }
   })
 
 

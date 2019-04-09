@@ -1,3 +1,7 @@
+# jsmodule 0.8.1
+
+* **Change default time** when time-dependent ROC analysis. 
+
 # jsmodule 0.8.0
 
 ## New module
