@@ -142,7 +142,7 @@ timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey 
 
 timeROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
   auc <- round(sapply(ListModel, function(x){x$AUC[[2]]}), dec.auc)
-  auc.ci <- sapply(ListModel, function(x){paste(round(stats::confint(x)$CI_AUC/100, dec.auc), collapse = "-")})
+  auc.ci <- sapply(ListModel, function(x){ifelse(is.na(x$AUC[[2]]), NA, paste(round(stats::confint(x)$CI_AUC/100, dec.auc), collapse = "-"))})
   auc.pdiff <- c(NA, sapply(seq_along(ListModel)[-1],
                             function(x){
                               p <- timeROC::compare(ListModel[[x]], ListModel[[x-1]])$p_values_AUC[2]
@@ -467,6 +467,11 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
     #req(!is.null(input$indep_km2))
     for (i in 1:input$n_model){req(!is.null(input[[paste0("indep_km", i)]]))}
     req(!is.null(indeps()))
+    collapse.indep <- sapply(1:input$n_model, function(i){paste0(input[[paste0("indep_km", i)]], collapse = "")})
+    validate(
+      need(anyDuplicated(collapse.indep) == 0, "Please select different models")
+    )
+
 
     data.km <- data()
     label.regress <- data_label()
