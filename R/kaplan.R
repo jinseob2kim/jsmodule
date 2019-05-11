@@ -517,7 +517,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     tagList(
       column(4,
              selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                            choices = c("jpg","pdf", "tiff", "svg"), multiple = F,
+                            choices = c("jpg","pdf", "tiff", "svg", "emf"), multiple = F,
                             selected = "jpg"
              )
       ),
@@ -556,7 +556,14 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
                        Sys.sleep(0.01)
                      }
 
-                     ggsave(file, kmInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                     if (input$file_ext == "emf"){
+                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300)
+                       graphics::plot(kmInput())
+                       grDevices::dev.off()
+
+                     } else{
+                       ggsave(file, kmInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                     }
                    })
 
     }

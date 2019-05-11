@@ -309,7 +309,7 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
       tagList(
         column(4,
                selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                              choices = c("jpg","pdf", "tiff", "svg"), multiple = F,
+                              choices = c("jpg","pdf", "tiff", "svg", "emf"), multiple = F,
                               selected = "jpg"
                )
         ),
@@ -337,9 +337,15 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
                        for (i in 1:15) {
                          incProgress(1/15)
                          Sys.sleep(0.01)
-                         }
+                       }
+                       if (input$file_ext == "emf"){
+                         devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300)
+                         print(ggpairsInput())
+                         grDevices::dev.off()
 
-                       ggsave(file,ggpairsInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                       } else{
+                         ggsave(file, ggpairsInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                       }
                        })
 
       }
@@ -588,7 +594,7 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
     tagList(
       column(4,
              selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                            choices = c("jpg","pdf", "tiff", "svg"), multiple = F,
+                            choices = c("jpg","pdf", "tiff", "svg", "emf"), multiple = F,
                             selected = "jpg"
              )
       ),
@@ -618,7 +624,14 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
                        Sys.sleep(0.01)
                      }
 
-                     ggsave(file,ggpairsInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                     if (input$file_ext == "emf"){
+                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300)
+                       print(ggpairsInput())
+                       grDevices::dev.off()
+
+                     } else{
+                       ggsave(file, ggpairsInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                     }
                    })
 
     }
@@ -628,3 +641,4 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
 
 
 }
+

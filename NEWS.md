@@ -1,3 +1,7 @@
+# jsmodule 0.8.2
+
+* Add **emf** format to the plot download modules. You can customize the plot in **MS powerpoint**.
+
 # jsmodule 0.8.1
 
 * **Change default time** when time-dependent ROC analysis. 

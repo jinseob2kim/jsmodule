@@ -558,7 +558,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
     tagList(
       column(4,
              selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                            choices = c("jpg","pdf", "tiff", "svg"), multiple = F,
+                            choices = c("jpg","pdf", "tiff", "svg", "emf"), multiple = F,
                             selected = "jpg"
              )
       ),
@@ -597,7 +597,15 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
                        Sys.sleep(0.01)
                      }
 
-                     ggsave(file, timerocList()$plot, dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                     if (input$file_ext == "emf"){
+                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300)
+                       print(timerocList()$plot)
+                       grDevices::dev.off()
+
+                     } else{
+                       ggsave(file, timerocList()$plot, dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                     }
+
                    })
 
     }
