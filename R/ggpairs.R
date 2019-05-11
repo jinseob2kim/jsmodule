@@ -339,7 +339,7 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
                          Sys.sleep(0.01)
                        }
                        if (input$file_ext == "emf"){
-                         devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300)
+                         devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300, emfPlus = F)
                          print(ggpairsInput())
                          grDevices::dev.off()
 
@@ -625,7 +625,7 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
                      }
 
                      if (input$file_ext == "emf"){
-                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300)
+                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300, emfPlus = F)
                        print(ggpairsInput())
                        grDevices::dev.off()
 

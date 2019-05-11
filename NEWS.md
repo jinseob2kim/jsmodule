@@ -1,3 +1,8 @@
+# jsmodule 0.8.2.1
+
+* Bug fix: **emf** format can recognize figure's line.
+
+
 # jsmodule 0.8.2
 
 * Add **emf** format to the plot download modules. You can customize the plot in **MS powerpoint**.

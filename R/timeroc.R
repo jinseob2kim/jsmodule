@@ -598,7 +598,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
                      }
 
                      if (input$file_ext == "emf"){
-                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300)
+                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300, emfPlus = F)
                        print(timerocList()$plot)
                        grDevices::dev.off()
 
