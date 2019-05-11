@@ -1,7 +1,10 @@
+# jsmodule 0.8.3
+
+* Bug fix: time-dependent ROC analysis.
+
 # jsmodule 0.8.2.1
 
 * Bug fix: **emf** format can recognize figure's line.
-
 
 # jsmodule 0.8.2
 
