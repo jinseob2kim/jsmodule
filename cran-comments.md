@@ -1,3 +1,9 @@
+## Submission v0.8.3
+
+* Bug fix: **emf** format can recognize figure's line.
+* Bug fix: time-dependent ROC analysis.
+
+
 ## Resubmission
 
 This is a resubmission. In this version I have:
