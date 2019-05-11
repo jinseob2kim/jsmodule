@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>kaplanModule: Module for kaplan-meier plot — kaplanModule • jsmodule</title>
+<title>kaplanModule: shiny module server for kaplan-meier plot. — kaplanModule • jsmodule</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -36,9 +36,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="kaplanModule: Module for kaplan-meier plot — kaplanModule" />
+<meta property="og:title" content="kaplanModule: shiny module server for kaplan-meier plot. — kaplanModule" />
 
-<meta property="og:description" content="Module for kaplan-meier plot" />
+<meta property="og:description" content="Shiny module server for kaplan-meier plot." />
 <meta name="twitter:card" content="summary" />
 
 <meta name="robots" content="noindex">
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.7.8.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.8.2.1</span>
       </span>
     </div>
 
@@ -117,20 +117,21 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>kaplanModule: Module for kaplan-meier plot</h1>
+    <h1>kaplanModule: shiny module server for kaplan-meier plot.</h1>
     <small class="dont-index">Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/R/kaplan.R'><code>R/kaplan.R</code></a></small>
     <div class="hidden name"><code>kaplanModule.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Module for kaplan-meier plot</p>
+    <p>Shiny module server for kaplan-meier plot.</p>
     
     </div>
 
     <pre class="usage"><span class='fu'>kaplanModule</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>, <span class='no'>data</span>, <span class='no'>data_label</span>,
   <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>nfactor.limit</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>design.survey</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>id.cluster</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+  <span class='kw'>id.cluster</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>timeby</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>range.x</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>range.y</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>pval.coord</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -149,15 +150,15 @@
     </tr>
     <tr>
       <th>data</th>
-      <td><p>reactive data</p></td>
+      <td><p>Reactive data</p></td>
     </tr>
     <tr>
       <th>data_label</th>
-      <td><p>reactuve data_label</p></td>
+      <td><p>Reactuve data label</p></td>
     </tr>
     <tr>
       <th>data_varStruct</th>
-      <td><p>reactive data_varStruct, Default: NULL</p></td>
+      <td><p>Reactive List of variable structure, Default: NULL</p></td>
     </tr>
     <tr>
       <th>nfactor.limit</th>
@@ -165,26 +166,65 @@
     </tr>
     <tr>
       <th>design.survey</th>
-      <td><p>reactive survey data. default: NULL</p></td>
+      <td><p>Reactive survey data. default: NULL</p></td>
     </tr>
     <tr>
       <th>id.cluster</th>
-      <td><p>reactive cluster variable if marginal model, Default: NULL</p></td>
+      <td><p>Reactive cluster variable if marginal model, Default: NULL</p></td>
+    </tr>
+    <tr>
+      <th>timeby</th>
+      <td><p>timeby, Default: NULL</p></td>
+    </tr>
+    <tr>
+      <th>range.x</th>
+      <td><p>range of x axis, Default: NULL</p></td>
+    </tr>
+    <tr>
+      <th>range.y</th>
+      <td><p>range of y axis, Default: NULL</p></td>
+    </tr>
+    <tr>
+      <th>pval.coord</th>
+      <td><p>pval.coord, Default: NULL</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>kaplanModule</p>
+    <p>Shiny module server for kaplan-meier plot.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>DETAILS</p>
+    <p>Shiny module server for kaplan-meier plot.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'> #EXAMPLE1
-</div></pre>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>shiny</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>DT</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>data.table</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>jstable</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>ggplot2</span>)
+<span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/fluidPage'>fluidPage</a></span>(
+   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/sidebarLayout'>sidebarLayout</a></span>(
+   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/sidebarPanel'>sidebarPanel</a></span>(
+     <span class='fu'><a href='kaplanUI.html'>kaplanUI</a></span>(<span class='st'>"kaplan"</span>)
+   ),
+   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/mainPanel'>mainPanel</a></span>(
+     <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/plotOutput'>plotOutput</a></span>(<span class='st'>"kaplan_plot"</span>),
+     <span class='fu'><a href='ggplotdownUI.html'>ggplotdownUI</a></span>(<span class='st'>"kaplan"</span>)
+   )
+ )
+)
+
+<span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
+
+  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/reactive'>reactive</a></span>(<span class='no'>mtcars</span>)
+  <span class='no'>data.label</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/reactive'>reactive</a></span>(<span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/jstable/topics/mk.lev'>mk.lev</a></span>(<span class='no'>mtcars</span>))
+
+  <span class='no'>out_kaplan</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/callModule'>callModule</a></span>(<span class='no'>kaplanModule</span>, <span class='st'>"kaplan"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>,
+                           <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+
+  <span class='no'>output</span>$<span class='no'>kaplan_plot</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/renderPlot'>renderPlot</a></span>({
+    <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='fu'>out_kaplan</span>())
+  })
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -203,7 +243,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by <a href='https://github.com/jinseob2kim'>Jinseob Kim</a>, <a href='https://www.anpanman.co.kr'><img src="https://raw.githubusercontent.com/anpanmancorp/Anpanman/master/horizontal_anpanman_transparent.png" height="24" /></a>.</p>
+  <p>Developed by <a href='https://github.com/jinseob2kim'>Jinseob Kim</a>, <a href='https://www.zarathu.com'><img src="https://raw.githubusercontent.com/zarathucorp/zarathu/master/Color%20logo%20-%20no%20background.png" height="24" /></a>.</p>
 </div>
 
 <div class="pkgdown">

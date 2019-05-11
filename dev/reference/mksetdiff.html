@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>mksetdiff: make setdiff varlist — mksetdiff • jsmodule</title>
+<title>mksetdiff: function to make variable list excluding specific variables. — mksetdiff • jsmodule</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -36,9 +36,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="mksetdiff: make setdiff varlist — mksetdiff" />
+<meta property="og:title" content="mksetdiff: function to make variable list excluding specific variables. — mksetdiff" />
 
-<meta property="og:description" content="make setdiff varlist" />
+<meta property="og:description" content="Function to make variable list excluding specific variables." />
 <meta name="twitter:card" content="summary" />
 
 <meta name="robots" content="noindex">
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.7.8.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.8.2.1</span>
       </span>
     </div>
 
@@ -117,14 +117,14 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>mksetdiff: make setdiff varlist</h1>
+    <h1>mksetdiff: function to make variable list excluding specific variables.</h1>
     <small class="dont-index">Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/R/regress.R'><code>R/regress.R</code></a></small>
     <div class="hidden name"><code>mksetdiff.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>make setdiff varlist</p>
+    <p>Function to make variable list excluding specific variables.</p>
     
     </div>
 
@@ -135,17 +135,17 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>varlist</th>
-      <td><p>varlist</p></td>
+      <td><p>Original variable list</p></td>
     </tr>
     <tr>
       <th>vars</th>
-      <td><p>vars</p></td>
+      <td><p>variable to exclude.</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Setdiff varlist</p>
+    <p>variable list excluding specific variables.</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
@@ -153,8 +153,10 @@
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'> # Example
-</div></pre>
+    <pre class="examples"><div class='input'> <span class='no'>data_varStruct</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>variable</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/names'>names</a></span>(<span class='no'>mtcars</span>))
+ <span class='fu'>mksetdiff</span>(<span class='no'>data_varStruct</span>, <span class='st'>"mpg"</span>)</div><div class='output co'>#&gt; $variable
+#&gt;  [1] "cyl"  "disp" "hp"   "drat" "wt"   "qsec" "vs"   "am"   "gear" "carb"
+#&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -173,7 +175,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by <a href='https://github.com/jinseob2kim'>Jinseob Kim</a>, <a href='https://www.anpanman.co.kr'><img src="https://raw.githubusercontent.com/anpanmancorp/Anpanman/master/horizontal_anpanman_transparent.png" height="24" /></a>.</p>
+  <p>Developed by <a href='https://github.com/jinseob2kim'>Jinseob Kim</a>, <a href='https://www.zarathu.com'><img src="https://raw.githubusercontent.com/zarathucorp/zarathu/master/Color%20logo%20-%20no%20background.png" height="24" /></a>.</p>
 </div>
 
 <div class="pkgdown">

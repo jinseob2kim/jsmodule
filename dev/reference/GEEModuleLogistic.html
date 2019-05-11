@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>GEEModuleLogistic: Module for logistic GEE using reactive data — GEEModuleLogistic • jsmodule</title>
+<title>GEEModuleLogistic: shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data. — GEEModuleLogistic • jsmodule</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -36,9 +36,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="GEEModuleLogistic: Module for logistic GEE using reactive data — GEEModuleLogistic" />
+<meta property="og:title" content="GEEModuleLogistic: shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data. — GEEModuleLogistic" />
 
-<meta property="og:description" content="Module for logistic GEE using reactive data" />
+<meta property="og:description" content="Shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data." />
 <meta name="twitter:card" content="summary" />
 
 <meta name="robots" content="noindex">
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.7.8.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.8.2.1</span>
       </span>
     </div>
 
@@ -117,14 +117,14 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>GEEModuleLogistic: Module for logistic GEE using reactive data</h1>
+    <h1>GEEModuleLogistic: shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data.</h1>
     <small class="dont-index">Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/R/gee.R'><code>R/gee.R</code></a></small>
     <div class="hidden name"><code>GEEModuleLogistic.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Module for logistic GEE using reactive data</p>
+    <p>Shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data.</p>
     
     </div>
 
@@ -152,11 +152,11 @@
     </tr>
     <tr>
       <th>data_label</th>
-      <td><p>reactive data_label</p></td>
+      <td><p>reactive data label</p></td>
     </tr>
     <tr>
       <th>data_varStruct</th>
-      <td><p>data_varStruct, Default: NULL</p></td>
+      <td><p>List of variable structure, Default: NULL</p></td>
     </tr>
     <tr>
       <th>nfactor.limit</th>
@@ -170,16 +170,47 @@
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>GEEModuleLogistic</p>
+    <p>Shiny modulde server for binomial gaussian generalized estimating equation(GEE).</p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>DETAILS</p>
+    <p>Shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'> #EXAMPLE1
-</div></pre>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>shiny</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>DT</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>data.table</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>jstable</span>)
+<span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/fluidPage'>fluidPage</a></span>(
+   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/sidebarLayout'>sidebarLayout</a></span>(
+   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/sidebarPanel'>sidebarPanel</a></span>(
+     <span class='fu'><a href='GEEModuleUI.html'>GEEModuleUI</a></span>(<span class='st'>"logistic"</span>)
+   ),
+   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/mainPanel'>mainPanel</a></span>(
+     <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>DTOutput</a></span>(<span class='st'>"logistictable"</span>)
+   )
+ )
+)
+
+<span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
+
+  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/reactive'>reactive</a></span>(<span class='no'>mtcars</span>)
+  <span class='no'>data.label</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/reactive'>reactive</a></span>(<span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/jstable/topics/mk.lev'>mk.lev</a></span>(<span class='no'>mtcars</span>))
+  <span class='no'>id.gee</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/reactive'>reactive</a></span>(<span class='st'>"mpg"</span>)
+
+  <span class='no'>out_logistic</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/callModule'>callModule</a></span>(<span class='no'>GEEModuleLogistic</span>, <span class='st'>"logistic"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>,
+                             <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>id.gee</span> <span class='kw'>=</span> <span class='no'>id.gee</span>)
+
+  <span class='no'>output</span>$<span class='no'>logistictable</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>renderDT</a></span>({
+    <span class='no'>hide</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/which'>which</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/colnames'>colnames</a></span>(<span class='fu'>out_logistic</span>()$<span class='no'>table</span>) <span class='kw'>==</span> <span class='st'>"sig"</span>)
+    <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/datatable'>datatable</a></span>(<span class='fu'>out_logistic</span>()$<span class='no'>table</span>, <span class='kw'>rownames</span><span class='kw'>=</span><span class='no'>T</span>, <span class='kw'>extension</span><span class='kw'>=</span> <span class='st'>"Buttons"</span>,
+              <span class='kw'>caption</span> <span class='kw'>=</span> <span class='fu'>out_logistic</span>()$<span class='no'>caption</span>,
+              <span class='kw'>options</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/jstable/topics/opt.tbreg'>opt.tbreg</a></span>(<span class='fu'>out_logistic</span>()$<span class='no'>caption</span>),
+                          <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>columnDefs</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>visible</span><span class='kw'>=</span><span class='fl'>FALSE</span>, <span class='kw'>targets</span> <span class='kw'>=</span><span class='no'>hide</span>))
+                          ),
+                          <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>scrollX</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+              )
+    ) <span class='kw'>%&gt;%</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/formatCurrency'>formatStyle</a></span>(<span class='st'>"sig"</span>, <span class='kw'>target</span> <span class='kw'>=</span> <span class='st'>'row'</span>,<span class='kw'>backgroundColor</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/styleInterval'>styleEqual</a></span>(<span class='st'>"**"</span>, <span class='st'>'yellow'</span>))
+  })
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -198,7 +229,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by <a href='https://github.com/jinseob2kim'>Jinseob Kim</a>, <a href='https://www.anpanman.co.kr'><img src="https://raw.githubusercontent.com/anpanmancorp/Anpanman/master/horizontal_anpanman_transparent.png" height="24" /></a>.</p>
+  <p>Developed by <a href='https://github.com/jinseob2kim'>Jinseob Kim</a>, <a href='https://www.zarathu.com'><img src="https://raw.githubusercontent.com/zarathucorp/zarathu/master/Color%20logo%20-%20no%20background.png" height="24" /></a>.</p>
 </div>
 
 <div class="pkgdown">
