@@ -465,14 +465,16 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         range.y <- c(0, 1)
       }
 
+      xstep.default <- ifelse(xmax <= 365, 1, 5)
+
 
 
       tagList(
         sliderInput(session$ns("timeby"), "Time by",
-                    min = 1, max = xmax, value = value.timeby, step = 5),
+                    min = 1, max = xmax, value = value.timeby, step = xstep.default),
 
         sliderInput(session$ns("xlims"), "X axis range(time)",
-                    min = 0, max = xmax, value = range.x, step = 5),
+                    min = 0, max = xmax, value = range.x, step = xstep.default),
         sliderInput(session$ns("ylims"), "Y axis range(probability)",
                     min = 0, max = 1, value = range.y , step = 0.05)
       )

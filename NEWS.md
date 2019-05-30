@@ -1,3 +1,8 @@
+# jsmodule 0.8.4
+
+* Change default **step of x-axis range**.
+
+
 # jsmodule 0.8.3
 
 * Bug fix: time-dependent ROC analysis.
