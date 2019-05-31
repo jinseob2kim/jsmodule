@@ -24,18 +24,13 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
   requireNamespace("survival")
   requireNamespace("survC1")
 
-  change.vnlist = list(c(" ", "_"), c("=<", "_le_"), c("=>", "_ge_"), c("=", "_eq_"), c("\\(", "_open_"), c("\\)", "_close_"), c("%", "_percent_"), c("-", "_"), c("/", "_"),
-                       c("\r\n", "_"), c(",", "_comma_"))
 
+  out <- data.table(data, check.names = F)
+  name.old <- names(out)
   out <- data.table(data, check.names = T)
+  name.new <- names(out)
+  ref <- data.table(name.old = name.old, name.new = name.new);setkey(ref, name.new)
 
-
-  ## Initial variable name
-  for (x in change.vnlist){
-    names(out) <- gsub(x[1], x[2], names(out))
-  }
-  numstart.vnum <- suppressWarnings(sapply(names(out),function(x){!is.na(as.numeric(substr(x, 1,1)))}))
-  names(out)[numstart.vnum] <- paste("n_", names(out)[numstart.vnum], sep = "")
 
   ## factor variable
   factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
@@ -244,6 +239,8 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 
         }
       }
+
+      out.label[, var_label := ref[out.label$variable, name.old]]
 
       return(list(data = out, label = out.label))
     })
