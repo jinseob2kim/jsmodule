@@ -1,6 +1,6 @@
 # jsmodule 0.8.5
 
-* **Keep original variable's name** when running the RStudio Addins
+* **Keep original variable's name** in tables/figures
 
 
 # jsmodule 0.8.4
