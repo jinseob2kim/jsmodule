@@ -320,7 +320,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
     if (!is.null(design.survey)){
       conti_vars <- setdiff(conti_vars, c(names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
     }
-    conti_vars_positive <- conti_vars[unlist(data()[, lapply(.SD, function(x){min(x, na.rm = T) > 0}), .SDcols = conti_vars])]
+    conti_vars_positive <- conti_vars[unlist(data()[, lapply(.SD, function(x){min(x, na.rm = T) >= 0}), .SDcols = conti_vars])]
     conti_list <- mklist(data_varStruct(), conti_vars)
 
     nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
