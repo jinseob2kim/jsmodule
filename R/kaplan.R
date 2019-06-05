@@ -99,7 +99,55 @@ ggplotdownUI <- function(id) {
   )
 }
 
+#' @title optionUI: Option UI with icon
+#' @description Option UI with icon
+#' @param id id
+#' @return Option UI with icon
+#' @details Option UI with icon
+#' @examples
+#' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      kaplanUI("kaplan")
+#'    ),
+#'    mainPanel(
+#'      optionUI("kaplan"),
+#'      plotOutput("kaplan_plot"),
+#'      ggplotdownUI("kaplan")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label,
+#'                            data_varStruct = NULL)
+#'
+#'   output$kaplan_plot <- renderPlot({
+#'     print(out_kaplan())
+#'   })
+#'}
+#' @seealso
+#'  \code{\link[shinyWidgets]{dropdownButton}},\code{\link[shinyWidgets]{tooltipOptions}}
+#' @rdname optionUI
+#' @export
+#' @importFrom shinyWidgets dropdownButton tooltipOptions
 
+optionUI <- function(id) {
+  # Create a namespace function using the provided id
+  ns <- NS(id)
+
+  shinyWidgets::dropdownButton(
+    uiOutput(ns("option_kaplan")),
+    circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
+    tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
+  )
+
+}
 
 
 #' @title kaplanModule: shiny module server for kaplan-meier plot.
@@ -116,7 +164,6 @@ ggplotdownUI <- function(id) {
 #' @param timeby timeby, Default: NULL
 #' @param range.x range of x axis, Default: NULL
 #' @param range.y range of y axis, Default: NULL
-#' @param pval.coord pval.coord, Default: NULL
 #' @return Shiny module server for kaplan-meier plot.
 #' @details Shiny module server for kaplan-meier plot.
 #' @examples
@@ -157,7 +204,7 @@ ggplotdownUI <- function(id) {
 
 
 kaplanModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL,
-                         timeby = NULL, range.x = NULL, range.y = NULL, pval.coord = NULL) {
+                         timeby = NULL, range.x = NULL, range.y = NULL) {
 
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
@@ -190,8 +237,9 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     if (!is.null(design.survey)){
       conti_vars <- setdiff(conti_vars, c(names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
     }
-    conti_list <- mklist(data_varStruct(), conti_vars)
+    conti_vars_positive <- conti_vars[unlist(data()[, lapply(.SD, function(x){min(x, na.rm = T) > 0}), .SDcols = conti_vars])]
 
+    conti_list <- mklist(data_varStruct(), conti_vars)
     nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
     #nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]]))})
     class01_factor <- unlist(data()[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])
@@ -208,7 +256,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
     except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data())]
 
-    return(list(factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list,
+    return(list(factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list, conti_vars_positive = conti_vars_positive,
                 factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_vars = group_vars, group_list = group_list, except_vars = except_vars)
     )
 
@@ -217,7 +265,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
   output$eventtime <- renderUI({
     validate(
       need(length(vlist()$factor_01vars) >=1 , "No candidate event variables coded as 0, 1"),
-      need(length(vlist()$conti_list) >=1, "No candidate time variables")
+      need(length(vlist()$conti_vars_positive) >=1, "No candidate time variables")
     )
 
     tagList(
@@ -226,7 +274,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
                   selected = NULL
       ),
       selectInput(session$ns("time_km"), "Time",
-                  choices = vlist()$conti_list, multiple = F,
+                  choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = F,
                   selected = NULL
       )
     )
@@ -295,6 +343,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
   observeEvent(input$subcheck, {
     output$subvar <- renderUI({
       req(input$subcheck == T)
+      req(!is.null(input$time_km))
 
       var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$time_km, input$event_km, input$indep_km))
       if (!is.null(id.cluster)){
@@ -343,8 +392,10 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
   form.km <- reactive({
     validate(
-      need(!is.null(input$indep_km), "Please select at least 1 independent variable.")
+      need(!is.null(input$indep_km), "Please select at least 1 independent variable."),
+      need(!is.null(input$time_km), "Please select at least 1 time variable.")
     )
+
     if (input$indep_km == "None"){
       return(as.formula(paste("survival::Surv(",input$time_km,",", input$event_km,") ~ ", "1", sep="")))
     } else if (input$indep_km %in% vlist()$factor_vars) {
@@ -492,22 +543,34 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     yst.lab <- kmList()$yst.lab
     data.km <- kmList()$data
 
+    if(is.null(input$legendx)){
+      legend.p <- c(0.85, 0.8)
+    } else{
+      legend.p <-  c(input$legendx, input$legendy)
+    }
+
+    if(is.null(input$pvalx)){
+      pval.coord <- c(as.integer(input$xlims[1]+ input$xlims[2]/5), 0.1 + input$ylims[1])
+    } else{
+      pval.coord <-  c(input$pvalx, input$pvaly)
+    }
+
     if (is.null(design.survey)){
       if (is.null(id.cluster)){
         return(
           jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                     cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord)
+                     cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p)
         )
       } else{
         return(
           jskm::jskm(res.km, pval = input$pval, mark=F, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                     cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord)
+                     cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord, legendposition = legend.p)
         )
       }
     } else{
       return(
         jskm::svyjskm(res.km, pval = input$pval, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                      cumhaz= input$cumhaz, design = data.km, pval.coord = pval.coord)
+                      cumhaz= input$cumhaz, design = data.km, pval.coord = pval.coord, legendposition = legend.p)
       )
     }
   })
@@ -570,6 +633,35 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
     }
   )
+
+  output$option_kaplan <- renderUI({
+    if (input$indep_km == "None"){
+      tagList(
+        h3("Legend position"),
+        sliderInput(session$ns("legendx"), "x-axis (proportion)",
+                    min = 0, max = 1, value = 0.85),
+        sliderInput(session$ns("legendy"), "y-axis",
+                    min = 0, max = 1, value = 0.8)
+      )
+    } else{
+      tagList(
+        h3("Legend position"),
+        sliderInput(session$ns("legendx"), "x-axis (proportion)",
+                    min = 0, max = 1, value = 0.85),
+        sliderInput(session$ns("legendy"), "y-axis",
+                    min = 0, max = 1, value = 0.8),
+
+        h3("P-value position"),
+        sliderInput(session$ns("pvalx"), "x-axis (time)",
+                    min = 0, max = input$xlims[2], value = as.integer(input$xlims[1]+ input$xlims[2]/5)),
+        sliderInput(session$ns("pvaly"), "y-axis",
+                    min = 0, max = 1, value = 0.1 + input$ylims[1])
+      )
+    }
+
+
+
+  })
 
   return(kmInput)
 

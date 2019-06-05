@@ -109,6 +109,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     if (!is.null(design.survey)){
       conti_vars <- setdiff(conti_vars, c(names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
     }
+    conti_vars_positive <- conti_vars[unlist(data()[, lapply(.SD, function(x){min(x, na.rm = T) > 0}), .SDcols = conti_vars])]
     conti_list <- mklist(data_varStruct(), conti_vars)
 
     nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
@@ -127,7 +128,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
     except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data())]
 
-    return(list(factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list,
+    return(list(factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list, conti_vars_positive = conti_vars_positive,
                 factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_vars = group_vars, group_list = group_list, except_vars = except_vars)
     )
 
@@ -136,7 +137,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
   output$eventtime <- renderUI({
     validate(
       need(length(vlist()$factor_01vars) >=1 , "No candidate event variables coded as 0, 1"),
-      need(length(vlist()$conti_list) >=1, "No candidate time variables")
+      need(length(vlist()$conti_vars_positive) >=1, "No candidate time variables")
     )
 
 
@@ -146,7 +147,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
                   selected = NULL
       ),
       selectInput(session$ns("time_cox"), "Time",
-                  choices = vlist()$conti_list, multiple = F,
+                  choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = F,
                   selected = NULL
       )
     )

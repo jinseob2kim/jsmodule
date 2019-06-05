@@ -1,3 +1,14 @@
+# jsmodule 0.8.6
+
+## Update
+* Change **candidate time variables** in survival analysis  : allow only > 0 
+
+* Add option to **change legend, p-value position in kaplan-meier plot**
+
+## Bug fixes
+
+* Time-dependent ROC analysis can allow 1 model.
+
 # jsmodule 0.8.5
 
 * **Keep original variable's name** in tables/figures

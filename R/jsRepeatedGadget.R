@@ -129,6 +129,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                                            kaplanUI("kaplan")
                                          ),
                                          mainPanel(
+                                           optionUI("kaplan"),
                                            withLoader(plotOutput("kaplan_plot"), type="html", loader="loader6"),
                                            ggplotdownUI("kaplan")
                                          )
