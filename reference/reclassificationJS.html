@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>timerocUI: shiny module UI for time-dependent roc analysis — timerocUI • jsmodule</title>
+<title>reclassificationJS: Function for reclassification table and statistics — reclassificationJS • jsmodule</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -36,9 +36,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
 
 
-<meta property="og:title" content="timerocUI: shiny module UI for time-dependent roc analysis — timerocUI" />
+<meta property="og:title" content="reclassificationJS: Function for reclassification table and statistics — reclassificationJS" />
 
-<meta property="og:description" content="Shiny module UI for time-dependent roc analysis" />
+<meta property="og:description" content="Modified function of PredictABEL::reclassification: return output table" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -117,71 +117,109 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>timerocUI: shiny module UI for time-dependent roc analysis</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/R/timeroc.R'><code>R/timeroc.R</code></a></small>
-    <div class="hidden name"><code>timerocUI.Rd</code></div>
+    <h1>reclassificationJS: Function for reclassification table and statistics</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/R/roc.R'><code>R/roc.R</code></a></small>
+    <div class="hidden name"><code>reclassificationJS.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Shiny module UI for time-dependent roc analysis</p>
+    <p>Modified function of PredictABEL::reclassification: return output table</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>timerocUI</span>(<span class='no'>id</span>)</pre>
+    <pre class="usage"><span class='fu'>reclassificationJS</span>(<span class='no'>data</span>, <span class='no'>cOutcome</span>, <span class='no'>predrisk1</span>, <span class='no'>predrisk2</span>, <span class='no'>cutoff</span>,
+  <span class='kw'>dec.value</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>dec.p</span> <span class='kw'>=</span> <span class='fl'>3</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>id</th>
-      <td><p>id</p></td>
+      <th>data</th>
+      <td><p>Data frame or matrix that includes the outcome and predictors variables.</p></td>
+    </tr>
+    <tr>
+      <th>cOutcome</th>
+      <td><p>Column number of the outcome variable.</p></td>
+    </tr>
+    <tr>
+      <th>predrisk1</th>
+      <td><p>Vector of predicted risks of all individuals using initial model.</p></td>
+    </tr>
+    <tr>
+      <th>predrisk2</th>
+      <td><p>Vector of predicted risks of all individuals using updated model.</p></td>
+    </tr>
+    <tr>
+      <th>cutoff</th>
+      <td><p>Cutoff values for risk categories. Define the cut-off values. Ex: c(0,.20,.30,1)</p></td>
+    </tr>
+    <tr>
+      <th>dec.value</th>
+      <td><p>digits of value, Default: 4</p></td>
+    </tr>
+    <tr>
+      <th>dec.p</th>
+      <td><p>digits of p, Default: 3</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Shiny module UI for time-dependent roc analysis</p>
+    <p>Table including NRI(categorical), NRI(continuous), IDI with 95<!-- % CI and p-values. --></p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Shiny module UI for time-dependent roc analysis</p>
+    <p>Modified function of PredictABEL::reclassification</p>
+    
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='https://www.rdocumentation.org/packages/Hmisc/topics/rcorrp.cens'>rcorrp.cens</a></code></p></div>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>shiny</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>DT</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>data.table</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>jstable</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>ggplot2</span>)
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>timeROC</span>);<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>survIDINRI</span>)
-<span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/fluidPage'>fluidPage</a></span>(
-   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/sidebarLayout'>sidebarLayout</a></span>(
-   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/sidebarPanel'>sidebarPanel</a></span>(
-     <span class='fu'>timerocUI</span>(<span class='st'>"timeroc"</span>)
-   ),
-   <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/mainPanel'>mainPanel</a></span>(
-     <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/plotOutput'>plotOutput</a></span>(<span class='st'>"plot_timeroc"</span>),
-     <span class='fu'><a href='ggplotdownUI.html'>ggplotdownUI</a></span>(<span class='st'>"timeroc"</span>),
-     <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>DTOutput</a></span>(<span class='st'>"table_timeroc"</span>)
-   )
- )
-)
-
-<span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
-
-  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/reactive'>reactive</a></span>(<span class='no'>mtcars</span>)
-  <span class='no'>data.label</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/jstable/topics/mk.lev'>mk.lev</a></span>(<span class='no'>mtcars</span>)
-
-  <span class='no'>out_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/callModule'>callModule</a></span>(<span class='no'>timerocModule</span>, <span class='st'>"timeroc"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>,
-                            <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
-
-  <span class='no'>output</span>$<span class='no'>plot_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/shiny/topics/renderPlot'>renderPlot</a></span>({
-    <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='fu'>out_timeroc</span>()$<span class='no'>plot</span>)
-  })
-
-  <span class='no'>output</span>$<span class='no'>table_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/dataTableOutput'>renderDT</a></span>({
-    <span class='fu'><a href='https://www.rdocumentation.org/packages/DT/topics/datatable'>datatable</a></span>(<span class='fu'>out_timeroc</span>()$<span class='no'>tb</span>, <span class='kw'>rownames</span><span class='kw'>=</span><span class='no'>F</span>, <span class='kw'>editable</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>extensions</span><span class='kw'>=</span> <span class='st'>"Buttons"</span>,
-              <span class='kw'>caption</span> <span class='kw'>=</span> <span class='st'>"ROC results"</span>,
-              <span class='kw'>options</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/jstable/topics/opt.tbreg'>opt.tbreg</a></span>(<span class='st'>"roctable"</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>scrollX</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)))
-  })
-}</div></pre>
+    <pre class="examples"><div class='input'> <span class='no'>m1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/glm'>glm</a></span>(<span class='no'>vs</span> ~ <span class='no'>am</span> + <span class='no'>gear</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>mtcars</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='no'>binomial</span>)
+ <span class='no'>m2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/glm'>glm</a></span>(<span class='no'>vs</span> ~ <span class='no'>am</span> + <span class='no'>gear</span> + <span class='no'>wt</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>mtcars</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='no'>binomial</span>)
+ <span class='fu'>reclassificationJS</span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>mtcars</span>, <span class='kw'>cOutcome</span> <span class='kw'>=</span> <span class='fl'>8</span>,
+                    <span class='kw'>predrisk1</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>m1</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"response"</span>),
+                    <span class='kw'>predrisk2</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/predict'>predict</a></span>(<span class='no'>m2</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"response"</span>), <span class='kw'>cutoff</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>0</span>,<span class='fl'>.20</span>,<span class='fl'>.40</span>,<span class='fl'>1</span>))</div><div class='output co'>#&gt;  _________________________________________
+#&gt;  
+#&gt;      Reclassification table    
+#&gt;  _________________________________________
+#&gt; 
+#&gt;  Outcome: absent 
+#&gt;   
+#&gt;              Updated Model
+#&gt; Initial Model [0,0.2) [0.2,0.4) [0.4,1]  % reclassified
+#&gt;     [0,0.2)         0         0       0             NaN
+#&gt;     [0.2,0.4)       8         2       2              83
+#&gt;     [0.4,1]         4         1       1              83
+#&gt; 
+#&gt;  
+#&gt;  Outcome: present 
+#&gt;   
+#&gt;              Updated Model
+#&gt; Initial Model [0,0.2) [0.2,0.4) [0.4,1]  % reclassified
+#&gt;     [0,0.2)         0         0       0             NaN
+#&gt;     [0.2,0.4)       0         0       3             100
+#&gt;     [0.4,1]         1         0      10               9
+#&gt; 
+#&gt;  
+#&gt;  Combined Data 
+#&gt;   
+#&gt;              Updated Model
+#&gt; Initial Model [0,0.2) [0.2,0.4) [0.4,1]  % reclassified
+#&gt;     [0,0.2)         0         0       0             NaN
+#&gt;     [0.2,0.4)       8         2       5              87
+#&gt;     [0.4,1]         5         1      11              35
+#&gt;  _________________________________________
+#&gt; 
+#&gt;  NRI(Categorical) [95% CI]: 0.754 [ 0.3405 - 1.1674 ] ; p-value: 0.00035 
+#&gt;  NRI(Continuous) [95% CI]: 1.4127 [ 0.9433 - 1.8821 ] ; p-value: 0 
+#&gt;  IDI [95% CI]: 0.5325 [ 0.356 - 0.709 ] ; p-value: 0 </div><div class='output co'>#&gt;                  value      95% CI       p
+#&gt; NRI(Categorical) 0.754 0.341-1.167 &lt; 0.001
+#&gt; NRI(Continuous)  1.413 0.943-1.882 &lt; 0.001
+#&gt; IDI              0.532 0.356-0.709 &lt; 0.001</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -191,6 +229,8 @@
       <li><a href="#value">Value</a></li>
 
       <li><a href="#details">Details</a></li>
+
+      <li><a href="#see-also">See also</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>
