@@ -1,7 +1,7 @@
 Package: jsmodule
 Title: 'RStudio' Addins and 'Shiny' Modules for Medical Research
-Version: 0.8.6
-Date: 2019-06-05
+Version: 0.9.0
+Date: 2019-06-08
 Authors@R: c(person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c("aut", "cre"),  comment = c(ORCID = "0000-0002-9403-605X")),
              person("Zarathu", role = c("cph", "fnd"))
              )
@@ -11,7 +11,7 @@ License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
-Imports: stats, data.table, shiny, readxl, DT, jstable, labelled, methods, epiDisplay, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt, survey, tableone, jskm, survival, purrr, geepack, maxstat, survC1, survIDINRI, timeROC, devEMF, graphics, grDevices, shinyWidgets
+Imports: stats, data.table, shiny, readxl, DT, jstable, labelled, methods, epiDisplay, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt, survey, tableone, jskm, survival, purrr, geepack, maxstat, survC1, survIDINRI, timeROC, devEMF, graphics, grDevices, shinyWidgets, pROC, Hmisc, see
 URL: https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
 Suggests: 

@@ -1,3 +1,16 @@
+# jsmodule 0.9.0
+
+## New module
+
+* Shiny module forROC analysis : `rocUI` `rocModule`.
+
+* Add this module to `jsBasicGadget` and `jsRepeatedGadjet`.
+
+## Update
+
+* Apply time-dependent ROC to survey data analysis(`jsSurveyGadget`)
+
+
 # jsmodule 0.8.6
 
 ## Update
