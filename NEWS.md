@@ -1,3 +1,11 @@
+# jsmodule 0.9.1
+
+## Bug fixes
+
+* Encoding issues when reading `sav/sas7bdat/dta` formats.
+
+* Default independent variables when running `regression/logistic/cox` analysis
+
 # jsmodule 0.9.0
 
 ## New module

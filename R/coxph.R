@@ -185,8 +185,8 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
                             } else{
                               forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, " + cluster(", id.cluster(), ")", sep = ""))
                             }
-                            coef <- summary(survival::coxph(forms, data = data.cox))$coefficients
-                            sigOK <- !all(coef[, "Pr(>|z|)"] > 0.05)
+                            coef <- tryCatch(summary(survival::coxph(forms, data = data.cox))$coefficients, error = function(e){return(NULL)})
+                            sigOK <- ifelse(is.null(coef), F, !all(coef[, "Pr(>|z|)"] > 0.05))
                             return(sigOK)
                           })
       } else{
@@ -201,8 +201,8 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
         varsIni <- sapply(indep.cox,
                           function(v){
                             forms <- as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", v, sep=""))
-                            coef <- summary(survey::svycoxph(forms, design =data.design))$coefficients
-                            sigOK <- !all(coef[, "Pr(>|z|)"] > 0.05)
+                            coef <- tryCatch(summary(survey::svycoxph(forms, design =data.design))$coefficients, error = function(e){return(NULL)})
+                            sigOK <- ifelse(is.null(coef), F, !all(coef[, "Pr(>|z|)"] > 0.05))
                             return(sigOK)
                           })
       } else{

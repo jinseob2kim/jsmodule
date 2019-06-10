@@ -199,8 +199,9 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
         varsIni <- sapply(vars,
                           function(v){
                             forms <- as.formula(paste(input$dep_vars, "~", v))
-                            coef <- summary(glm(forms, data =data))$coefficients
-                            sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                            coef <- tryCatch(summary(glm(forms, data = data))$coefficients, error = function(e){return(NULL)})
+                            #coef <- summary(glm(forms, data = data()))$coefficients
+                            sigOK <- ifelse(is.null(coef), F, !all(coef[-1, "Pr(>|t|)"] > 0.05))
                             return(sigOK)
                           })
       } else{
@@ -213,9 +214,8 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
         varsIni <- sapply(vars,
                           function(v){
                             forms <- as.formula(paste(input$dep_vars, "~", v))
-                            #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
-                            coef <- summary(survey::svyglm(forms, design = design.survey))$coefficients
-                            sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                            coef <- tryCatch(summary(survey::svyglm(forms, design = design.survey))$coefficients, error = function(e){return(NULL)})
+                            sigOK <- ifelse(is.null(coef), F, !all(coef[-1, "Pr(>|t|)"] > 0.05))
                             return(sigOK)
                           })
       } else{
@@ -450,8 +450,9 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
         varsIni <- sapply(vars,
                           function(v){
                             forms <- as.formula(paste(input$dep_vars, "~", v))
-                            coef <- summary(glm(forms, data = data()))$coefficients
-                            sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                            coef <- tryCatch(summary(glm(forms, data = data()))$coefficients, error = function(e){return(NULL)})
+                            #coef <- summary(glm(forms, data = data()))$coefficients
+                            sigOK <- ifelse(is.null(coef), F, !all(coef[-1, "Pr(>|t|)"] > 0.05))
                             return(sigOK)
                           })
       } else{
@@ -464,9 +465,9 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
         varsIni <- sapply(vars,
                           function(v){
                             forms <- as.formula(paste(input$dep_vars, "~", v))
-                            #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
-                            coef <- summary(survey::svyglm(forms, design = design.survey()))$coefficients
-                            sigOK <- !all(coef[-1, "Pr(>|t|)"] > 0.05)
+                            coef <- tryCatch(summary(survey::svyglm(forms, design = design.survey()))$coefficients, error = function(e){return(NULL)})
+                            #coef <- summary(survey::svyglm(forms, design = design.survey()))$coefficients
+                            sigOK <- ifelse(is.null(coef), F, !all(coef[-1, "Pr(>|t|)"] > 0.05))
                             return(sigOK)
                           })
       } else{
@@ -731,8 +732,10 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
         varsIni <- sapply(vars,
                           function(v){
                             forms <- as.formula(paste(input$dep_vars, "~", v))
-                            coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
-                            sigOK <- !all(coef[-1, 4] > 0.05)
+                            coef <- tryCatch(summary(glm(forms, data = data, family = binomial))$coefficients, error = function(e){return(NULL)})
+                            sigOK <- ifelse(is.null(coef), F, !all(coef[-1, 4] > 0.05))
+                            #coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
+                            #sigOK <- !all(coef[-1, 4] > 0.05)
                             return(sigOK)
                           })
       } else{
@@ -745,9 +748,8 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
         varsIni <- sapply(vars,
                           function(v){
                             forms <- as.formula(paste(input$dep_vars, "~", v))
-                            #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey))
-                            coef <- summary(survey::svyglm(forms, design = design.survey, family = binomial))$coefficients
-                            sigOK <- !all(coef[-1, 4] > 0.05)
+                            coef <- tryCatch(summary(survey::svyglm(forms, design = design.survey, family = binomial))$coefficients, error = function(e){return(NULL)})
+                            sigOK <- ifelse(is.null(coef), F, !all(coef[-1, 4] > 0.05))
                             return(sigOK)
                           })
       } else{
@@ -975,8 +977,8 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
         varsIni <- sapply(vars,
                           function(v){
                             forms <- as.formula(paste(input$dep_vars, "~", v))
-                            coef <- summary(glm(forms, data = data(), family = binomial))$coefficients
-                            sigOK <- !all(coef[-1, 4] > 0.05)
+                            coef <- tryCatch(summary(glm(forms, data = data(), family = binomial))$coefficients, error = function(e){return(NULL)})
+                            sigOK <- ifelse(is.null(coef), F, !all(coef[-1, 4] > 0.05))
                             return(sigOK)
                           })
       } else{
@@ -989,9 +991,9 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
         varsIni <- sapply(vars,
                           function(v){
                             forms <- as.formula(paste(input$dep_vars, "~", v))
-                            #data.design <- survey::svydesign(ids = ~ 1, data = data(), weights = ~ get(var.weights.survey()))
-                            coef <- summary(survey::svyglm(forms, design = design.survey(), family = binomial))$coefficients
-                            sigOK <- !all(coef[-1, 4] > 0.05)
+                            coef <- tryCatch(summary(survey::svyglm(forms, design = design.survey(), family = binomial))$coefficients, error = function(e){return(NULL)})
+                            sigOK <- ifelse(is.null(coef), F, !all(coef[-1, 4] > 0.05))
+
                             return(sigOK)
                           })
       } else{
