@@ -37,6 +37,7 @@ coxUI <- function(id) {
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis.
+#' @param limit.unires Change to default.unires = F if number of independent variables > limit.unires, Default: 20
 #' @param id.cluster reactive cluster variable if marginal cox model, Default: NULL
 #' @return Shiny modulde server for Cox's model.
 #' @details Shiny modulde server for Cox's model.
@@ -76,7 +77,7 @@ coxUI <- function(id) {
 #' @importFrom purrr map_lgl
 #' @importFrom survival cluster coxph Surv
 
-coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, id.cluster = NULL) {
+coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, id.cluster = NULL) {
 
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
@@ -189,6 +190,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
                             sigOK <- ifelse(is.null(coef), F, !all(coef[, "Pr(>|z|)"] > 0.05))
                             return(sigOK)
                           })
+        if (length(varsIni[varsIni == T]) > limit.unires) {varsIni <- c(T, rep(F, length(indep.cox) -1))}
       } else{
         varsIni <- c(T, rep(F, length(indep.cox) -1))
       }
@@ -205,6 +207,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
                             sigOK <- ifelse(is.null(coef), F, !all(coef[, "Pr(>|z|)"] > 0.05))
                             return(sigOK)
                           })
+        if (length(varsIni[varsIni == T]) > limit.unires) {varsIni <- c(T, rep(F, length(indep.cox) -1))}
       } else{
         varsIni <- c(T, rep(F, length(indep.cox) -1))
       }

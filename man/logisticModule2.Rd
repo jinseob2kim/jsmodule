@@ -6,7 +6,7 @@
 \usage{
 logisticModule2(input, output, session, data, data_label,
   data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
-  default.unires = T)
+  default.unires = T, limit.unires = 20)
 }
 \arguments{
 \item{input}{input}
@@ -26,6 +26,8 @@ logisticModule2(input, output, session, data, data_label,
 \item{design.survey}{reactive survey data. default: NULL}
 
 \item{default.unires}{Set default independent variables using univariate analysis, Default: T}
+
+\item{limit.unires}{Change to default.unires = F if number of independent variables > limit.unires, Default: 20}
 }
 \value{
 Shiny modulde server for logistic regression.

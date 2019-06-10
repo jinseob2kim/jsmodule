@@ -4,7 +4,12 @@
 
 * Encoding issues when reading `sav/sas7bdat/dta` formats.
 
-* Default independent variables when running `regression/logistic/cox` analysis
+* Default independent variables when running **regression/logistic/cox** analysis
+
+## Update
+
+* Add `limit.unires` option to **regression/logistic/cox** analysis to prevent computation burden.
+
 
 # jsmodule 0.9.0
 

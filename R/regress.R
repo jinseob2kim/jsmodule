@@ -114,6 +114,7 @@ regressModuleUI <- function(id) {
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis, Default: T
+#' @param limit.unires Change to default.unires = F if number of independent variables > limit.unires, Default: 20
 #' @return Shiny modulde server for linear regression.
 #' @details Shiny modulde server for linear regression.
 #' @examples
@@ -151,7 +152,7 @@ regressModuleUI <- function(id) {
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
 
-regressModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
+regressModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
 
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
@@ -204,6 +205,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
                             sigOK <- ifelse(is.null(coef), F, !all(coef[-1, "Pr(>|t|)"] > 0.05))
                             return(sigOK)
                           })
+        if (length(varsIni[varsIni == T]) > limit.unires) {varsIni <- c(T, rep(F, length(vars) -1))}
       } else{
         varsIni <- c(T, rep(F, length(vars) -1))
       }
@@ -218,6 +220,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
                             sigOK <- ifelse(is.null(coef), F, !all(coef[-1, "Pr(>|t|)"] > 0.05))
                             return(sigOK)
                           })
+        if (length(varsIni[varsIni == T]) > limit.unires) {varsIni <- c(T, rep(F, length(vars) -1))}
       } else{
         varsIni <- c(T, rep(F, length(vars) -1))
       }
@@ -345,6 +348,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis, Default: T
+#' @param limit.unires Change to default.unires = F if number of independent variables > limit.unires, Default: 20
 #' @return Shiny modulde server for linear regression.
 #' @details Shiny modulde server for linear regression.
 #' @examples
@@ -381,7 +385,7 @@ regressModule <- function(input, output, session, data, data_label, data_varStru
 #' @importFrom epiDisplay regress.display
 #' @importFrom purrr map_lgl
 
-regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
+regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
 
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
@@ -455,6 +459,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
                             sigOK <- ifelse(is.null(coef), F, !all(coef[-1, "Pr(>|t|)"] > 0.05))
                             return(sigOK)
                           })
+        if (length(varsIni[varsIni == T]) > limit.unires) {varsIni <- c(T, rep(F, length(vars) -1))}
       } else{
         varsIni <- c(T, rep(F, length(vars) -1))
       }
@@ -470,6 +475,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
                             sigOK <- ifelse(is.null(coef), F, !all(coef[-1, "Pr(>|t|)"] > 0.05))
                             return(sigOK)
                           })
+        if (length(varsIni[varsIni == T]) > limit.unires) {varsIni <- c(T, rep(F, length(vars) -1))}
       } else{
         varsIni <- c(T, rep(F, length(vars) -1))
       }
@@ -645,6 +651,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis, Default: T
+#' @param limit.unires Change to default.unires = F if number of independent variables > limit.unires, Default: 20
 #' @return Shiny modulde server for logistic regression.
 #' @details Shiny modulde server for logistic regression.
 #' @examples
@@ -682,7 +689,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
 
-logisticModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
+logisticModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
 
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
@@ -738,6 +745,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
                             #sigOK <- !all(coef[-1, 4] > 0.05)
                             return(sigOK)
                           })
+        if (length(varsIni[varsIni == T]) > limit.unires) {varsIni <- c(T, rep(F, length(vars) -1))}
       } else{
         varsIni <- c(T, rep(F, length(vars)-1))
       }
@@ -752,6 +760,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
                             sigOK <- ifelse(is.null(coef), F, !all(coef[-1, 4] > 0.05))
                             return(sigOK)
                           })
+        if (length(varsIni[varsIni == T]) > limit.unires) {varsIni <- c(T, rep(F, length(vars) -1))}
       } else{
         varsIni <- c(T, rep(F, length(vars)-1))
       }
@@ -874,6 +883,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis, Default: T
+#' @param limit.unires Change to default.unires = F if number of independent variables > limit.unires, Default: 20
 #' @return Shiny modulde server for logistic regression.
 #' @details Shiny modulde server for logistic regression.
 #' @examples
@@ -911,7 +921,7 @@ logisticModule <- function(input, output, session, data, data_label, data_varStr
 #' @importFrom purrr map_lgl
 
 
-logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T) {
+logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
 
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
@@ -981,6 +991,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
                             sigOK <- ifelse(is.null(coef), F, !all(coef[-1, 4] > 0.05))
                             return(sigOK)
                           })
+        if (length(varsIni[varsIni == T]) > limit.unires) {varsIni <- c(T, rep(F, length(vars) -1))}
       } else{
         varsIni <- c(T, rep(F, length(vars) - 1))
       }
@@ -996,6 +1007,7 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
 
                             return(sigOK)
                           })
+        if (length(varsIni[varsIni == T]) > limit.unires) {varsIni <- c(T, rep(F, length(vars) -1))}
       } else{
         varsIni <- c(T, rep(F, length(vars) - 1))
       }
