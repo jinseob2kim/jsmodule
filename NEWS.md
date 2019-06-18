@@ -1,3 +1,8 @@
+# jsmodule 0.9.3
+
+* Bug fixes: Error if repeated measure variable is **id**.
+
+
 # jsmodule 0.9.2
 
 * Bug fixes: Apply nested survey design to `jsSurveyGadget` and `FileSurveyInput`

@@ -271,7 +271,7 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
       need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
 
-    res.gee <- geepack::geeglm(form, data = data.regress, family = "gaussian", id = get(id), corstr = "exchangeable")
+    res.gee <- geepack::geeglm(form, data = data.regress, family = "gaussian", id = eval(id), corstr = "exchangeable")
     info.gee <- jstable::geeglm.display(res.gee, decimal = input$decimal)
     info.gee$caption = gsub("id", id, info.gee$caption)
     ltb.gee <- jstable::LabeljsGeeglm(info.gee, ref = label.regress)
@@ -512,7 +512,7 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
       need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
 
-    res.gee <- geepack::geeglm(form, data = data.logistic, family = "binomial", id = get(id), corstr = "exchangeable")
+    res.gee <- geepack::geeglm(form, data = data.logistic, family = "binomial", id = eval(id), corstr = "exchangeable")
     info.gee <- jstable::geeglm.display(res.gee, decimal = input$decimal)
     info.gee$caption = gsub("id", id, info.gee$caption)
     ltb.gee <- jstable::LabeljsGeeglm(info.gee, ref = label.regress)
