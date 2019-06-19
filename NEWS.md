@@ -1,7 +1,10 @@
 # jsmodule 0.9.3
 
-* Bug fixes: Error if repeated measure variable is **id**.
+## Bug fixes: repeated measure analysis 
 
+* Error if repeated measure variable is **id**.
+
+* Error if there are missing values.
 
 # jsmodule 0.9.2
 
