@@ -131,8 +131,8 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
            })
   }
 
-  if (!("data.table" %in% class(data))) {data = data.table(data)}
-  if (!("data.table" %in% class(data_label))) {data_label = data.table(data_label)}
+  if (!("data.table" %in% class(data))) {data <- data.table(data)}
+  if (!("data.table" %in% class(data_label))) {data_label <- data.table(data_label)}
 
   factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
   #data[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
@@ -368,7 +368,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
 
 
   if (is.null(data_varStruct)){
-    data_varStruct = reactive(list(variable = names(data())))
+    data_varStruct <- reactive(list(variable = names(data())))
   }
 
   vlist <- reactive({
@@ -385,8 +385,8 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
     }
 
 
-    factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
-    #factor_vars <- names(data())[sapply(names(data()), function(x){class(data()[[x]]) %in% c("factor", "character")})]
+    #factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
+    factor_vars <- names(data())[sapply(data(), class) %in% c("factor", "character")]
     factor_list <- mklist(data_varStruct(), factor_vars)
 
 
@@ -396,8 +396,8 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
     }
     conti_list <- mklist(data_varStruct(), conti_vars)
 
-    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}), .SDcols = factor_vars])
-    #nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]]))})
+    #nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}), .SDcols = factor_vars])
+    nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]])[!is.na(unique(data()[[x]]))])})
 
     group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <= nfactor.limit & nclass_factor < nrow(data())]
     group_list <- mklist(data_varStruct(), group_vars)

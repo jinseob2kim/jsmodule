@@ -6,6 +6,11 @@
 
 * Error if there are missing values.
 
+## Bug fixes: Table 1
+
+* `data.frame` vs `data.table` issue.
+
+
 # jsmodule 0.9.2
 
 * Bug fixes: Apply nested survey design to `jsSurveyGadget` and `FileSurveyInput`
