@@ -21,6 +21,8 @@
 #' @import shiny
 
 jsSurveyGadget <- function(data, nfactor.limit = 20) {
+  requireNamespace("survival")
+  requireNamespace("survC1")
 
   out <- data.table(data, check.names = F)
   name.old <- names(out)

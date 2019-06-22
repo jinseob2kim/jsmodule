@@ -1,10 +1,18 @@
 # jsmodule 0.9.3
 
+## Update: Propensity score analysis
+
+* Add scatterplot, ROC/time-dependent ROD analysis.
+
 ## Bug fixes: repeated measure analysis 
 
 * Error if repeated measure variable is **id**.
 
 * Error if there are missing values.
+
+## Bug fixes: survey data analysis
+
+* Error in **ROC** analysis
 
 ## Bug fixes: Table 1
 

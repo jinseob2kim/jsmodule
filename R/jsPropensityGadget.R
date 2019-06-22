@@ -30,6 +30,9 @@
 
 jsPropensityGadget <- function(data){
 
+  requireNamespace("survival")
+  requireNamespace("survC1")
+
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
 
@@ -41,6 +44,7 @@ jsPropensityGadget <- function(data){
   ref <- list(name.old = name.old, name.new = name.new)
 
   data_varStruct1 = list(variable = names(out))
+
 
   ## Vars
   naCol <- names(out)[colSums(is.na(out)) > 0]
@@ -73,9 +77,8 @@ jsPropensityGadget <- function(data){
                                 uiOutput("subset_val"),
                                 uiOutput("group_ps"),
                                 uiOutput("indep_ps"),
-                                radioButtons("pcut_ps", label = "Default p-value cut for ps calculation",
-                                             choices = c(0.05, 0.1, 0.2),
-                                             selected = 0.1, inline =T)
+                                uiOutput("pcut")
+
                               ),
                               mainPanel(
                                 tabsetPanel(type = "pills",
@@ -90,7 +93,7 @@ jsPropensityGadget <- function(data){
                    tabPanel("Table 1",
                             sidebarLayout(
                               sidebarPanel(
-                                tb1simpleUI("tb1")
+                                tb1moduleUI("tb1")
                               ),
                               mainPanel(
                                 tabsetPanel(type = "pills",
@@ -122,76 +125,179 @@ jsPropensityGadget <- function(data){
                               )
                             )
                    ),
-                   tabPanel("Cox model",
-                            sidebarLayout(
-                              sidebarPanel(
-                                uiOutput("coxUI_eventtime"),
-                                uiOutput("coxUI_indep"),
-                                checkboxInput("coxUI_subcheck", "Sub-group analysis"),
-                                uiOutput("coxUI_subvar"),
-                                uiOutput("coxUI_subval")
+                   navbarMenu("Regression",
+                              tabPanel("Linear regression",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           regressModuleUI("linear")
+                                         ),
+                                         mainPanel(
+                                           tabsetPanel(type = "pills",
+                                                       tabPanel("Original",
+                                                                withLoader(DTOutput("linear_original"), type="html", loader="loader6"),
+                                                                br(),
+                                                                uiOutput("warning_linear_original")
+                                                       ),
+                                                       tabPanel("Matching",
+                                                                withLoader(DTOutput("linear_ps"), type="html", loader="loader6"),
+                                                                br(),
+                                                                uiOutput("warning_linear_ps")
+                                                       ),
+                                                       tabPanel("IPTW",
+                                                                withLoader(DTOutput("linear_iptw"), type="html", loader="loader6")
+                                                       )
+                                           )
+
+                                         )
+                                       )
                               ),
-                              mainPanel(
-                                tabsetPanel(type = "pills",
-                                            tabPanel("Original",
-                                                     withLoader(DTOutput("cox_original"), type="html", loader="loader6")
-                                            ),
-                                            tabPanel("Matching",
-                                                     withLoader(DTOutput("cox_ps"), type="html", loader="loader6")
-                                            ),
-                                            tabPanel("IPTW",
-                                                     withLoader(DTOutput("cox_iptw"), type="html", loader="loader6")
-                                            )
-                                )
+                              tabPanel("Logistic regression",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           regressModuleUI("logistic")
+                                         ),
+                                         mainPanel(
+                                           tabsetPanel(type = "pills",
+                                                       tabPanel("Original",
+                                                                withLoader(DTOutput("logistic_original"), type="html", loader="loader6")
+                                                       ),
+                                                       tabPanel("Matching",
+                                                                withLoader(DTOutput("logistic_ps"), type="html", loader="loader6")
+                                                       ),
+                                                       tabPanel("IPTW",
+                                                                withLoader(DTOutput("logistic_iptw"), type="html", loader="loader6")
+                                                       )
+                                           )
+                                         )
+                                       )
+                              ),
+                              tabPanel("Cox model",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           coxUI("cox")
+                                         ),
+                                         mainPanel(
+                                           tabsetPanel(type = "pills",
+                                                       tabPanel("Original",
+                                                                withLoader(DTOutput("cox_original"), type="html", loader="loader6")
+                                                       ),
+                                                       tabPanel("Matching",
+                                                                withLoader(DTOutput("cox_ps"), type="html", loader="loader6")
+                                                       ),
+                                                       tabPanel("IPTW",
+                                                                withLoader(DTOutput("cox_iptw"), type="html", loader="loader6")
+                                                       )
+                                           )
+                                         )
+                                       )
                               )
-                            )
+
                    ),
-                   tabPanel("Kaplan-meier plot",
-                            sidebarLayout(
-                              sidebarPanel(
-                                uiOutput("kmUI_eventtime"),
-                                uiOutput("kmUI_indep"),
-                                checkboxInput("km_cumhaz", "Show cumulative hazard", F),
-                                checkboxInput("km_pval", "Show p-value(log-rank test)", T),
-                                checkboxInput("km_table", "Show table", T),
-                                checkboxInput("km_subcheck", "Sub-group analysis"),
-                                uiOutput("km_subvar"),
-                                uiOutput("km_subval")
+                   navbarMenu("Plot",
+                              tabPanel("Scatter plot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           ggpairsModuleUI1("ggpairs")
+                                         ),
+                                         mainPanel(
+                                           tabsetPanel(type = "pills",
+                                                       tabPanel("Original",
+                                                                withLoader(plotOutput("ggpairs_plot_original"), type="html", loader="loader6")
+
+                                                       ),
+                                                       tabPanel("Matching",
+                                                                withLoader(plotOutput("ggpairs_plot_ps"), type="html", loader="loader6")
+                                                       )
+
+                                           ),
+                                           ggpairsModuleUI2("ggpairs")
+                                         )
+                                       )
                               ),
-                              mainPanel(
-                                tabsetPanel(type = "pills",
-                                            tabPanel("Original",
-                                                     withLoader(plotOutput("km_original"), type="html", loader="loader6"),
-                                                     h3("Download options"),
-                                                     wellPanel(
-                                                       uiOutput("downloadControls_km_original"),
-                                                       downloadButton("downloadButton_km_original", label = "Download the plot")
-                                                     )
-                                            ),
-                                            tabPanel("Matching",
-                                                     withLoader(plotOutput("km_ps"), type="html", loader="loader6"),
-                                                     h3("Download options"),
-                                                     wellPanel(
-                                                       uiOutput("downloadControls_km_ps"),
-                                                       downloadButton("downloadButton_km_ps", label = "Download the plot")
-                                                     )
-                                            ),
-                                            tabPanel("IPTW",
-                                                     withLoader(plotOutput("km_iptw"), type="html", loader="loader6"),
-                                                     h3("Download options"),
-                                                     wellPanel(
-                                                       uiOutput("downloadControls_km_iptw"),
-                                                       downloadButton("downloadButton_km_iptw", label = "Download the plot")
-                                                     )
-                                            )
-                                )
+                              tabPanel("Kaplan-meier plot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           kaplanUI("kaplan")
+                                         ),
+                                         mainPanel(
+                                           optionUI("kaplan"),
+                                           tabsetPanel(type = "pills",
+                                                       tabPanel("Original",
+                                                                withLoader(plotOutput("kaplan_plot_original"), type="html", loader="loader6")
+                                                       ),
+                                                       tabPanel("Matching",
+                                                                withLoader(plotOutput("kaplan_plot_ps"), type="html", loader="loader6")
+                                                       ),
+                                                       tabPanel("IPTW",
+                                                                withLoader(plotOutput("kaplan_plot_iptw"), type="html", loader="loader6")
+                                                       )
+                                           ),
+                                           ggplotdownUI("kaplan")
+                                         )
+                                       )
                               )
-                            )
+                   ),
+                   navbarMenu("ROC analysis",
+                              tabPanel("ROC",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           rocUI("roc")
+                                         ),
+                                         mainPanel(
+                                           tabsetPanel(type = "pills",
+                                                       tabPanel("Original",
+                                                                withLoader(plotOutput("plot_roc_original"), type="html", loader="loader6"),
+                                                                withLoader(DTOutput("table_roc_original"), type="html", loader="loader6")
+                                                       ),
+                                                       tabPanel("Matching",
+                                                                withLoader(plotOutput("plot_roc_ps"), type="html", loader="loader6"),
+                                                                withLoader(DTOutput("table_roc_ps"), type="html", loader="loader6")
+                                                       ),
+                                                       tabPanel("IPTW",
+                                                                withLoader(plotOutput("plot_roc_iptw"), type="html", loader="loader6"),
+                                                                withLoader(DTOutput("table_roc_iptw"), type="html", loader="loader6")
+                                                       )
+                                           ),
+                                           ggplotdownUI("roc")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Time-dependent ROC",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           timerocUI("timeroc")
+                                         ),
+                                         mainPanel(
+                                           tabsetPanel(type = "pills",
+                                                       tabPanel("Original",
+                                                                withLoader(plotOutput("plot_timeroc_original"), type="html", loader="loader6"),
+                                                                withLoader(DTOutput("table_timeroc_original"), type="html", loader="loader6")
+                                                       ),
+                                                       tabPanel("Matching",
+                                                                withLoader(plotOutput("plot_timeroc_ps"), type="html", loader="loader6"),
+                                                                withLoader(DTOutput("table_timeroc_ps"), type="html", loader="loader6")
+                                                       ),
+                                                       tabPanel("IPTW",
+                                                                withLoader(plotOutput("plot_timeroc_iptw"), type="html", loader="loader6"),
+                                                                withLoader(DTOutput("table_timeroc_iptw"), type="html", loader="loader6")
+                                                       )
+                                           ),
+                                           ggplotdownUI("timeroc")
+                                         )
+                                       )
+                              )
                    )
+
 
   )
 
   server <- function(input, output, session) {
+
+    output$pcut <- renderUI({
+      radioButtons("pcut_ps", label = "Default p-value cut for ps calculation",
+                   choices = c(0.05, 0.1, 0.2),
+                   selected = 0.1, inline =T)
+    })
 
     output$factor <- renderUI({
       selectInput("factor_vname", label = "Additional categorical variables",
@@ -228,17 +334,19 @@ jsPropensityGadget <- function(data){
 
         if (input$var_subset %in% var.factor){
           varlevel <- levels(as.factor(out[[input$var_subset]]))
-          selectInput(session$ns("val_subset"), "Subset value",
+          selectInput("val_subset", "Subset value",
                       choices = varlevel, multiple = T,
                       selected = varlevel[1])
         } else{
           val <- stats::quantile(out[[input$var_subset]], na.rm = T)
-          sliderInput(session$ns("val_subset"), "Subset range",
+          sliderInput("val_subset", "Subset range",
                       min = val[1], max = val[5],
                       value = c(val[2], val[4]))
         }
       })
     })
+
+
 
     data1 <- reactive({
       out1 <- out
@@ -270,7 +378,7 @@ jsPropensityGadget <- function(data){
       return(out1)
     })
 
-    data.label <- eventReactive(data(), {
+    data.label <- eventReactive(data1(), {
       labeldata <- mk.lev(data1())
       for (vn in ref[["name.new"]]){
         w <- which(ref[["name.new"]] == vn)
@@ -320,7 +428,7 @@ jsPropensityGadget <- function(data){
                             return(sigOK)
                           })
         tagList(
-          selectInput(session$ns("indep_pscal"), label = "Independent variables for PS calculation",
+          selectInput("indep_pscal", label = "Independent variables for PS calculation",
                       choices = mklist(data_varStruct1, vars), multiple = T,
                       selected = vars[varsIni])
         )
@@ -341,10 +449,6 @@ jsPropensityGadget <- function(data){
       mdata <- MatchIt::match.data(m.out, distance = "pscore")
       return(list(data = wdata, matdata = mdata[, -grep("weights", names(mdata))]))
     })
-
-
-    ## For Other analysis
-    group_var = reactive(input$group_pscal)
 
 
 
@@ -376,585 +480,299 @@ jsPropensityGadget <- function(data){
     })
 
 
-    ## Table 1
-    data <- reactive(mat.info()$data)
-    matdata <- reactive(mat.info()$matdata)
-    data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
-
-
-    vlist <- eventReactive(mat.info(), {
-
-      mklist <- function(varlist, vars){
-        lapply(varlist,
-               function(x){
-                 inter <- intersect(x, vars)
-                 if (length(inter) == 1){
-                   inter <- c(inter, "")
-                 }
-                 return(inter)
-               })
-      }
-
-
-      factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
-      #factor_vars <- names(data())[sapply(names(data()), function(x){class(data()[[x]]) %in% c("factor", "character")})]
-      factor_list <- mklist(data_varStruct(), factor_vars)
-
-
-      conti_vars <- setdiff(names(data()), c(factor_vars, "pscore", "iptw"))
-      conti_list <- mklist(data_varStruct(), conti_vars)
-
-      nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x)[!is.na(unique(x))])}), .SDcols = factor_vars])
-      #nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]]))})
-      class01_factor <- unlist(data()[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])
-
-      validate(
-        need(!is.null(class01_factor), "No categorical variables coded as 0, 1 in data")
-      )
-      factor_01vars <- factor_vars[class01_factor]
-
-      factor_01_list <- mklist(data_varStruct(), factor_01vars)
-
-      group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data())]
-      group_list <- mklist(data_varStruct(), group_vars)
-
-
-      except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data())]
-
-      ## non-normal: shapiro test
-      f <- function(x) {
-        if (diff(range(x, na.rm = T)) == 0) return(F) else return(shapiro.test(x)$p.value <= 0.05)
-      }
-
-      non_normal <- ifelse(nrow(data()) <=3 | nrow(data()) >= 5000,
-                           rep(F, length(conti_vars)),
-                           sapply(conti_vars, function(x){f(data()[[x]])})
-      )
-
-      return(list(factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list,
-                  factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_list = group_list, except_vars = except_vars, non_normal = non_normal)
-      )
-
+    ## tb1
+    data <- reactive({
+      mat.info()$data[, .SD, .SDcols = -c("iptw")]
     })
+    matdata <- reactive(data.table::data.table(mat.info()$matdata))
+    #data.label <- reactive(mat.info()$data.label)
+    #data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
+    design.survey <- reactive(survey::svydesign(ids = ~ 1, data = mat.info()$data, weights = ~ iptw))
 
 
+    tb1_original <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = 10)
+    tb1_ps <- callModule(tb1module2, "tb1", data = matdata, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = 10)
+    tb1_iptw <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = 10)
 
-
-    out.tb1 <- callModule(tb1simple2, "tb1", data = data, matdata = matdata, data_label = data.label, data_varStruct = data_varStruct,
-                          vlist = vlist, group_var = group_var, showAllLevels = T)
 
     output$table1_original <- renderDT({
-      tb = out.tb1()$original$table
-      cap = out.tb1()$original$caption
-      out.tb1 = datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
-                          options = c(opt.tb1("tb1_original"),
-                                      list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
-                                      ),
-                                      list(scrollX = TRUE)
-                          )
+      tb <- tb1_original()$table
+      cap <- tb1_original()$caption
+      out.tb1 <- datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
+                           options = c(opt.tb1("tb1"),
+                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
+                                       ),
+                                       list(scrollX = TRUE)
+                           )
       )
       if ("sig" %in% colnames(tb)){
-        out.tb1 = out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
       }
       return(out.tb1)
     })
 
     output$table1_ps <- renderDT({
-      tb = out.tb1()$ps$table
-      cap = out.tb1()$ps$caption
-      out.tb1 = datatable(tb, rownames = T, extensions= "Buttons", caption = paste(cap, "- PS matching"),
-                          options = c(opt.tb1("tb1_ps"),
-                                      list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
-                                      ),
-                                      list(scrollX = TRUE)
-                          )
+      tb <- tb1_ps()$table
+      cap <- tb1_ps()$caption
+      out.tb1 <- datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
+                           options = c(opt.tb1("tb1"),
+                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
+                                       ),
+                                       list(scrollX = TRUE)
+                           )
       )
       if ("sig" %in% colnames(tb)){
-        out.tb1 = out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
       }
       return(out.tb1)
     })
 
     output$table1_iptw <- renderDT({
-      tb = out.tb1()$iptw$table
-      cap = out.tb1()$iptw$caption
-      out.tb1 = datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
-                          options = c(opt.tb1("tb1_iptw"),
-                                      list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
-                                      ),
-                                      list(scrollX = TRUE)
-                          )
+      tb <- tb1_iptw()$table
+      cap <- tb1_iptw()$caption
+      out.tb1 <- datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
+                           options = c(opt.tb1("tb1"),
+                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
+                                       ),
+                                       list(scrollX = TRUE)
+                           )
       )
       if ("sig" %in% colnames(tb)){
-        out.tb1 = out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
       }
       return(out.tb1)
     })
 
 
+    ## Regression
+
+    out_linear_original <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F)
+    out_linear_ps <- callModule(regressModule2, "linear", data = matdata, data_label = data.label, data_varStruct = NULL, default.unires = F)
+    out_linear_iptw <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, design.survey = design.survey)
+
+
+    output$linear_original <- renderDT({
+      hide <- which(colnames(out_linear_original()$table) == "sig")
+      datatable(out_linear_original()$table, rownames=T, extensions= "Buttons", caption = out_linear_original()$caption,
+                options = c(opt.tbreg(out_linear_original()$caption),
+                            list(columnDefs = list(list(visible=FALSE, targets =hide))
+                            ),
+                            list(scrollX = TRUE)
+                )
+      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+    })
+
+    output$warning_linear_original <- renderText({
+      paste("<b>", out_linear_original()$warning, "</b>")
+    })
+
+    output$linear_ps <- renderDT({
+      hide <- which(colnames(out_linear_ps()$table) == "sig")
+      datatable(out_linear_ps()$table, rownames=T, extensions= "Buttons", caption = out_linear_ps()$caption,
+                options = c(opt.tbreg(out_linear_ps()$caption),
+                            list(columnDefs = list(list(visible=FALSE, targets =hide))
+                            ),
+                            list(scrollX = TRUE)
+                )
+      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+    })
+
+    output$warning_linear_ps <- renderText({
+      paste("<b>", out_linear_ps()$warning, "</b>")
+    })
+
+    output$linear_iptw <- renderDT({
+      hide <- which(colnames(out_linear_iptw()$table) == "sig")
+      datatable(out_linear_iptw()$table, rownames=T, extensions= "Buttons", caption = out_linear_iptw()$caption,
+                options = c(opt.tbreg(out_linear_iptw()$caption),
+                            list(columnDefs = list(list(visible=FALSE, targets =hide))
+                            ),
+                            list(scrollX = TRUE)
+                )
+      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+    })
+
+
+    ## Logistic
+
+    out_logistic_original <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL)
+    out_logistic_ps <- callModule(logisticModule2, "logistic", data = matdata, data_label = data.label, data_varStruct = NULL)
+    out_logistic_iptw <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey)
+
+
+    output$logistic_original <- renderDT({
+      hide = which(colnames(out_logistic_original()$table) == "sig")
+      datatable(out_logistic_original()$table, rownames=T, extensions= "Buttons", caption = out_logistic_original()$caption,
+                options = c(opt.tbreg(out_logistic_original()$caption),
+                            list(columnDefs = list(list(visible=FALSE, targets =hide))
+                            ),
+                            list(scrollX = TRUE)
+                )
+      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+    })
+
+    output$logistic_ps <- renderDT({
+      hide = which(colnames(out_logistic_ps()$table) == "sig")
+      datatable(out_logistic_ps()$table, rownames=T, extensions= "Buttons", caption = out_logistic_ps()$caption,
+                options = c(opt.tbreg(out_logistic_ps()$caption),
+                            list(columnDefs = list(list(visible=FALSE, targets =hide))
+                            ),
+                            list(scrollX = TRUE)
+                )
+      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+    })
+
+    output$logistic_iptw <- renderDT({
+      hide = which(colnames(out_logistic_iptw()$table) == "sig")
+      datatable(out_logistic_iptw()$table, rownames=T, extensions= "Buttons", caption = out_logistic_iptw()$caption,
+                options = c(opt.tbreg(out_logistic_iptw()$caption),
+                            list(columnDefs = list(list(visible=FALSE, targets =hide))
+                            ),
+                            list(scrollX = TRUE)
+                )
+      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+    })
+
+
     ## Cox
 
-    output$coxUI_eventtime <- renderUI({
-      mklist <- function(varlist, vars){
-        lapply(varlist,
-               function(x){
-                 inter <- intersect(x, vars)
-                 if (length(inter) == 1){
-                   inter <- c(inter, "")
-                 }
-                 return(inter)
-               })
-      }
-
-      tagList(
-        selectInput("event_cox", "Event",
-                    choices = mklist(data_varStruct(), setdiff(vlist()$factor_01vars, group_var())), multiple = F,
-                    selected = NULL
-        ),
-        selectInput("time_cox", "Time",
-                    choices = vlist()$conti_list, multiple = F,
-                    selected = NULL
-        )
-      )
-    })
-
-
-    output$coxUI_indep <- renderUI({
-      req(!is.null(input$event_cox))
-      req(!is.null(input$time_cox))
-      indep.cox <- setdiff(names(mat.info()$matdata), c(vlist()$except_vars, input$event_cox, input$time_cox ))
-      mklist <- function(varlist, vars){
-        lapply(varlist,
-               function(x){
-                 inter <- intersect(x, vars)
-                 if (length(inter) == 1){
-                   inter <- c(inter, "")
-                 }
-                 return(inter)
-               })
-      }
-
-      tagList(
-        selectInput("indep_cox", "Independent variables",
-                    choices = mklist(data_varStruct(), indep.cox), multiple = T,
-                    selected = group_var()
-        )
-      )
-    })
-
-    observeEvent(input$indep_cox, {
-      output$coxUI_subvar <- renderUI({
-        req(input$coxUI_subcheck == T)
-        factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
-        factor_subgroup <- setdiff(factor_vars, c(input$event_cox, input$indep_cox))
-        factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
-        validate(
-          need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
-        )
-
-        tagList(
-          selectInput("subvar_cox", "Sub-group variable",
-                      choices = factor_subgroup_list, multiple = F,
-                      selected = factor_subgroup[1])
-        )
-      })
-
-    })
-
-
-    output$coxUI_subval <- renderUI({
-      req(input$coxUI_subcheck == T)
-      req(input$subvar_cox)
-      selectInput("subval_cox", "Sub-group value",
-                  choices = data.label()[variable == input$subvar_cox, val_label], multiple = F,
-                  selected = data.label()[variable == input$subvar_cox, val_label][1])
-    })
-
-
-
-    form.cox <- reactive({
-      validate(
-        need(!is.null(input$indep_cox), "Please select at least 1 independent variable.")
-      )
-      as.formula(paste("survival::Surv(",input$time_cox,",", input$event_cox,") ~ ", paste(input$indep_cox, collapse="+"),sep=""))
-    })
-
-
+    out_cox_original <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F)
+    out_cox_ps <- callModule(coxModule, "cox", data = matdata, data_label = data.label, data_varStruct = NULL, default.unires = F)
+    out_cox_iptw <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, design.survey = design.survey)
 
     output$cox_original <- renderDT({
-      data.cox <- mat.info()$data
-      data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
-      if(input$coxUI_subcheck == T){
-        req(input$subvar_cox)
-        data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
-      }
-      mf <- model.frame(form.cox(), data.cox)
-      validate(
-        need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
-      )
-      lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
-      validate(
-        need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
-      )
-
-      cc = substitute(survival::coxph(.form, data= data.cox, model = T), list(.form= form.cox()))
-      res.cox = eval(cc)
-      tb.cox <- jstable::cox2.display(res.cox)
-      tb.cox <- jstable::LabeljsCox(tb.cox, data.label())
-      out.cox <- rbind(tb.cox$table, tb.cox$metric)
-      sig <- out.cox[, ncol(out.cox)]
-      sig <- gsub("< ", "", sig)
-      sig <- ifelse(as.numeric(as.vector(sig)) <= 0.05, "**", NA)
-      out.cox <- cbind(out.cox, sig)
-      cap.cox <- paste("Cox's proportional hazard model on time ('", data.label()[variable == input$time_cox, var_label][1] , "') to event ('", data.label()[variable == input$event_cox, var_label][1], "')", sep="")
-      if(input$coxUI_subcheck == T){
-        cap.cox <- paste(cap.cox, " - ", data.label()[variable == input$subvar_cox, var_label][1], ": ", data.label()[variable == input$subvar_cox & level == input$subval_cox, val_label], sep = "")
-      }
-      hide = which(colnames(out.cox) == c("sig"))
-      datatable(out.cox, rownames=T, extensions= "Buttons", caption = cap.cox,
-                options = c(opt.tbreg(cap.cox),
+      hide = which(colnames(out_cox_original()$table) == c("sig"))
+      datatable(out_cox_original()$table, rownames=T, extensions= "Buttons", caption = out_cox_original()$caption,
+                options = c(opt.tbreg(out_cox_original()$caption),
                             list(columnDefs = list(list(visible=FALSE, targets= hide))
                             )
                 )
       )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
-
     })
 
-
     output$cox_ps <- renderDT({
-      data.cox <- mat.info()$matdata
-      data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
-      if(input$coxUI_subcheck == T){
-        req(input$subvar_cox)
-        data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
-      }
-      mf <- model.frame(form.cox(), data.cox)
-      validate(
-        need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
-      )
-      lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
-      validate(
-        need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
-      )
-      cc = substitute(survival::coxph(.form, data= data.cox, model = T), list(.form= form.cox()))
-      res.cox = eval(cc)
-      tb.cox <- jstable::cox2.display(res.cox)
-      tb.cox <- jstable::LabeljsCox(tb.cox, data.label())
-      out.cox <- rbind(tb.cox$table, tb.cox$metric)
-      sig <- out.cox[, ncol(out.cox)]
-      sig <- gsub("< ", "", sig)
-      sig <- ifelse(as.numeric(as.vector(sig)) <= 0.05, "**", NA)
-      out.cox <- cbind(out.cox, sig)
-      cap.cox <- paste("Cox's proportional hazard model on time ('", data.label()[variable == input$time_cox, var_label][1] , "') to event ('", data.label()[variable == input$event_cox, var_label][1], "') - Matching data", sep="")
-      if(input$coxUI_subcheck == T){
-        cap.cox <- paste(cap.cox, " - ", data.label()[variable == input$subvar_cox, var_label][1], ": ", data.label()[variable == input$subvar_cox & level == input$subval_cox, val_label], sep = "")
-      }
-      hide = which(colnames(out.cox) == c("sig"))
-      datatable(out.cox, rownames=T, extensions= "Buttons", caption = cap.cox,
-                options = c(opt.tbreg(cap.cox),
+      hide = which(colnames(out_cox_ps()$table) == c("sig"))
+      datatable(out_cox_ps()$table, rownames=T, extensions= "Buttons", caption = out_cox_ps()$caption,
+                options = c(opt.tbreg(out_cox_ps()$caption),
                             list(columnDefs = list(list(visible=FALSE, targets= hide))
                             )
                 )
       )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
-
     })
 
     output$cox_iptw <- renderDT({
-      data.cox <- mat.info()$data
-      data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
-      if(input$coxUI_subcheck == T){
-        req(input$subvar_cox)
-        data.cox <- data.cox[get(input$subvar_cox) == input$subval_cox, ]
-      }
-      data.design <- survey::svydesign(ids = ~ 1, data = data.cox, weights = ~ iptw)
-      mf <- model.frame(form.cox(), data.cox)
-      validate(
-        need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
-      )
-      lgl.1level <- purrr::map_lgl(mf, ~length(unique(.x)) == 1)
-      validate(
-        need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse =" ,"), "has(have) a unique value. Please remove that from independent variables"))
-      )
-
-      cc = substitute(survey::svycoxph(.form, design= data.design), list(.form= form.cox()))
-      res.cox = eval(cc)
-      tb.cox <- jstable::svycox.display(res.cox)
-      tb.cox <- jstable::LabeljsCox(tb.cox, data.label())
-      out.cox <- rbind(tb.cox$table, tb.cox$metric)
-      sig <- out.cox[, ncol(out.cox)]
-      sig <- gsub("< ", "", sig)
-      sig <- ifelse(as.numeric(as.vector(sig)) <= 0.05, "**", NA)
-      out.cox <- cbind(out.cox, sig)
-      cap.cox <- paste("Weighted cox's proportional hazard model on time ('", data.label()[variable == input$time_cox, var_label][1] , "') to event ('", data.label()[variable == input$event_cox, var_label][1], "') ", sep="")
-      if(input$coxUI_subcheck == T){
-        cap.cox <- paste(cap.cox, " - ", data.label()[variable == input$subvar_cox, var_label][1], ": ", data.label()[variable == input$subvar_cox & level == input$subval_cox, val_label], sep = "")
-      }
-      hide = which(colnames(out.cox) == c("sig"))
-      datatable(out.cox, rownames=T, extensions= "Buttons", caption = cap.cox,
-                options = c(opt.tbreg(cap.cox),
+      hide = which(colnames(out_cox_iptw()$table) == c("sig"))
+      datatable(out_cox_iptw()$table, rownames=T, extensions= "Buttons", caption = out_cox_iptw()$caption,
+                options = c(opt.tbreg(out_cox_iptw()$caption),
                             list(columnDefs = list(list(visible=FALSE, targets= hide))
                             )
                 )
       )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
-
     })
+
+    ## ggpairs
+
+    out_ggpairs_original <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL)
+    out_ggpairs_ps <- callModule(ggpairsModule2, "ggpairs", data = matdata, data_label = data.label, data_varStruct = NULL)
+
+    output$ggpairs_plot_original <- renderPlot({
+      print(out_ggpairs_original())
+    })
+
+    output$ggpairs_plot_ps <- renderPlot({
+      print(out_ggpairs_ps())
+    })
+
 
     ## Kaplan
 
-    output$kmUI_eventtime <- renderUI({
-      mklist <- function(varlist, vars){
-        lapply(varlist,
-               function(x){
-                 inter <- intersect(x, vars)
-                 if (length(inter) == 1){
-                   inter <- c(inter, "")
-                 }
-                 return(inter)
-               })
-      }
+    out_kaplan_original <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL)
+    out_kaplan_ps <- callModule(kaplanModule, "kaplan", data = matdata, data_label = data.label, data_varStruct = NULL)
+    out_kaplan_iptw <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey)
 
-      tagList(
-        selectInput("event_km", "Event",
-                    choices = mklist(data_varStruct(), setdiff(vlist()$factor_01vars, group_var())), multiple = F,
-                    selected = NULL
-        ),
-        selectInput("time_km", "Time",
-                    choices = vlist()$conti_list, multiple = F,
-                    selected = NULL
-        )
-      )
+    output$kaplan_plot_original <- renderPlot({
+      print(out_kaplan_original())
+    })
+
+    output$kaplan_plot_ps <- renderPlot({
+      print(out_kaplan_ps())
+    })
+
+    output$kaplan_plot_iptw <- renderPlot({
+      print(out_kaplan_iptw())
     })
 
 
-    output$kmUI_indep <- renderUI({
-      indep.km <- setdiff(vlist()$factor_vars, c(vlist()$except_vars, input$event_km, input$time_km ))
-      mklist <- function(varlist, vars){
-        lapply(varlist,
-               function(x){
-                 inter <- intersect(x, vars)
-                 if (length(inter) == 1){
-                   inter <- c(inter, "")
-                 }
-                 return(inter)
-               })
-      }
+    ## ROC
 
-      tagList(
-        selectInput("indep_km", "Independent variables",
-                    choices = mklist(data_varStruct(), indep.km), multiple = F,
-                    selected = group_var()
-        )
-      )
+    out_roc_original <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL)
+    out_roc_ps <- callModule(rocModule, "roc", data = matdata, data_label = data.label, data_varStruct = NULL)
+    out_roc_iptw <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey)
+
+
+    output$plot_roc_original <- renderPlot({
+      print(out_roc_original()$plot)
     })
 
-    observeEvent(input$indep_km,{
-      output$km_subvar <- renderUI({
-        req(input$km_subcheck == T)
-        factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
-        factor_subgroup <- setdiff(factor_vars, c(input$event_km, input$indep_km))
-        factor_subgroup_list <- mklist(data_varStruct(), factor_subgroup)
-        validate(
-          need(length(factor_subgroup) > 0 , "No factor variable for sub-group analysis")
-        )
-
-        tagList(
-          selectInput("subvar_km", "Sub-group variable",
-                      choices = factor_subgroup_list, multiple = F,
-                      selected = factor_subgroup[1])
-        )
-      })
+    output$table_roc_original <- renderDT({
+      datatable(out_roc_original()$tb, rownames=F, editable = F, extensions= "Buttons",
+                caption = "ROC results",
+                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
 
-
-    output$km_subval <- renderUI({
-      req(input$km_subcheck == T)
-      req(input$subvar_km)
-      selectInput("subval_km", "Sub-group value",
-                  choices = data.label()[variable == input$subvar_km, val_label], multiple = F,
-                  selected = data.label()[variable == input$subvar_km, val_label][1])
+    output$plot_roc_ps <- renderPlot({
+      print(out_roc_ps()$plot)
     })
 
-
-
-    form.km <- reactive({
-      validate(
-        need(!is.null(input$indep_km), "Please select at least 1 independent variable.")
-      )
-      as.formula(paste("survival::Surv(",input$time_km,",", input$event_km,") ~ ", input$indep_km ,sep=""))
+    output$table_roc_ps <- renderDT({
+      datatable(out_roc_ps()$tb, rownames=F, editable = F, extensions= "Buttons",
+                caption = "ROC results",
+                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
 
-    ## KM original
-    km_original_input <- reactive({
-      data.km <- mat.info()$data
-      data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
-      if (input$km_subcheck == T){
-        req(input$subvar_km)
-        data.km <- data.km[get(input$subvar_km) == input$subval_km, ]
-      }
-      cc = substitute(survival::survfit(.form, data= data.km), list(.form= form.km()))
-      res.km = eval(cc)
-      yst.name = data.label()[variable == input$indep_km, var_label][1]
-      yst.lab = data.label()[variable == input$indep_km, val_label]
-      ylab = ifelse(input$km_cumhaz, "Cumulative hazard(%)", "Survival(%)")
-
-      return(
-        jskm::jskm(res.km, pval = input$km_pval, mark=F, table= input$km_table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, legendposition = c(0.9, 0.2),
-             cumhaz= input$km_cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km)
-      )
-
+    output$plot_roc_iptw <- renderPlot({
+      print(out_roc_iptw()$plot)
     })
 
-    output$km_original <- renderPlot({
-      print(km_original_input())
+    output$table_roc_iptw <- renderDT({
+      datatable(out_roc_iptw()$tb, rownames=F, editable = F, extensions= "Buttons",
+                caption = "ROC results",
+                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
 
-    output$downloadControls_km_original <- renderUI({
-      fluidRow(
-        column(4,
-               selectizeInput("km_original_file_ext", "File extension (dpi = 300)",
-                              choices = c("jpg","pdf", "tiff", "svg"), multiple = F,
-                              selected = "jpg"
-               )
-        ),
-        column(4,
-               sliderInput("fig_width_km_original", "Width (in):",
-                           min = 5, max = 20, value = 8
-               )
-        ),
-        column(4,
-               sliderInput("fig_height_km_original", "Height (in):",
-                           min = 5, max = 20, value = 6
-               )
-        )
-      )
+    ## Time-ROC
+
+    out_timeroc_original <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL)
+    out_timeroc_ps <- callModule(timerocModule, "timeroc", data = matdata, data_label = data.label, data_varStruct = NULL)
+    out_timeroc_iptw <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey)
+
+
+    output$plot_timeroc_original <- renderPlot({
+      print(out_timeroc_original()$plot)
     })
 
-    output$downloadButton_km_original <- downloadHandler(
-      filename =  function() {
-        paste(input$event_km, input$indep_km,"_kaplan_meier.",input$km_original_file_ext ,sep="")
-      },
-      # content is a function with argument file. content writes the plot to the device
-      content = function(file) {
-        ggplot2::ggsave(file ,km_original_input(), dpi = 300, units = "in", width = input$fig_width_km_original, height =input$fig_height_km_original)
-
-      }
-    )
-
-
-    ## KM ps
-    km_ps_input <- reactive({
-      data.km <- mat.info()$matdata
-      data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
-      if (input$km_subcheck == T){
-        req(input$subvar_km)
-        data.km <- data.km[get(input$subvar_km) == input$subval_km, ]
-      }
-      cc = substitute(survival::survfit(.form, data= data.km), list(.form= form.km()))
-      res.km = eval(cc)
-      yst.name = data.label()[variable == input$indep_km, var_label][1]
-      yst.lab = data.label()[variable == input$indep_km, val_label]
-      ylab = ifelse(input$km_cumhaz, "Cumulative hazard(%)", "Survival(%)")
-
-      return(
-        jskm::jskm(res.km, pval = input$km_pval, mark=F, table= input$km_table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= F, legendposition = c(0.9, 0.2),
-             cumhaz= input$km_cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km)
-      )
-
+    output$table_timeroc_original <- renderDT({
+      datatable(out_timeroc_original()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
+                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
 
-    output$km_ps <- renderPlot({
-      print(km_ps_input())
+    output$plot_timeroc_ps <- renderPlot({
+      print(out_timeroc_ps()$plot)
     })
 
-    output$downloadControls_km_ps <- renderUI({
-      fluidRow(
-        column(4,
-               selectizeInput("km_ps_file_ext", "File extension (dpi = 300)",
-                              choices = c("jpg","pdf", "tiff", "svg"), multiple = F,
-                              selected = "jpg"
-               )
-        ),
-        column(4,
-               sliderInput("fig_width_km_ps", "Width (in):",
-                           min = 5, max = 20, value = 8
-               )
-        ),
-        column(4,
-               sliderInput("fig_height_km_ps", "Height (in):",
-                           min = 5, max = 20, value = 6
-               )
-        )
-      )
+    output$table_timeroc_ps <- renderDT({
+      datatable(out_timeroc_ps()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
+                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
 
-    output$downloadButton_km_ps <- downloadHandler(
-      filename =  function() {
-        paste(input$event_km, input$indep_km,"_kaplan_meier_PSmatching.", input$km_original_file_ext  ,sep="")
-      },
-      # content is a function with argument file. content writes the plot to the device
-      content = function(file) {
-        ggplot2::ggsave(file ,km_ps_input(), dpi = 300, units = "in", width = input$fig_width_km_ps, height =input$fig_height_km_ps)
-
-      }
-    )
-
-
-    ## KM iptw
-    km_iptw_input <- reactive({
-      data.km <- mat.info()$data
-      data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
-      if (input$km_subcheck == T){
-        req(input$subvar_km)
-        data.km <- data.km[get(input$subvar_km) == input$subval_km, ]
-      }
-      data.design <- survey::svydesign(ids = ~ 1, data = data.km, weights = ~ iptw)
-      cc = substitute(survey::svykm(.form, design = data.design), list(.form= form.km()))
-      res.km = eval(cc)
-      yst.name = data.label()[variable == input$indep_km, var_label][1]
-      yst.lab = data.label()[variable == input$indep_km, val_label]
-      ylab = ifelse(input$km_cumhaz, "Cumulative hazard(%)", "Survival(%)")
-
-      return(
-        jskm::svyjskm(res.km, xlabs = "Time-to-event", ylabs = ylab, ystratalabs = yst.lab, ystrataname = yst.name, cumhaz = input$km_cumhaz, design = data.design, pval = input$km_pval, legendposition = c(0.9, 0.2))
-      )
-
+    output$plot_timeroc_iptw <- renderPlot({
+      print(out_timeroc_iptw()$plot)
     })
 
-    output$km_iptw <- renderPlot({
-      print(km_iptw_input())
+    output$table_timeroc_iptw <- renderDT({
+      datatable(out_timeroc_iptw()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
+                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
-
-    output$downloadControls_km_iptw <- renderUI({
-      fluidRow(
-        column(4,
-               selectizeInput("km_iptw_file_ext", "File extension (dpi = 300)",
-                              choices = c("jpg","pdf", "tiff", "svg"), multiple = F,
-                              selected = "jpg"
-               )
-        ),
-        column(4,
-               sliderInput("fig_width_km_iptw", "Width (in):",
-                           min = 5, max = 20, value = 8
-               )
-        ),
-        column(4,
-               sliderInput("fig_height_km_iptw", "Height (in):",
-                           min = 5, max = 20, value = 6
-               )
-        )
-      )
-    })
-
-    output$downloadButton_km_iptw <- downloadHandler(
-      filename =  function() {
-        paste(input$event_km, input$indep_km,"_kaplan_meier_IPTW.", input$km_original_file_ext  ,sep="")
-      },
-      # content is a function with argument file. content writes the plot to the device
-      content = function(file) {
-        ggplot2::ggsave(file ,km_iptw_input(), dpi = 300, units = "in", width = input$fig_width_km_iptw, height =input$fig_height_km_iptw)
-
-      }
-    )
 
   }
 
