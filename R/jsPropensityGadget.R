@@ -348,12 +348,20 @@ jsPropensityGadget <- function(data){
 
 
 
-    data1 <- reactive({
+    data.info <- reactive({
       out1 <- out
       out1[, (conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = conti_original]
       if (!is.null(input$factor_vname) & length(input$factor_vname) > 0){
         out1[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
       }
+
+      out.label <- mk.lev(out1)
+      for (vn in ref[["name.new"]]){
+        w <- which(ref[["name.new"]] == vn)
+        out.label[variable == vn, var_label := ref[["name.old"]][w]]
+      }
+
+
       if (!is.null(input$check_subset)){
         if (input$check_subset){
           validate(
@@ -365,35 +373,36 @@ jsPropensityGadget <- function(data){
             out1 <- out1[get(input$var_subset) %in% input$val_subset]
             #var.factor <- c(data()$factor_original, input$factor_vname)
             out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+            out.label2 <- mk.lev(out1)[, c("variable", "class", "level")]
+            data.table::setkey(out.label, "variable", "class", "level")
+            data.table::setkey(out.label2, "variable", "class", "level")
+            out.label <- out.label[out.label2]
 
           } else{
             out1 <- out1[get(input$var_subset) >= input$val_subset[1] & get(input$var_subset) <= input$val_subset[2]]
             #var.factor <- c(data()$factor_original, input$factor_vname)
             out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+            out.label2 <- mk.lev(out1)[, c("variable", "class", "level")]
+            data.table::setkey(out.label, "variable", "class", "level")
+            data.table::setkey(out.label2, "variable", "class", "level")
+            out.label <- out.label[out.label2]
           }
 
         }
       }
 
-      return(out1)
+      return(list(data = out1, label = out.label))
     })
 
-    data.label <- eventReactive(data1(), {
-      labeldata <- mk.lev(data1())
-      for (vn in ref[["name.new"]]){
-        w <- which(ref[["name.new"]] == vn)
-        labeldata[variable ==vn, var_label := ref[["name.old"]][w]]
-      }
-      return(labeldata)
-    })
+
 
     output$group_ps <- renderUI({
-      factor_vars <- names(data1())[data1()[, lapply(.SD, class) %in% c("factor", "character")]]
+      factor_vars <- names(data.info()$data)[data.info()$data[, lapply(.SD, class) %in% c("factor", "character")]]
       validate(
         need(!is.null(factor_vars) & length(factor_vars) > 0, "No categorical variables in data")
       )
 
-      class01_factor <- unlist(data1()[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])
+      class01_factor <- unlist(data.info()$data[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])
       #nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
       #factor_2vars <- names(nclass_factor)[nclass_factor == 2]
 
@@ -403,7 +412,7 @@ jsPropensityGadget <- function(data){
       )
 
       factor_01vars <- factor_vars[class01_factor]
-      factor_01vars_case_small <- factor_01vars[unlist(sapply(factor_01vars, function(x){diff(table(data1()[[x]])) <= 0}))]
+      factor_01vars_case_small <- factor_01vars[unlist(sapply(factor_01vars, function(x){diff(table(data.info()$data[[x]])) <= 0}))]
 
       selectInput("group_pscal", label = "Group variable for PS calculation (0, 1 coding)",
                   choices = mklist(data_varStruct1, factor_01vars_case_small), multiple = F,
@@ -419,11 +428,11 @@ jsPropensityGadget <- function(data){
           need(length(input$group_pscal) > 0, "No group variables in data")
         )
 
-        vars <- setdiff(setdiff(names(data1()), except_vars),  c(input$var_subset, input$group_pscal))
+        vars <- setdiff(setdiff(names(data.info()$data), except_vars),  c(input$var_subset, input$group_pscal))
         varsIni <- sapply(vars,
                           function(v){
                             forms <- as.formula(paste(input$group_pscal, "~", v))
-                            coef <- summary(glm(forms, data = data1(), family = binomial))$coefficients
+                            coef <- tryCatch(summary(glm(forms, data = data.info()$data, family = binomial))$coefficients, error = function(e){return(NULL)})
                             sigOK <- !all(coef[-1, 4] > as.numeric(input$pcut_ps))
                             return(sigOK)
                           })
@@ -441,10 +450,10 @@ jsPropensityGadget <- function(data){
       }
 
       forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
-      m.out <- MatchIt::matchit(forms, data = data1())
+      m.out <- MatchIt::matchit(forms, data = data.info()$data)
       pscore <- m.out$distance
       iptw <- ifelse(m.out$treat == levels(m.out$treat)[2], 1/pscore,  1/(1-pscore))
-      wdata <- cbind(data1(), pscore, iptw)
+      wdata <- cbind(data.info()$data, pscore, iptw)
 
       mdata <- MatchIt::match.data(m.out, distance = "pscore")
       return(list(data = wdata, matdata = mdata[, -grep("weights", names(mdata))]))
@@ -465,7 +474,7 @@ jsPropensityGadget <- function(data){
     })
 
     output$data_label <- renderDT({
-      datatable(data.label(), rownames=F, editable = F, extensions= "Buttons", caption = "Label of data",
+      datatable(data.info()$label, rownames=F, editable = F, extensions= "Buttons", caption = "Label of data",
                 options = c(opt.data("data_label"), list(scrollX = TRUE))
       )
     })
@@ -485,7 +494,7 @@ jsPropensityGadget <- function(data){
       mat.info()$data[, .SD, .SDcols = -c("iptw")]
     })
     matdata <- reactive(data.table::data.table(mat.info()$matdata))
-    #data.label <- reactive(mat.info()$data.label)
+    data.label <- reactive(data.info()$label)
     #data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
     design.survey <- reactive(survey::svydesign(ids = ~ 1, data = mat.info()$data, weights = ~ iptw))
 
