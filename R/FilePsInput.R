@@ -190,6 +190,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
 
   output$pcut <- renderUI({
     if (is.null(input$file)){return(NULL)}
+
     radioButtons(session$ns("pcut_ps"), label = "Default p-value cut for ps calculation",
                  choices = c(0.05, 0.1, 0.2),
                  selected = 0.1, inline =T)
@@ -320,6 +321,10 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
 
     factor_01vars <- factor_vars[class01_factor]
     factor_01vars_case_small <- factor_01vars[unlist(sapply(factor_01vars, function(x){diff(table(data()$data[[x]])) <= 0}))]
+
+    validate(
+      need(length(factor_01vars_case_small) > 0, "No candidate group variable for PS calculation")
+    )
 
     selectInput(session$ns("group_pscal"), label = "Group variable for PS calculation (0, 1 coding)",
                 choices = mklist(data.info()$data_varStruct, factor_01vars_case_small), multiple = F,

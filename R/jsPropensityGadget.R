@@ -414,6 +414,11 @@ jsPropensityGadget <- function(data){
       factor_01vars <- factor_vars[class01_factor]
       factor_01vars_case_small <- factor_01vars[unlist(sapply(factor_01vars, function(x){diff(table(data.info()$data[[x]])) <= 0}))]
 
+      validate(
+        need(length(factor_01vars_case_small) > 0, "No candidate group variable for PS calculation")
+      )
+
+
       selectInput("group_pscal", label = "Group variable for PS calculation (0, 1 coding)",
                   choices = mklist(data_varStruct1, factor_01vars_case_small), multiple = F,
                   selected = factor_01vars_case_small[1])
