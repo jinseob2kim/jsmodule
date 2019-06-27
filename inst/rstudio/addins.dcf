@@ -1,6 +1,11 @@
 Name: Basic statistics
-Description: Gadget including Data, Label info, Table 1, Regression(liear, logistic), Basic plot.
+Description: RStudio Addin for basic data analysis.
 Binding: jsBasicAddin
+Interactive: true
+
+Name: Basic statistics with external data
+Description: RStudio Addin for basic data analysis with external data.
+Binding: jsBasicExtAddin
 Interactive: true
 
 
@@ -9,13 +14,32 @@ Description: Gatget including propensity score matching & IPTW analysis
 Binding: jsPropensityAddin
 Interactive: true
 
+Name: Propensity score analysis with external data
+Description: RStudio Addin for propensity score analysis with external data.
+Binding: jsPropensityExtAddin
+Interactive: true
+
+
 
 Name: Repeated measure analysis
-Description: Gatget including Data, Label info, Table 1, GEE(liear, logistic), Basic plot.
+Description: RStudio Addin for repeated measure analysis
 Binding: jsRepeatedAddin
 Interactive: true
 
-Name: Survey data analysis
-Description: Gatget including Data, Label info, Table 1, svyglm, Basic plot.
-Binding: jsSurveydAddin
+Name: Repeated measure analysis with external data
+Description: RStudio Addin for repeated measure analysis with external data.
+Binding: jsRepeatedExtAddin
 Interactive: true
+
+
+Name: Survey data analysis
+Description: RStudio Addin for survey data analysis.
+Binding: jsSurveyAddin
+Interactive: true
+
+Name: Survey data analysis with external data
+Description: RStudio Addin for survey data analysis with external data.
+Binding: jsSurveyExtAddin
+Interactive: true
+
+

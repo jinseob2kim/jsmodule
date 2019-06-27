@@ -177,7 +177,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
 
     conti_vars <- setdiff(names(out), factor_vars)
     nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x))}), .SDcols = conti_vars])
-    factor_adds_list = mklist(data_varStruct, names(nclass)[(nclass <= 20) & (nclass < nrow(out))])
+    factor_adds_list = mklist(data_varStruct, names(nclass)[(nclass <= nfactor.limit) & (nclass < nrow(out))])
 
     except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
     add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]

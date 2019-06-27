@@ -5,7 +5,7 @@
 \title{ggpairsModule: shiny module server for basic/scatter plot.}
 \usage{
 ggpairsModule(input, output, session, data, data_label,
-  data_varStruct = NULL)
+  data_varStruct = NULL, nfactor.limit = 20)
 }
 \arguments{
 \item{input}{input}
@@ -19,6 +19,8 @@ ggpairsModule(input, output, session, data, data_label,
 \item{data_label}{data label}
 
 \item{data_varStruct}{List of variable structure, Default: NULL}
+
+\item{nfactor.limit}{nlevels limit for categorical variables, Default: 20}
 }
 \value{
 Shiny module server for basic/scatter plot.

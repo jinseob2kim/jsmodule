@@ -115,6 +115,7 @@ ggpairsModuleUI2 <- function(id) {
 #' @param data data
 #' @param data_label data label
 #' @param data_varStruct List of variable structure, Default: NULL
+#' @param nfactor.limit nlevels limit for categorical variables, Default: 20
 #' @return Shiny module server for basic/scatter plot.
 #' @details Shiny module server for basic/scatter plot.
 #' @examples
@@ -153,7 +154,7 @@ ggpairsModuleUI2 <- function(id) {
 #' @importFrom GGally ggpairs
 
 
-ggpairsModule <- function(input, output, session, data, data_label, data_varStruct = NULL) {
+ggpairsModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 20) {
 
   ## To remove NOTE.
   val_label <- variable <- NULL
@@ -171,10 +172,10 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
 
   nclass_factor <- unlist(data[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
 
-  group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data)]
+  group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <= nfactor.limit & nclass_factor < nrow(data)]
   group_list <- mklist(data_varStruct, group_vars)
 
-  except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data)]
+  except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data)]
 
   select_vars <- setdiff(names(data), except_vars)
   select_list <- mklist(data_varStruct, select_vars)
@@ -366,6 +367,7 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
 #' @param data Reactive data
 #' @param data_label Reactive data label
 #' @param data_varStruct List of variable structure, Default: NULL
+#' @param nfactor.limit nlevels limit for categorical variables, Default: 20
 #' @return Shiny module server for basic/scatter plot
 #' @details Shiny module server for basic/scatter plot for reactive data.
 #' @examples
@@ -403,7 +405,7 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
 #' @importFrom data.table data.table .SD :=
 #' @importFrom GGally ggpairs
 
-ggpairsModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL) {
+ggpairsModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 20) {
 
   ## To remove NOTE.
   val_label <- variable <- NULL
@@ -436,10 +438,10 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
 
     nclass_factor <- unlist(data[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
 
-    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <=10 & nclass_factor < nrow(data)]
+    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <= nfactor.limit & nclass_factor < nrow(data)]
     group_list <- mklist(data_varStruct(), group_vars)
 
-    except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data)]
+    except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data)]
 
     select_vars <- setdiff(names(data), except_vars)
     select_list <- mklist(data_varStruct(), select_vars)

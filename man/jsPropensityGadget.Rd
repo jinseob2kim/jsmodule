@@ -4,10 +4,12 @@
 \alias{jsPropensityGadget}
 \title{jsPropensityGadget: Shiny Gadget for propensity score analysis.}
 \usage{
-jsPropensityGadget(data)
+jsPropensityGadget(data, nfactor.limit = 20)
 }
 \arguments{
 \item{data}{data}
+
+\item{nfactor.limit}{nlevels limit for categorical variables, Default: 20}
 }
 \value{
 Shiny Gadget including original/matching/IPTW data, Label info, Table 1, Cox model, Basic/kaplan-meier plot.

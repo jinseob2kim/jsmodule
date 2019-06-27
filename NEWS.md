@@ -1,3 +1,21 @@
+# jsmodule 0.9.9
+
+## New addins
+
+* Basic statistics with external file: `jsBasicExtAddin`
+
+* Propensity score analysis with external file: `jsPropensityExtAddin`
+
+* Repeated measure analysis with external file: `jsRepeatedExtAddin`
+
+* Survey data analysis with external file: `jsSurveyExtAddin`
+
+## Bug fixes
+
+* Regression/Logistic model in `jsSurveyAddin`.
+
+
+
 # jsmodule 0.9.3
 
 ## Update: Propensity score analysis
