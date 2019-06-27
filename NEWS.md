@@ -14,7 +14,7 @@
 
 * Regression/Logistic model in `jsSurveyAddin`.
 
-
+* **Id** issue in repeated measure analysis.
 
 # jsmodule 0.9.3
 
