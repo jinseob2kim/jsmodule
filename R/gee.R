@@ -479,6 +479,8 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
 
 
   out <- reactive({
+    req(input$dep_vars)
+    req(input$indep_vars)
     data.logistic <- data()
     label.regress <- data_label()
     idgee_Plz_Noduplicate <- id.gee()
