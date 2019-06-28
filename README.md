@@ -21,19 +21,41 @@ RStudio Addins
 
 ### Basic statistics
 
+Use `jsBasicGadget(data)` or Click **Basic statistics** Addin with **the dragged name of data**.
+
 ``` r
 jsBasicGadget(mtcars)
 ```
 
 ![](vignettes/figures/addin.gif)
 
+### Basic statistics with external data
+
+Use `jsBasicExtAddin()` or Click **Basic statistics with external data** Addin **without any drag**
+
+``` r
+jsBasicExtAddin()
+```
+
 ### Repeated measure analysis
+
+Use `jsRepeatedGadget(data)` or Click **Repeated measure analysis** Addin with **the dragged name of data**.
 
 ``` r
 jsRepeatedGadget(mtcars)
 ```
 
+### Repeated measure analysis with external data
+
+Use `jsRepeatedExtAddin()` or Click **Repeated measure analysis with external data** Addin **without any drag**
+
+``` r
+jsRepeatedExtAddin()
+```
+
 ### Survey data analysis
+
+Use `jsSurveyGadget(data)` or Click **Survey data analysis** Addin with **the dragged name of data**.
 
 ``` r
 library(survey)
@@ -41,13 +63,31 @@ data(api)
 jsSurveyGadget(apistrat)
 ```
 
-### Propensity score analysis (experimental)
+### Survey data analysis with external data
+
+Use `jsSurveyExtAddin()` or Click **Survey data analysis with external data** Addin **without any drag**
+
+``` r
+jsSurveyExtAddin()
+```
+
+### Propensity score analysis
+
+Use `jsPropensityGadget(data)` or Click **Propensity score analysis** Addin with **the dragged name of data**.
 
 ``` r
 jsPropensityGadget(mtcars)
 ```
 
 ![](vignettes/figures/ps.png)
+
+### Propensity score analysis with external data
+
+Use `jsPropensityExtAddin()` or Click **Propensity score analysis with external data** Addin **without any drag**
+
+``` r
+jsPropensityExtAddin()
+```
 
 Web applications
 ----------------
