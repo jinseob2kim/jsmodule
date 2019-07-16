@@ -1,3 +1,9 @@
+# jsmodule 1.0.0
+
+## Bug fixes
+
+* Encoding error when `csv` file upload.
+
 # jsmodule 0.9.9
 
 ## New addins

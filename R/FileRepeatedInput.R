@@ -91,6 +91,8 @@ FileRepeatedInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dt
 #' @import shiny
 #' @importFrom data.table fread data.table .SD :=
 #' @importFrom readxl read_excel
+#' @importFrom readr guess_encoding
+#' @importFrom utils read.csv
 #' @importFrom jstable mk.lev
 #' @importFrom haven read_sav read_sas read_dta
 
@@ -116,8 +118,11 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
     validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T) | (grepl("sav", userFile()$name) == T) | (grepl("sas7bdat", userFile()$name) == T), message = "Please upload csv/xlsx/sav/sas7bdat file"))
     if (grepl("csv", userFile()$name) == T){
       out <- data.table::fread(userFile()$datapath, check.names = F, integer64 = "double")
+      if (readr::guess_encoding(userFile()$datapath)[1, 1] == "EUC-KR"){
+        out <- data.table::data.table(utils::read.csv(userFile()$datapath, check.names = F, fileEncoding = "EUC-KR"))
+      }
     } else if (grepl("xlsx", userFile()$name) == T){
-      out = data.table::data.table(readxl::read_excel(userFile()$datapath), check.names = F, integer64 = "double")
+      out <- data.table::data.table(readxl::read_excel(userFile()$datapath), check.names = F, integer64 = "double")
     } else if (grepl("sav", userFile()$name) == T){
       out <- data.table::data.table(tryCatch(haven::read_sav(userFile()$datapath), error = function(e){return(haven::read_sav(userFile()$datapath, encoding = "latin1"))}), check.names = F)
       #out = data.table::data.table(haven::read_sav(userFile()$datapath, encoding = "latin1"), check.names = F, integer64 = "double")
