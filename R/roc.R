@@ -45,8 +45,8 @@ rocUI <- function(id) {
 
   tagList(
     uiOutput(ns("event")),
-    uiOutput(ns("nmodel")),
     uiOutput(ns("indep")),
+    uiOutput(ns("addmodel")),
     checkboxInput(ns("subcheck"), "Sub-group analysis"),
     uiOutput(ns("subvar")),
     uiOutput(ns("subval"))
@@ -343,12 +343,23 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
     )
   })
 
-  output$nmodel <- renderUI({
-    sliderInput(session$ns("n_model"), "Number of models", value = 2, min = 1, max = 5)
 
+  nmodel <- reactiveVal(1)
+
+
+  output$addmodel <- renderUI({
+    if (nmodel() <= 1){
+      actionButton(session$ns("add"), label = "Add model", icon("plus"), class = "btn-primary")
+    } else if (nmodel() > 1){
+      tagList(
+        actionButton(session$ns("add"), label = "Add model", icon("plus"), class = "btn-primary"),
+        actionButton(session$ns("rmv"), label = "Remove model", icon("minus"))
+      )
+    }
   })
 
-  output$indep <- renderUI({
+
+  indeproc <- reactive({
     req(!is.null(input$event_roc))
     mklist <- function(varlist, vars){
       lapply(varlist,
@@ -369,17 +380,40 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
     } else{
       indep.roc <- setdiff(names(data()), c(vlist()$except_vars, input$event_roc ))
     }
-
-    dynamic_selection_list <- lapply(1:input$n_model, function(i) {
-      selectInput(session$ns(paste0("indep_roc", i)), paste0("Independent variables for Model ", i),
-                  choices = mklist(data_varStruct(), indep.roc), multiple = T,
-                  selected = unlist(mklist(data_varStruct(), indep.roc))[1]
-                  )
-    })
-
+    return(indep.roc)
   })
 
-  indeps <-  reactive(lapply(1:input$n_model, function(i){input[[paste0("indep_roc", i)]]}))
+
+  output$indep <- renderUI({
+    selectInput(session$ns(paste0("indep_roc", 1)), paste0("Independent variables for Model ", 1),
+                choices = mklist(data_varStruct(), indeproc()), multiple = T,
+                selected = unlist(mklist(data_varStruct(), indeproc()))[1])
+  })
+
+  observeEvent(input$add, {
+    insertUI(
+      selector = paste0("div:has(> #", session$ns("add"), ")"),
+      where = "beforeBegin",
+      ui = selectInput(session$ns(paste0("indep_roc", nmodel() + 1)), paste0("Independent variables for Model ", nmodel() + 1),
+                       choices = mklist(data_varStruct(), indeproc()), multiple = T,
+                       selected = unlist(mklist(data_varStruct(), indeproc()))[1:min(length(indeproc()), nmodel() + 1)])
+    )
+    nmodel(nmodel() + 1)
+  })
+
+  observeEvent(input$rmv, {
+    removeUI(
+      selector = paste0("div:has(>> #", session$ns(paste0("indep_roc", nmodel())), ")")
+    )
+    nmodel(nmodel() - 1)
+  })
+
+
+
+
+  indeps <-  reactive(lapply(1:nmodel(), function(i){input[[paste0("indep_roc", i)]]}))
+
+
 
 
 
@@ -434,9 +468,9 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
   rocList <- reactive({
     req(!is.null(input$event_roc))
 
-    for (i in 1:input$n_model){req(!is.null(input[[paste0("indep_roc", i)]]))}
+    for (i in 1:nmodel()){req(!is.null(input[[paste0("indep_roc", i)]]))}
     req(!is.null(indeps()))
-    collapse.indep <- sapply(1:input$n_model, function(i){paste0(input[[paste0("indep_roc", i)]], collapse = "")})
+    collapse.indep <- sapply(1:nmodel(), function(i){paste0(input[[paste0("indep_roc", i)]], collapse = "")})
     validate(
       need(anyDuplicated(collapse.indep) == 0, "Please select different models")
     )
@@ -511,7 +545,7 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
 
     p <- pROC::ggroc(res.roc) + see::theme_modern() + geom_abline(slope = 1, intercept = 1, lty = 2) +
-      xlab("Specificity") + ylab("Sensitivity") + scale_color_discrete("Model", labels = paste("Model", 1:input$n_model))
+      xlab("Specificity") + ylab("Sensitivity") + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
 
     return(list(plot = p, tb = res.tb))
   })

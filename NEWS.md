@@ -1,5 +1,9 @@
 # jsmodule 1.0.0
 
+## Update
+
+* Change UI: ROC/time-dependent ROC analysis.
+
 ## Bug fixes
 
 * Encoding error when `csv` file upload.
@@ -26,7 +30,7 @@
 
 ## Update: Propensity score analysis
 
-* Add scatterplot, ROC/time-dependent ROD analysis.
+* Add scatterplot, ROC/time-dependent ROC analysis.
 
 ## Bug fixes: repeated measure analysis 
 
