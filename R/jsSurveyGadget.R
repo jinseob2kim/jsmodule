@@ -535,8 +535,6 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
   data.example <- utils::data("nhanes", package = "survey")
   options(shiny.maxRequestSize = max.filesize * 1024^2, survey.lonely.psu = "certainty")
-  requireNamespace("survival")
-  requireNamespace("survC1")
 
   ui <- navbarPage("Survey data analysis",
                    tabPanel("Data",

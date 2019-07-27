@@ -442,8 +442,6 @@ jsBasicAddin <- function(){
 jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
   options(shiny.maxRequestSize = max.filesize * 1024^2)
-  requireNamespace("survival")
-  requireNamespace("survC1")
 
   ui <- navbarPage("Basic statistics",
                    tabPanel("Data",

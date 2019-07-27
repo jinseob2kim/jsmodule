@@ -856,8 +856,6 @@ jsPropensityAddin <- function(){
 jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
   options(shiny.maxRequestSize = max.filesize * 1024^2)
-  requireNamespace("survival")
-  requireNamespace("survC1")
 
   ui <- navbarPage("Propensity score analysis",
                    tabPanel("Data",
