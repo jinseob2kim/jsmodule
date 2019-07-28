@@ -45,7 +45,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 
 
   ui <- navbarPage("Basic statistics",
-                   tabPanel("Data",
+                   tabPanel("Data", icon = icon("table"),
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("factor"),
@@ -61,7 +61,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                               )
                             )
                    ),
-                   tabPanel("Table 1",
+                   tabPanel("Table 1", icon = icon("percentage"),
                             sidebarLayout(
                               sidebarPanel(
                                 tb1moduleUI("tb1")
@@ -77,7 +77,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                             )
 
                    ),
-                   navbarMenu("Regression",
+                   navbarMenu("Regression", icon = icon("list-alt"),
                               tabPanel("Linear regression",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -112,7 +112,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                               )
 
                    ),
-                   navbarMenu("Plot",
+                   navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Scatter plot",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -138,7 +138,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                               )
 
                    ),
-                   navbarMenu("ROC analysis",
+                   navbarMenu("ROC analysis", icon = icon("check"),
                               tabPanel("ROC",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -444,7 +444,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
   options(shiny.maxRequestSize = max.filesize * 1024^2)
 
   ui <- navbarPage("Basic statistics",
-                   tabPanel("Data",
+                   tabPanel("Data", icon = icon("table"),
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("import"),
@@ -460,7 +460,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
                             )
                    ),
-                   tabPanel("Table 1",
+                   tabPanel("Table 1", icon = icon("percentage"),
                             sidebarLayout(
                               sidebarPanel(
                                 tb1moduleUI("tb1")
@@ -476,7 +476,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                             )
 
                    ),
-                   navbarMenu("Regression",
+                   navbarMenu("Regression", icon = icon("list-alt"),
                               tabPanel("Linear regression",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -511,7 +511,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
 
                    ),
-                   navbarMenu("Plot",
+                   navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Scatter plot",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -537,7 +537,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
 
                    ),
-                   navbarMenu("ROC analysis",
+                   navbarMenu("ROC analysis", icon = icon("check"),
                               tabPanel("ROC",
                                        sidebarLayout(
                                          sidebarPanel(

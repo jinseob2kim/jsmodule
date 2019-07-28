@@ -4,7 +4,7 @@ options(shiny.sanitize.errors = F)
 
 
 ui <- navbarPage("Basic statistics",
-                 tabPanel("Data",
+                 tabPanel("Data", icon = icon("table"),
                           sidebarLayout(
                             sidebarPanel(
                               uiOutput("factor"),
@@ -20,7 +20,7 @@ ui <- navbarPage("Basic statistics",
                             )
                           )
                  ),
-                 tabPanel("Table 1",
+                 tabPanel("Table 1", icon = icon("percentage"),
                           sidebarLayout(
                             sidebarPanel(
                               tb1moduleUI("tb1")
@@ -36,7 +36,7 @@ ui <- navbarPage("Basic statistics",
                           )
 
                  ),
-                 navbarMenu("Regression",
+                 navbarMenu("Regression", icon = icon("list-alt"),
                             tabPanel("Linear regression",
                                      sidebarLayout(
                                        sidebarPanel(
@@ -71,7 +71,7 @@ ui <- navbarPage("Basic statistics",
                             )
 
                  ),
-                 navbarMenu("Plot",
+                 navbarMenu("Plot", icon = icon("bar-chart-o"),
                             tabPanel("Scatter plot",
                                      sidebarLayout(
                                        sidebarPanel(

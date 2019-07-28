@@ -44,7 +44,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
 
 
   ui <- navbarPage("Survey data analysis",
-                   tabPanel("Data",
+                   tabPanel("Data", icon = icon("table"),
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("factor"),
@@ -61,7 +61,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
                               )
                             )
                    ),
-                   tabPanel("Table 1",
+                   tabPanel("Table 1", icon = icon("percentage"),
                             sidebarLayout(
                               sidebarPanel(
                                 tb1moduleUI("tb1")
@@ -89,7 +89,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
                               )
                             )
                    ),
-                   navbarMenu("Survey regression",
+                   navbarMenu("Survey regression", icon = icon("list-alt"),
                               tabPanel("Linear",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -122,33 +122,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
                               )
 
                    ),
-                   navbarMenu("ROC analysis",
-                              tabPanel("ROC",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           rocUI("roc")
-                                         ),
-                                         mainPanel(
-                                           withLoader(plotOutput("plot_roc"), type="html", loader="loader6"),
-                                           ggplotdownUI("roc"),
-                                           withLoader(DTOutput("table_roc"), type="html", loader="loader6")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Time-dependent ROC",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           timerocUI("timeroc")
-                                         ),
-                                         mainPanel(
-                                           withLoader(plotOutput("plot_timeroc"), type="html", loader="loader6"),
-                                           ggplotdownUI("timeroc"),
-                                           withLoader(DTOutput("table_timeroc"), type="html", loader="loader6")
-                                         )
-                                       )
-                              )
-                   ),
-                   navbarMenu("Plot",
+                   navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Scatter plot",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -173,6 +147,32 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
                                        )
                               )
 
+                   ),
+                   navbarMenu("ROC analysis", icon = icon("check"),
+                              tabPanel("ROC",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           rocUI("roc")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("plot_roc"), type="html", loader="loader6"),
+                                           ggplotdownUI("roc"),
+                                           withLoader(DTOutput("table_roc"), type="html", loader="loader6")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Time-dependent ROC",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           timerocUI("timeroc")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("plot_timeroc"), type="html", loader="loader6"),
+                                           ggplotdownUI("timeroc"),
+                                           withLoader(DTOutput("table_timeroc"), type="html", loader="loader6")
+                                         )
+                                       )
+                              )
                    )
   )
 
@@ -537,7 +537,7 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
   options(shiny.maxRequestSize = max.filesize * 1024^2, survey.lonely.psu = "certainty")
 
   ui <- navbarPage("Survey data analysis",
-                   tabPanel("Data",
+                   tabPanel("Data", icon = icon("table"),
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("import"),
@@ -553,7 +553,7 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
                             )
                    ),
-                   tabPanel("Table 1",
+                   tabPanel("Table 1", icon = icon("percentage"),
                             sidebarLayout(
                               sidebarPanel(
                                 tb1moduleUI("tb1")
@@ -581,7 +581,7 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
                             )
                    ),
-                   navbarMenu("Survey regression",
+                   navbarMenu("Survey regression", icon = icon("list-alt"),
                               tabPanel("Linear",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -614,7 +614,7 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
 
                    ),
-                   navbarMenu("Plot",
+                   navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Scatter plot",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -640,7 +640,7 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
 
                    ),
-                   navbarMenu("ROC analysis",
+                   navbarMenu("ROC analysis", icon = icon("check"),
                               tabPanel("ROC",
                                        sidebarLayout(
                                          sidebarPanel(

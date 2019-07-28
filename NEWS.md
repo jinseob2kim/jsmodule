@@ -4,6 +4,10 @@
 
 * Change UI: ROC/time-dependent ROC analysis.
 
+* Choose cut-off value in **kaplan-meier analysis with continuous independent variable**.
+
+* Add some icons.
+
 ## Bug fixes
 
 * Encoding error when `csv` file upload.

@@ -45,7 +45,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
 
 
   ui <- navbarPage("Repeated measure analysis",
-                   tabPanel("Data",
+                   tabPanel("Data", icon = icon("table"),
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("factor"),
@@ -62,7 +62,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                               )
                             )
                    ),
-                   tabPanel("Table 1",
+                   tabPanel("Table 1", icon = icon("percentage"),
                             sidebarLayout(
                               sidebarPanel(
                                 tb1moduleUI("tb1")
@@ -78,7 +78,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                             )
 
                    ),
-                   navbarMenu("GEE",
+                   navbarMenu("GEE", icon = icon("list-alt"),
                               tabPanel("Linear",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -111,7 +111,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                               )
 
                    ),
-                   navbarMenu("Plot",
+                   navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Scatter plot",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -137,7 +137,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                               )
 
                    ),
-                   navbarMenu("ROC analysis",
+                   navbarMenu("ROC analysis", icon = icon("check"),
                               tabPanel("ROC",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -282,7 +282,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
 
 
 
-    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, showAllLevels = T, nfactor.limit = nfactor.limit)
+    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, showAllLevels = T)
 
     output$table1 <- renderDT({
       tb = out_tb1()$table
@@ -300,7 +300,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
       return(out.tb1)
     })
 
-    out_linear <- callModule(GEEModuleLinear, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, id.gee = id.gee, nfactor.limit = nfactor.limit)
+    out_linear <- callModule(GEEModuleLinear, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, id.gee = id.gee)
 
     output$lineartable <- renderDT({
       hide = which(colnames(out_linear()$table) == "sig")
@@ -313,7 +313,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
 
-    out_logistic <- callModule(GEEModuleLogistic, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, id.gee = id.gee, nfactor.limit = nfactor.limit)
+    out_logistic <- callModule(GEEModuleLogistic, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, id.gee = id.gee)
 
     output$logistictable <- renderDT({
       hide = which(colnames(out_logistic()$table) == "sig")
@@ -326,7 +326,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
 
-    out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, default.unires = T, id.cluster = id.gee, nfactor.limit = nfactor.limit)
+    out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, default.unires = T, id.cluster = id.gee)
 
     output$coxtable <- renderDT({
       hide = which(colnames(out_cox()$table) == c("sig"))
@@ -345,7 +345,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
       print(out_ggpairs())
     })
 
-    out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, nfactor.limit = nfactor.limit, data_varStruct = NULL, id.cluster = id.gee, nfactor.limit = nfactor.limit)
+    out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, nfactor.limit = nfactor.limit, data_varStruct = NULL, id.cluster = id.gee)
 
     output$kaplan_plot <- renderPlot({
       print(out_kaplan())
@@ -441,7 +441,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
   options(shiny.maxRequestSize = max.filesize * 1024^2)
 
   ui <- navbarPage("Repeated measure analysis",
-                   tabPanel("Data",
+                   tabPanel("Data", icon = icon("table"),
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("import"),
@@ -457,7 +457,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
                             )
                    ),
-                   tabPanel("Table 1",
+                   tabPanel("Table 1", icon = icon("percentage"),
                             sidebarLayout(
                               sidebarPanel(
                                 tb1moduleUI("tb1")
@@ -473,7 +473,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                             )
 
                    ),
-                   navbarMenu("GEE",
+                   navbarMenu("GEE", icon = icon("list-alt"),
                               tabPanel("Linear",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -506,7 +506,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
 
                    ),
-                   navbarMenu("Plot",
+                   navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Scatter plot",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -532,7 +532,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
 
                    ),
-                   navbarMenu("ROC analysis",
+                   navbarMenu("ROC analysis", icon = icon("check"),
                               tabPanel("ROC",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -660,7 +660,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
       )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
 
-    out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL)
+    out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$ggpairs_plot <- renderPlot({
       print(out_ggpairs())

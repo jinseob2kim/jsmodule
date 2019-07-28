@@ -69,7 +69,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
 
   ui <- navbarPage("Propensity score analysis",
-                   tabPanel("Data",
+                   tabPanel("Data", icon = icon("table"),
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("factor"),
@@ -91,7 +91,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                               )
                             )
                    ),
-                   tabPanel("Table 1",
+                   tabPanel("Table 1", icon = icon("percentage"),
                             sidebarLayout(
                               sidebarPanel(
                                 tb1moduleUI("tb1")
@@ -126,7 +126,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                               )
                             )
                    ),
-                   navbarMenu("Regression",
+                   navbarMenu("Regression", icon = icon("list-alt"),
                               tabPanel("Linear regression",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -194,7 +194,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                               )
 
                    ),
-                   navbarMenu("Plot",
+                   navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Scatter plot",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -238,7 +238,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                                        )
                               )
                    ),
-                   navbarMenu("ROC analysis",
+                   navbarMenu("ROC analysis", icon = icon("check"),
                               tabPanel("ROC",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -858,7 +858,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
   options(shiny.maxRequestSize = max.filesize * 1024^2)
 
   ui <- navbarPage("Propensity score analysis",
-                   tabPanel("Data",
+                   tabPanel("Data", icon = icon("table"),
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("import"),
@@ -874,7 +874,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
                             )
                    ),
-                   tabPanel("Table 1",
+                   tabPanel("Table 1", icon = icon("percentage"),
                             sidebarLayout(
                               sidebarPanel(
                                 tb1moduleUI("tb1")
@@ -909,7 +909,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
                             )
                    ),
-                   navbarMenu("Regression",
+                   navbarMenu("Regression", icon = icon("list-alt"),
                               tabPanel("Linear regression",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -977,7 +977,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
 
                    ),
-                   navbarMenu("Plot",
+                   navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Scatter plot",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -1021,7 +1021,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                        )
                               )
                    ),
-                   navbarMenu("ROC analysis",
+                   navbarMenu("ROC analysis", icon = icon("check"),
                               tabPanel("ROC",
                                        sidebarLayout(
                                          sidebarPanel(
