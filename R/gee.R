@@ -207,8 +207,8 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
       )
 
       tagList(
-        selectInput(session$ns("subvar_regress"), "Sub-group variable",
-                    choices = var_subgroup_list, multiple = F,
+        selectInput(session$ns("subvar_regress"), "Sub-group variables",
+                    choices = var_subgroup_list, multiple = T,
                     selected = var_subgroup[1])
       )
 
@@ -216,18 +216,24 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 
     output$regressUI_subval <- renderUI({
       req(input$regressUI_subcheck == T)
-      req(input$subvar_regress)
+      req(length(input$subvar_regress) > 0)
 
-      if (input$subvar_regress %in% vlist()$factor_vars){
-        selectInput(session$ns("subval_regress"), "Sub-group value",
-                    choices = data_label()[variable == input$subvar_regress, level], multiple = T,
-                    selected = data_label()[variable == input$subvar_regress, level][1])
-      } else{
-        val <- stats::quantile(data()[[input$subvar_regress]], na.rm = T)
-        sliderInput(session$ns("subval_regress"), "Sub-group range",
-                    min = val[1], max = val[5],
-                    value = c(val[2], val[4]))
+      outUI <- tagList()
+
+      for (v in seq_along(input$subvar_regress)){
+        if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+          outUI[[v]] <- selectInput(session$ns(paste0("subval_regress", v)), paste0("Sub-group value: ", input$subvar_regress[[v]]),
+                                    choices = data_label()[variable == input$subvar_regress[[v]], level], multiple = T,
+                                    selected = data_label()[variable == input$subvar_regress[[v]], level][1])
+        } else{
+          val <- stats::quantile(data()[[input$subvar_regress[[v]]]], na.rm = T)
+          outUI[[v]] <- sliderInput(session$ns(paste0("subval_regress", v)), paste0("Sub-group range: ", input$subvar_regress[[v]]),
+                                    min = val[1], max = val[5],
+                                    value = c(val[2], val[4]))
+        }
+
       }
+      outUI
 
     })
 
@@ -243,11 +249,17 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
     label.regress <- data_label()
     idgee_Plz_Noduplicate <- id.gee()
     if(input$regressUI_subcheck == T){
-      req(input$subvar_regress)
-      if (input$subvar_regress %in% vlist()$factor_vars){
-        data.regress <- data.regress[get(input$subvar_regress) %in% input$subval_regress]
-      } else{
-        data.regress <- data.regress[get(input$subvar_regress) >= input$subval_regress[1] & get(input$subvar_regress) <= input$subval_regress[2]]
+      validate(
+        need(length(input$subvar_regress) > 0 , "No variables for subsetting"),
+        need(all(sapply(1:length(input$subvar_regress), function(x){length(input[[paste0("subval_regress", x)]])})), "No value for subsetting")
+      )
+
+      for (v in seq_along(input$subvar_regress)){
+        if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+          data.regress <- data.regress[get(input$subvar_regress[[v]]) %in% input[[paste0("subval_regress", v)]]]
+        } else{
+          data.regress <- data.regress[get(input$subvar_regress[[v]]) >= input[[paste0("subval_regress", v)]][1] & get(input$subvar_regress[[v]]) <= input[[paste0("subval_regress", v)]][2]]
+        }
       }
       data.regress[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
       label.regress2 <- mk.lev(data.regress)[, c("variable", "class", "level")]
@@ -280,10 +292,12 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
     cap.gee <- ltb.gee$caption
 
     if(input$regressUI_subcheck == T){
-      if (input$subvar_regress %in% vlist()$factor_vars){
-        cap.gee <- paste(cap.gee, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(label.regress[variable == input$subvar_regress & level %in% input$subval_regress, val_label], collapse = ", "), sep = "")
-      } else{
-        cap.gee <- paste(cap.gee, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(input$subval_regress, collapse = "~"), sep = "")
+      for (v in seq_along(input$subvar_regress)){
+        if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+          cap.gee <- paste(cap.gee, ", ", label.regress[variable == input$subvar_regress[[v]], var_label][1], ": ", paste(label.regress[variable == input$subvar_regress[[v]] & level %in% input[[paste0("subval_regress", v)]], val_label], collapse = ", "), sep = "")
+        } else{
+          cap.gee <- paste(cap.gee, ", ", label.regress[variable == input$subvar_regress[[v]], var_label][1], ": ", paste(input[[paste0("subval_regress", v)]], collapse = "~"), sep = "")
+        }
       }
     }
     sig <- ifelse(out.tb[, ncol(out.tb)] == "< 0.001", "**", ifelse(as.numeric(out.tb[, ncol(out.tb)]) <= 0.05, "**", NA))
@@ -449,26 +463,32 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
       )
 
       tagList(
-        selectInput(session$ns("subvar_regress"), "Sub-group variable",
-                    choices = var_subgroup_list, multiple = F,
+        selectInput(session$ns("subvar_regress"), "Sub-group variables",
+                    choices = var_subgroup_list, multiple = T,
                     selected = var_subgroup[1])
       )
     })
 
     output$regressUI_subval <- renderUI({
       req(input$regressUI_subcheck == T)
-      req(input$subvar_regress)
+      req(length(input$subvar_regress) > 0)
 
-      if (input$subvar_regress %in% vlist()$factor_vars){
-        selectInput(session$ns("subval_regress"), "Sub-group value",
-                    choices = data_label()[variable == input$subvar_regress, level], multiple = T,
-                    selected = data_label()[variable == input$subvar_regress, level][1])
-      } else{
-        val <- stats::quantile(data()[[input$subvar_regress]], na.rm = T)
-        sliderInput(session$ns("subval_regress"), "Sub-group range",
-                    min = val[1], max = val[5],
-                    value = c(val[2], val[4]))
+      outUI <- tagList()
+
+      for (v in seq_along(input$subvar_regress)){
+        if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+          outUI[[v]] <- selectInput(session$ns(paste0("subval_regress", v)), paste0("Sub-group value: ", input$subvar_regress[[v]]),
+                                    choices = data_label()[variable == input$subvar_regress[[v]], level], multiple = T,
+                                    selected = data_label()[variable == input$subvar_regress[[v]], level][1])
+        } else{
+          val <- stats::quantile(data()[[input$subvar_regress[[v]]]], na.rm = T)
+          outUI[[v]] <- sliderInput(session$ns(paste0("subval_regress", v)), paste0("Sub-group range: ", input$subvar_regress[[v]]),
+                                    min = val[1], max = val[5],
+                                    value = c(val[2], val[4]))
+        }
+
       }
+      outUI
     })
 
   })
@@ -485,11 +505,17 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
     label.regress <- data_label()
     idgee_Plz_Noduplicate <- id.gee()
     if(input$regressUI_subcheck == T){
-      req(input$subvar_regress)
-      if (input$subvar_regress %in% vlist()$factor_vars){
-        data.logistic <- data.logistic[get(input$subvar_regress) %in% input$subval_regress]
-      } else{
-        data.logistic <- data.logistic[get(input$subvar_regress) >= input$subval_regress[1] & get(input$subvar_regress) <= input$subval_regress[2]]
+      validate(
+        need(length(input$subvar_regress) > 0 , "No variables for subsetting"),
+        need(all(sapply(1:length(input$subvar_regress), function(x){length(input[[paste0("subval_regress", x)]])})), "No value for subsetting")
+      )
+
+      for (v in seq_along(input$subvar_regress)){
+        if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+          data.logistic <- data.logistic[get(input$subvar_regress[[v]]) %in% input[[paste0("subval_regress", v)]]]
+        } else{
+          data.logistic <- data.logistic[get(input$subvar_regress[[v]]) >= input[[paste0("subval_regress", v)]][1] & get(input$subvar_regress[[v]]) <= input[[paste0("subval_regress", v)]][2]]
+        }
       }
       data.logistic[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
       label.regress2 <- mk.lev(data.logistic)[, c("variable", "class", "level")]
@@ -524,10 +550,12 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
     cap.gee <- ltb.gee$caption
 
     if(input$regressUI_subcheck == T){
-      if (input$subvar_regress %in% vlist()$factor_vars){
-        cap.gee <- paste(cap.gee, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(label.regress[variable == input$subvar_regress & level %in% input$subval_regress, val_label], collapse = ", "), sep = "")
-      } else{
-        cap.gee <- paste(cap.gee, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(input$subval_regress, collapse = "~"), sep = "")
+      for (v in seq_along(input$subvar_regress)){
+        if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+          cap.gee <- paste(cap.gee, ", ", label.regress[variable == input$subvar_regress[[v]], var_label][1], ": ", paste(label.regress[variable == input$subvar_regress[[v]] & level %in% input[[paste0("subval_regress", v)]], val_label], collapse = ", "), sep = "")
+        } else{
+          cap.gee <- paste(cap.gee, ", ", label.regress[variable == input$subvar_regress[[v]], var_label][1], ": ", paste(input[[paste0("subval_regress", v)]], collapse = "~"), sep = "")
+        }
       }
     }
     sig <- ifelse(out.tb[, ncol(out.tb)] == "< 0.001", "**", ifelse(as.numeric(out.tb[, ncol(out.tb)]) <= 0.05, "**", NA))

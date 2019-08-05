@@ -239,8 +239,8 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       )
 
       tagList(
-        selectInput(session$ns("subvar_cox"), "Sub-group variable",
-                    choices = var_subgroup_list, multiple = F,
+        selectInput(session$ns("subvar_cox"), "Sub-group variables",
+                    choices = var_subgroup_list, multiple = T,
                     selected = var_subgroup[1])
       )
 
@@ -251,18 +251,24 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
   output$subval <- renderUI({
     req(input$subcheck == T)
-    req(input$subvar_cox)
+    req(length(input$subvar_cox) > 0)
 
-    if (input$subvar_cox %in% vlist()$factor_vars){
-      selectInput(session$ns("subval_cox"), "Sub-group value",
-                  choices = data_label()[variable == input$subvar_cox, level], multiple = T,
-                  selected = data_label()[variable == input$subvar_cox, level][1])
-    } else{
-      val <- stats::quantile(data()[[input$subvar_cox]], na.rm = T)
-      sliderInput(session$ns("subval_cox"), "Sub-group range",
-                  min = val[1], max = val[5],
-                  value = c(val[2], val[4]))
+    outUI <- tagList()
+
+    for (v in seq_along(input$subvar_cox)){
+      if (input$subvar_cox[[v]] %in% vlist()$factor_vars){
+        outUI[[v]] <- selectInput(session$ns(paste0("subval_cox", v)), paste0("Sub-group value: ", input$subvar_cox[[v]]),
+                                  choices = data_label()[variable == input$subvar_cox[[v]], level], multiple = T,
+                                  selected = data_label()[variable == input$subvar_cox[[v]], level][1])
+      } else{
+        val <- stats::quantile(data()[[input$subvar_cox[[v]]]], na.rm = T)
+        outUI[[v]] <- sliderInput(session$ns(paste0("subval_cox", v)), paste0("Sub-group range: ", input$subvar_cox[[v]]),
+                                  min = val[1], max = val[5],
+                                  value = c(val[2], val[4]))
+      }
+
     }
+    outUI
 
   })
 
@@ -287,14 +293,19 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
     label.regress <- data_label()
     if(input$subcheck == T){
-      req(input$subvar_cox)
-      req(input$subval_cox)
+      validate(
+        need(length(input$subvar_cox) > 0 , "No variables for subsetting"),
+        need(all(sapply(1:length(input$subvar_cox), function(x){length(input[[paste0("subval_cox", x)]])})), "No value for subsetting")
+      )
 
-      if (input$subvar_cox %in% vlist()$factor_vars){
-        data.cox <- data.cox[get(input$subvar_cox) %in% input$subval_cox]
-      } else{
-        data.cox <- data.cox[get(input$subvar_cox) >= input$subval_cox[1] & get(input$subvar_cox) <= input$subval_cox[2]]
+      for (v in seq_along(input$subvar_cox)){
+        if (input$subvar_cox[[v]] %in% vlist()$factor_vars){
+          data.cox <- data.cox[get(input$subvar_cox[[v]]) %in% input[[paste0("subval_cox", v)]]]
+        } else{
+          data.cox <- data.cox[get(input$subvar_cox[[v]]) >= input[[paste0("subval_cox", v)]][1] & get(input$subvar_cox[[v]]) <= input[[paste0("subval_cox", v)]][2]]
+        }
       }
+
       data.cox[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
       label.regress2 <- mk.lev(data.cox)[, c("variable", "class", "level")]
       data.table::setkey(data_label(), "variable", "class", "level")
@@ -329,23 +340,32 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       }
 
       if(input$subcheck == T){
-        if (input$subvar_cox %in% vlist()$factor_vars){
-          cap.cox <- paste(cap.cox, " - ", label.regress[variable == input$subvar_cox, var_label][1], ": ", paste(label.regress[variable == input$subvar_cox & level %in% input$subval_cox, val_label], collapse = ", "), sep = "")
-        } else{
-          cap.cox <- paste(cap.cox, " - ", label.regress[variable == input$subvar_cox, var_label][1], ": ", paste(input$subval_cox[1], "~", input$subval_cox[2], sep = ""), sep = "")
+        for (v in seq_along(input$subvar_cox)){
+          if (input$subvar_cox[[v]] %in% vlist()$factor_vars){
+            cap.cox <- paste(cap.cox, ", ", label.regress[variable == input$subvar_cox[[v]], var_label][1], ": ", paste(label.regress[variable == input$subvar_cox[[v]] & level %in% input[[paste0("subval_cox", v)]], val_label], collapse = ", "), sep = "")
+          } else{
+            cap.cox <- paste(cap.cox, ", ", label.regress[variable == input$subvar_cox[[v]], var_label][1], ": ", paste(input[[paste0("subval_cox", v)]], collapse = "~"), sep = "")
+          }
         }
+
       }
     } else{
       data.design <- design.survey()
       data.design$variables[[input$event_cox]] <- as.numeric(as.vector(data.design$variables[[input$event_cox]]))
       if(input$subcheck == T){
-        req(input$subvar_cox)
-        req(input$subval_cox)
-        if (input$subvar_cox %in% vlist()$factor_vars){
-          data.design <- subset(data.design, get(input$subvar_cox) %in% input$subval_cox)
-        } else{
-          data.design <- subset(data.design, get(input$subvar_cox) >= input$subval_cox[1] & get(input$subvar_cox) <= input$subval_cox[2])
+        validate(
+          need(length(input$subvar_cox) > 0 , "No variables for subsetting"),
+          need(all(sapply(1:length(input$subvar_cox), function(x){length(input[[paste0("subval_cox", x)]])})), "No value for subsetting")
+        )
+
+        for (v in seq_along(input$subvar_cox)){
+          if (input$subvar_cox[[v]] %in% vlist()$factor_vars){
+            data.design <- subset(data.design, get(input$subvar_cox[[v]]) %in% input[[paste0("subval_cox", v)]])
+          } else{
+            data.design <- subset(data.design, get(input$subvar_cox[[v]]) >= input[[paste0("subval_cox", v)]][1] & get(input$subvar_cox[[v]]) <= input[[paste0("subval_cox", v)]][2])
+          }
         }
+
         data.design$variables[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
         label.regress2 <- mk.lev(data.design$variables)[, c("variable", "class", "level")]
         data.table::setkey(data_label(), "variable", "class", "level")
@@ -365,10 +385,12 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       out.cox <- cbind(out.cox, sig)
       cap.cox <- paste("Weighted cox's proportional hazard model on time ('", label.regress[variable == input$time_cox, var_label][1] , "') to event ('", label.regress[variable == input$event_cox, var_label][1], "') ", sep="")
       if(input$subcheck == T){
-        if (input$subvar_cox %in% vlist()$factor_vars){
-          cap.cox <- paste(cap.cox, " - ", label.regress[variable == input$subvar_cox, var_label][1], ": ", paste(label.regress[variable == input$subvar_cox & level %in% input$subval_cox, val_label], collapse = ", "), sep = "")
-        } else{
-          cap.cox <- paste(cap.cox, " - ", label.regress[variable == input$subvar_cox, var_label][1], ": ", paste(input$subval_cox[1], "~", input$subval_cox[2], sep = ""), sep = "")
+        for (v in seq_along(input$subvar_cox)){
+          if (input$subvar_cox[[v]] %in% vlist()$factor_vars){
+            cap.cox <- paste(cap.cox, ", ", label.regress[variable == input$subvar_cox[[v]], var_label][1], ": ", paste(label.regress[variable == input$subvar_cox[[v]] & level %in% input[[paste0("subval_cox", v)]], val_label], collapse = ", "), sep = "")
+          } else{
+            cap.cox <- paste(cap.cox, ", ", label.regress[variable == input$subvar_cox[[v]], var_label][1], ": ", paste(input[[paste0("subval_cox", v)]], collapse = "~"), sep = "")
+          }
         }
       }
     }

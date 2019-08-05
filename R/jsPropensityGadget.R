@@ -322,8 +322,8 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
         #)
 
         tagList(
-          selectInput("var_subset", "Subset variable",
-                      choices = names(out), multiple = F,
+          selectInput("var_subset", "Subset variables",
+                      choices = names(out), multiple = T,
                       selected = names(out)[1])
         )
       })
@@ -333,17 +333,23 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
         req(input$var_subset)
         var.factor <- c(factor_original, input$factor_vname)
 
-        if (input$var_subset %in% var.factor){
-          varlevel <- levels(as.factor(out[[input$var_subset]]))
-          selectInput("val_subset", "Subset value",
-                      choices = varlevel, multiple = T,
-                      selected = varlevel[1])
-        } else{
-          val <- stats::quantile(out[[input$var_subset]], na.rm = T)
-          sliderInput("val_subset", "Subset range",
-                      min = val[1], max = val[5],
-                      value = c(val[2], val[4]))
+        outUI <- tagList()
+
+        for (v in seq_along(input$var_subset)){
+          if (input$var_subset[[v]] %in% var.factor){
+            varlevel <- levels(as.factor(out[[input$var_subset[[v]]]]))
+            outUI[[v]] <- selectInput(session$ns(paste0("val_subset", v)), paste0("Subset value: ", input$var_subset[[v]]),
+                                      choices = varlevel, multiple = T,
+                                      selected = varlevel[1])
+          } else{
+            val <- stats::quantile(out[[input$var_subset[[v]]]], na.rm = T)
+            outUI[[v]] <- sliderInput(session$ns(paste0("val_subset", v)), paste0("Subset range: ", input$var_subset[[v]]),
+                                      min = val[1], max = val[5],
+                                      value = c(val[2], val[4]))
+          }
+
         }
+        outUI
       })
     })
 
@@ -366,27 +372,31 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
       if (!is.null(input$check_subset)){
         if (input$check_subset){
           validate(
-            need(length(input$var_subset) > 0 , "No variable for subsetting")
+            need(length(input$var_subset) > 0 , "No variable for subsetting"),
+            need(all(sapply(1:length(input$var_subset), function(x){length(input[[paste0("val_subset", x)]])})), "No value for subsetting")
+
           )
           var.factor <- c(factor_original, input$factor_vname)
 
-          if (input$var_subset %in% var.factor){
-            out1 <- out1[get(input$var_subset) %in% input$val_subset]
-            #var.factor <- c(data()$factor_original, input$factor_vname)
-            out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
-            out.label2 <- mk.lev(out1)[, c("variable", "class", "level")]
-            data.table::setkey(out.label, "variable", "class", "level")
-            data.table::setkey(out.label2, "variable", "class", "level")
-            out.label <- out.label[out.label2]
+          for (v in seq_along(input$var_subset)){
+            if (input$var_subset[[v]] %in% var.factor){
+              out1 <- out1[get(input$var_subset[[v]]) %in% input[[paste0("val_subset", v)]]]
+              #var.factor <- c(data()$factor_original, input$factor_vname)
+              out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+              out.label2 <- mk.lev(out1)[, c("variable", "class", "level")]
+              data.table::setkey(out.label, "variable", "class", "level")
+              data.table::setkey(out.label2, "variable", "class", "level")
+              out.label <- out.label[out.label2]
 
-          } else{
-            out1 <- out1[get(input$var_subset) >= input$val_subset[1] & get(input$var_subset) <= input$val_subset[2]]
-            #var.factor <- c(data()$factor_original, input$factor_vname)
-            out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
-            out.label2 <- mk.lev(out1)[, c("variable", "class", "level")]
-            data.table::setkey(out.label, "variable", "class", "level")
-            data.table::setkey(out.label2, "variable", "class", "level")
-            out.label <- out.label[out.label2]
+            } else{
+              out1 <- out1[get(input$var_subset[[v]]) >= input[[paste0("val_subset", v)]][1] & get(input$var_subset[[v]]) <= input[[paste0("val_subset", v)]][2]]
+              #var.factor <- c(data()$factor_original, input$factor_vname)
+              out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
+              out.label2 <- mk.lev(out1)[, c("variable", "class", "level")]
+              data.table::setkey(out.label, "variable", "class", "level")
+              data.table::setkey(out.label2, "variable", "class", "level")
+              out.label <- out.label[out.label2]
+            }
           }
 
         }

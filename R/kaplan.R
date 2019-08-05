@@ -362,8 +362,8 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       )
 
       tagList(
-        selectInput(session$ns("subvar_km"), "Sub-group variable",
-                    choices = var_subgroup_list, multiple = F,
+        selectInput(session$ns("subvar_km"), "Sub-group variables",
+                    choices = var_subgroup_list, multiple = T,
                     selected = var_subgroup[1])
       )
 
@@ -375,18 +375,24 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
   output$subval <- renderUI({
     req(input$subcheck == T)
-    req(input$subvar_km)
+    req(length(input$subvar_km) > 0)
 
-    if (input$subvar_km %in% vlist()$factor_vars){
-      selectInput(session$ns("subval_km"), "Sub-group value",
-                  choices = data_label()[variable == input$subvar_km, level], multiple = T,
-                  selected = data_label()[variable == input$subvar_km, level][1])
-    } else{
-      val <- stats::quantile(data()[[input$subvar_km]], na.rm = T)
-      sliderInput(session$ns("subval_km"), "Sub-group range",
-                  min = val[1], max = val[5],
-                  value = c(val[2], val[4]))
+    outUI <- tagList()
+
+    for (v in seq_along(input$subvar_km)){
+      if (input$subvar_km[[v]] %in% vlist()$factor_vars){
+        outUI[[v]] <- selectInput(session$ns(paste0("subval_km", v)), paste0("Sub-group value: ", input$subvar_km[[v]]),
+                                  choices = data_label()[variable == input$subvar_km[[v]], level], multiple = T,
+                                  selected = data_label()[variable == input$subvar_km[[v]], level][1])
+      } else{
+        val <- stats::quantile(data()[[input$subvar_km[[v]]]], na.rm = T)
+        outUI[[v]] <- sliderInput(session$ns(paste0("subval_km", v)), paste0("Sub-group range: ", input$subvar_km[[v]]),
+                                  min = val[1], max = val[5],
+                                  value = c(val[2], val[4]))
+      }
+
     }
+    outUI
 
   })
 
@@ -418,13 +424,19 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     label.regress <- data_label()
     data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
     if(input$subcheck == T){
-      req(input$subvar_km)
-      req(input$subval_km)
-      if (input$subvar_km %in% vlist()$factor_vars){
-        data.km <- data.km[get(input$subvar_km) %in% input$subval_km]
-      } else{
-        data.km <- data.km[get(input$subvar_km) >= input$subval_km[1] & get(input$subvar_km) <= input$subval_km[2]]
+      validate(
+        need(length(input$subvar_km) > 0 , "No variables for subsetting"),
+        need(all(sapply(1:length(input$subvar_km), function(x){length(input[[paste0("subval_km", x)]])})), "No value for subsetting")
+      )
+
+      for (v in seq_along(input$subvar_km)){
+        if (input$subvar_km[[v]] %in% vlist()$factor_vars){
+          data.km <- data.km[get(input$subvar_km[[v]]) %in% input[[paste0("subval_km", v)]]]
+        } else{
+          data.km <- data.km[get(input$subvar_km[[v]]) >= input[[paste0("subval_km", v)]][1] & get(input$subvar_km[[v]]) <= input[[paste0("subval_km", v)]][2]]
+        }
       }
+
       data.km[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
       label.regress2 <- mk.lev(data.km)[, c("variable", "class", "level")]
       data.table::setkey(data_label(), "variable", "class", "level")
@@ -464,14 +476,20 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       label.regress <- data_label()
       data.design$variables[[input$event_km]] <- as.numeric(as.vector(data.design$variables[[input$event_km]]))
       if(input$subcheck == T){
-        req(input$subvar_km)
-        req(input$subval_km)
+        validate(
+          need(length(input$subvar_km) > 0 , "No variables for subsetting"),
+          need(all(sapply(1:length(input$subvar_km), function(x){length(input[[paste0("subval_km", x)]])})), "No value for subsetting")
+        )
 
-        if (input$subvar_km %in% vlist()$factor_vars){
-          data.design <- subset(data.design, get(input$subvar_km) %in% input$subval_km)
-        } else{
-          data.design <- subset(data.design, get(input$subvar_km) >= input$subval_km[1] & get(input$subvar_km) <= input$subval_km[2])
+        for (v in seq_along(input$subvar_km)){
+          if (input$subvar_km[[v]] %in% vlist()$factor_vars){
+            data.design <- subset(data.design, get(input$subvar_km[[v]]) %in% input[[paste0("subval_km", v)]])
+          } else{
+            data.design <- subset(data.design, get(input$subvar_km[[v]]) >= input[[paste0("subval_km", v)]][1] & get(input$subvar_km[[v]]) <= input[[paste0("subval_km", v)]][2])
+          }
         }
+
+
         data.design$variables[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
         label.regress2 <- mk.lev(data.design$variables)[, c("variable", "class", "level")]
         data.table::setkey(data_label(), "variable", "class", "level")

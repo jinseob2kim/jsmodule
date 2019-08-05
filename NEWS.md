@@ -8,6 +8,8 @@
 
 * Add some icons.
 
+* Choose **multiple conditions when subsetting data**.  
+
 ## Bug fixes
 
 * Encoding error when `csv` file upload.

@@ -505,26 +505,32 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
       )
 
       tagList(
-        selectInput(session$ns("subvar_regress"), "Sub-group variable",
-                    choices = var_subgroup_list, multiple = F,
+        selectInput(session$ns("subvar_regress"), "Sub-group variables",
+                    choices = var_subgroup_list, multiple = T,
                     selected = var_subgroup[1])
       )
     })
 
     output$regressUI_subval <- renderUI({
       req(input$regressUI_subcheck == T)
-      req(input$subvar_regress)
+      req(length(input$subvar_regress) > 0)
 
-      if (input$subvar_regress %in% vlist()$factor_vars){
-        selectInput(session$ns("subval_regress"), "Sub-group value",
-                    choices = data_label()[variable == input$subvar_regress, level], multiple = T,
-                    selected = data_label()[variable == input$subvar_regress, level][1])
-      } else{
-        val <- stats::quantile(data()[[input$subvar_regress]], na.rm = T)
-        sliderInput(session$ns("subval_regress"), "Sub-group range",
-                    min = val[1], max = val[5],
-                    value = c(val[2], val[4]))
+      outUI <- tagList()
+
+      for (v in seq_along(input$subvar_regress)){
+        if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+          outUI[[v]] <- selectInput(session$ns(paste0("subval_regress", v)), paste0("Sub-group value: ", input$subvar_regress[[v]]),
+                                    choices = data_label()[variable == input$subvar_regress[[v]], level], multiple = T,
+                                    selected = data_label()[variable == input$subvar_regress[[v]], level][1])
+        } else{
+          val <- stats::quantile(data()[[input$subvar_regress[[v]]]], na.rm = T)
+          outUI[[v]] <- sliderInput(session$ns(paste0("subval_regress", v)), paste0("Sub-group range: ", input$subvar_regress[[v]]),
+                                    min = val[1], max = val[5],
+                                    value = c(val[2], val[4]))
+        }
+
       }
+      outUI
 
     })
 
@@ -546,12 +552,19 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
       data.regress <- data()
       label.regress <- data_label()
       if(input$regressUI_subcheck == T){
-        req(input$subvar_regress)
-        if (input$subvar_regress %in% vlist()$factor_vars){
-          data.regress <- data.regress[get(input$subvar_regress) %in% input$subval_regress]
-        } else{
-          data.regress <- data.regress[get(input$subvar_regress) >= input$subval_regress[1] & get(input$subvar_regress) <= input$subval_regress[2]]
+        validate(
+          need(length(input$subvar_regress) > 0 , "No variables for subsetting"),
+          need(all(sapply(1:length(input$subvar_regress), function(x){length(input[[paste0("subval_regress", x)]])})), "No value for subsetting")
+        )
+
+        for (v in seq_along(input$subvar_regress)){
+          if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+            data.regress <- data.regress[get(input$subvar_regress[[v]]) %in% input[[paste0("subval_regress", v)]]]
+          } else{
+            data.regress <- data.regress[get(input$subvar_regress[[v]]) >= input[[paste0("subval_regress", v)]][1] & get(input$subvar_regress[[v]]) <= input[[paste0("subval_regress", v)]][2]]
+          }
         }
+
         data.regress[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
         label.regress2 <- mk.lev(data.regress)[, c("variable", "class", "level")]
         data.table::setkey(data_label(), "variable", "class", "level")
@@ -579,10 +592,12 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
       tb.linear <- jstable::glmshow.display(res.linear, decimal = input$decimal)
       cap.linear <- paste("Linear regression predicting ", label.regress[variable == y, var_label][1], sep="")
       if(input$regressUI_subcheck == T){
-        if (input$subvar_regress %in% vlist()$factor_vars){
-          cap.linear <- paste(cap.linear, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(label.regress[variable == input$subvar_regress & level %in% input$subval_regress, val_label], collapse = ", "), sep = "")
-        } else{
-          cap.linear <- paste(cap.linear, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(input$subval_regress, collapse = "~"), sep = "")
+        for (v in seq_along(input$subvar_regress)){
+          if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+            cap.linear <- paste(cap.linear, ", ", label.regress[variable == input$subvar_regress[[v]], var_label][1], ": ", paste(label.regress[variable == input$subvar_regress[[v]] & level %in% input[[paste0("subval_regress", v)]], val_label], collapse = ", "), sep = "")
+          } else{
+            cap.linear <- paste(cap.linear, ", ", label.regress[variable == input$subvar_regress[[v]], var_label][1], ": ", paste(input[[paste0("subval_regress", v)]], collapse = "~"), sep = "")
+          }
         }
       }
       out.linear <- jstable::LabelepiDisplay(tb.linear, label = T, ref = label.regress)
@@ -590,12 +605,18 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
       data.design <- design.survey()
       label.regress <- data_label()
       if(input$regressUI_subcheck == T){
-        req(input$subvar_regress)
-        if (input$subvar_regress %in% vlist()$factor_vars){
-          data.design <- subset(data.design, get(input$subvar_regress) %in% input$subval_regress)
-        } else{
-          data.design <- subset(data.design, get(input$subvar_regress) >= input$subval_regress[1] & get(input$subvar_regress) <= input$subval_regress[2])
+        validate(
+          need(length(input$subvar_regress) > 0 , "No variables for subsetting"),
+          need(all(sapply(1:length(input$subvar_regress), function(x){length(input[[paste0("subval_regress", x)]])})), "No value for subsetting")
+        )
+        for (v in seq_along(input$subvar_regress)){
+          if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+            data.design <- subset(data.design, get(input$subvar_regress[[v]]) %in% input[[paste0("subval_regress", v)]])
+          } else{
+            data.design <- subset(data.design, get(input$subvar_regress[[v]]) >= input[[paste0("subval_regress", v)]][1] & get(input$subvar_regress[[v]]) <= input[[paste0("subval_regress", v)]][2])
+          }
         }
+
         data.design$variables[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
         label.regress2 <- mk.lev(data.design$variables)[, c("variable", "class", "level")]
         data.table::setkey(data_label(), "variable", "class", "level")
@@ -617,12 +638,14 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
       tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
       cap.linear <- paste("Linear regression predicting ", label.regress[variable == y, var_label][1], "- survey data", sep="")
       if(input$regressUI_subcheck == T){
-        if (input$subvar_regress %in% vlist()$factor_vars){
-          cap.linear <- paste(cap.linear, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(label.regress[variable == input$subvar_regress & level %in% input$subval_regress, val_label], collapse = ", "), sep = "")
-          } else {
-          cap.linear <- paste(cap.linear, " - ", label.regress[variable == input$subvar_regress, var_label][1], ": ", paste(input$subval_regress, collapse = "~"), sep = "")
+        for (v in seq_along(input$subvar_regress)){
+          if (input$subvar_regress[[v]] %in% vlist()$factor_vars){
+            cap.linear <- paste(cap.linear, ", ", label.regress[variable == input$subvar_regress[[v]], var_label][1], ": ", paste(label.regress[variable == input$subvar_regress[[v]] & level %in% input[[paste0("subval_regress", v)]], val_label], collapse = ", "), sep = "")
+          } else{
+            cap.linear <- paste(cap.linear, ", ", label.regress[variable == input$subvar_regress[[v]], var_label][1], ": ", paste(input[[paste0("subval_regress", v)]], collapse = "~"), sep = "")
           }
         }
+      }
       out.linear <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = label.regress)
       warn <- NULL
     }
@@ -1038,8 +1061,8 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
       )
 
       tagList(
-        selectInput(session$ns("subvar_logistic"), "Sub-group variable",
-                    choices = var_subgroup_list, multiple = F,
+        selectInput(session$ns("subvar_logistic"), "Sub-group variables",
+                    choices = var_subgroup_list, multiple = T,
                     selected = var_subgroup[1])
       )
 
@@ -1047,18 +1070,24 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
 
     output$regressUI_subval <- renderUI({
       req(input$regressUI_subcheck == T)
-      req(input$subvar_logistic)
+      req(length(input$subvar_logistic) > 0)
 
-      if (input$subvar_logistic %in% vlist()$factor_vars){
-        selectInput(session$ns("subval_logistic"), "Sub-group value",
-                    choices = data_label()[variable == input$subvar_logistic, level], multiple = T,
-                    selected = data_label()[variable == input$subvar_logistic, level][1])
-      } else{
-        val <- stats::quantile(data()[[input$subvar_logistic]], na.rm = T)
-        sliderInput(session$ns("subval_logistic"), "Sub-group range",
-                    min = val[1], max = val[5],
-                    value = c(val[2], val[4]))
+      outUI <- tagList()
+
+      for (v in seq_along(input$subvar_logistic)){
+        if (input$subvar_logistic[[v]] %in% vlist()$factor_vars){
+          outUI[[v]] <- selectInput(session$ns(paste0("subval_logistic", v)), paste0("Sub-group value: ", input$subvar_logistic[[v]]),
+                                    choices = data_label()[variable == input$subvar_logistic[[v]], level], multiple = T,
+                                    selected = data_label()[variable == input$subvar_logistic[[v]], level][1])
+        } else{
+          val <- stats::quantile(data()[[input$subvar_logistic[[v]]]], na.rm = T)
+          outUI[[v]] <- sliderInput(session$ns(paste0("subval_logistic", v)), paste0("Sub-group range: ", input$subvar_logistic[[v]]),
+                                    min = val[1], max = val[5],
+                                    value = c(val[2], val[4]))
+        }
+
       }
+      outUI
 
     })
 
@@ -1071,13 +1100,19 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     data.logistic <- data()
     label.regress <- data_label()
     if(input$regressUI_subcheck == T){
-      req(input$subvar_logistic)
+      validate(
+        need(length(input$subvar_logistic) > 0 , "No variables for subsetting"),
+        need(all(sapply(1:length(input$subvar_logistic), function(x){length(input[[paste0("subval_logistic", x)]])})), "No value for subsetting")
+      )
 
-      if (input$subvar_logistic %in% vlist()$factor_vars){
-        data.logistic <- data.logistic[get(input$subvar_logistic) %in% input$subval_logistic]
-      } else{
-        data.logistic <- data.logistic[get(input$subvar_logistic) >= input$subval_logistic[1] & get(input$subvar_logistic) <= input$subval_logistic[2]]
+      for (v in seq_along(input$subvar_logistic)){
+        if (input$subvar_logistic[[v]] %in% vlist()$factor_vars){
+          data.logistic <- data.logistic[get(input$subvar_logistic[[v]]) %in% input[[paste0("subval_logistic", v)]]]
+        } else{
+          data.logistic <- data.logistic[get(input$subvar_logistic[[v]]) >= input[[paste0("subval_logistic", v)]][1] & get(input$subvar_logistic[[v]]) <= input[[paste0("subval_logistic", v)]][2]]
+        }
       }
+
       data.logistic[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
       label.regress2 <- mk.lev(data.logistic)[, c("variable", "class", "level")]
       data.table::setkey(data_label(), "variable", "class", "level")
@@ -1106,10 +1141,12 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
       tb.logistic = jstable::glmshow.display(res.logistic, decimal = input$decimal)
       cap.logistic = paste("Logistic regression predicting ", label.regress[variable == y, var_label][1], sep="")
       if(input$regressUI_subcheck == T){
-        if (input$subvar_logistic %in% vlist()$factor_vars){
-        cap.logistic <- paste(cap.logistic, " - ", label.regress[variable == input$subvar_logistic, var_label][1], ": ", paste(label.regress[variable == input$subvar_logistic & level %in% input$subval_logistic, val_label], collapse = ", "), sep = "")
-        } else{
-          cap.logistic <- paste(cap.logistic, " - ", label.regress[variable == input$subvar_logistic, var_label][1], ": ", paste(input$subval_logistic[1], "~", input$subval_logistic[2], sep = ""), sep = "")
+        for (v in seq_along(input$subvar_logistic)){
+          if (input$subvar_logistic[[v]] %in% vlist()$factor_vars){
+            cap.logistic <- paste(cap.logistic, ", ", label.regress[variable == input$subvar_logistic[[v]], var_label][1], ": ", paste(label.regress[variable == input$subvar_logistic[[v]] & level %in% input[[paste0("subval_logistic", v)]], val_label], collapse = ", "), sep = "")
+          } else{
+            cap.logistic <- paste(cap.logistic, ", ", label.regress[variable == input$subvar_logistic[[v]], var_label][1], ": ", paste(input[[paste0("subval_logistic", v)]], collapse = "~"), sep = "")
+          }
         }
       }
       out.logistic = jstable::LabelepiDisplay(tb.logistic, label = T, ref = label.regress)
@@ -1122,12 +1159,18 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
       #data.design <- survey::svydesign(ids = ~ 1, data = data.logistic, weights = ~ get(var.weights.survey()))
       data.design <- design.survey()
       if(input$regressUI_subcheck == T){
-        req(input$subvar_logistic)
-        if (input$subvar_logistic %in% vlist()$factor_vars){
-          data.design <- subset(data.design, get(input$subvar_logistic) %in% input$subval_logistic)
-        } else{
-          data.design <- subset(data.design, get(input$subvar_logistic) >= input$subval_logistic[1] & get(input$subvar_logistic) <= input$subval_logistic[2])
+        validate(
+          need(length(input$subvar_logistic) > 0 , "No variables for subsetting"),
+          need(all(sapply(1:length(input$subvar_logistic), function(x){length(input[[paste0("subval_logistic", x)]])})), "No value for subsetting")
+        )
+        for (v in seq_along(input$subvar_logistic)){
+          if (input$subvar_logistic[[v]] %in% vlist()$factor_vars){
+            data.design <- subset(data.design, get(input$subvar_logistic[[v]]) %in% input[[paste0("subval_logistic", v)]])
+          } else{
+            data.design <- subset(data.design, get(input$subvar_logistic[[v]]) >= input[[paste0("subval_logistic", v)]][1] & get(input$subvar_logistic[[v]]) <= input[[paste0("subval_logistic", v)]][2])
+          }
         }
+
         data.design$variables[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
         label.regress2 <- mk.lev(data.design$variables)[, c("variable", "class", "level")]
         data.table::setkey(data_label(), "variable", "class", "level")
@@ -1139,10 +1182,12 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
       tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
       cap.logistic <- paste("Logistic regression predicting ", label.regress[variable == y, var_label][1], "- survey data", sep="")
       if(input$regressUI_subcheck == T){
-        if (input$subvar_logistic %in% vlist()$factor_vars){
-          cap.logistic <- paste(cap.logistic, " - ", label.regress[variable == input$subvar_logistic, var_label][1], ": ", paste(label.regress[variable == input$subvar_logistic & level %in% input$subval_logistic, val_label], collapse = ", "), sep = "")
-        } else{
-          cap.logistic <- paste(cap.logistic, " - ", label.regress[variable == input$subvar_logistic, var_label][1], ": ", paste(input$subval_logistic[1], "~", input$subval_logistic[2], sep = ""), sep = "")
+        for (v in seq_along(input$subvar_logistic)){
+          if (input$subvar_logistic[[v]] %in% vlist()$factor_vars){
+            cap.logistic <- paste(cap.logistic, ", ", label.regress[variable == input$subvar_logistic[[v]], var_label][1], ": ", paste(label.regress[variable == input$subvar_logistic[[v]] & level %in% input[[paste0("subval_logistic", v)]], val_label], collapse = ", "), sep = "")
+          } else{
+            cap.logistic <- paste(cap.logistic, ", ", label.regress[variable == input$subvar_logistic[[v]], var_label][1], ": ", paste(input[[paste0("subval_logistic", v)]], collapse = "~"), sep = "")
+          }
         }
       }
       out.logistic <- jstable::LabelepiDisplay(tb.svyglm, label = T, ref = label.regress)
