@@ -8,7 +8,9 @@
 
 * Add some icons.
 
-* Choose **multiple conditions when subsetting data**.  
+* Choose **multiple conditions when subsetting data**.
+
+* **Make binary variables** from contiuous variables.
 
 ## Bug fixes
 

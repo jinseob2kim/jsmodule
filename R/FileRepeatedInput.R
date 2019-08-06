@@ -43,6 +43,9 @@ FileRepeatedInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dt
     fileInput(ns("file"), label),
     uiOutput(ns("factor")),
     uiOutput(ns("repeated")),
+    uiOutput(ns("binary_check")),
+    uiOutput(ns("binary_var")),
+    uiOutput(ns("binary_val")),
     uiOutput(ns("subset_check")),
     uiOutput(ns("subset_var")),
     uiOutput(ns("subset_val"))
@@ -186,8 +189,42 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
 
 
   observeEvent(c(data()$factor_original, input$factor_vname, input$repeated_vname), {
+    output$binary_check <- renderUI({
+      checkboxInput(session$ns("check_binary"), "Make binary variables")
+    })
+
     output$subset_check <- renderUI({
       checkboxInput(session$ns("check_subset"), "Subset data")
+    })
+  })
+
+  observeEvent(input$check_binary, {
+    var.conti <- setdiff(names(data()$data), c(data()$factor_original, input$factor_vname))
+    output$binary_var <- renderUI({
+      req(input$check_binary == T)
+      selectInput(session$ns("var_binary"), "Variables to dichotomize",
+                  choices = var.conti, multiple = T,
+                  selected = var.conti[1])
+    })
+
+    output$binary_val <- renderUI({
+      req(input$check_binary == T)
+      req(length(input$var_binary) > 0)
+      outUI <- tagList()
+      for (v in seq_along(input$var_binary)){
+        med <- stats::quantile(data()$data[[input$var_binary[[v]]]], c(0.05, 0.5, 0.95), na.rm = T)
+        outUI[[v]] <- splitLayout(cellWidths = c("25%", "75%"),
+                                  selectInput(session$ns(paste0("con_binary", v)), paste0("Define reference:"),
+                                              choices = c("\u2264", "\u2265", "\u003c", "\u003e"), selected = "\u2264"
+                                  ),
+                                  numericInput(session$ns(paste0("cut_binary", v)), input$var_binary[[v]],
+                                               value = med[2], min = med[1], max = med[3]
+                                  )
+        )
+
+      }
+      outUI
+
     })
   })
 
@@ -253,6 +290,39 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
     for (vn in ref[["name.new"]]){
       w <- which(ref[["name.new"]] == vn)
       out.label[variable == vn, var_label := ref[["name.old"]][w]]
+    }
+
+    if (!is.null(input$check_binary)){
+      if (input$check_binary){
+        validate(
+          need(length(input$var_binary) > 0 , "No variables to dichotomize")
+        )
+        sym.ineq <- c("\u2264", "\u2265", "\u003c", "\u003e")
+        names(sym.ineq) <- sym.ineq[4:1]
+        sym.ineq2 <- c("le", "ge", "l", "g")
+        names(sym.ineq2) <- sym.ineq
+        for (v in seq_along(input$var_binary)){
+          req(input[[paste0("con_binary", v)]])
+          if (input[[paste0("con_binary", v)]] == "\u2264"){
+            out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) <= input[[paste0("cut_binary", v)]]))]
+
+          } else if (input[[paste0("con_binary", v)]] == "\u2265"){
+            out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) >= input[[paste0("cut_binary", v)]]))]
+          } else if (input[[paste0("con_binary", v)]] == "\u003c"){
+            out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) < input[[paste0("cut_binary", v)]]))]
+          } else{
+            out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) > input[[paste0("cut_binary", v)]]))]
+          }
+
+          cn.new <- paste0(input$var_binary[[v]], "_group_", sym.ineq2[input[[paste0("con_binary", v)]]], input[[paste0("cut_binary", v)]])
+          setnames(out, "BinaryGroupRandom", cn.new)
+
+          label.binary <- mk.lev(out[, .SD, .SDcols = cn.new])
+          label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
+          out.label <- rbind(out.label, label.binary)
+        }
+
+      }
     }
 
     if (!is.null(input$check_subset)){
