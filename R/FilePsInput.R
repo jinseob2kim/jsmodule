@@ -351,7 +351,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
 
           label.binary <- mk.lev(out[, .SD, .SDcols = cn.new])
           label.binary[, var_label := paste0(input$var_binary[[v]], " _group")]
-          #label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
+          label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
           out.label <- rbind(out.label, label.binary)
         }
 
