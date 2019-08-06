@@ -103,7 +103,7 @@ FileSurveyInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)
 FileSurvey <- function(input, output, session, nfactor.limit = 20) {
 
   ## To remove NOTE.
-  variable <- NULL
+  val_label <- BinaryGroupRandom <- variable <- NULL
 
   # The selected file, if any
   userFile <- eventReactive(input$file, {
@@ -155,7 +155,7 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
     out <- data.table::data.table(out, check.names = T)
     name.new <- names(out)
     ref <- list(name.old = name.old, name.new = name.new)
-
+    #ref <- data.table::data.table(name.old = name.old, name.new = name.new);setkey(ref, name.new)
 
     #numstart.vnum <- suppressWarnings(sapply(names(out),function(x){!is.na(as.numeric(substr(x, 1,1)))}))
     #names(out)[numstart.vnum] <- paste("n_", names(out)[numstart.vnum], sep = "")
@@ -229,10 +229,8 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
     output$subset_check <- renderUI({
       checkboxInput(session$ns("check_subset"), "Subset data")
     })
-  })
 
-  observeEvent(input$check_binary, {
-    var.conti <- setdiff(names(data()$data), c(data()$factor_original, input$factor_vname))
+    var.conti <- setdiff(names(data()$data), c(data()$factor_original, input$factor_vname, input$repeated_vname, input$cluster_vname, input$strata_vname, input$weights_vname))
     output$binary_var <- renderUI({
       req(input$check_binary == T)
       selectInput(session$ns("var_binary"), "Variables to dichotomize",
@@ -260,6 +258,8 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
 
     })
   })
+
+
 
 
 
@@ -313,20 +313,19 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
     cat(msg, "\n")
   })
 
+
   outdata <- reactive({
     req(input$weights_vname)
-    out <- data()$data
+    req(input$cluster_vname)
+    req(input$strata_vname)
+    req(!is.null(input$check_binary))
+
+    out <- data.table::data.table(data()$data)
     out[, (data()$conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = data()$conti_original]
     if (length(input$factor_vname) > 0){
       out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
     }
 
-    ref <- data()$ref
-    out.label <- mk.lev(out)
-    for (vn in ref[["name.new"]]){
-      w <- which(ref[["name.new"]] == vn)
-      out.label[variable == vn, var_label := ref[["name.old"]][w]]
-    }
 
     ## Make survey object
     if (input$cluster_vname == "None"){
@@ -350,42 +349,44 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
       out <- out[!is.na(get(input$weights_vname))]
     }
 
-    #surveydata <- survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out)
-    surveydata <- tryCatch(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out),
-                           error = function(e){return(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out, nest = T))})
+    ref <- data()$ref
+    out.label <- mk.lev(out)
+    #out.label[, var_label := ref[out.label$variable, name.old]]
 
-    if (!is.null(input$check_binary)){
-      if (input$check_binary){
-        validate(
-          need(length(input$var_binary) > 0 , "No variables to dichotomize")
-        )
-        sym.ineq <- c("\u2264", "\u2265", "\u003c", "\u003e")
-        names(sym.ineq) <- sym.ineq[4:1]
-        sym.ineq2 <- c("le", "ge", "l", "g")
-        names(sym.ineq2) <- sym.ineq
-        for (v in seq_along(input$var_binary)){
-          req(input[[paste0("con_binary", v)]])
-          if (input[[paste0("con_binary", v)]] == "\u2264"){
-            out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) <= input[[paste0("cut_binary", v)]]))]
 
-          } else if (input[[paste0("con_binary", v)]] == "\u2265"){
-            out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) >= input[[paste0("cut_binary", v)]]))]
-          } else if (input[[paste0("con_binary", v)]] == "\u003c"){
-            out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) < input[[paste0("cut_binary", v)]]))]
-          } else{
-            out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) > input[[paste0("cut_binary", v)]]))]
-          }
-          cn.new <- paste0(input$var_binary[[v]], "_group_", sym.ineq2[input[[paste0("con_binary", v)]]], input[[paste0("cut_binary", v)]])
-          setnames(out, "BinaryGroupRandom", cn.new)
+    if (!is.null(input$check_binary) & input$check_binary){
+      validate(
+        need(length(input$var_binary) > 0 , "No variables to dichotomize")
+      )
+      sym.ineq <- c("\u2264", "\u2265", "\u003c", "\u003e")
+      names(sym.ineq) <- sym.ineq[4:1]
+      sym.ineq2 <- c("le", "ge", "l", "g")
+      names(sym.ineq2) <- sym.ineq
+      for (v in seq_along(input$var_binary)){
+        req(input[[paste0("con_binary", v)]])
+        req(input[[paste0("cut_binary", v)]])
+        if (input[[paste0("con_binary", v)]] == "\u2264"){
+          out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) <= input[[paste0("cut_binary", v)]]))]
 
-          label.binary <- mk.lev(out[, .SD, .SDcols = cn.new])
-          label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
-          out.label <- rbind(out.label, label.binary)
+        } else if (input[[paste0("con_binary", v)]] == "\u2265"){
+          out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) >= input[[paste0("cut_binary", v)]]))]
+        } else if (input[[paste0("con_binary", v)]] == "\u003c"){
+          out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) < input[[paste0("cut_binary", v)]]))]
+        } else{
+          out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) > input[[paste0("cut_binary", v)]]))]
         }
-        surveydata <- tryCatch(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out),
-                               error = function(e){return(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out, nest = T))})
+        cn.new <- paste0(input$var_binary[[v]], "_group_", sym.ineq2[input[[paste0("con_binary", v)]]], input[[paste0("cut_binary", v)]])
+        data.table::setnames(out, "BinaryGroupRandom", cn.new)
 
+        label.binary <- mk.lev(out[, .SD, .SDcols = cn.new])
+        label.binary[, var_label := paste0(input$var_binary[[v]], "_group")]
+        label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
+
+        out.label <- rbind(out.label, label.binary)
       }
+      #surveydata <- tryCatch(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out),
+      #                       error = function(e){return(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out, nest = T))})
+
     }
 
 
@@ -403,8 +404,8 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
           if (input$var_subset[[v]] %in% var.factor){
             out <- out[get(input$var_subset[[v]]) %in% input[[paste0("val_subset", v)]]]
             #surveydata <- survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out)
-            surveydata <- tryCatch(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out),
-                                   error = function(e){return(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out, nest = T))})
+            #surveydata <- tryCatch(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out),
+            #                       error = function(e){return(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out, nest = T))})
             #var.factor <- c(data()$factor_original, input$factor_vname)
             out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
             out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
@@ -414,8 +415,8 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
           } else{
             out <- out[get(input$var_subset[[v]]) >= input[[paste0("val_subset", v)]][1] & get(input$var_subset[[v]]) <= input[[paste0("val_subset", v)]][2]]
             #surveydata <- survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out)
-            surveydata <- tryCatch(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out),
-                                   error = function(e){return(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out, nest = T))})
+            #surveydata <- tryCatch(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out),
+            #                       error = function(e){return(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out, nest = T))})
 
             #var.factor <- c(data()$factor_original, input$factor_vname)
             out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
@@ -429,8 +430,25 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
       }
     }
 
+    for (vn in ref[["name.new"]]){
+      w <- which(ref[["name.new"]] == vn)
+      out.label[variable == vn, var_label := ref[["name.old"]][w]]
+    }
+
+
+    surveydata <- tryCatch(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out),
+                           error = function(e){return(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out, nest = T))})
+
+
     return(list(data = out, label = out.label, naomit = data()$naomit, survey = surveydata))
   })
+
+
+
+    #surveydata <- survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out)
+    #surveydata <- tryCatch(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out),
+    #                       error = function(e){return(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out, nest = T))})
+
 
 
 

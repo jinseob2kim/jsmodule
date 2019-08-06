@@ -35,7 +35,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
   requireNamespace("survC1")
 
   ## To remove NOTE.
-  level <- val_label <- variable <- NULL
+  level <- val_label <- BinaryGroupRandom <- variable <- NULL
 
   ## Data label
   out.old <- data.table::data.table(data)
@@ -73,6 +73,9 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                             sidebarLayout(
                               sidebarPanel(
                                 uiOutput("factor"),
+                                uiOutput("binary_check"),
+                                uiOutput("binary_var"),
+                                uiOutput("binary_val"),
                                 uiOutput("subset_check"),
                                 uiOutput("subset_var"),
                                 uiOutput("subset_val"),
@@ -307,8 +310,43 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     })
 
     observeEvent(c(factor_original, input$factor_vname), {
+      output$binary_check <- renderUI({
+        checkboxInput(session$ns("check_binary"), "Make binary variables")
+      })
+
       output$subset_check <- renderUI({
         checkboxInput("check_subset", "Subset data")
+      })
+    })
+
+
+    observeEvent(input$check_binary, {
+      var.conti <- setdiff(names(out), c(factor_original, input$factor_vname))
+      output$binary_var <- renderUI({
+        req(input$check_binary == T)
+        selectInput(session$ns("var_binary"), "Variables to dichotomize",
+                    choices = var.conti, multiple = T,
+                    selected = var.conti[1])
+      })
+
+      output$binary_val <- renderUI({
+        req(input$check_binary == T)
+        req(length(input$var_binary) > 0)
+        outUI <- tagList()
+        for (v in seq_along(input$var_binary)){
+          med <- stats::quantile(out[[input$var_binary[[v]]]], c(0.05, 0.5, 0.95), na.rm = T)
+          outUI[[v]] <- splitLayout(cellWidths = c("25%", "75%"),
+                                    selectInput(session$ns(paste0("con_binary", v)), paste0("Define reference:"),
+                                                choices = c("\u2264", "\u2265", "\u003c", "\u003e"), selected = "\u2264"
+                                    ),
+                                    numericInput(session$ns(paste0("cut_binary", v)), input$var_binary[[v]],
+                                                 value = med[2], min = med[1], max = med[3]
+                                    )
+          )
+
+        }
+        outUI
+
       })
     })
 
@@ -356,16 +394,47 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
 
     data.info <- reactive({
-      out1 <- out
+      out1 <- data.table::data.table(out)
       out1[, (conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = conti_original]
       if (!is.null(input$factor_vname) & length(input$factor_vname) > 0){
         out1[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
       }
 
       out.label <- mk.lev(out1)
-      for (vn in ref[["name.new"]]){
-        w <- which(ref[["name.new"]] == vn)
-        out.label[variable == vn, var_label := ref[["name.old"]][w]]
+
+      if (!is.null(input$check_binary)){
+        if (input$check_binary){
+          validate(
+            need(length(input$var_binary) > 0 , "No variables to dichotomize")
+          )
+          sym.ineq <- c("\u2264", "\u2265", "\u003c", "\u003e")
+          names(sym.ineq) <- sym.ineq[4:1]
+          sym.ineq2 <- c("le", "ge", "l", "g")
+          names(sym.ineq2) <- sym.ineq
+          for (v in seq_along(input$var_binary)){
+            req(input[[paste0("con_binary", v)]])
+            req(input[[paste0("cut_binary", v)]])
+            if (input[[paste0("con_binary", v)]] == "\u2264"){
+              out1[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) <= input[[paste0("cut_binary", v)]]))]
+
+            } else if (input[[paste0("con_binary", v)]] == "\u2265"){
+              out1[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) >= input[[paste0("cut_binary", v)]]))]
+            } else if (input[[paste0("con_binary", v)]] == "\u003c"){
+              out1[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) < input[[paste0("cut_binary", v)]]))]
+            } else{
+              out1[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) > input[[paste0("cut_binary", v)]]))]
+            }
+
+            cn.new <- paste0(input$var_binary[[v]], "_group_", sym.ineq2[input[[paste0("con_binary", v)]]], input[[paste0("cut_binary", v)]])
+            data.table::setnames(out1, "BinaryGroupRandom", cn.new)
+
+            label.binary <- mk.lev(out1[, .SD, .SDcols = cn.new])
+            label.binary[, var_label := paste0(input$var_binary[[v]], " _group")]
+            #label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
+            out.label <- rbind(out.label, label.binary)
+          }
+
+        }
       }
 
 
@@ -402,41 +471,47 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
         }
       }
 
+      for (vn in ref[["name.new"]]){
+        w <- which(ref[["name.new"]] == vn)
+        out.label[variable == vn, var_label := ref[["name.old"]][w]]
+      }
+      out.label <- rbind(out.label, data.table(variable = "pscore", class = "numeric", level = NA, var_label = "pscore", val_label = NA))
+
       return(list(data = out1, label = out.label))
     })
 
+    observeEvent(data.info(),{
+      output$group_ps <- renderUI({
+        factor_vars <- names(data.info()$data)[data.info()$data[, lapply(.SD, class) %in% c("factor", "character")]]
+        validate(
+          need(!is.null(factor_vars) & length(factor_vars) > 0, "No categorical variables in data")
+        )
+
+        class01_factor <- unlist(data.info()$data[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])
+        #nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
+        #factor_2vars <- names(nclass_factor)[nclass_factor == 2]
 
 
-    output$group_ps <- renderUI({
-      factor_vars <- names(data.info()$data)[data.info()$data[, lapply(.SD, class) %in% c("factor", "character")]]
-      validate(
-        need(!is.null(factor_vars) & length(factor_vars) > 0, "No categorical variables in data")
-      )
+        validate(
+          need(!is.null(class01_factor), "No categorical variables coded as 0, 1 in data")
+        )
 
-      class01_factor <- unlist(data.info()$data[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])
-      #nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
-      #factor_2vars <- names(nclass_factor)[nclass_factor == 2]
+        factor_01vars <- factor_vars[class01_factor]
+        factor_01vars_case_small <- factor_01vars[unlist(sapply(factor_01vars, function(x){diff(table(data.info()$data[[x]])) <= 0}))]
 
-
-      validate(
-        need(!is.null(class01_factor), "No categorical variables coded as 0, 1 in data")
-      )
-
-      factor_01vars <- factor_vars[class01_factor]
-      factor_01vars_case_small <- factor_01vars[unlist(sapply(factor_01vars, function(x){diff(table(data.info()$data[[x]])) <= 0}))]
-
-      validate(
-        need(length(factor_01vars_case_small) > 0, "No candidate group variable for PS calculation")
-      )
+        validate(
+          need(length(factor_01vars_case_small) > 0, "No candidate group variable for PS calculation")
+        )
 
 
-      selectInput("group_pscal", label = "Group variable for PS calculation (0, 1 coding)",
-                  choices = mklist(data_varStruct1, factor_01vars_case_small), multiple = F,
-                  selected = factor_01vars_case_small[1])
-    })
+        selectInput("group_pscal", label = "Group variable for PS calculation (0, 1 coding)",
+                    choices = mklist(list(variable = names(data.info()$data)), factor_01vars_case_small), multiple = F,
+                    selected = factor_01vars_case_small[1])
 
-    observeEvent(input$group_pscal , {
+      })
+
       output$indep_ps <- renderUI({
+        req(!is.null(input$group_pscal))
         if (is.null(input$group_pscal)){
           return(NULL)
         }
@@ -454,26 +529,35 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                           })
         tagList(
           selectInput("indep_pscal", label = "Independent variables for PS calculation",
-                      choices = mklist(data_varStruct1, vars), multiple = T,
+                      choices = mklist(list(variable = names(data.info()$data)), vars), multiple = T,
                       selected = vars[varsIni])
         )
       })
     })
 
-    mat.info <- eventReactive(input$indep_pscal, {
+
+
+
+
+    mat.info <- reactive({
+      req(input$indep_pscal)
       if (is.null(input$group_pscal) | is.null(input$indep_pscal)){
         return(NULL)
       }
+      data <- data.table::data.table(data.info()$data)
 
       forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
-      m.out <- MatchIt::matchit(forms, data = data.info()$data)
+      m.out <- MatchIt::matchit(forms, data = data)
       pscore <- m.out$distance
       iptw <- ifelse(m.out$treat == levels(m.out$treat)[2], 1/pscore,  1/(1-pscore))
-      wdata <- cbind(data.info()$data, pscore, iptw)
+      wdata <- cbind(data, pscore, iptw)
 
       mdata <- MatchIt::match.data(m.out, distance = "pscore")
       return(list(data = wdata, matdata = mdata[, -grep("weights", names(mdata))]))
     })
+
+
+
 
 
 

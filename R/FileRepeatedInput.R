@@ -103,7 +103,7 @@ FileRepeatedInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dt
 FileRepeated <- function(input, output, session, nfactor.limit = 20) {
 
   ## To remove NOTE.
-  variable <- NULL
+  val_label <- BinaryGroupRandom <- variable <- NULL
 
   # The selected file, if any
   userFile <- eventReactive(input$file, {
@@ -287,10 +287,7 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
 
     ref <- data()$ref
     out.label <- mk.lev(out)
-    for (vn in ref[["name.new"]]){
-      w <- which(ref[["name.new"]] == vn)
-      out.label[variable == vn, var_label := ref[["name.old"]][w]]
-    }
+
 
     if (!is.null(input$check_binary)){
       if (input$check_binary){
@@ -315,9 +312,10 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
           }
 
           cn.new <- paste0(input$var_binary[[v]], "_group_", sym.ineq2[input[[paste0("con_binary", v)]]], input[[paste0("cut_binary", v)]])
-          setnames(out, "BinaryGroupRandom", cn.new)
+          data.table::setnames(out, "BinaryGroupRandom", cn.new)
 
           label.binary <- mk.lev(out[, .SD, .SDcols = cn.new])
+          label.binary[, var_label := paste0(input$var_binary[[v]], " _group")]
           label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
           out.label <- rbind(out.label, label.binary)
         }
@@ -354,6 +352,11 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
           }
         }
       }
+    }
+
+    for (vn in ref[["name.new"]]){
+      w <- which(ref[["name.new"]] == vn)
+      out.label[variable == vn, var_label := ref[["name.old"]][w]]
     }
 
     return(list(data = out, label = out.label, naomit = data()$naomit, id.gee = input$repeated_vname))
