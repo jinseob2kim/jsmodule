@@ -81,7 +81,8 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                                 uiOutput("subset_val"),
                                 uiOutput("group_ps"),
                                 uiOutput("indep_ps"),
-                                uiOutput("pcut")
+                                uiOutput("pcut"),
+                                uiOutput("caliperps")
 
                               ),
                               mainPanel(
@@ -533,13 +534,19 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                       selected = vars[varsIni])
         )
       })
+
+      output$caliperps <- renderUI({
+        sliderInput("caliper", "Caliper (0: no)", value = 0, min = 0, max = 1)
+      })
     })
 
 
 
 
 
-    mat.info <- reactive({
+
+
+    mat.info <- eventReactive(c(input$indep_pscal, input$group_pscal, input$caliper), {
       req(input$indep_pscal)
       if (is.null(input$group_pscal) | is.null(input$indep_pscal)){
         return(NULL)
@@ -547,7 +554,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
       data <- data.table::data.table(data.info()$data)
 
       forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
-      m.out <- MatchIt::matchit(forms, data = data)
+      m.out <- MatchIt::matchit(forms, data = data, caliper = input$caliper)
       pscore <- m.out$distance
       iptw <- ifelse(m.out$treat == levels(m.out$treat)[2], 1/pscore,  1/(1-pscore))
       wdata <- cbind(data, pscore, iptw)

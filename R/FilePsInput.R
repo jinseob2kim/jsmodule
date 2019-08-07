@@ -56,7 +56,8 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
     uiOutput(ns("subset_val")),
     uiOutput(ns("group_ps")),
     uiOutput(ns("indep_ps")),
-    uiOutput(ns("pcut"))
+    uiOutput(ns("pcut")),
+    uiOutput(ns("caliperps"))
   )
 }
 
@@ -190,20 +191,22 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
     add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
     #factor_vars_ini <- union(factor_vars, add_vars)
+    naomit <- ifelse(length(naCol) == 0, "Data has <B>no</B> missing values.", paste("Column <B>", paste(naCol, collapse = ", "), "</B> are(is) excluded due to missing value.", sep = ""))
     return(list(data = out, data_varStruct = data_varStruct, factor_original = factor_vars,
                 conti_original = conti_vars, factor_adds_list = factor_adds_list,
-                factor_adds = add_vars, naCol = naCol, except_vars = except_vars, ref = ref)
+                factor_adds = add_vars, naCol = naCol, except_vars = except_vars, ref = ref, naomit = naomit)
            )
   })
 
-  naomit <- eventReactive(data.info(), {
-    if (length(data.info()$naCol) == 0) {
-      return("Data has <B>no</B> missing values.")
-    } else{
-      txt_miss <- paste(data.info()$naCol, collapse = ", ")
-      return(paste("Column <B>", txt_miss, "</B> are(is) excluded due to missing value.", sep = ""))
-    }
-  })
+  #naomit <- eventReactive(data.info(), {
+  #  req(data.info())
+  #  if (length(data.info()$naCol) == 0) {
+  #    return("Data has <B>no</B> missing values.")
+  #  } else{
+  #    txt_miss <- paste(data.info()$naCol, collapse = ", ")
+  #    return(paste("Column <B>", txt_miss, "</B> are(is) excluded due to missing value.", sep = ""))
+  #  }
+  #})
 
   output$pcut <- renderUI({
     if (is.null(input$file)){return(NULL)}
@@ -214,12 +217,14 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
   })
 
 
-
-  output$factor <- renderUI({
-    selectInput(session$ns("factor_vname"), label = "Additional categorical variables",
-                choices = data.info()$factor_adds_list, multiple = T,
-                selected = data.info()$factor_adds)
+  observeEvent(data.info(), {
+    output$factor <- renderUI({
+      selectInput(session$ns("factor_vname"), label = "Additional categorical variables",
+                  choices = data.info()$factor_adds_list, multiple = T,
+                  selected = data.info()$factor_adds)
+    })
   })
+
 
   observeEvent(c(data.info()$factor_original, input$factor_vname), {
     output$binary_check <- renderUI({
@@ -313,7 +318,8 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
 
 
 
-  data <- reactive({
+  data <- eventReactive(input$factor_vname, {
+    req(input$factor_vname)
     out <- data.table::data.table(data.info()$data)
     out[, (data.info()$conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = data.info()$conti_original]
     if (length(input$factor_vname) > 0){
@@ -397,14 +403,14 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     }
     out.label <- rbind(out.label, data.table(variable = "pscore", class = "numeric", level = NA, var_label = "pscore", val_label = NA))
 
-    return(list(data = out, label = out.label, data_varStruct = list(variable = names(out))))
+    return(list(data = out, label = out.label, data_varStruct = list(variable = names(out)),  except_vars = data.info()$except_vars))
     })
 
 
 
   observeEvent(data(), {
     output$group_ps <- renderUI({
-      req(data())
+      #req(data())
       factor_vars <- names(data()$data)[data()$data[, lapply(.SD, class) %in% c("factor", "character")]]
       validate(
         need(!is.null(factor_vars) & length(factor_vars) > 0, "No categorical variables in data")
@@ -437,7 +443,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
         need(length(input$group_pscal) != 0, "No group variables in data")
       )
 
-      vars <- setdiff(setdiff(names(data()$data), data.info()$except_vars),  c(input$var_subset, input$group_pscal))
+      vars <- setdiff(setdiff(names(data()$data), data()$except_vars),  c(input$var_subset, input$group_pscal))
       varsIni <- sapply(vars,
                         function(v){
                           forms <- as.formula(paste(input$group_pscal, "~", v))
@@ -451,12 +457,18 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
                     selected = vars[varsIni])
       )
     })
+
+    output$caliperps <- renderUI({
+      sliderInput(session$ns("caliper"), "Caliper (0: no)", value = 0, min = 0, max = 1)
+    })
   })
 
 
 
 
-  mat.info <- reactive({
+
+
+  mat.info <- eventReactive(c(input$indep_pscal, input$group_pscal, input$caliper), {
     req(input$indep_pscal)
     if (is.null(input$group_pscal) | is.null(input$indep_pscal)){
       return(NULL)
@@ -464,13 +476,13 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     data <- data.table(data()$data)
 
     forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
-    m.out <- MatchIt::matchit(forms, data = data)
+    m.out <- MatchIt::matchit(forms, data = data, caliper = input$caliper)
     pscore <- m.out$distance
     iptw <- ifelse(m.out$treat == levels(m.out$treat)[2], 1/pscore,  1/(1-pscore))
     wdata <- cbind(data, pscore, iptw)
 
     mdata <- MatchIt::match.data(m.out, distance = "pscore")
-    return(list(data = wdata, matdata = mdata[, -grep("weights", names(mdata))], data.label = data()$label, naomit = naomit(), group_var = input$group_pscal))
+    return(list(data = wdata, matdata = mdata[, -grep("weights", names(mdata))], data.label = data()$label, naomit = data.info()$naomit, group_var = input$group_pscal))
   })
 
 

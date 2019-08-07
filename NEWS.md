@@ -10,6 +10,8 @@
 
 * Choose **multiple conditions when subsetting data**.
 
+* Add **caliper** option when propensity score matching. 
+
 * **Make binary variables** from contiuous variables.
 
 ## Bug fixes
