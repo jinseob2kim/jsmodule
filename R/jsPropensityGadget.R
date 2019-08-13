@@ -106,7 +106,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                                                      withLoader(DTOutput("table1_original"), type="html", loader="loader6"),
                                                      wellPanel(
                                                        h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                                       h5("Non-normal continuous variables are summarized with median [IQR] and kruskal-wallis test"),
+                                                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
                                                        h5("Categorical variables  are summarized with table")
                                                      )
                                             ),
@@ -114,7 +114,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                                                      withLoader(DTOutput("table1_ps"), type="html", loader="loader6"),
                                                      wellPanel(
                                                        h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                                       h5("Non-normal continuous variables are summarized with median [IQR] and kruskal-wallis test"),
+                                                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
                                                        h5("Categorical variables  are summarized with table")
                                                      )
                                             ),
@@ -122,7 +122,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                                                      withLoader(DTOutput("table1_iptw"), type="html", loader="loader6"),
                                                      wellPanel(
                                                        h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
-                                                       h5("Non-normal continuous variables are summarized with median [IQR] and complex sampling rank test"),
+                                                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and complex sampling rank test"),
                                                        h5("Categorical variables  are summarized with table")
                                                      )
                                             )

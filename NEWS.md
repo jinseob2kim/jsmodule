@@ -14,6 +14,8 @@
 
 * **Make binary variables** from contiuous variables.
 
+* Non-normal variables can be summarized with [min,max]. 
+
 ## Bug fixes
 
 * Encoding error when `csv` file upload.

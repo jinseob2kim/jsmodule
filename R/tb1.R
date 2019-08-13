@@ -174,6 +174,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
                      choices = conti_list, multiple = T,
                      selected = conti_vars[non_normal]
       ),
+      checkboxInput(session$ns("nonnormal_range"), "Non-normal variable with [min,max]"),
       sliderInput(session$ns("decimal_tb1_con"), "Digits (continuous)",
                   min = 1, max = 3, value = 1
       ),
@@ -228,7 +229,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                          showAllLevels = showAllLevels, printToggle = F, quote = F, smd = F, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
-                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, labeldata = data_label)
+                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, labeldata = data_label, minMax = input$nonnormal_range)
 
         return(res)
       } else if(is.null(input$group2_vars)) {
@@ -247,7 +248,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                          showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
-                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
+                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, minMax = input$nonnormal_range)
 
         return(res)
       } else {
@@ -264,7 +265,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                          showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
-                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
+                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub, minMax = input$nonnormal_range)
 
         return(res)
       }
@@ -277,7 +278,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
       if (input$group_vars == "None"){
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars, includeNA = F, test = F,
                                             showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
-                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
+                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, minMax = input$nonnormal_range)
 
         return(res)
       } else if(is.null(input$group2_vars)) {
@@ -290,7 +291,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
                                             showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
-                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label)
+                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, minMax = input$nonnormal_range)
 
         return(res)
       } else {
@@ -298,7 +299,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
                                             showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
-                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub)
+                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub, minMax = input$nonnormal_range)
 
         return(res)
       }
@@ -430,6 +431,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
                   choices = vlist()$conti_list, multiple = T,
                   selected = vlist()$conti_vars[vlist()$non_normal]
       ),
+      checkboxInput(session$ns("nonnormal_range"), "Non-normal variable with [min,max]"),
       sliderInput(session$ns("decimal_tb1_con"), "Digits (continuous)",
                   min = 1, max = 3, value = 1
       ),
@@ -500,7 +502,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = F, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
-                                        catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, labeldata = data_label())
+                                        catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, labeldata = data_label(), minMax = input$nonnormal_range)
 
         return(res)
       } else if(is.null(input$group2_vars)) {
@@ -519,7 +521,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
-                                        catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
+                                        catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), minMax = input$nonnormal_range)
 
         return(res)
       } else {
@@ -537,7 +539,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
                                         catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(),
-                                        psub = input$psub)
+                                        psub = input$psub, minMax = input$nonnormal_range)
 
         return(res)
       }
@@ -550,7 +552,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
       if (input$group_vars == "None"){
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars, includeNA = F, test = F,
                                             showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
-                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
+                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), minMax = input$nonnormal_range)
 
         return(res)
       } else if(is.null(input$group2_vars)) {
@@ -563,7 +565,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
 
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
                                             showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
-                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label())
+                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), minMax = input$nonnormal_range)
 
         return(res)
       } else {
@@ -571,7 +573,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
 
         res <- jstable::svyCreateTableOneJS(data = Svydesign, vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
                                             showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
-                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub)
+                                            catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), psub = input$psub, minMax = input$nonnormal_range)
 
               return(res)
       }
