@@ -554,7 +554,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                 withLoader(DTOutput("table1"), type="html", loader="loader6"),
                                 wellPanel(
                                   h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                  h5("Non-normal continuous variables are summarized with median [IQR] and kruskal-wallis test"),
+                                  h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
                                   h5("Categorical variables  are summarized with table")
                                 )
                               )
