@@ -44,7 +44,7 @@ kaplanUI <- function(id) {
     checkboxInput(ns("pval"), "Show p-value(log-rank test)", T),
     checkboxInput(ns("table"), "Show table", T),
     checkboxInput(ns("ci"), "Show 95% CI", F),
-    uiOutput(ns("marks")),
+    checkboxInput(ns("marks"), "Show censoring marks", F),
     checkboxInput(ns("subcheck"), "Sub-group analysis"),
     uiOutput(ns("ranges")),
     uiOutput(ns("subvar")),
@@ -282,14 +282,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     )
   })
 
-  output$marks <- renderUI({
-    if (!is.null(design.survey)){
-      return(NULL)
-    } else{
-      checkboxInput(session$ns("marks_km"), "Show censoring marks", F)
 
-      }
-  })
 
   output$indep <- renderUI({
     req(!is.null(input$event_km))
@@ -601,12 +594,12 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     if (is.null(design.survey)){
       if (is.null(id.cluster)){
         return(
-          jskm::jskm(res.km, pval = input$pval, marks= input$marks_km, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
+          jskm::jskm(res.km, pval = input$pval, marks= input$marks, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
                      cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x)
         )
       } else{
         return(
-          jskm::jskm(res.km, pval = input$pval, marks= input$marks_km, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
+          jskm::jskm(res.km, pval = input$pval, marks= input$marks, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
                      cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x)
         )
       }
