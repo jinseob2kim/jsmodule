@@ -686,7 +686,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         sliderInput(session$ns("legendy"), "y-axis",
                     min = 0, max = 1, value = 0.8),
         textInput(session$ns("xaxis_km"), "x-axis text", "Time-to-event"),
-        radioButtons(session$ns("pal_km"), "Line color", rownames(RColorBrewer::brewer.pal.info), inline = T)
+        radioButtons(session$ns("pal_km"), "Line color", choices = rownames(RColorBrewer::brewer.pal.info), selected = "Set1", inline = T)
       )
     } else{
       tagList(
@@ -702,7 +702,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         sliderInput(session$ns("pvaly"), "y-axis",
                     min = 0, max = 1, value = 0.1 + input$ylims[1]),
         textInput(session$ns("xaxis_km"), "x-axis text", "Time-to-event"),
-        radioButtons(session$ns("pal_km"), "Line color", rownames(RColorBrewer::brewer.pal.info), inline = T)
+        radioButtons(session$ns("pal_km"), "Line color", choices = rownames(RColorBrewer::brewer.pal.info), selected = "Set1", inline = T)
       )
     }
 
