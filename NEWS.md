@@ -16,6 +16,8 @@
 
 * Non-normal variables can be summarized with [min,max]. 
 
+* Add **line color**, **x-axis label** option to **kaplan-meier** plot
+
 ## Bug fixes
 
 * Encoding error when `csv` file upload.
