@@ -58,6 +58,9 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
                                 uiOutput("binary_check"),
                                 uiOutput("binary_var"),
                                 uiOutput("binary_val"),
+                                uiOutput("ref_check"),
+                                uiOutput("ref_var"),
+                                uiOutput("ref_val"),
                                 uiOutput("subset_check"),
                                 uiOutput("subset_var"),
                                 uiOutput("subset_val")
@@ -189,7 +192,11 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
 
     observeEvent(c(data.list$factor_original, input$factor_vname, input$repeated_vname), {
       output$binary_check <- renderUI({
-        checkboxInput(session$ns("check_binary"), "Make binary variables")
+        checkboxInput("check_binary", "Make binary variables")
+      })
+
+      output$ref_check <- renderUI({
+        checkboxInput("check_ref", "Change reference of categorical variables")
       })
 
       output$subset_check <- renderUI({
@@ -202,7 +209,7 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
       var.conti <- setdiff(names(data.list$data), c(data.list$factor_original, input$factor_vname))
       output$binary_var <- renderUI({
         req(input$check_binary == T)
-        selectInput(session$ns("var_binary"), "Variables to dichotomize",
+        selectInput("var_binary", "Variables to dichotomize",
                     choices = var.conti, multiple = T,
                     selected = var.conti[1])
       })
@@ -214,13 +221,36 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
         for (v in seq_along(input$var_binary)){
           med <- stats::quantile(data.list$data[[input$var_binary[[v]]]], c(0.05, 0.5, 0.95), na.rm = T)
           outUI[[v]] <- splitLayout(cellWidths = c("25%", "75%"),
-                                    selectInput(session$ns(paste0("con_binary", v)), paste0("Define reference:"),
+                                    selectInput(paste0("con_binary", v), paste0("Define reference:"),
                                                 choices = c("\u2264", "\u2265", "\u003c", "\u003e"), selected = "\u2264"
                                     ),
-                                    numericInput(session$ns(paste0("cut_binary", v)), input$var_binary[[v]],
+                                    numericInput(paste0("cut_binary", v), input$var_binary[[v]],
                                                  value = med[2], min = med[1], max = med[3]
                                     )
           )
+
+        }
+        outUI
+
+      })
+    })
+
+    observeEvent(input$check_ref, {
+      var.factor <- c(data.list$factor_original, input$factor_vname)
+      output$ref_var <- renderUI({
+        req(input$check_ref == T)
+        selectInput("var_ref", "Variables to change reference",
+                    choices = var.factor, multiple = T,
+                    selected = var.factor[1])
+      })
+
+      output$ref_val <- renderUI({
+        req(input$check_ref == T)
+        req(length(input$var_ref) > 0)
+        outUI <- tagList()
+        for (v in seq_along(input$var_ref)){
+          outUI[[v]] <- selectInput(paste0("con_ref", v), paste0("Reference: ", input$var_ref[[v]]),
+                                    choices = levels(factor(data.list$data[[input$var_ref[[v]]]])), selected = levels(factor(data.list$data[[input$var_ref[[v]]]]))[2])
 
         }
         outUI
@@ -254,12 +284,12 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
         for (v in seq_along(input$var_subset)){
           if (input$var_subset[[v]] %in% var.factor){
             varlevel <- levels(as.factor(data.list$data[[input$var_subset[[v]]]]))
-            outUI[[v]] <- selectInput(session$ns(paste0("val_subset", v)), paste0("Subset value: ", input$var_subset[[v]]),
+            outUI[[v]] <- selectInput(paste0("val_subset", v), paste0("Subset value: ", input$var_subset[[v]]),
                                       choices = varlevel, multiple = T,
                                       selected = varlevel[1])
           } else{
             val <- stats::quantile(data.list$data[[input$var_subset[[v]]]], na.rm = T)
-            outUI[[v]] <- sliderInput(session$ns(paste0("val_subset", v)), paste0("Subset range: ", input$var_subset[[v]]),
+            outUI[[v]] <- sliderInput(paste0("val_subset", v), paste0("Subset range: ", input$var_subset[[v]]),
                                       min = val[1], max = val[5],
                                       value = c(val[2], val[4]))
           }
@@ -309,6 +339,20 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
           out.label <- rbind(out.label, label.binary)
         }
 
+      }
+
+      if (!is.null(input$check_ref)){
+        if (input$check_ref){
+          validate(
+            need(length(input$var_ref) > 0 , "No variables to change reference")
+          )
+          for (v in seq_along(input$var_ref)){
+            req(input[[paste0("con_ref", v)]])
+            out[[input$var_ref[[v]]]] <- stats::relevel(out[[input$var_ref[[v]]]], ref = input[[paste0("con_ref", v)]])
+            out.label[variable == input$var_ref[[v]], ':='(level = levels(out[[input$var_ref[[v]]]]), val_label = levels(out[[input$var_ref[[v]]]]))]
+          }
+
+        }
       }
 
       if (!is.null(input$check_subset)){

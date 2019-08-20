@@ -22,6 +22,7 @@
     "ggpairs-theme-selectized": "",
     "kaplan-ci": false,
     "kaplan-cumhaz": false,
+    "kaplan-marks": false,
     "kaplan-pval": true,
     "kaplan-subcheck": false,
     "kaplan-table": true,

@@ -1,3 +1,14 @@
+# jsmodule 1.0.1
+
+## Update
+
+* **Change reference** of categorical variables
+
+## Bug fixes
+
+* **Reactive error** in propensity score matching.
+
+
 # jsmodule 1.0.0
 
 ## Update

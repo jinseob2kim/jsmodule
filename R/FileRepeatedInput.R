@@ -46,6 +46,9 @@ FileRepeatedInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dt
     uiOutput(ns("binary_check")),
     uiOutput(ns("binary_var")),
     uiOutput(ns("binary_val")),
+    uiOutput(ns("ref_check")),
+    uiOutput(ns("ref_var")),
+    uiOutput(ns("ref_val")),
     uiOutput(ns("subset_check")),
     uiOutput(ns("subset_var")),
     uiOutput(ns("subset_val"))
@@ -193,6 +196,10 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
       checkboxInput(session$ns("check_binary"), "Make binary variables")
     })
 
+    output$ref_check <- renderUI({
+      checkboxInput(session$ns("check_ref"), "Change reference of categorical variables")
+    })
+
     output$subset_check <- renderUI({
       checkboxInput(session$ns("check_subset"), "Subset data")
     })
@@ -221,6 +228,29 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
                                                value = med[2], min = med[1], max = med[3]
                                   )
         )
+
+      }
+      outUI
+
+    })
+  })
+
+  observeEvent(input$check_ref, {
+    var.factor <- c(data()$factor_original, input$factor_vname)
+    output$ref_var <- renderUI({
+      req(input$check_ref == T)
+      selectInput(session$ns("var_ref"), "Variables to change reference",
+                  choices = var.factor, multiple = T,
+                  selected = var.factor[1])
+    })
+
+    output$ref_val <- renderUI({
+      req(input$check_ref == T)
+      req(length(input$var_ref) > 0)
+      outUI <- tagList()
+      for (v in seq_along(input$var_ref)){
+        outUI[[v]] <- selectInput(session$ns(paste0("con_ref", v)), paste0("Reference: ", input$var_ref[[v]]),
+                                  choices = levels(factor(data()$data[[input$var_ref[[v]]]])), selected = levels(factor(data()$data[[input$var_ref[[v]]]]))[2])
 
       }
       outUI
@@ -318,6 +348,20 @@ FileRepeated <- function(input, output, session, nfactor.limit = 20) {
           label.binary[, var_label := paste0(input$var_binary[[v]], " _group")]
           label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
           out.label <- rbind(out.label, label.binary)
+        }
+
+      }
+    }
+
+    if (!is.null(input$check_ref)){
+      if (input$check_ref){
+        validate(
+          need(length(input$var_ref) > 0 , "No variables to change reference")
+        )
+        for (v in seq_along(input$var_ref)){
+          req(input[[paste0("con_ref", v)]])
+          out[[input$var_ref[[v]]]] <- stats::relevel(out[[input$var_ref[[v]]]], ref = input[[paste0("con_ref", v)]])
+          out.label[variable == input$var_ref[[v]], ':='(level = levels(out[[input$var_ref[[v]]]]), val_label = levels(out[[input$var_ref[[v]]]]))]
         }
 
       }
