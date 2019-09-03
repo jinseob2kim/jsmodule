@@ -590,23 +590,24 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
     pal <- ifelse(is.null(input$pal_km), "Set1", input$pal_km)
     text.x <- ifelse(is.null(input$xaxis_km), "Time-to-event", input$xaxis_km)
+    dashed <- ifelse(is.null(input$linetype), F, input$linetype)
 
     if (is.null(design.survey)){
       if (is.null(id.cluster)){
         return(
           jskm::jskm(res.km, pval = input$pval, marks= input$marks, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                     cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x)
+                     cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed)
         )
       } else{
         return(
           jskm::jskm(res.km, pval = input$pval, marks= input$marks, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                     cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x)
+                     cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed)
         )
       }
     } else{
       return(
         jskm::svyjskm(res.km, pval = input$pval, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                      cumhaz= input$cumhaz, design = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x)
+                      cumhaz= input$cumhaz, design = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed)
       )
     }
   })
@@ -694,8 +695,11 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
                     min = 0, max = input$xlims[2], value = as.integer(input$xlims[1]+ input$xlims[2]/5)),
         sliderInput(session$ns("pvaly"), "y-axis",
                     min = 0, max = 1, value = 0.1 + input$ylims[1]),
-        textInput(session$ns("xaxis_km"), "x-axis text", "Time-to-event"),
-        radioButtons(session$ns("pal_km"), "Line color", choices = rownames(RColorBrewer::brewer.pal.info), selected = "Set1", inline = T)
+        h3("Line"),
+        radioButtons(session$ns("pal_km"), "Line color", choices = rownames(RColorBrewer::brewer.pal.info), selected = "Set1", inline = T),
+        checkboxInput(session$ns("linetype"), "Different line type", value = F),
+        h3("Others"),
+        textInput(session$ns("xaxis_km"), "x-axis text", "Time-to-event")
       )
     }
 

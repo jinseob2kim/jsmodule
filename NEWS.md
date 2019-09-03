@@ -4,6 +4,8 @@
 
 * **Change reference** of categorical variables
 
+* Add **line type** option to **kaplan-meier** plot 
+
 ## Bug fixes
 
 * **Reactive error** in propensity score matching.
