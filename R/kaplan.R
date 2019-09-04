@@ -696,7 +696,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         sliderInput(session$ns("pvaly"), "y-axis",
                     min = 0, max = 1, value = 0.1 + input$ylims[1]),
         h3("Line"),
-        radioButtons(session$ns("pal_km"), "Line color", choices = rownames(RColorBrewer::brewer.pal.info), selected = "Set1", inline = T),
+        radioButtons(session$ns("pal_km"), "Line color", choices = c("black", rownames(RColorBrewer::brewer.pal.info)), selected = "Set1", inline = T),
         checkboxInput(session$ns("linetype"), "Different line type", value = F),
         h3("Others"),
         textInput(session$ns("xaxis_km"), "x-axis text", "Time-to-event")
