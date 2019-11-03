@@ -1,3 +1,8 @@
+# jsmodule 1.0.2
+
+* Update: Stop running ShinyApps by closing the browser window.
+
+
 # jsmodule 1.0.1
 
 ## Update

@@ -609,6 +609,10 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
                 options = c(jstable::opt.tbreg("timeroctable"), list(scrollX = TRUE)))
     })
 
+    session$onSessionEnded(function() {
+      stopApp()
+    })
+
   }
 
 
@@ -959,6 +963,10 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     output$table_timeroc <- renderDT({
       datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+    })
+
+    session$onSessionEnded(function() {
+      stopApp()
     })
 
   }

@@ -504,6 +504,10 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
 
+    session$onSessionEnded(function() {
+      stopApp()
+    })
+
   }
 
 
@@ -837,7 +841,12 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
       datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
+
+    session$onSessionEnded(function() {
+      stopApp()
+    })
   }
+
 
 
 
