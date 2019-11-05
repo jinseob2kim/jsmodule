@@ -75,7 +75,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.2</span>
       </span>
     </div>
 
@@ -158,10 +158,10 @@
     <pre class="examples"><div class='input'> <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shiny</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>DT</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>data.table</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>readxl</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>jstable</span>)
  <span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/fluidPage.html'>fluidPage</a></span>(
    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarLayout</a></span>(
-     <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarPanel.html'>sidebarPanel</a></span>(
+     <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarPanel</a></span>(
        <span class='fu'>FileSurveyInput</span>(<span class='st'>"datafile"</span>)
      ),
-     <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/mainPanel.html'>mainPanel</a></span>(
+     <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>mainPanel</a></span>(
        <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/tabsetPanel.html'>tabsetPanel</a></span>(<span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"pills"</span>,
                    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/tabPanel.html'>tabPanel</a></span>(<span class='st'>"Data"</span>, <span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>DTOutput</a></span>(<span class='st'>"data"</span>)),
                    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/tabPanel.html'>tabPanel</a></span>(<span class='st'>"Label"</span>, <span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>DTOutput</a></span>(<span class='st'>"data_label"</span>, <span class='kw'>width</span> <span class='kw'>=</span> <span class='st'>"100%"</span>))

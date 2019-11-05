@@ -75,7 +75,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.2</span>
       </span>
     </div>
 
@@ -186,7 +186,7 @@
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='https://rdrr.io/r/stats/quantile.html'>quantile</a></code>
- <code><a href='https://rdrr.io/pkg/data.table/man/setkey.html'>setkey</a></code>
+ <code><a href='https://Rdatatable.gitlab.io/data.table/reference/setkey.html'>setkey</a></code>
  <code><a href='https://rdrr.io/pkg/geepack/man/geeglm.html'>geeglm</a></code>
  <code><a href='https://rdrr.io/pkg/survey/man/svyglm.html'>svyglm</a></code>
  <code><a href='https://rdrr.io/pkg/pROC/man/ggroc.html'>ggroc.roc</a></code>
@@ -198,10 +198,10 @@
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shiny</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>DT</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>data.table</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>jstable</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>ggplot2</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>pROC</span>)
 <span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/fluidPage.html'>fluidPage</a></span>(
    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarLayout</a></span>(
-   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarPanel.html'>sidebarPanel</a></span>(
+   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarPanel</a></span>(
      <span class='fu'><a href='rocUI.html'>rocUI</a></span>(<span class='st'>"roc"</span>)
    ),
-   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/mainPanel.html'>mainPanel</a></span>(
+   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>mainPanel</a></span>(
      <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/plotOutput.html'>plotOutput</a></span>(<span class='st'>"plot_roc"</span>),
      <span class='fu'><a href='ggplotdownUI.html'>ggplotdownUI</a></span>(<span class='st'>"roc"</span>),
      <span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>DTOutput</a></span>(<span class='st'>"table_roc"</span>)
