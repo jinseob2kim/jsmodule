@@ -186,7 +186,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
                             } else{
                               forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, " + cluster(", id.cluster(), ")", sep = ""))
                             }
-                            coef <- tryCatch(summary(survival::coxph(forms, data = data.cox))$coefficients, error = function(e){return(NULL)})
+                            coef <- tryCatch(summary(survival::coxph(forms, data = data.cox, robust = T))$coefficients, error = function(e){return(NULL)})
                             sigOK <- ifelse(is.null(coef), F, !all(coef[, "Pr(>|z|)"] > 0.05))
                             return(sigOK)
                           })
@@ -324,7 +324,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     )
 
     if (is.null(design.survey)){
-      cc <- substitute(survival::coxph(.form, data= data.cox, model = T), list(.form= form.cox()))
+      cc <- substitute(survival::coxph(.form, data= data.cox, model = T, robust = T), list(.form= form.cox()))
       res.cox <- eval(cc)
       tb.cox <- jstable::cox2.display(res.cox, dec = input$decimal)
       tb.cox <- jstable::LabeljsCox(tb.cox, ref = label.regress)

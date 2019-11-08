@@ -1,3 +1,8 @@
+# jsmodule 1.0.3
+
+* Bug fixes: Incorrect p-value when applying cluster options.
+
+
 # jsmodule 1.0.2
 
 * Update: Stop running ShinyApps by closing the browser window.
