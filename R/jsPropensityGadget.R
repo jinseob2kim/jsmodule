@@ -60,8 +60,8 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
   conti_original <- setdiff(names(out), factor_vars)
   nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x))}), .SDcols = conti_original])
   factor_adds_list = mklist(data_varStruct1, names(nclass)[nclass <= nfactor.limit])
-
-  except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
+  except_vars <- names(nclass)[ nclass== 1]
+  #except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
   factor_adds <- names(nclass)[nclass >= 1 &  nclass <= 5]
 
 
@@ -85,7 +85,8 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
                                 uiOutput("group_ps"),
                                 uiOutput("indep_ps"),
                                 uiOutput("pcut"),
-                                uiOutput("caliperps")
+                                uiOutput("caliperps"),
+                                uiOutput("ratio")
 
                               ),
                               mainPanel(
@@ -305,6 +306,12 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
       radioButtons("pcut_ps", label = "Default p-value cut for ps calculation",
                    choices = c(0.05, 0.1, 0.2),
                    selected = 0.1, inline =T)
+    })
+
+    output$ratio <- renderUI({
+      radioButtons("ratio_ps", label = "Case:control ratio",
+                   choices = c("1:1" = 1, "1:2" = 2, "1:3" = 3, "1:4" = 4),
+                   selected = 1, inline =T)
     })
 
     output$factor <- renderUI({
@@ -590,7 +597,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
 
 
-    mat.info <- eventReactive(c(input$indep_pscal, input$group_pscal, input$caliper, data.info()), {
+    mat.info <- eventReactive(c(input$indep_pscal, input$group_pscal, input$caliper, input$ratio_ps, data.info()), {
       req(input$indep_pscal)
       if (is.null(input$group_pscal) | is.null(input$indep_pscal)){
         return(NULL)
@@ -598,7 +605,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
       data <- data.table::data.table(data.info()$data)
 
       forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
-      m.out <- MatchIt::matchit(forms, data = data, caliper = input$caliper)
+      m.out <- MatchIt::matchit(forms, data = data, caliper = input$caliper, ratio = as.integer(input$ratio_ps))
       pscore <- m.out$distance
       iptw <- ifelse(m.out$treat == levels(m.out$treat)[2], 1/pscore,  1/(1-pscore))
       wdata <- cbind(data, pscore, iptw)

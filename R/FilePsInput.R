@@ -60,8 +60,11 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
     uiOutput(ns("group_ps")),
     uiOutput(ns("indep_ps")),
     uiOutput(ns("pcut")),
-    uiOutput(ns("caliperps"))
+    uiOutput(ns("caliperps")),
+    uiOutput(ns("ratio"))
   )
+
+
 }
 
 
@@ -191,7 +194,8 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x))}), .SDcols = conti_vars])
     factor_adds_list = mklist(data_varStruct, names(nclass)[(nclass <= nfactor.limit) & (nclass < nrow(out))])
 
-    except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
+    #except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
+    except_vars <- names(nclass)[ nclass== 1]
     add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
     #factor_vars_ini <- union(factor_vars, add_vars)
     naomit <- ifelse(length(naCol) == 0, "Data has <B>no</B> missing values.", paste("Column <B>", paste(naCol, collapse = ", "), "</B> are(is) excluded due to missing value.", sep = ""))
@@ -217,6 +221,13 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     radioButtons(session$ns("pcut_ps"), label = "Default p-value cut for ps calculation",
                  choices = c(0.05, 0.1, 0.2),
                  selected = 0.1, inline =T)
+  })
+
+  output$ratio <- renderUI({
+    if (is.null(input$file)){return(NULL)}
+    radioButtons(session$ns("ratio_ps"), label = "Case:control ratio",
+                 choices = c("1:1" = 1, "1:2" = 2, "1:3" = 3, "1:4" = 4),
+                 selected = 1, inline =T)
   })
 
 
@@ -513,7 +524,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
 
 
 
-  mat.info <- eventReactive(c(input$indep_pscal, input$group_pscal, input$caliper, data()), {
+  mat.info <- eventReactive(c(input$indep_pscal, input$group_pscal, input$caliper, input$ratio_ps, data()), {
     req(input$indep_pscal)
     if (is.null(input$group_pscal) | is.null(input$indep_pscal)){
       return(NULL)
@@ -521,7 +532,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     data <- data.table(data()$data)
 
     forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
-    m.out <- MatchIt::matchit(forms, data = data, caliper = input$caliper)
+    m.out <- MatchIt::matchit(forms, data = data, caliper = input$caliper, ratio = as.integer(input$ratio_ps))
     pscore <- m.out$distance
     iptw <- ifelse(m.out$treat == levels(m.out$treat)[2], 1/pscore,  1/(1-pscore))
     wdata <- cbind(data, pscore, iptw)

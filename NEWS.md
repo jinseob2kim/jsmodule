@@ -1,6 +1,14 @@
 # jsmodule 1.0.3
 
-* Bug fixes: Incorrect p-value when applying cluster options.
+## Bug fixes
+
+* Incorrect p-value when applying cluster options.
+
+* PS matching: allow continuous variables as Independent variables
+
+## Update
+
+* PS matching: allow 1:N matching.
 
 
 # jsmodule 1.0.2
