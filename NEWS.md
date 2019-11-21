@@ -1,3 +1,9 @@
+# jsmodule 1.0.4
+
+## Bug fixes
+
+* **Cox model** of Basic statistics module.
+
 # jsmodule 1.0.3
 
 ## Bug fixes
