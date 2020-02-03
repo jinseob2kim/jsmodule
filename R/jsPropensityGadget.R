@@ -1273,7 +1273,8 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     })
 
     output$naomit <- renderText({
-      mat.info()$naomit
+      paste("<font size = 5 ><b>", "Variables with missing value are excluded!</b></font><br>", '<font size = 4 color=\"#FF0000\"><b>', mat.info()$naomit, "</b></font>")
+      #mat.info()$naomit
     })
 
 

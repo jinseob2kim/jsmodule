@@ -1,3 +1,10 @@
+# jsmodule 1.0.5
+
+## Update
+
+* PS matching: Change font size & color of the message with missing value information. 
+
+
 # jsmodule 1.0.4
 
 ## Bug fixes
