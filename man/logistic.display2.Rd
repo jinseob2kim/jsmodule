@@ -4,8 +4,14 @@
 \alias{logistic.display2}
 \title{logistic.display2: Modified epiDisplay's logistic.display function.}
 \usage{
-logistic.display2(logistic.model, alpha = 0.05, crude = TRUE,
-  crude.p.value = FALSE, decimal = 2, simplified = FALSE)
+logistic.display2(
+  logistic.model,
+  alpha = 0.05,
+  crude = TRUE,
+  crude.p.value = FALSE,
+  decimal = 2,
+  simplified = FALSE
+)
 }
 \arguments{
 \item{logistic.model}{glm object(binomial)}

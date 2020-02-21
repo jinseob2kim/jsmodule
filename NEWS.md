@@ -1,3 +1,14 @@
+# jsmodule 1.0.6
+
+## Bug fix
+
+* PS matching: **Duplicated independent variables UI** in ROC/timeROC analysis.  
+
+## Update
+
+* Change **minimum timeby** in kaplan-meier plot: 1 to 0
+
+
 # jsmodule 1.0.5
 
 ## Update

@@ -4,8 +4,18 @@
 \alias{tb1simple2}
 \title{tb1simple2: tb1 module for propensity score analysis for reactive data}
 \usage{
-tb1simple2(input, output, session, data, matdata, data_label,
-  data_varStruct = NULL, vlist, group_var, showAllLevels = T)
+tb1simple2(
+  input,
+  output,
+  session,
+  data,
+  matdata,
+  data_label,
+  data_varStruct = NULL,
+  vlist,
+  group_var,
+  showAllLevels = T
+)
 }
 \arguments{
 \item{input}{input}

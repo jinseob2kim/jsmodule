@@ -4,8 +4,15 @@
 \alias{reclassificationJS}
 \title{reclassificationJS: Function for reclassification table and statistics}
 \usage{
-reclassificationJS(data, cOutcome, predrisk1, predrisk2, cutoff,
-  dec.value = 3, dec.p = 3)
+reclassificationJS(
+  data,
+  cOutcome,
+  predrisk1,
+  predrisk2,
+  cutoff,
+  dec.value = 3,
+  dec.p = 3
+)
 }
 \arguments{
 \item{data}{Data frame or matrix that includes the outcome and predictors variables.}

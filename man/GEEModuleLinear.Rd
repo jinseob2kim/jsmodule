@@ -4,8 +4,16 @@
 \alias{GEEModuleLinear}
 \title{GEEModuleLinear: shiny modulde server for gaussian generalized estimating equation(GEE) using reactive data.}
 \usage{
-GEEModuleLinear(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, id.gee)
+GEEModuleLinear(
+  input,
+  output,
+  session,
+  data,
+  data_label,
+  data_varStruct = NULL,
+  nfactor.limit = 10,
+  id.gee
+)
 }
 \arguments{
 \item{input}{input}

@@ -4,9 +4,18 @@
 \alias{regressModule2}
 \title{regressModule2: Shiny modulde server for linear regression for reactive data.}
 \usage{
-regressModule2(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
-  default.unires = T, limit.unires = 20)
+regressModule2(
+  input,
+  output,
+  session,
+  data,
+  data_label,
+  data_varStruct = NULL,
+  nfactor.limit = 10,
+  design.survey = NULL,
+  default.unires = T,
+  limit.unires = 20
+)
 }
 \arguments{
 \item{input}{input}

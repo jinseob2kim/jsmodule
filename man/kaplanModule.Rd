@@ -4,9 +4,20 @@
 \alias{kaplanModule}
 \title{kaplanModule: shiny module server for kaplan-meier plot.}
 \usage{
-kaplanModule(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
-  id.cluster = NULL, timeby = NULL, range.x = NULL, range.y = NULL)
+kaplanModule(
+  input,
+  output,
+  session,
+  data,
+  data_label,
+  data_varStruct = NULL,
+  nfactor.limit = 10,
+  design.survey = NULL,
+  id.cluster = NULL,
+  timeby = NULL,
+  range.x = NULL,
+  range.y = NULL
+)
 }
 \arguments{
 \item{input}{input}

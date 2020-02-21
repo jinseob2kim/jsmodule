@@ -872,9 +872,9 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
     ## ROC
 
-    out_roc_original <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    out_roc_ps <- callModule(rocModule, "roc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    out_roc_iptw <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
+    out_roc_original <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_roc_ps <- callModule(rocModule2, "roc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_roc_iptw <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
 
     output$plot_roc_original <- renderPlot({
@@ -909,9 +909,9 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
     ## Time-ROC
 
-    out_timeroc_original <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    out_timeroc_ps <- callModule(timerocModule, "timeroc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    out_timeroc_iptw <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
+    out_timeroc_original <- callModule(timerocModule2, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_timeroc_ps <- callModule(timerocModule2, "timeroc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_timeroc_iptw <- callModule(timerocModule2, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
 
     output$plot_timeroc_original <- renderPlot({
@@ -1503,9 +1503,9 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
     ## ROC
 
-    out_roc_original <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    out_roc_ps <- callModule(rocModule, "roc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    out_roc_iptw <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
+    out_roc_original <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_roc_ps <- callModule(rocModule2, "roc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_roc_iptw <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
 
     output$plot_roc_original <- renderPlot({
@@ -1540,9 +1540,9 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
     ## Time-ROC
 
-    out_timeroc_original <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    out_timeroc_ps <- callModule(timerocModule, "timeroc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    out_timeroc_iptw <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
+    out_timeroc_original <- callModule(timerocModule2, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_timeroc_ps <- callModule(timerocModule2, "timeroc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_timeroc_iptw <- callModule(timerocModule2, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
 
     output$plot_timeroc_original <- renderPlot({

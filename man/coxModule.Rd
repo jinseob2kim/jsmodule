@@ -4,9 +4,19 @@
 \alias{coxModule}
 \title{coxModule: shiny modulde server for Cox's model.}
 \usage{
-coxModule(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
-  default.unires = T, limit.unires = 20, id.cluster = NULL)
+coxModule(
+  input,
+  output,
+  session,
+  data,
+  data_label,
+  data_varStruct = NULL,
+  nfactor.limit = 10,
+  design.survey = NULL,
+  default.unires = T,
+  limit.unires = 20,
+  id.cluster = NULL
+)
 }
 \arguments{
 \item{input}{input}

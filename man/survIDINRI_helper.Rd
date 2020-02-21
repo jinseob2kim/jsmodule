@@ -4,8 +4,16 @@
 \alias{survIDINRI_helper}
 \title{survIDINRI_helper: Helper function for IDI.INF.OUT in survIDINRI packages}
 \usage{
-survIDINRI_helper(var.event, var.time, list.vars.ind, t, data,
-  dec.auc = 3, dec.p = 3, id.cluster = NULL)
+survIDINRI_helper(
+  var.event,
+  var.time,
+  list.vars.ind,
+  t,
+  data,
+  dec.auc = 3,
+  dec.p = 3,
+  id.cluster = NULL
+)
 }
 \arguments{
 \item{var.event}{event}

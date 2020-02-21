@@ -4,9 +4,18 @@
 \alias{logisticModule2}
 \title{logisticModule2: Shiny modulde server for logistic regression for reactive data.}
 \usage{
-logisticModule2(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
-  default.unires = T, limit.unires = 20)
+logisticModule2(
+  input,
+  output,
+  session,
+  data,
+  data_label,
+  data_varStruct = NULL,
+  nfactor.limit = 10,
+  design.survey = NULL,
+  default.unires = T,
+  limit.unires = 20
+)
 }
 \arguments{
 \item{input}{input}

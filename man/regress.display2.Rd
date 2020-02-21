@@ -4,8 +4,14 @@
 \alias{regress.display2}
 \title{regress.display2: modified epiDisplay's regress.display function}
 \usage{
-regress.display2(regress.model, alpha = 0.05, crude = FALSE,
-  crude.p.value = FALSE, decimal = 2, simplified = FALSE)
+regress.display2(
+  regress.model,
+  alpha = 0.05,
+  crude = FALSE,
+  crude.p.value = FALSE,
+  decimal = 2,
+  simplified = FALSE
+)
 }
 \arguments{
 \item{regress.model}{lm object}

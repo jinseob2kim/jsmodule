@@ -4,9 +4,17 @@
 \alias{tb1module}
 \title{tb1module: table 1 shiny module server.}
 \usage{
-tb1module(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
-  showAllLevels = T)
+tb1module(
+  input,
+  output,
+  session,
+  data,
+  data_label,
+  data_varStruct = NULL,
+  nfactor.limit = 10,
+  design.survey = NULL,
+  showAllLevels = T
+)
 }
 \arguments{
 \item{input}{input}

@@ -4,8 +4,15 @@
 \alias{timeROChelper}
 \title{timeROChelper: Helper function for timerocModule}
 \usage{
-timeROChelper(var.event, var.time, vars.ind, t, data,
-  design.survey = NULL, id.cluster = NULL)
+timeROChelper(
+  var.event,
+  var.time,
+  vars.ind,
+  t,
+  data,
+  design.survey = NULL,
+  id.cluster = NULL
+)
 }
 \arguments{
 \item{var.event}{event}

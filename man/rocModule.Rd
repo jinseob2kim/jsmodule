@@ -2,11 +2,32 @@
 % Please edit documentation in R/roc.R
 \name{rocModule}
 \alias{rocModule}
+\alias{rocModule2}
 \title{rocModule: shiny module server for roc analysis}
 \usage{
-rocModule(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL,
-  id.cluster = NULL)
+rocModule(
+  input,
+  output,
+  session,
+  data,
+  data_label,
+  data_varStruct = NULL,
+  nfactor.limit = 10,
+  design.survey = NULL,
+  id.cluster = NULL
+)
+
+rocModule2(
+  input,
+  output,
+  session,
+  data,
+  data_label,
+  data_varStruct = NULL,
+  nfactor.limit = 10,
+  design.survey = NULL,
+  id.cluster = NULL
+)
 }
 \arguments{
 \item{input}{input}
@@ -29,12 +50,18 @@ rocModule(input, output, session, data, data_label,
 }
 \value{
 shiny module server for roc analysis
+
+shiny module server for roc analysis- input number of model as integer
 }
 \description{
 shiny module server for roc analysis
+
+shiny module server for roc analysis- input number of model as integer
 }
 \details{
 shiny module server for roc analysis
+
+shiny module server for roc analysis- input number of model as integer
 }
 \examples{
 library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2);library(pROC)
@@ -69,8 +96,49 @@ server <- function(input, output, session) {
               options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
   })
 }
+library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2);library(pROC)
+ui <- fluidPage(
+   sidebarLayout(
+   sidebarPanel(
+     rocUI("roc")
+   ),
+   mainPanel(
+     plotOutput("plot_roc"),
+     ggplotdownUI("roc"),
+     DTOutput("table_roc")
+   )
+ )
+)
+
+server <- function(input, output, session) {
+
+  data <- reactive(mtcars)
+  data.label <- jstable::mk.lev(mtcars)
+
+  out_roc <- callModule(rocModule2, "roc", data = data, data_label = data.label,
+                            data_varStruct = NULL)
+
+  output$plot_roc <- renderPlot({
+    print(out_roc()$plot)
+  })
+
+  output$table_roc <- renderDT({
+    datatable(out_roc()$tb, rownames=F, editable = F, extensions= "Buttons",
+              caption = "ROC results",
+              options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+  })
+}
 }
 \seealso{
+\code{\link[stats]{quantile}}
+ \code{\link[data.table]{setkey}}
+ \code{\link[geepack]{geeglm}}
+ \code{\link[survey]{svyglm}}
+ \code{\link[pROC]{ggroc.roc}}
+ \code{\link[see]{theme_modern}}
+ \code{\link[devEMF]{emf}}
+ \code{\link[grDevices]{dev}}
+
 \code{\link[stats]{quantile}}
  \code{\link[data.table]{setkey}}
  \code{\link[geepack]{geeglm}}

@@ -4,8 +4,17 @@
 \alias{tb1simple}
 \title{tb1simple: tb1 module server for propensity score analysis}
 \usage{
-tb1simple(input, output, session, data, matdata, data_label,
-  data_varStruct = NULL, group_var, showAllLevels = T)
+tb1simple(
+  input,
+  output,
+  session,
+  data,
+  matdata,
+  data_label,
+  data_varStruct = NULL,
+  group_var,
+  showAllLevels = T
+)
 }
 \arguments{
 \item{input}{input}

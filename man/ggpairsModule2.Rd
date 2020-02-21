@@ -4,8 +4,15 @@
 \alias{ggpairsModule2}
 \title{ggpairsModule2: shiny module server for basic/scatter plot for reactive data.}
 \usage{
-ggpairsModule2(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 20)
+ggpairsModule2(
+  input,
+  output,
+  session,
+  data,
+  data_label,
+  data_varStruct = NULL,
+  nfactor.limit = 20
+)
 }
 \arguments{
 \item{input}{input}

@@ -4,8 +4,16 @@
 \alias{GEEModuleLogistic}
 \title{GEEModuleLogistic: shiny modulde server for binomial gaussian generalized estimating equation(GEE) using reactive data.}
 \usage{
-GEEModuleLogistic(input, output, session, data, data_label,
-  data_varStruct = NULL, nfactor.limit = 10, id.gee)
+GEEModuleLogistic(
+  input,
+  output,
+  session,
+  data,
+  data_label,
+  data_varStruct = NULL,
+  nfactor.limit = 10,
+  id.gee
+)
 }
 \arguments{
 \item{input}{input}

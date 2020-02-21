@@ -633,9 +633,422 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
   return(rocList)
 
-
-
 }
 
 
+
+
+
+#' @title rocModule2: shiny module server for roc analysis- input number of model as integer
+#' @description shiny module server for roc analysis- input number of model as integer
+#' @param input input
+#' @param output output
+#' @param session session
+#' @param data Reactive data
+#' @param data_label Reactuve data label
+#' @param data_varStruct Reactive List of variable structure, Default: NULL
+#' @param nfactor.limit nlevels limit in factor variable, Default: 10
+#' @param design.survey Reactive survey data. default: NULL
+#' @param id.cluster Reactive cluster variable if marginal model, Default: NULL
+#' @return shiny module server for roc analysis- input number of model as integer
+#' @details shiny module server for roc analysis- input number of model as integer
+#' @examples
+#' library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2);library(pROC)
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      rocUI("roc")
+#'    ),
+#'    mainPanel(
+#'      plotOutput("plot_roc"),
+#'      ggplotdownUI("roc"),
+#'      DTOutput("table_roc")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- jstable::mk.lev(mtcars)
+#'
+#'   out_roc <- callModule(rocModule2, "roc", data = data, data_label = data.label,
+#'                             data_varStruct = NULL)
+#'
+#'   output$plot_roc <- renderPlot({
+#'     print(out_roc()$plot)
+#'   })
+#'
+#'   output$table_roc <- renderDT({
+#'     datatable(out_roc()$tb, rownames=F, editable = F, extensions= "Buttons",
+#'               caption = "ROC results",
+#'               options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+#'   })
+#'}
+#' @seealso
+#'  \code{\link[stats]{quantile}}
+#'  \code{\link[data.table]{setkey}}
+#'  \code{\link[geepack]{geeglm}}
+#'  \code{\link[survey]{svyglm}}
+#'  \code{\link[pROC]{ggroc.roc}}
+#'  \code{\link[see]{theme_modern}}
+#'  \code{\link[devEMF]{emf}}
+#'  \code{\link[grDevices]{dev}}
+#' @rdname rocModule
+#' @export
+#' @importFrom stats quantile
+#' @importFrom data.table setkey
+#' @importFrom geepack geeglm
+#' @importFrom survey svyglm
+#' @importFrom pROC ggroc
+#' @importFrom see theme_modern
+#' @importFrom devEMF emf
+#' @importFrom grDevices dev.off
+
+
+rocModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
+
+  ## To remove NOTE.
+  level <- variable <- NULL
+
+  if (is.null(data_varStruct)){
+    data_varStruct <- reactive(list(variable = names(data())))
+  }
+
+  vlist <- reactive({
+
+    mklist <- function(varlist, vars){
+      lapply(varlist,
+             function(x){
+               inter <- intersect(x, vars)
+               if (length(inter) == 1){
+                 inter <- c(inter, "")
+               }
+               return(inter)
+             })
+
+
+    }
+
+    factor_vars <- names(data())[data()[, lapply(.SD, class) %in% c("factor", "character")]]
+    #factor_vars <- names(data())[sapply(names(data()), function(x){class(data()[[x]]) %in% c("factor", "character")})]
+    factor_list <- mklist(data_varStruct(), factor_vars)
+
+
+    conti_vars <- setdiff(names(data()), factor_vars)
+    if (!is.null(design.survey)){
+      conti_vars <- setdiff(conti_vars, c(names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
+    }
+    conti_vars_positive <- conti_vars[unlist(data()[, lapply(.SD, function(x){min(x, na.rm = T) >= 0}), .SDcols = conti_vars])]
+    conti_list <- mklist(data_varStruct(), conti_vars)
+
+    nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(levels(x))}), .SDcols = factor_vars])
+    #nclass_factor <- sapply(factor_vars, function(x){length(unique(data()[[x]]))})
+    class01_factor <- unlist(data()[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])
+
+    validate(
+      need(length(class01_factor) >= 1, "No categorical variables coded as 0, 1 in data")
+    )
+    factor_01vars <- factor_vars[class01_factor]
+
+    factor_01_list <- mklist(data_varStruct(), factor_01vars)
+
+    group_vars <- factor_vars[nclass_factor >=2 & nclass_factor <= nfactor.limit & nclass_factor < nrow(data())]
+    group_list <- mklist(data_varStruct(), group_vars)
+
+    except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data())]
+
+    return(list(factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list, conti_vars_positive = conti_vars_positive,
+                factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_vars = group_vars, group_list = group_list, except_vars = except_vars)
+    )
+
+  })
+
+  output$event <- renderUI({
+    validate(
+      need(length(vlist()$factor_01vars) >=1 , "No candidate event variables coded as 0, 1")
+    )
+
+    tagList(
+      selectInput(session$ns("event_roc"), "Event",
+                  choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
+                  selected = NULL
+      )
+    )
+  })
+
+
+  output$addmodel <- renderUI({
+    radioButtons(session$ns("nmodel"), "Number of models", 1:5, selected = 1, inline = T)
+  })
+
+  nmodel <- reactive(as.integer(input$nmodel))
+
+
+
+  indeproc <- reactive({
+    req(!is.null(input$event_roc))
+    mklist <- function(varlist, vars){
+      lapply(varlist,
+             function(x){
+               inter <- intersect(x, vars)
+               if (length(inter) == 1){
+                 inter <- c(inter, "")
+               }
+               return(inter)
+             })
+    }
+
+
+    if (!is.null(design.survey)){
+      indep.roc <- setdiff(vlist()$factor_vars, c(vlist()$except_vars, input$event_roc, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
+    } else if (!is.null(id.cluster)){
+      indep.roc <- setdiff(vlist()$factor_vars, c(vlist()$except_vars, input$event_roc, id.cluster()))
+    } else{
+      indep.roc <- setdiff(names(data()), c(vlist()$except_vars, input$event_roc ))
+    }
+    return(indep.roc)
+  })
+
+
+  output$indep <- renderUI({
+    req(nmodel())
+    lapply(1:nmodel(), {
+      function(x){
+        selectInput(session$ns(paste0("indep_roc", x)), paste0("Independent variables for Model ", x),
+                    choices = mklist(data_varStruct(), indeproc()), multiple = T,
+                    selected = unlist(mklist(data_varStruct(), indeproc()))[x])
+      }
+    })
+
+  })
+
+
+
+
+
+
+
+  indeps <-  reactive(lapply(1:nmodel(), function(i){input[[paste0("indep_roc", i)]]}))
+
+
+
+
+  observeEvent(input$subcheck, {
+    output$subvar <- renderUI({
+      req(input$subcheck == T)
+      indeps.unique <- unique(unlist(indeps()))
+
+      var_subgroup <- setdiff(names(data()), c(vlist()$except_vars,input$event_roc,  indeps.unique))
+      if (!is.null(id.cluster)){
+        var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$event_roc, indeps.unique, id.cluster()))
+      } else if (!is.null(design.survey)){
+        var_subgroup <- setdiff(names(data()), union(c(names(design.survey()$strata), names(design.survey()$cluster), names(design.survey()$allprob)), c(vlist()$except_vars, input$event_roc, indeps.unique)))
+      }
+
+      var_subgroup_list <- mklist(data_varStruct(), var_subgroup)
+      validate(
+        need(length(var_subgroup) > 0 , "No variables for sub-group analysis")
+      )
+
+      tagList(
+        selectInput(session$ns("subvar_roc"), "Sub-group variables",
+                    choices = var_subgroup_list, multiple = T,
+                    selected = var_subgroup[1])
+      )
+
+
+    })
+
+  })
+
+
+  output$subval <- renderUI({
+    req(input$subcheck == T)
+    req(length(input$subvar_roc) > 0)
+
+    outUI <- tagList()
+
+    for (v in seq_along(input$subvar_roc)){
+      if (input$subvar_roc[[v]] %in% vlist()$factor_vars){
+        outUI[[v]] <- selectInput(session$ns(paste0("subval_roc", v)), paste0("Sub-group value: ", input$subvar_roc[[v]]),
+                                  choices = data_label()[variable == input$subvar_roc[[v]], level], multiple = T,
+                                  selected = data_label()[variable == input$subvar_roc[[v]], level][1])
+      } else{
+        val <- stats::quantile(data()[[input$subvar_roc[[v]]]], na.rm = T)
+        outUI[[v]] <- sliderInput(session$ns(paste0("subval_roc", v)), paste0("Sub-group range: ", input$subvar_roc[[v]]),
+                                  min = val[1], max = val[5],
+                                  value = c(val[2], val[4]))
+      }
+
+    }
+    outUI
+
+
+  })
+
+
+
+  rocList <- reactive({
+    req(!is.null(input$event_roc))
+
+    for (i in 1:nmodel()){req(!is.null(input[[paste0("indep_roc", i)]]))}
+    req(!is.null(indeps()))
+    collapse.indep <- sapply(1:nmodel(), function(i){paste0(input[[paste0("indep_roc", i)]], collapse = "")})
+    validate(
+      need(anyDuplicated(collapse.indep) == 0, "Please select different models")
+    )
+
+    data.roc <- data()
+    label.regress <- data_label()
+    data.roc[[input$event_roc]] <- as.numeric(as.vector(data.roc[[input$event_roc]]))
+    if(input$subcheck == TRUE){
+      validate(
+        need(length(input$subvar_roc) > 0 , "No variables for subsetting"),
+        need(all(sapply(1:length(input$subvar_roc), function(x){length(input[[paste0("subval_roc", x)]])})), "No value for subsetting")
+      )
+
+      for (v in seq_along(input$subvar_roc)){
+        if (input$subvar_roc[[v]] %in% vlist()$factor_vars){
+          data.roc <- data.roc[get(input$subvar_roc[[v]]) %in% input[[paste0("subval_roc", v)]]]
+        } else{
+          data.roc <- data.roc[get(input$subvar_roc[[v]]) >= input[[paste0("subval_roc", v)]][1] & get(input$subvar_roc[[v]]) <= input[[paste0("subval_roc", v)]][2]]
+        }
+      }
+
+
+      data.roc[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
+      label.regress2 <- mk.lev(data.roc)[, c("variable", "class", "level")]
+      data.table::setkey(data_label(), "variable", "class", "level")
+      data.table::setkey(label.regress2, "variable", "class", "level")
+      label.regress <- data_label()[label.regress2]
+      data.roc[[input$event_roc]] <- as.numeric(as.vector(data.roc[[input$event_roc]]))
+    }
+
+    if (is.null(design.survey)){
+      if (is.null(id.cluster)){
+        res.roc <- lapply(indeps(), function(x){
+          forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
+          mm <- glm(as.formula(forms), data = data.roc, family = binomial)
+          pROC::roc(mm$y, predict(mm, type = "response"))})
+
+
+      } else{
+        res.roc <- lapply(indeps(), function(x){
+          forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
+          mm <- geepack::geeglm(as.formula(forms), data = data.roc, family = "binomial", id = get(id.cluster()), corstr = "exchangeable")
+          pROC::roc(mm$y, predict(mm, type = "response"))})
+
+      }
+
+      res.tb <- ROC_table(res.roc, dec.auc = 3, dec.p = 3)
+
+
+
+    } else{
+      data.design <- design.survey()
+      label.regress <- data_label()
+      data.design$variables[[input$event_roc]] <- as.numeric(as.vector(data.design$variables[[input$event_roc]]))
+      if(input$subcheck == TRUE){
+        validate(
+          need(length(input$subvar_roc) > 0 , "No variables for subsetting"),
+          need(all(sapply(1:length(input$subvar_roc), function(x){length(input[[paste0("subval_roc", x)]])})), "No value for subsetting")
+        )
+
+        for (v in seq_along(input$subvar_roc)){
+          if (input$subvar_roc[[v]] %in% vlist()$factor_vars){
+            data.design <- subset(data.design, get(input$subvar_roc[[v]]) %in% input[[paste0("subval_roc", v)]])
+          } else{
+            data.design <- subset(data.design, get(input$subvar_roc[[v]]) >= input[[paste0("subval_roc", v)]][1] & get(input$subvar_roc[[v]]) <= input[[paste0("subval_roc", v)]][2])
+          }
+        }
+
+
+        data.design$variables[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
+        label.regress2 <- mk.lev(data.design$variables)[, c("variable", "class", "level")]
+        data.table::setkey(data_label(), "variable", "class", "level")
+        data.table::setkey(label.regress2, "variable", "class", "level")
+        label.regress <- data_label()[label.regress2]
+        data.design$variables[[input$event_roc]] <- as.numeric(as.vector(data.design$variables[[input$event_roc]]))
+
+      }
+      res.roc <- lapply(indeps(), function(x){
+        forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
+        mm <- survey::svyglm(as.formula(forms), design = data.design, family=quasibinomial())
+        pROC::roc(mm$y, as.matrix(predict(mm, type= "response")))})
+
+      res.tb <- ROC_table(res.roc, dec.auc = 3, dec.p = 3)
+    }
+
+
+    p <- pROC::ggroc(res.roc) + see::theme_modern() + geom_abline(slope = 1, intercept = 1, lty = 2) +
+      xlab("Specificity") + ylab("Sensitivity") + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
+
+    return(list(plot = p, tb = res.tb))
+  })
+
+
+
+
+
+  output$downloadControls <- renderUI({
+    tagList(
+      column(4,
+             selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
+                            choices = c("jpg","pdf", "tiff", "svg", "emf"), multiple = F,
+                            selected = "jpg"
+             )
+      ),
+      column(4,
+             sliderInput(session$ns("fig_width"), "Width (in):",
+                         min = 5, max = 15, value = 8
+             )
+      ),
+      column(4,
+             sliderInput(session$ns("fig_height"), "Height (in):",
+                         min = 5, max = 15, value = 6
+             )
+      )
+    )
+  })
+
+  output$downloadButton <- downloadHandler(
+    filename =  function() {
+      if (is.null(design.survey)){
+        if (is.null(id.cluster)){
+          return(paste(input$event_roc, "_ROC.",input$file_ext ,sep=""))
+        } else{
+          return(paste(input$event_roc, "_ROC_marginal.",input$file_ext ,sep=""))
+        }
+      } else{
+        return(paste(input$event_roc, "_ROC_survey.",input$file_ext ,sep=""))
+      }
+
+    },
+    # content is a function with argument file. content writes the plot to the device
+    content = function(file) {
+      withProgress(message = 'Download in progress',
+                   detail = 'This may take a while...', value = 0, {
+                     for (i in 1:15) {
+                       incProgress(1/15)
+                       Sys.sleep(0.01)
+                     }
+
+                     if (input$file_ext == "emf"){
+                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300, emfPlus = F)
+                       print(rocList()$plot)
+                       grDevices::dev.off()
+
+                     } else{
+                       ggsave(file, rocList()$plot, dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                     }
+
+                   })
+
+    }
+  )
+
+  return(rocList)
+
+}
 

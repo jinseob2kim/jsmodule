@@ -555,7 +555,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
       tagList(
         sliderInput(session$ns("timeby"), "Time by",
-                    min = 1, max = xmax, value = value.timeby, step = xstep.default),
+                    min = 0, max = xmax, value = value.timeby, step = xstep.default),
 
         sliderInput(session$ns("xlims"), "X axis range(time)",
                     min = 0, max = xmax, value = range.x, step = xstep.default),
@@ -567,7 +567,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
   kmInput <- reactive({
     req(kmList())
-    req(input$timeby)
+    req(input$timeby > 1)
     req(input$xlims)
     req(input$ylims)
     res.km <- kmList()$res
