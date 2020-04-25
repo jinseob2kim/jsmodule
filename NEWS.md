@@ -1,3 +1,9 @@
+# jsmodule 1.0.7
+
+## Dependency
+
+* Add dependency: **Cairo** package
+
 # jsmodule 1.0.6
 
 ## Bug fix
