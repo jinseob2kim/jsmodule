@@ -60,6 +60,7 @@ tb1moduleUI <- function(id) {
 #' @param nfactor.limit maximum factor levels to include, Default: 10
 #' @param design.survey survey data of survey package. default: NULL
 #' @param showAllLevels Show All label information with 2 categorical variables, Default: T
+#' @param argsExact Option for Fisher exact test memory limit.
 #' @return Table 1 shiny module server for descriptive statistics.
 #' @details Table 1 shiny module server for descriptive statistics.
 #' @examples
@@ -100,7 +101,7 @@ tb1moduleUI <- function(id) {
 #' @importFrom methods is
 
 
-tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T){
+tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T, argsExact = list(workspace = 2 * 10^7, hybrid = T)){
 
   ## To remove NOTE.
   variable <- NULL
@@ -225,7 +226,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
         res <- jstable::CreateTableOneJS(data = data,
                                          vars = vars, includeNA = F, test = T,
                                          testApprox = chisq.test, argsApprox = list(correct = TRUE),
-                                         testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                         testExact = fisher.test, argsExact = argsExact,
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                          showAllLevels = showAllLevels, printToggle = F, quote = F, smd = F, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
@@ -244,7 +245,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
         res <- jstable::CreateTableOneJS(data = data,
                                          vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
                                          testApprox = chisq.test, argsApprox = list(correct = TRUE),
-                                         testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                         testExact = fisher.test, argsExact = argsExact,
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                          showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
@@ -261,7 +262,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
         res <- jstable::CreateTableOneJS(data = data,
                                          vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
                                          testApprox = chisq.test, argsApprox = list(correct = TRUE),
-                                         testExact = fisher.test, argsExact = list(workspace = 2 * 10^5, hybrid = T),
+                                         testExact = fisher.test, argsExact = argsExact,
                                          testNormal = oneway.test, argsNormal = list(var.equal = F),
                                          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                          showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
@@ -324,7 +325,8 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @param data_varStruct Variable structure list of data, Default: NULL
 #' @param nfactor.limit maximum factor levels to include, Default: 10
 #' @param design.survey Reactive survey data of survey package. Default: NULL
-#' @param showAllLevels Show All label information with 2 categorical variables, Default: F
+#' @param showAllLevels Show All label information with 2 categorical variables, Default: T
+#' @param argsExact Option for Fisher exact test memory limit.
 #' @return Table 1 shiny module server for descriptive statistics.
 #' @details Table 1 shiny module server for descriptive statistics.
 #' @examples
@@ -365,7 +367,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @importFrom methods is
 
 
-tb1module2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T){
+tb1module2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T, argsExact = list(workspace = 2 * 10^7, hybrid = T)){
 
 
   if (is.null(data_varStruct)){
@@ -498,7 +500,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
         res <- jstable::CreateTableOneJS(data = data(),
                                         vars = vars, includeNA = F, test = T,
                                         testApprox = chisq.test, argsApprox = list(correct = TRUE),
-                                        testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                        testExact = fisher.test, argsExact = argsExact,
                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = F, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
@@ -517,7 +519,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
         res <- jstable::CreateTableOneJS(data = data(),
                                         vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
                                         testApprox = chisq.test, argsApprox = list(correct = TRUE),
-                                        testExact = fisher.test, argsExact = list(workspace = 2 * 10^5),
+                                        testExact = fisher.test, argsExact = argsExact,
                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
@@ -534,7 +536,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
         res <- jstable::CreateTableOneJS(data = data(),
                                         vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
                                         testApprox = chisq.test, argsApprox = list(correct = TRUE),
-                                        testExact = fisher.test, argsExact = list(workspace = 2 * 10^5, hybrid = T),
+                                        testExact = fisher.test, argsExact = argsExact,
                                         testNormal = oneway.test, argsNormal = list(var.equal = F),
                                         testNonNormal = kruskal.test, argsNonNormal = list(NULL),
                                         showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,

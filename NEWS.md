@@ -1,3 +1,7 @@
+# jsmodule 1.0.8
+
+* Add option to `tb1module1` ,`tb1module2`: control memory allocation in Fisher exact test.
+
 # jsmodule 1.0.7
 
 ## Dependency

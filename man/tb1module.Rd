@@ -13,7 +13,8 @@ tb1module(
   data_varStruct = NULL,
   nfactor.limit = 10,
   design.survey = NULL,
-  showAllLevels = T
+  showAllLevels = T,
+  argsExact = list(workspace = 2 * 10^7, hybrid = T)
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ tb1module(
 \item{design.survey}{survey data of survey package. default: NULL}
 
 \item{showAllLevels}{Show All label information with 2 categorical variables, Default: T}
+
+\item{argsExact}{Option for Fisher exact test memory limit.}
 }
 \value{
 Table 1 shiny module server for descriptive statistics.
