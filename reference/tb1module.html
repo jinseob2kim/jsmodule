@@ -78,7 +78,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.8</span>
       </span>
     </div>
 
@@ -144,7 +144,8 @@
   <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>nfactor.limit</span> <span class='kw'>=</span> <span class='fl'>10</span>,
   <span class='kw'>design.survey</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>showAllLevels</span> <span class='kw'>=</span> <span class='no'>T</span>
+  <span class='kw'>showAllLevels</span> <span class='kw'>=</span> <span class='no'>T</span>,
+  <span class='kw'>argsExact</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>workspace</span> <span class='kw'>=</span> <span class='fl'>2</span> * <span class='fl'>10</span>^<span class='fl'>7</span>, <span class='kw'>hybrid</span> <span class='kw'>=</span> <span class='no'>T</span>)
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -185,6 +186,10 @@
     <tr>
       <th>showAllLevels</th>
       <td><p>Show All label information with 2 categorical variables, Default: T</p></td>
+    </tr>
+    <tr>
+      <th>argsExact</th>
+      <td><p>Option for Fisher exact test memory limit.</p></td>
     </tr>
     </table>
 
