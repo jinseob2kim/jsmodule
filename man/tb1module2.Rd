@@ -14,7 +14,7 @@ tb1module2(
   nfactor.limit = 10,
   design.survey = NULL,
   showAllLevels = T,
-  argsExact = list(workspace = 2 * 10^7, hybrid = T)
+  argsExact = list(workspace = 2 * 10^7, simulate.p.value = T)
 )
 }
 \arguments{
