@@ -101,7 +101,7 @@ tb1moduleUI <- function(id) {
 #' @importFrom methods is
 
 
-tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T, argsExact = list(workspace = 2 * 10^7, hybrid = T)){
+tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T, argsExact = list(workspace = 2 * 10^7, simulate.p.value = T)){
 
   ## To remove NOTE.
   variable <- NULL
@@ -367,7 +367,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @importFrom methods is
 
 
-tb1module2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T, argsExact = list(workspace = 2 * 10^7, hybrid = T)){
+tb1module2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T, argsExact = list(workspace = 2 * 10^7, simulate.p.value = T)){
 
 
   if (is.null(data_varStruct)){

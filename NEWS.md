@@ -1,6 +1,6 @@
 # jsmodule 1.0.8
 
-* Add option to `tb1module1` ,`tb1module2`: control memory allocation in Fisher exact test.
+* Add option to `tb1module1` ,`tb1module2`: get simulated p value in Fisher exact test when larger than 2 by 2 tables.
 
 # jsmodule 1.0.7
 
