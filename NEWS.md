@@ -1,6 +1,6 @@
 # jsmodule 1.1.0
 
-* Apply **AIC based stepwise selection** to linear/logistic regression, cox model and svyglm.
+* Apply **AIC based stepwise selection** to linear/logistic regression, cox model.
 
 * Deprecated fucntion: `regressModule` & `logisticModule`, please use `regressModule2` & `logisticModule2`
 

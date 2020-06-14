@@ -155,7 +155,7 @@ regressModuleUI <- function(id) {
 regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
 
   ## To remove NOTE.
-  d2 <- level <- val_label <- variable <- NULL
+  level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -439,13 +439,14 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
         validate(
           need(!is.null(input$step_upper), "Upper limits can't be NULL, please select at least 1 variable."),
           need(length((setdiff(input$step_lower, input$step_upper))) == 0, "Upper limits must include lower limits. Please add the variables to upper limits"),
-          need(input$step_direction != "both", "Only forward/bacward directions are supported")
+          need(input$step_direction != "both", "Only forward/backward directions are supported"),
+          need(is.null(design.survey), "Survey glm can't support stepwise selection")
         )
         scope <- lapply(list(input$step_upper, input$step_lower), function(x){
           as.formula(ifelse(is.null(x), "~1", paste0("~", paste(x, collapse = "+"))))
         })
 
-        d2 <<- na.omit(data.design[, c(y, xs)])
+        d2 <- na.omit(data.design[, c(y, xs)])
 
         res.svyglm <- stats::step(survey::svyglm(form, design = d2),
                                                  direction = input$step_direction, scope = list(upper = scope[[1]], lower = scope[[2]]))
@@ -533,7 +534,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
 
   ## To remove NOTE.
-  d2 <- level <- val_label <- variable <- NULL
+  level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct = reactive(list(variable = names(data())))
@@ -803,15 +804,16 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
         validate(
           need(!is.null(input$step_upper), "Upper limits can't be NULL, please select at least 1 variable."),
           need(length((setdiff(input$step_lower, input$step_upper))) == 0, "Upper limits must include lower limits. Please add the variables to upper limits"),
-          need(input$step_direction != "both", "Only forward/bacward directions are supported")
+          need(input$step_direction != "both", "Only forward/backward directions are supported"),
+          need(is.null(design.survey), "Survey glm can't support stepwise selection")
         )
         scope <- lapply(list(input$step_upper, input$step_lower), function(x){
           as.formula(ifelse(is.null(x), "~1", paste0("~", paste(x, collapse = "+"))))
         })
 
-        d2 <<- na.omit(data.design[, c(y, xs)])
+        d2 <- na.omit(data.design[, c(y, xs)])
 
-        res.svyglm <- stats::step(survey::svyglm(form, design = d2, family = quasibinomial()),
+        res.svyglm <- stats::step(res.svyglm,
                                   direction = input$step_direction, scope = list(upper = scope[[1]], lower = scope[[2]]))
       }
       tb.svyglm <- jstable::svyregress.display(res.svyglm, decimal = input$decimal)
