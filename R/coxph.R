@@ -20,7 +20,10 @@ coxUI <- function(id) {
     ),
     checkboxInput(ns("subcheck"), "Sub-group analysis"),
     uiOutput(ns("subvar")),
-    uiOutput(ns("subval"))
+    uiOutput(ns("subval")),
+    checkboxInput(ns("step_check"), "Stepwise variable selection"),
+    uiOutput(ns("step_direction")),
+    uiOutput(ns("step_scope"))
   )
 }
 
@@ -71,7 +74,7 @@ coxUI <- function(id) {
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula model.frame
+#' @importFrom stats glm as.formula model.frame step
 #' @importFrom epiDisplay regress.display
 #' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
@@ -80,7 +83,7 @@ coxUI <- function(id) {
 coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, id.cluster = NULL) {
 
   ## To remove NOTE.
-  level <- val_label <- variable <- NULL
+  data.cox.step <- level <- val_label <- variable <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -274,6 +277,26 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
   })
 
 
+  observeEvent(input$step_check, {
+    output$step_direction <- renderUI({
+      req(input$step_check == T)
+      radioButtons(session$ns("step_direction"), "Step direction", choices = c("backward", "forward", "both"), selected = "backward", inline = T)
+    })
+
+    output$step_scope <- renderUI({
+      req(input$step_check == T)
+      req(input$indep_cox)
+      tagList(
+        fluidRow(
+          column(6, selectInput(session$ns("step_lower"), "Lower limit", choices = input$indep_cox, selected = NULL, multiple = T)),
+          column(6, selectInput(session$ns("step_upper"), "Upper limit", choices = input$indep_cox, selected = input$indep_cox, multiple = T))
+        )
+
+      )
+    })
+  })
+
+
 
   form.cox <- reactive({
     validate(
@@ -331,6 +354,25 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
         cc <- substitute(survival::coxph(.form, data= data.cox, model = T, robust = T), list(.form= form.cox()))
       }
       res.cox <- eval(cc)
+      if (input$step_check == T){
+        validate(
+          need(!is.null(input$step_upper), "Upper limits can't be NULL, please select at least 1 variable."),
+          need(length((setdiff(input$step_lower, input$step_upper))) == 0, "Upper limits must include lower limits. Please add the variables to upper limits")
+        )
+        scope <- lapply(list(input$step_upper, input$step_lower), function(x){
+          as.formula(ifelse(is.null(x), "~1", paste0("~", paste(x, collapse = "+"))))
+        })
+
+        data.cox.step <<- data.cox[complete.cases(data.cox[, .SD, .SDcols = c(input$time_cox, input$event_cox, input$indep_cox)])]
+
+        if (is.null(id.cluster)){
+          cc.step <- substitute(survival::coxph(.form, data= data.cox.step, model = T), list(.form= form.cox()))
+        } else{
+          cc.step <- substitute(survival::coxph(.form, data= data.cox.step, model = T, robust = T), list(.form= form.cox()))
+        }
+
+        res.cox <- stats::step(eval(cc.step), direction = input$step_direction, scope = list(upper = scope[[1]], lower = scope[[2]]))
+      }
       tb.cox <- jstable::cox2.display(res.cox, dec = input$decimal)
       tb.cox <- jstable::LabeljsCox(tb.cox, ref = label.regress)
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
@@ -344,7 +386,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
         cap.cox <- paste("Marginal cox model on time ('", label.regress[variable == input$time_cox, var_label][1] , "') to event ('", label.regress[variable == input$event_cox, var_label][1], "')", sep="")
       }
 
-      if(input$subcheck == T){
+      if (input$subcheck == T){
         for (v in seq_along(input$subvar_cox)){
           if (input$subvar_cox[[v]] %in% vlist()$factor_vars){
             cap.cox <- paste(cap.cox, ", ", label.regress[variable == input$subvar_cox[[v]], var_label][1], ": ", paste(label.regress[variable == input$subvar_cox[[v]] & level %in% input[[paste0("subval_cox", v)]], val_label], collapse = ", "), sep = "")
@@ -352,7 +394,9 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
             cap.cox <- paste(cap.cox, ", ", label.regress[variable == input$subvar_cox[[v]], var_label][1], ": ", paste(input[[paste0("subval_cox", v)]], collapse = "~"), sep = "")
           }
         }
-
+      }
+      if (input$step_check == T){
+        cap.cox <- paste0(cap.cox, "- stepwise selection")
       }
     } else{
       data.design <- design.survey()
@@ -381,6 +425,11 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
       cc <- substitute(survey::svycoxph(.form, design= data.design), list(.form= form.cox()))
       res.cox <- eval(cc)
+      if (input$step_check == T){
+        validate(
+          need(is.null(design.survey), "Survey cox model can't support stepwise selection")
+          )
+      }
       tb.cox <- jstable::svycox.display(res.cox, decimal = input$decimal)
       tb.cox <- jstable::LabeljsCox(tb.cox, label.regress)
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
@@ -389,7 +438,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       sig <- ifelse(as.numeric(as.vector(sig)) <= 0.05, "**", NA)
       out.cox <- cbind(out.cox, sig)
       cap.cox <- paste("Weighted cox's proportional hazard model on time ('", label.regress[variable == input$time_cox, var_label][1] , "') to event ('", label.regress[variable == input$event_cox, var_label][1], "') ", sep="")
-      if(input$subcheck == T){
+      if (input$subcheck == T){
         for (v in seq_along(input$subvar_cox)){
           if (input$subvar_cox[[v]] %in% vlist()$factor_vars){
             cap.cox <- paste(cap.cox, ", ", label.regress[variable == input$subvar_cox[[v]], var_label][1], ": ", paste(label.regress[variable == input$subvar_cox[[v]] & level %in% input[[paste0("subval_cox", v)]], val_label], collapse = ", "), sep = "")

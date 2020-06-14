@@ -1,3 +1,9 @@
+# jsmodule 1.1.0
+
+* Apply **AIC based stepwise selection** to linear/logistic regression, cox model and svyglm.
+
+* Deprecated fucntion: `regressModule` & `logisticModule`, please use `regressModule2` & `logisticModule2`
+
 # jsmodule 1.0.8
 
 * Add option to `tb1module1` ,`tb1module2`: get simulated p value in Fisher exact test when larger than 2 by 2 tables.
