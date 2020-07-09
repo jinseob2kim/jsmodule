@@ -135,7 +135,7 @@ timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey 
 #' #timeROC_table(list.timeROC)
 #' @seealso
 #'  \code{\link[stats]{confint}}
-#'  \code{\link[data.table]{data.table-package}}
+#'  \code{\link[data.table]{data.table}}
 #' @rdname timeROC_table
 #' @importFrom stats confint
 #' @importFrom data.table data.table
@@ -181,7 +181,7 @@ timeROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
 #' #survIDINRI_helper("status", "time", list.vars.ind = list("age", c("age", "sex")),
 #' #                  t = 365, data = lung)
 #' @seealso
-#'  \code{\link[data.table]{data.table-package}}
+#'  \code{\link[data.table]{data.table}}
 #'  \code{\link[stats]{model.matrix}}
 #'  \code{\link[survival]{coxph}}
 #'  \code{\link[survival]{Surv}}

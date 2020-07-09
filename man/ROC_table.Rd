@@ -35,5 +35,5 @@ ROC_table(list.roc)
 }
 \seealso{
 \code{\link[pROC]{ci.auc}},\code{\link[pROC]{roc.test}}
- \code{\link[data.table]{data.table-package}}
+ \code{\link[data.table]{data.table}}, \code{\link[data.table]{rbindlist}}
 }

@@ -162,12 +162,11 @@ reclassificationJS <- function (data, cOutcome, predrisk1, predrisk2, cutoff, de
 #' ROC_table(list.roc)
 #' @seealso
 #'  \code{\link[pROC]{ci.auc}},\code{\link[pROC]{roc.test}}
-#'  \code{\link[data.table]{data.table-package}}
+#'  \code{\link[data.table]{data.table}}, \code{\link[data.table]{rbindlist}}
 #' @rdname ROC_table
 #' @export
 #' @importFrom pROC ci.auc roc.test
-#' @importFrom data.table data.table
-
+#' @importFrom data.table data.table rbindlist
 
 ROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
   auc <- round(sapply(ListModel, function(x){x$auc}), dec.auc)
@@ -254,9 +253,9 @@ ROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
 #' @seealso
 #'  \code{\link[stats]{quantile}}
 #'  \code{\link[data.table]{setkey}}
+#'  \code{\link[pROC]{ggroc.roc}}
 #'  \code{\link[geepack]{geeglm}}
 #'  \code{\link[survey]{svyglm}}
-#'  \code{\link[pROC]{ggroc.roc}}
 #'  \code{\link[see]{theme_modern}}
 #'  \code{\link[devEMF]{emf}}
 #'  \code{\link[grDevices]{dev}}
@@ -264,9 +263,9 @@ ROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
 #' @export
 #' @importFrom stats quantile
 #' @importFrom data.table setkey
+#' @importFrom pROC roc ggroc
 #' @importFrom geepack geeglm
 #' @importFrom survey svyglm
-#' @importFrom pROC ggroc
 #' @importFrom see theme_modern
 #' @importFrom devEMF emf
 #' @importFrom grDevices dev.off
@@ -688,22 +687,23 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 #' @seealso
 #'  \code{\link[stats]{quantile}}
 #'  \code{\link[data.table]{setkey}}
+#'  \code{\link[pROC]{ggroc.roc}}
 #'  \code{\link[geepack]{geeglm}}
 #'  \code{\link[survey]{svyglm}}
-#'  \code{\link[pROC]{ggroc.roc}}
 #'  \code{\link[see]{theme_modern}}
 #'  \code{\link[devEMF]{emf}}
 #'  \code{\link[grDevices]{dev}}
-#' @rdname rocModule
+#' @rdname rocModule2
 #' @export
 #' @importFrom stats quantile
 #' @importFrom data.table setkey
+#' @importFrom pROC roc ggroc
 #' @importFrom geepack geeglm
 #' @importFrom survey svyglm
-#' @importFrom pROC ggroc
 #' @importFrom see theme_modern
 #' @importFrom devEMF emf
 #' @importFrom grDevices dev.off
+
 
 
 rocModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {

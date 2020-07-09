@@ -32,5 +32,5 @@ extract AUC information from list of timeROC object.
 }
 \seealso{
 \code{\link[stats]{confint}}
- \code{\link[data.table]{data.table-package}}
+ \code{\link[data.table]{data.table}}
 }

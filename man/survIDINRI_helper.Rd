@@ -47,7 +47,7 @@ Helper function for IDI.INF.OUT in survIDINRI packages
 #                  t = 365, data = lung)
 }
 \seealso{
-\code{\link[data.table]{data.table-package}}
+\code{\link[data.table]{data.table}}
  \code{\link[stats]{model.matrix}}
  \code{\link[survival]{coxph}}
  \code{\link[survival]{Surv}}

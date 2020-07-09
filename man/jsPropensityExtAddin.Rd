@@ -27,7 +27,7 @@ if(interactive()){
 }
 \seealso{
 \code{\link[survival]{pbc}}
- \code{\link[data.table]{fwrite}},\code{\link[data.table]{data.table-package}}
+ \code{\link[data.table]{fwrite}},\code{\link[data.table]{data.table}}
  \code{\link[survey]{svydesign}}
  \code{\link[jstable]{opt.tbreg}}
 }
