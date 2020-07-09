@@ -81,7 +81,7 @@ server <- function(input, output, session) {
 \seealso{
 \code{\link[stats]{quantile}}
  \code{\link[data.table]{setkey}}
- \code{\link[pROC]{ggroc.roc}}
+ \code{\link[pROC]{ggroc}}
  \code{\link[geepack]{geeglm}}
  \code{\link[survey]{svyglm}}
  \code{\link[see]{theme_modern}}
