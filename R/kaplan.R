@@ -45,8 +45,10 @@ kaplanUI <- function(id) {
     checkboxInput(ns("table"), "Show table", T),
     checkboxInput(ns("ci"), "Show 95% CI", F),
     checkboxInput(ns("marks"), "Show censoring marks", F),
-    checkboxInput(ns("subcheck"), "Sub-group analysis"),
     uiOutput(ns("ranges")),
+    checkboxInput(ns("landmark"), "Landmark analysis", F),
+    uiOutput(ns("val_landmark")),
+    checkboxInput(ns("subcheck"), "Sub-group analysis"),
     uiOutput(ns("subvar")),
     uiOutput(ns("subval"))
   )
@@ -403,6 +405,8 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
 
 
+
+
   form.km <- reactive({
     validate(
       need(!is.null(input$indep_km), "Please select at least 1 independent variable."),
@@ -563,6 +567,12 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
                     min = 0, max = 1, value = range.y , step = 0.05)
       )
     })
+
+    output$val_landmark <- renderUI({
+      if (input$landmark){
+        sliderInput(session$ns("cut_landmark"), "Time cut-off for landmark analysis", min = input$xlims[1], max = input$xlims[2], value = input$timeby)
+      }
+    })
   })
 
   kmInput <- reactive({
@@ -591,23 +601,27 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     pal <- ifelse(is.null(input$pal_km), "Set1", input$pal_km)
     text.x <- ifelse(is.null(input$xaxis_km), "Time-to-event", input$xaxis_km)
     dashed <- ifelse(is.null(input$linetype), F, input$linetype)
+    cut.landmark <- input$cut_landmark
+    if (input$landmark == F) {
+      cut.landmark <- NULL
+    }
 
     if (is.null(design.survey)){
       if (is.null(id.cluster)){
         return(
           jskm::jskm(res.km, pval = input$pval, marks= input$marks, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                     cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed)
+                     cumhaz= input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark)
         )
       } else{
         return(
           jskm::jskm(res.km, pval = input$pval, marks= input$marks, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                     cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed)
+                     cumhaz= input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark)
         )
       }
     } else{
       return(
         jskm::svyjskm(res.km, pval = input$pval, table= input$table, ylab= ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci= input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-                      cumhaz= input$cumhaz, design = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed)
+                      cumhaz= input$cumhaz, design = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark)
       )
     }
   })

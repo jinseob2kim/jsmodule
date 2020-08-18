@@ -1,3 +1,7 @@
+# jsmodule 1.1.1
+
+* Add landmark analysis to kaplan-meier analysis. Because it uses **jskm 0.4.0** version, please install it with `remotes::install_github("jinseob2kim/jskm")`
+
 # jsmodule 1.1.0
 
 * Apply **AIC based stepwise selection** to linear/logistic regression, cox model.
