@@ -14,7 +14,9 @@ timerocModule(
   data_varStruct = NULL,
   nfactor.limit = 10,
   design.survey = NULL,
-  id.cluster = NULL
+  id.cluster = NULL,
+  iid = T,
+  NRIIDI = T
 )
 
 timerocModule2(
@@ -26,7 +28,9 @@ timerocModule2(
   data_varStruct = NULL,
   nfactor.limit = 10,
   design.survey = NULL,
-  id.cluster = NULL
+  id.cluster = NULL,
+  iid = T,
+  NRIIDI = T
 )
 }
 \arguments{
@@ -47,6 +51,10 @@ timerocModule2(
 \item{design.survey}{Reactive survey data. default: NULL}
 
 \item{id.cluster}{Reactive cluster variable if marginal model, Default: NULL}
+
+\item{iid}{logical, get CI of AUC, Default: T}
+
+\item{NRIIDI}{logical, get NRI & IDI, Default: T}
 }
 \value{
 shiny module server for time-dependent roc analysis

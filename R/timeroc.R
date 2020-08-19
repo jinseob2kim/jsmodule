@@ -66,6 +66,7 @@ timerocUI <- function(id) {
 #' @param data data
 #' @param design.survey survey data, Default: NULL
 #' @param id.cluster cluster variable if marginal model, Default: NULL
+#' @param iid logical. if calculationg confidence interval, Default: T
 #' @return timeROC object
 #' @details Helper function for timerocModule
 #' @examples
@@ -84,7 +85,7 @@ timerocUI <- function(id) {
 
 
 
-timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey = NULL, id.cluster = NULL) {
+timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey = NULL, id.cluster = NULL, iid = T) {
   data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
   form <- paste0("survival::Surv(", var.time, ",", var.event, ") ~ " , paste(vars.ind, collapse = "+"))
 
@@ -111,7 +112,7 @@ timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey 
                           cause = 1,
                           weighting="marginal",
                           times = t,
-                          iid = TRUE)
+                          iid = iid)
 
   return(out)
 }
@@ -142,21 +143,28 @@ timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey 
 
 timeROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
   auc <- round(sapply(ListModel, function(x){x$AUC[[2]]}), dec.auc)
-  auc.ci <- sapply(ListModel, function(x){ifelse(is.na(x$AUC[[2]]), NA, paste(round(stats::confint(x)$CI_AUC/100, dec.auc), collapse = "-"))})
-  if (length(ListModel) == 1){
-    out <- data.table::data.table(paste0("Model ", seq_along(ListModel)), auc, auc.ci)
-    names(out) <- c("Prediction Model", "AUC", "95% CI")
-  } else{
-    auc.pdiff <- c(NA, sapply(seq_along(ListModel)[-1],
-                              function(x){
-                                p <- timeROC::compare(ListModel[[x]], ListModel[[x-1]])$p_values_AUC[2]
-                                p <- ifelse(p < 0.001, "< 0.001", round(p, dec.p))
-                                return(p)
-                              }))
+  if (all(sapply(ListModel, `[[`, "iid"))){
+    auc.ci <- sapply(ListModel, function(x){ifelse(is.na(x$AUC[[2]]), NA, paste(round(stats::confint(x)$CI_AUC/100, dec.auc), collapse = "-"))})
 
-    out <- data.table::data.table(paste0("Model ", seq_along(ListModel)), auc, auc.ci, auc.pdiff)
-    names(out) <- c("Prediction Model", "AUC", "95% CI", "P-value for AUC Difference")
+    if (length(ListModel) == 1){
+      out <- data.table::data.table(paste0("Model ", seq_along(ListModel)), auc, auc.ci)
+      names(out) <- c("Prediction Model", "AUC", "95% CI")
+    } else{
+      auc.pdiff <- c(NA, sapply(seq_along(ListModel)[-1],
+                                function(x){
+                                  p <- timeROC::compare(ListModel[[x]], ListModel[[x-1]])$p_values_AUC[2]
+                                  p <- ifelse(p < 0.001, "< 0.001", round(p, dec.p))
+                                  return(p)
+                                }))
+
+      out <- data.table::data.table(paste0("Model ", seq_along(ListModel)), auc, auc.ci, auc.pdiff)
+      names(out) <- c("Prediction Model", "AUC", "95% CI", "P-value for AUC Difference")
+    }
+  } else{
+    out <- data.table::data.table(paste0("Model ", seq_along(ListModel)), auc)
+    names(out) <- c("Prediction Model", "AUC")
   }
+
 
   return(out[])
 }
@@ -242,6 +250,8 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey Reactive survey data. default: NULL
 #' @param id.cluster Reactive cluster variable if marginal model, Default: NULL
+#' @param iid logical, get CI of AUC, Default: T
+#' @param NRIIDI logical, get NRI & IDI, Default: T
 #' @return shiny module server for time-dependent roc analysis
 #' @details shiny module server for time-dependent roc analysis
 #' @examples
@@ -287,10 +297,10 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 #' @export
 #' @importFrom stats quantile median
 #' @importFrom data.table setkey rbindlist data.table
-timerocModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
+timerocModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL, iid = T, NRIIDI = T) {
 
   ## To remove NOTE.
-  compare <- level <- variable <- FP <- TP <- model <- NULL
+  NRIIDI <- compare <- level <- variable <- FP <- TP <- model <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -540,9 +550,9 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 
     if (is.null(design.survey)){
       if (is.null(id.cluster)){
-        res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km)})
+        res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, iid = iid)})
 
-        if (nmodel() == 1){
+        if (nmodel() == 1 | NRIIDI == F){
           res.tb <- timeROC_table(res.roc)
 
         } else{
@@ -555,9 +565,9 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 
 
       } else{
-        res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, id.cluster = id.cluster())})
+        res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, id.cluster = id.cluster(), iid = iid)})
 
-        if (nmodel() == 1){
+        if (nmodel() == 1 | NRIIDI == F){
           res.tb <- timeROC_table(res.roc)
 
         } else{
@@ -603,9 +613,9 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 
       }
       res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x,
-                                                            t = input$time_to_roc, data = data.km, design.survey = data.design)})
+                                                            t = input$time_to_roc, data = data.km, design.survey = data.design, iid = iid)})
 
-      if (nmodel() == 1){
+      if (nmodel() == 1 | NRIIID == F){
         res.tb <- timeROC_table(res.roc)
 
       } else{
@@ -709,6 +719,8 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey Reactive survey data. default: NULL
 #' @param id.cluster Reactive cluster variable if marginal model, Default: NULL
+#' @param iid logical, get CI of AUC, Default: T
+#' @param NRIIDI logical, get NRI & IDI, Default: T
 #' @return shiny module server for time dependent roc analysis- input number of model as integer
 #' @details shiny module server for time dependent roc analysis- input number of model as integer
 #' @examples
@@ -754,10 +766,10 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 #' @export
 #' @importFrom stats quantile median
 #' @importFrom data.table setkey rbindlist data.table
-timerocModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
+timerocModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL, iid = T, NRIIDI = T) {
 
   ## To remove NOTE.
-  compare <- level <- variable <- FP <- TP <- model <- NULL
+  NRIIDI <- compare <- level <- variable <- FP <- TP <- model <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -987,9 +999,9 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
 
     if (is.null(design.survey)){
       if (is.null(id.cluster)){
-        res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km)})
+        res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, iid = iid)})
 
-        if (nmodel() == 1){
+        if (nmodel() == 1 | NRIIDI == F){
           res.tb <- timeROC_table(res.roc)
 
         } else{
@@ -1002,9 +1014,9 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
 
 
       } else{
-        res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, id.cluster = id.cluster())})
+        res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, id.cluster = id.cluster(), iid = iid)})
 
-        if (nmodel() == 1){
+        if (nmodel() == 1 | NRIIDI == F){
           res.tb <- timeROC_table(res.roc)
 
         } else{
@@ -1050,9 +1062,9 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
 
       }
       res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x,
-                                                            t = input$time_to_roc, data = data.km, design.survey = data.design)})
+                                                            t = input$time_to_roc, data = data.km, design.survey = data.design, iid = iid)})
 
-      if (nmodel() == 1){
+      if (nmodel() == 1 | NRIIDI == F){
         res.tb <- timeROC_table(res.roc)
 
       } else{
