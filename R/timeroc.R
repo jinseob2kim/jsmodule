@@ -300,7 +300,7 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 timerocModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL, iid = T, NRIIDI = T) {
 
   ## To remove NOTE.
-  NRIIDI <- compare <- level <- variable <- FP <- TP <- model <- NULL
+  compare <- level <- variable <- FP <- TP <- model <- NULL; NRIIDI <- NRIIDI
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -552,7 +552,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
       if (is.null(id.cluster)){
         res.roc <- lapply(indeps(), function(x){timeROChelper(input$event_km, input$time_km, vars.ind =  x, t = input$time_to_roc, data = data.km, iid = iid)})
 
-        if (nmodel() == 1 | NRIIDI == F){
+        if ((nmodel() == 1 | NRIIDI == F)){
           res.tb <- timeROC_table(res.roc)
 
         } else{
@@ -769,7 +769,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 timerocModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL, iid = T, NRIIDI = T) {
 
   ## To remove NOTE.
-  NRIIDI <- compare <- level <- variable <- FP <- TP <- model <- NULL
+  compare <- level <- variable <- FP <- TP <- model <- NULL; NRIIDI <- NRIIDI
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
