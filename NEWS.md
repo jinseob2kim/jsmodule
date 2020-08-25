@@ -2,9 +2,9 @@
 
 ## Update
 
-* Add landmark analysis to kaplan-meier analysis. Because it uses **jskm 0.4.0** version, please install it with `remotes::install_github("jinseob2kim/jskm")`
+* Add landmark analysis to kaplan-meier analysis. Pease update **jskm to 0.4.0** version.
 
-* Add option **hide 95%CI of AUC, NRIIDI** to `timerocModule`. It reduces computation time.NRIIID
+* Add option **hide 95%CI of AUC, NRIIDI** to `timerocModule`. It reduces computation time.
 
 
 # jsmodule 1.1.0
