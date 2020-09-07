@@ -79,7 +79,7 @@ shiny module server for time-dependent roc analysis- input number of model as in
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
       </span>
     </div>
 
@@ -146,7 +146,9 @@ shiny module server for time-dependent roc analysis- input number of model as in
   <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>nfactor.limit</span> <span class='kw'>=</span> <span class='fl'>10</span>,
   <span class='kw'>design.survey</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>id.cluster</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+  <span class='kw'>id.cluster</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>iid</span> <span class='kw'>=</span> <span class='no'>T</span>,
+  <span class='kw'>NRIIDI</span> <span class='kw'>=</span> <span class='no'>T</span>
 )
 
 <span class='fu'>timerocModule2</span>(
@@ -158,7 +160,9 @@ shiny module server for time-dependent roc analysis- input number of model as in
   <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>nfactor.limit</span> <span class='kw'>=</span> <span class='fl'>10</span>,
   <span class='kw'>design.survey</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>id.cluster</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+  <span class='kw'>id.cluster</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>iid</span> <span class='kw'>=</span> <span class='no'>T</span>,
+  <span class='kw'>NRIIDI</span> <span class='kw'>=</span> <span class='no'>T</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -200,6 +204,14 @@ shiny module server for time-dependent roc analysis- input number of model as in
       <th>id.cluster</th>
       <td><p>Reactive cluster variable if marginal model, Default: NULL</p></td>
     </tr>
+    <tr>
+      <th>iid</th>
+      <td><p>logical, get CI of AUC, Default: T</p></td>
+    </tr>
+    <tr>
+      <th>NRIIDI</th>
+      <td><p>logical, get NRI &amp; IDI, Default: T</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -223,13 +235,13 @@ shiny module server for time-dependent roc analysis- input number of model as in
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shiny</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>DT</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>data.table</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>jstable</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>ggplot2</span>)
-<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>timeROC</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>survIDINRI</span>)</div><div class='output co'>#&gt; <span class='message'>Loading required package: survC1</span></div><div class='input'><span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/fluidPage.html'>fluidPage</a></span>(
-   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarLayout</a></span>(
-   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarPanel</a></span>(
+<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>timeROC</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>survIDINRI</span>)</div><div class='output co'>#&gt; <span class='message'>Loading required package: survC1</span></div><div class='input'><span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/fluidPage.html'>fluidPage</a></span>(
+   <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/sidebarLayout.html'>sidebarLayout</a></span>(
+   <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/sidebarLayout.html'>sidebarPanel</a></span>(
      <span class='fu'><a href='timerocUI.html'>timerocUI</a></span>(<span class='st'>"timeroc"</span>)
    ),
-   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>mainPanel</a></span>(
-     <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/plotOutput.html'>plotOutput</a></span>(<span class='st'>"plot_timeroc"</span>),
+   <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/sidebarLayout.html'>mainPanel</a></span>(
+     <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/plotOutput.html'>plotOutput</a></span>(<span class='st'>"plot_timeroc"</span>),
      <span class='fu'><a href='ggplotdownUI.html'>ggplotdownUI</a></span>(<span class='st'>"timeroc"</span>),
      <span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>DTOutput</a></span>(<span class='st'>"table_timeroc"</span>)
    )
@@ -238,13 +250,13 @@ shiny module server for time-dependent roc analysis- input number of model as in
 
 <span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
 
-  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='no'>mtcars</span>)
+  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/reactive.html'>reactive</a></span>(<span class='no'>mtcars</span>)
   <span class='no'>data.label</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jstable/man/mk.lev.html'>mk.lev</a></span>(<span class='no'>mtcars</span>)
 
-  <span class='no'>out_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/callModule.html'>callModule</a></span>(<span class='no'>timerocModule</span>, <span class='st'>"timeroc"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>,
+  <span class='no'>out_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/callModule.html'>callModule</a></span>(<span class='no'>timerocModule</span>, <span class='st'>"timeroc"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>,
                             <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-  <span class='no'>output</span>$<span class='no'>plot_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/renderPlot.html'>renderPlot</a></span>({
+  <span class='no'>output</span>$<span class='no'>plot_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/renderPlot.html'>renderPlot</a></span>({
     <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='fu'>out_timeroc</span>()$<span class='no'>plot</span>)
   })
 
@@ -256,13 +268,13 @@ shiny module server for time-dependent roc analysis- input number of model as in
 }
 <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shiny</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>DT</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>data.table</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>jstable</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>ggplot2</span>)
 <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>timeROC</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>survIDINRI</span>)
-<span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/fluidPage.html'>fluidPage</a></span>(
-   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarLayout</a></span>(
-   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarPanel</a></span>(
+<span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/fluidPage.html'>fluidPage</a></span>(
+   <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/sidebarLayout.html'>sidebarLayout</a></span>(
+   <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/sidebarLayout.html'>sidebarPanel</a></span>(
      <span class='fu'><a href='timerocUI.html'>timerocUI</a></span>(<span class='st'>"timeroc"</span>)
    ),
-   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>mainPanel</a></span>(
-     <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/plotOutput.html'>plotOutput</a></span>(<span class='st'>"plot_timeroc"</span>),
+   <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/sidebarLayout.html'>mainPanel</a></span>(
+     <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/plotOutput.html'>plotOutput</a></span>(<span class='st'>"plot_timeroc"</span>),
      <span class='fu'><a href='ggplotdownUI.html'>ggplotdownUI</a></span>(<span class='st'>"timeroc"</span>),
      <span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>DTOutput</a></span>(<span class='st'>"table_timeroc"</span>)
    )
@@ -271,13 +283,13 @@ shiny module server for time-dependent roc analysis- input number of model as in
 
 <span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
 
-  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='no'>mtcars</span>)
+  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/reactive.html'>reactive</a></span>(<span class='no'>mtcars</span>)
   <span class='no'>data.label</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jstable/man/mk.lev.html'>mk.lev</a></span>(<span class='no'>mtcars</span>)
 
-  <span class='no'>out_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/callModule.html'>callModule</a></span>(<span class='no'>timerocModule2</span>, <span class='st'>"timeroc"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>,
+  <span class='no'>out_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/callModule.html'>callModule</a></span>(<span class='no'>timerocModule2</span>, <span class='st'>"timeroc"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>,
                             <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
-  <span class='no'>output</span>$<span class='no'>plot_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/renderPlot.html'>renderPlot</a></span>({
+  <span class='no'>output</span>$<span class='no'>plot_timeroc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/renderPlot.html'>renderPlot</a></span>({
     <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='fu'>out_timeroc</span>()$<span class='no'>plot</span>)
   })
 
