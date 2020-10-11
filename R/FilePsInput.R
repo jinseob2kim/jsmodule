@@ -219,8 +219,8 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     if (is.null(input$file)){return(NULL)}
 
     radioButtons(session$ns("pcut_ps"), label = "Default p-value cut for ps calculation",
-                 choices = c(0.05, 0.1, 0.2),
-                 selected = 0.1, inline =T)
+                 choices = c("No", 0.05, 0.1, 0.2),
+                 selected = "No", inline =T)
   })
 
   output$ratio <- renderUI({
@@ -500,13 +500,17 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
       )
 
       vars <- setdiff(setdiff(names(data()$data), data()$except_vars),  c(input$var_subset, input$group_pscal))
-      varsIni <- sapply(vars,
-                        function(v){
-                          forms <- as.formula(paste(input$group_pscal, "~", v))
-                          coef <- tryCatch(summary(glm(forms, data = data()$data, family = binomial))$coefficients, error = function(e){return(NULL)})
-                          sigOK <- !all(coef[-1, 4] > as.numeric(input$pcut_ps))
-                          return(sigOK)
-                        })
+      varsIni <- 1
+      if (input$pcut_ps != "No"){
+        varsIni <- sapply(vars,
+                          function(v){
+                            forms <- as.formula(paste(input$group_pscal, "~", v))
+                            coef <- tryCatch(summary(glm(forms, data = data()$data, family = binomial))$coefficients, error = function(e){return(NULL)})
+                            sigOK <- !all(coef[-1, 4] > as.numeric(input$pcut_ps))
+                            return(sigOK)
+                          })
+      }
+
       tagList(
         selectInput(session$ns("indep_pscal"), label = "Independent variables for PS calculation",
                     choices = mklist(data()$data_varStruct, vars), multiple = T,

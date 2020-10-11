@@ -1,3 +1,10 @@
+# jsmodule 1.1.2
+
+## Update
+
+* Add **No** initial covariate option when ps calculation
+
+
 # jsmodule 1.1.1
 
 ## Update
