@@ -35,7 +35,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
   requireNamespace("survC1")
 
   ## To remove NOTE.
-  level <- val_label <- BinaryGroupRandom <- variable <- NULL
+  ID.pscal2828 <- level <- val_label <- BinaryGroupRandom <- variable <- NULL
 
   ## Data label
   out.old <- data.table::data.table(data)

@@ -125,7 +125,7 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
 FilePs <- function(input, output, session, nfactor.limit = 20) {
 
   ## To remove NOTE.
-  BinaryGroupRandom <- variable <- val_label <- NULL
+  ID.pscal2828 <- BinaryGroupRandom <- variable <- val_label <- NULL
 
   # The selected file, if any
   userFile <- eventReactive(input$file, {
