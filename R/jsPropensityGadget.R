@@ -49,7 +49,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
   ## Vars
   naCol <- names(out)[colSums(is.na(out)) > 0]
-  out <- out[, .SD, .SDcols = -naCol]
+  #out <- out[, .SD, .SDcols = -naCol]
 
   factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
   if (!is.null(factor_vars) & length(factor_vars) > 0){
@@ -304,8 +304,8 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
     output$pcut <- renderUI({
       radioButtons("pcut_ps", label = "Default p-value cut for ps calculation",
-                   choices = c(0.05, 0.1, 0.2),
-                   selected = 0.1, inline =T)
+                   choices = c("No", 0.05, 0.1, 0.2),
+                   selected = "No", inline =T)
     })
 
     output$ratio <- renderUI({
@@ -602,16 +602,22 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
       if (is.null(input$group_pscal) | is.null(input$indep_pscal)){
         return(NULL)
       }
-      data <- data.table::data.table(data.info()$data)
+
+      data <- data.table(data.info()$data)
+      data$ID.pscal2828 <- 1:nrow(data)
+      case.naomit <- which(complete.cases(data[, .SD, .SDcols = c(input$group_pscal, input$indep_pscal)]))
+      data.naomit <- data[case.naomit]
+      data.na <- data[-case.naomit]
+      data.na$pscore <- NA
+      data.na$iptw <- NA
 
       forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
-      m.out <- MatchIt::matchit(forms, data = data, caliper = input$caliper, ratio = as.integer(input$ratio_ps))
+      m.out <- MatchIt::matchit(forms, data = data.naomit[, .SD, .SDcols = c("ID.pscal2828", input$group_pscal, input$indep_pscal)], caliper = input$caliper, ratio = as.integer(input$ratio_ps))
       pscore <- m.out$distance
       iptw <- ifelse(m.out$treat == levels(m.out$treat)[2], 1/pscore,  1/(1-pscore))
-      wdata <- cbind(data, pscore, iptw)
 
-      mdata <- MatchIt::match.data(m.out, distance = "pscore")
-      return(list(data = wdata, matdata = mdata[, -grep("weights", names(mdata))]))
+      wdata <- rbind(data.na, cbind(data.naomit, pscore, iptw))
+      return(list(data = wdata, matdata = data[ID.pscal2828 %in% match.data(m.out)$ID.pscal2828]))
     })
 
 
@@ -642,7 +648,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
         return("Data has <B>no</B> missing values.")
       } else{
         txt_miss <- paste(naCol, collapse = ", ")
-        return(paste("Column <B>", txt_miss, "</B> are(is) excluded due to missing value.", sep = ""))
+        return(paste("Column <B>", txt_miss, "</B> contain missing values.", sep = ""))
       }
     })
 
@@ -1273,7 +1279,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     })
 
     output$naomit <- renderText({
-      paste("<font size = 5 ><b>", "Variables with missing value are excluded!</b></font><br>", '<font size = 4 color=\"#FF0000\"><b>', mat.info()$naomit, "</b></font>")
+      paste("<font size = 5 ><b>", "The variables below contain missing values.</b></font><br>", '<font size = 4 color=\"#FF0000\"><b>', mat.info()$naomit, "</b></font>")
       #mat.info()$naomit
     })
 

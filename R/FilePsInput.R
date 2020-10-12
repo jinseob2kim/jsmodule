@@ -181,7 +181,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
 
 
     naCol <- names(out)[colSums(is.na(out)) > 0]
-    out <- out[, .SD, .SDcols = -naCol]
+    #out <- out[, .SD, .SDcols = -naCol]
 
     data_varStruct = list(variable = names(out))
 
@@ -198,7 +198,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     except_vars <- names(nclass)[ nclass== 1]
     add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
     #factor_vars_ini <- union(factor_vars, add_vars)
-    naomit <- ifelse(length(naCol) == 0, "Data has <B>no</B> missing values.", paste("Column <B>", paste(naCol, collapse = ", "), "</B> are(is) excluded due to missing value.", sep = ""))
+    naomit <- ifelse(length(naCol) == 0, "Data has <B>no</B> missing values.", paste("Column <B>", paste(naCol, collapse = ", "), "</B> contain missing values.", sep = ""))
     return(list(data = out, data_varStruct = data_varStruct, factor_original = factor_vars,
                 conti_original = conti_vars, factor_adds_list = factor_adds_list,
                 factor_adds = add_vars, naCol = naCol, except_vars = except_vars, ref = ref, naomit = naomit)
@@ -534,15 +534,21 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
       return(NULL)
     }
     data <- data.table(data()$data)
+    data$ID.pscal2828 <- 1:nrow(data)
+    case.naomit <- which(complete.cases(data[, .SD, .SDcols = c(input$group_pscal, input$indep_pscal)]))
+    data.naomit <- data[case.naomit]
+    data.na <- data[-case.naomit]
+    data.na$pscore <- NA
+    data.na$iptw <- NA
 
     forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
-    m.out <- MatchIt::matchit(forms, data = data, caliper = input$caliper, ratio = as.integer(input$ratio_ps))
+    m.out <- MatchIt::matchit(forms, data = data.naomit[, .SD, .SDcols = c("ID.pscal2828", input$group_pscal, input$indep_pscal)], caliper = input$caliper, ratio = as.integer(input$ratio_ps))
     pscore <- m.out$distance
     iptw <- ifelse(m.out$treat == levels(m.out$treat)[2], 1/pscore,  1/(1-pscore))
-    wdata <- cbind(data, pscore, iptw)
 
-    mdata <- MatchIt::match.data(m.out, distance = "pscore")
-    return(list(data = wdata, matdata = mdata[, -grep("weights", names(mdata))], data.label = data()$label, naomit = data.info()$naomit, group_var = input$group_pscal))
+    wdata <- rbind(data.na, cbind(data.naomit, pscore, iptw))
+
+    return(list(data = wdata, matdata = data[ID.pscal2828 %in% match.data(m.out)$ID.pscal2828], data.label = data()$label, naomit = data.info()$naomit, group_var = input$group_pscal))
   })
 
 
