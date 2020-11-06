@@ -14,6 +14,8 @@ coxUI <- function(id) {
 
   tagList(
     uiOutput(ns("eventtime")),
+    checkboxInput(ns("check_rangetime"), "Choose time ranges"),
+    uiOutput(ns("rangetime")),
     uiOutput(ns("indep")),
     sliderInput(ns("decimal"), "Digits",
                 min = 1, max = 4, value = 2
@@ -157,6 +159,18 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     )
   })
 
+
+  observeEvent(input$check_rangetime, {
+    output$rangetime <- renderUI({
+      req(input$check_rangetime == T)
+      sliderInput(session$ns("range_time"), "Time ranges", min = min(data()[[input$time_cox]], na.rm = T), max = max(data()[[input$time_cox]], na.rm = T),
+                  value = c(min(data()[[input$time_cox]], na.rm = T), median(data()[[input$time_cox]], na.rm = T)))
+    })
+
+  })
+
+
+
   output$indep <- renderUI({
     req(!is.null(input$event_cox))
     req(!is.null(input$time_cox))
@@ -180,6 +194,13 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
       if (default.unires){
         data.cox <- data()
+
+        if (input$check_rangetime == T){
+          data.cox <- data.cox[!(get(input$time_cox) < input$range_time[1])]
+          data.cox[[input$event_cox]] <- ifelse(data.cox[[input$time_cox]] >= input$range_time[2] & data.cox[[input$event_cox]] == "1", 0,  as.numeric(as.vector(data.cox[[input$event_cox]])))
+          data.cox[[input$time_cox]] <- ifelse(data.cox[[input$time_cox]] >= input$range_time[2], input$range_time[2], data.cox[[input$time_cox]])
+        }
+
         data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
 
         varsIni <- sapply(indep.cox,
@@ -202,6 +223,12 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       indep.cox <- setdiff(names(data()), c(vlist()$except_vars, input$event_cox, input$time_cox, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
       if (default.unires){
         data.design <- design.survey()
+        if (input$check_rangetime == T){
+          data.design <- subset(data.design, !(get(input$time_cox) < input$range_time[1]))
+          data.design$variables[[input$event_cox]] <- ifelse(data.design$variables[[input$time_cox]] >= input$range_time[2] & data.design$variables[[input$event_cox]] == "1", 0,  as.numeric(as.vector(data.design$variables[[input$event_cox]])))
+          data.design$variables[[input$time_cox]] <- ifelse(data.design$variables[[input$time_cox]] >= input$range_time[2], input$range_time[2], data.design$variables[[input$time_cox]])
+        }
+
         data.design$variables[[input$event_cox]] <- as.numeric(as.vector(data.design$variables[[input$event_cox]]))
 
         varsIni <- sapply(indep.cox,
@@ -314,6 +341,14 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     req(!is.null(input$event_cox))
     req(!is.null(input$time_cox))
     data.cox <- data()
+
+    if (input$check_rangetime == T){
+      req(input$time_cox)
+      data.cox <- data.cox[!(get(input$time_cox) < input$range_time[1])]
+      data.cox[[input$event_cox]] <- ifelse(data.cox[[input$time_cox]] >= input$range_time[2] & data.cox[[input$event_cox]] == "1", 0,  as.numeric(as.vector(data.cox[[input$event_cox]])))
+      data.cox[[input$time_cox]] <- ifelse(data.cox[[input$time_cox]] >= input$range_time[2], input$range_time[2], data.cox[[input$time_cox]])
+    }
+
     data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
     label.regress <- data_label()
     if(input$subcheck == T){
@@ -400,6 +435,12 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       }
     } else{
       data.design <- design.survey()
+      if (input$check_rangetime == T){
+        data.design <- subset(data.design, !(get(input$time_cox) < input$range_time[1]))
+        data.design$variables[[input$event_cox]] <- ifelse(data.design$variables[[input$time_cox]] >= input$range_time[2] & data.design$variables[[input$event_cox]] == "1", 0,  as.numeric(as.vector(data.design$variables[[input$event_cox]])))
+        data.design$variables[[input$time_cox]] <- ifelse(data.design$variables[[input$time_cox]] >= input$range_time[2], input$range_time[2], data.design$variables[[input$time_cox]])
+      }
+
       data.design$variables[[input$event_cox]] <- as.numeric(as.vector(data.design$variables[[input$event_cox]]))
       if(input$subcheck == T){
         validate(

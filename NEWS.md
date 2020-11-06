@@ -1,3 +1,10 @@
+# jsmodule 1.1.3
+
+## Update
+
+* Choose time ranges: `coxUI`, `coxModule`.
+
+
 # jsmodule 1.1.2
 
 ## Update
