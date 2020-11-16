@@ -1,3 +1,9 @@
+# jsmodule 1.1.4
+
+## Update
+
+* **Show survival probabilities(%)** at kaplan-meier plot. This requires **[jskm](https://github.com/jinseob2kim/jskm) 0.4.2** or higher.
+
 # jsmodule 1.1.3
 
 ## Update
