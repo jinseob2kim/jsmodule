@@ -1,5 +1,11 @@
 # jsmodule 1.1.4
 
+## Fix
+
+* Fix according to **[MatchIt](https://github.com/kosukeimai/MatchIt) 4.0** update.
+
+# jsmodule 1.1.4
+
 ## Update
 
 * **Show survival probabilities(%)** at kaplan-meier plot. This requires **[jskm](https://github.com/jinseob2kim/jskm) 0.4.2** or higher.
