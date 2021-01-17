@@ -1,8 +1,10 @@
-# jsmodule 1.1.4
+# jsmodule 1.1.5
 
-## Fix
+## Fix 
 
 * Fix according to **[MatchIt](https://github.com/kosukeimai/MatchIt) 4.0** update.
+
+* Erratum: Cumulative hazard -> Cumulative incidence 
 
 # jsmodule 1.1.4
 
