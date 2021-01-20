@@ -1,3 +1,10 @@
+# jsmodule 1.1.6
+
+## Fix
+
+* `timerocModule`, `rocModule`: Compare ROC curve even if there are different sample size(na omit) 
+
+
 # jsmodule 1.1.5
 
 ## Fix 

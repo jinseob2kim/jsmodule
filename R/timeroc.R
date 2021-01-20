@@ -524,7 +524,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
     )
 
 
-    data.km <- data()
+    data.km <- data()[complete.cases(data()[, .SD, .SDcols = unique(unlist(indeps()))])]
     label.regress <- data_label()
     data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
     if(input$subcheck == TRUE){

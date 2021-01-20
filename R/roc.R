@@ -481,7 +481,7 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
       need(anyDuplicated(collapse.indep) == 0, "Please select different models")
     )
 
-    data.roc <- data()
+    data.roc <- data()[complete.cases(data()[, .SD, .SDcols = unique(unlist(indeps()))])]
     label.regress <- data_label()
     data.roc[[input$event_roc]] <- as.numeric(as.vector(data.roc[[input$event_roc]]))
     if(input$subcheck == TRUE){
