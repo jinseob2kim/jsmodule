@@ -554,7 +554,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         range.y <- c(0, 1)
       }
 
-      xstep.default <- ifelse(xmax <= 365, 1, 5)
+      xstep.default <- ifelse(xmax <= 365, 0.5, 5)
 
 
 

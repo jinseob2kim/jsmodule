@@ -4,6 +4,7 @@
 
 * `timerocModule`, `rocModule`: Compare ROC curve even if there are different sample size(na omit) 
 
+* Change **timeby unit** from 1 to 0.5 (when <365) 
 
 # jsmodule 1.1.5
 
