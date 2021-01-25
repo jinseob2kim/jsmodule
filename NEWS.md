@@ -1,10 +1,12 @@
 # jsmodule 1.1.6
 
-## Fix
+## Fix & update
 
 * `timerocModule`, `rocModule`: Compare ROC curve even if there are different sample size(na omit) 
 
 * Change **timeby unit** from 1 to 0.5 (when <365) 
+
+* Add **surv.scale** option to kaplan-meier plot
 
 # jsmodule 1.1.5
 
