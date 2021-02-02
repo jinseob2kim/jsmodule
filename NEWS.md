@@ -8,8 +8,10 @@
 
 * Add **surv.scale** option to kaplan-meier plot
 
-# jsmodule 1.1.5
+* Fix PS matching error with missing values  
 
+# jsmodule 1.1.5
+25
 ## Fix 
 
 * Fix according to **[MatchIt](https://github.com/kosukeimai/MatchIt) 4.0** update.

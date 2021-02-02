@@ -548,7 +548,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
     m.out <- MatchIt::matchit(forms, data = data.naomit[, .SD, .SDcols = c("ID.pscal2828", input$group_pscal, input$indep_pscal)], caliper = caliper, ratio = as.integer(input$ratio_ps))
     pscore <- m.out$distance
-    iptw <- ifelse(m.out$treat == levels(m.out$treat)[2], 1/pscore,  1/(1-pscore))
+    iptw <- ifelse(m.out$treat == levels(factor(m.out$treat))[2], 1/pscore,  1/(1 - pscore))
 
     wdata <- rbind(data.na, cbind(data.naomit, pscore, iptw))
 

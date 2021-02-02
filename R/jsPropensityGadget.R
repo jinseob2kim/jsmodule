@@ -618,7 +618,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
       forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
       m.out <- MatchIt::matchit(forms, data = data.naomit[, .SD, .SDcols = c("ID.pscal2828", input$group_pscal, input$indep_pscal)], caliper = caliper, ratio = as.integer(input$ratio_ps))
       pscore <- m.out$distance
-      iptw <- ifelse(m.out$treat == levels(m.out$treat)[2], 1/pscore,  1/(1-pscore))
+      iptw <- ifelse(m.out$treat == levels(factor(m.out$treat))[2], 1/pscore,  1/(1-pscore))
 
       wdata <- rbind(data.na, cbind(data.naomit, pscore, iptw))
       return(list(data = wdata, matdata = data[ID.pscal2828 %in% match.data(m.out)$ID.pscal2828]))
@@ -664,7 +664,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     matdata <- reactive(data.table::data.table(mat.info()$matdata))
     data.label <- reactive(data.info()$label)
     #data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
-    design.survey <- reactive(survey::svydesign(ids = ~ 1, data = mat.info()$data, weights = ~ iptw))
+    design.survey <- reactive(survey::svydesign(ids = ~ 1, data = mat.info()$data[!is.na(iptw), ], weights = ~ iptw))
 
 
     tb1_original <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = nfactor.limit)
@@ -1295,7 +1295,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     matdata <- reactive(data.table::data.table(mat.info()$matdata))
     data.label <- reactive(mat.info()$data.label)
     #data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
-    design.survey <- reactive(survey::svydesign(ids = ~ 1, data = mat.info()$data, weights = ~ iptw))
+    design.survey <- reactive(survey::svydesign(ids = ~ 1, data = mat.info()$data[!is.na(iptw), ], weights = ~ iptw))
 
 
     tb1_original <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = nfactor.limit)
