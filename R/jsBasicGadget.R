@@ -121,7 +121,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 
                    ),
                    navbarMenu("Plot", icon = icon("bar-chart-o"),
-                              tabPanel("Scatter plot",
+                              tabPanel("Basic plot",
                                        sidebarLayout(
                                          sidebarPanel(
                                            ggpairsModuleUI1("ggpairs")
@@ -129,6 +129,17 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                          mainPanel(
                                            withLoader(plotOutput("ggpairs_plot"), type="html", loader="loader6"),
                                            ggpairsModuleUI2("ggpairs")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Scatterplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           scatterUI("scatter")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("scatter_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("scatter")
                                          )
                                        )
                               ),
@@ -474,6 +485,12 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       print(out_ggpairs())
     })
 
+    out_scatter <- scatterServer("scatter", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    output$scatter_plot <- renderPlot({
+      print(out_scatter())
+    })
+
     out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$kaplan_plot <- renderPlot({
@@ -646,7 +663,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
                    ),
                    navbarMenu("Plot", icon = icon("bar-chart-o"),
-                              tabPanel("Scatter plot",
+                              tabPanel("Basic plot",
                                        sidebarLayout(
                                          sidebarPanel(
                                            ggpairsModuleUI1("ggpairs")
@@ -654,6 +671,17 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                          mainPanel(
                                            withLoader(plotOutput("ggpairs_plot"), type="html", loader="loader6"),
                                            ggpairsModuleUI2("ggpairs")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Scatterplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           scatterUI("scatter")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("scatter_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("scatter")
                                          )
                                        )
                               ),
@@ -809,6 +837,12 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
     output$ggpairs_plot <- renderPlot({
       print(out_ggpairs())
+    })
+
+    out_scatter <- scatterServer("scatter", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    output$scatter_plot <- renderPlot({
+      print(out_scatter())
     })
 
     out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)

@@ -1020,7 +1020,7 @@ jsPropensityAddin <- function(){
 #' @import shiny
 
 jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
-
+  iptw <- NULL
   options(shiny.maxRequestSize = max.filesize * 1024^2)
 
   ui <- navbarPage("Propensity score analysis",

@@ -162,7 +162,7 @@ optionUI <- function(id) {
 #' @param output output
 #' @param session session
 #' @param data Reactive data
-#' @param data_label Reactuve data label
+#' @param data_label Reactive data label
 #' @param data_varStruct Reactive List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey Reactive survey data. default: NULL
