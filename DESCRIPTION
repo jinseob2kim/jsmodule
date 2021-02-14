@@ -11,7 +11,7 @@ License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
-Imports: utils, stats, data.table, shiny, readxl, DT, jstable, labelled, methods, epiDisplay, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt(>= 4.0.0), survey, tableone, jskm(>= 0.4.2), survival, purrr, geepack, maxstat, survC1, survIDINRI, timeROC, devEMF, graphics, grDevices, shinyWidgets, pROC, Hmisc, see, readr, RColorBrewer, Cairo, ggpubr
+Imports: utils, stats, data.table, shiny, readxl, DT, jstable, labelled, methods, epiDisplay, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt(>= 3.0.0), survey, tableone, jskm(>= 0.4.2), survival, purrr, geepack, maxstat, survC1, survIDINRI, timeROC, devEMF, graphics, grDevices, shinyWidgets, pROC, Hmisc, see, readr, RColorBrewer, Cairo, ggpubr
 URL: https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
 Suggests: 
