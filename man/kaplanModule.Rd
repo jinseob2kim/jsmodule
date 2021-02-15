@@ -28,7 +28,7 @@ kaplanModule(
 
 \item{data}{Reactive data}
 
-\item{data_label}{Reactuve data label}
+\item{data_label}{Reactive data label}
 
 \item{data_varStruct}{Reactive List of variable structure, Default: NULL}
 

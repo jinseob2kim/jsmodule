@@ -8,6 +8,8 @@ scatterUI(id, label = "scatterplot")
 }
 \arguments{
 \item{id}{id}
+
+\item{label}{label}
 }
 \value{
 Shiny module UI for scatterplot
