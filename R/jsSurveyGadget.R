@@ -442,9 +442,9 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
               #                       error = function(e){return(survey::svydesign(id = cluster.survey, strata = strata.survey, weights = weights.survey, data = out, nest = T))})
               #var.factor <- c(data()$factor_original, input$factor_vname)
               out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
-              out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
-              data.table::setkey(out.label, "variable", "class", "level")
-              data.table::setkey(out.label2, "variable", "class", "level")
+              out.label2 <- mk.lev(out)[, c("variable", "level")]
+              data.table::setkey(out.label, "variable", "level")
+              data.table::setkey(out.label2, "variable", "level")
               out.label <- out.label[out.label2]
             } else{
               out <- out[get(input$var_subset[[v]]) >= input[[paste0("val_subset", v)]][1] & get(input$var_subset[[v]]) <= input[[paste0("val_subset", v)]][2]]
@@ -454,9 +454,9 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
 
               #var.factor <- c(data()$factor_original, input$factor_vname)
               out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
-              out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
-              data.table::setkey(out.label, "variable", "class", "level")
-              data.table::setkey(out.label2, "variable", "class", "level")
+              out.label2 <- mk.lev(out)[, c("variable", "level")]
+              data.table::setkey(out.label, "variable", "level")
+              data.table::setkey(out.label2, "variable", "level")
               out.label <- out.label[out.label2]
             }
           }

@@ -369,17 +369,17 @@ jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
               out <- out[get(input$var_subset[[v]]) %in% input[[paste0("val_subset", v)]]]
               #var.factor <- c(data()$factor_original, input$factor_vname)
               out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
-              out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
-              data.table::setkey(out.label, "variable", "class", "level")
-              data.table::setkey(out.label2, "variable", "class", "level")
+              out.label2 <- mk.lev(out)[, c("variable", "level")]
+              data.table::setkey(out.label, "variable", "level")
+              data.table::setkey(out.label2, "variable", "level")
               out.label <- out.label[out.label2]
             } else{
               out <- out[get(input$var_subset[[v]]) >= input[[paste0("val_subset", v)]][1] & get(input$var_subset[[v]]) <= input[[paste0("val_subset", v)]][2]]
               #var.factor <- c(data()$factor_original, input$factor_vname)
               out[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
-              out.label2 <- mk.lev(out)[, c("variable", "class", "level")]
-              data.table::setkey(out.label, "variable", "class", "level")
-              data.table::setkey(out.label2, "variable", "class", "level")
+              out.label2 <- mk.lev(out)[, c("variable", "level")]
+              data.table::setkey(out.label, "variable", "level")
+              data.table::setkey(out.label2, "variable", "level")
               out.label <- out.label[out.label2]
             }
           }

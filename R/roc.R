@@ -500,9 +500,9 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
 
       data.roc[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
-      label.regress2 <- mk.lev(data.roc)[, c("variable", "class", "level")]
-      data.table::setkey(data_label(), "variable", "class", "level")
-      data.table::setkey(label.regress2, "variable", "class", "level")
+      label.regress2 <- mk.lev(data.roc)[, c("variable", "level")]
+      data.table::setkey(data_label(), "variable", "level")
+      data.table::setkey(label.regress2, "variable", "level")
       label.regress <- data_label()[label.regress2]
       data.roc[[input$event_roc]] <- as.numeric(as.vector(data.roc[[input$event_roc]]))
     }

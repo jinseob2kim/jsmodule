@@ -352,9 +352,9 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
         }
 
         data.regress[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
-        label.regress2 <- mk.lev(data.regress)[, c("variable", "class", "level")]
-        data.table::setkey(data_label(), "variable", "class", "level")
-        data.table::setkey(label.regress2, "variable", "class", "level")
+        label.regress2 <- mk.lev(data.regress)[, c("variable", "level")]
+        data.table::setkey(data_label(), "variable", "level")
+        data.table::setkey(label.regress2, "variable", "level")
         label.regress <- data_label()[label.regress2]
       }
       mf <- model.frame(form, data.regress)

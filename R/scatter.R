@@ -227,9 +227,9 @@ scatterServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.l
                      }
 
                      data[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
-                     label2 <- mk.lev(data)[, c("variable", "class", "level")]
-                     data.table::setkey(label, "variable", "class", "level")
-                     data.table::setkey(label2, "variable", "class", "level")
+                     label2 <- mk.lev(data)[, c("variable", "level")]
+                     data.table::setkey(label, "variable", "level")
+                     data.table::setkey(label2, "variable", "level")
                      label <- label[label2]
 
                    }

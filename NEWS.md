@@ -1,3 +1,9 @@
+# jsmodule 1.1.7
+
+## Bug fix
+
+* Label info in subgroup analysis: regression, cox
+
 # jsmodule 1.1.6
 
 ## Fix & update

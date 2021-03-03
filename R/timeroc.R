@@ -541,9 +541,9 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
         }
       }
       data.km[, (vlist()$factor_vars) := lapply(.SD, factor), .SDcols = vlist()$factor_vars]
-      label.regress2 <- mk.lev(data.km)[, c("variable", "class", "level")]
-      data.table::setkey(data_label(), "variable", "class", "level")
-      data.table::setkey(label.regress2, "variable", "class", "level")
+      label.regress2 <- mk.lev(data.km)[, c("variable", "level")]
+      data.table::setkey(data_label(), "variable", "level")
+      data.table::setkey(label.regress2, "variable", "level")
       label.regress <- data_label()[label.regress2]
       data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
     }
