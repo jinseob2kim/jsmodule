@@ -1,3 +1,10 @@
+# jsmodule 1.1.8
+
+## Update
+
+* Faster AUC and 95% CI calculation when time-dependent ROC: use **Harrell's c-statistic**
+
+
 # jsmodule 1.1.7
 
 ## Bug fix

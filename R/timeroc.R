@@ -87,20 +87,16 @@ timerocUI <- function(id) {
 
 timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey = NULL, id.cluster = NULL, iid = T) {
   data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
-  form <- paste0("survival::Surv(", var.time, ",", var.event, ") ~ " , paste(vars.ind, collapse = "+"))
-
-  if (!is.null(id.cluster)){
-    forms <- as.formula(paste0("survival::Surv(", var.time, ",", var.event, ") ~ " , paste(vars.ind, collapse = "+"), "+ cluster(", id.cluster, ")"))
-    #forms <- as.formula(paste0(form, "+ cluster(", id.cluster, ")"))
-    #data <- na.omit(data[, .SD, .SDcols = c(var.event, var.time, vars.ind, id.cluster)])
-  } else{
-    forms <- as.formula(form)
-    #data <- na.omit(data[, .SD, .SDcols = c(var.event, var.time, vars.ind)])
-  }
+  form <- as.formula(paste0("survival::Surv(", var.time, ",", var.event, ") ~ " , paste(vars.ind, collapse = "+")))
 
   cmodel <- NULL
   if (is.null(design.survey)){
-    cmodel <- survival::coxph(forms, data = data, y = T)
+    if (!is.null(id.cluster)){
+      cmodel <- survival::coxph(forms, data = data, y = T, cluster = get(id.cluster))
+    } else{
+      cmodel <- survival::coxph(forms, data = data, y = T)
+    }
+
   } else{
     cmodel <- survey::svycoxph(forms, design = design.survey, y = T)
   }
