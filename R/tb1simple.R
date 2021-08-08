@@ -232,13 +232,11 @@ tb1simpleUI <- function(id) {
 #'  \code{\link[labelled]{var_label}}
 #'  \code{\link[jstable]{CreateTableOneJS}}
 #'  \code{\link[survey]{svydesign}}
-#'  \code{\link[tableone]{svyCreateTableOne}}
 #' @rdname tb1simple
 #' @export
 #' @importFrom labelled var_label
-#' @importFrom jstable CreateTableOneJS
+#' @importFrom jstable CreateTableOneJS svyCreateTableOneJS
 #' @importFrom survey svydesign
-#' @importFrom tableone svyCreateTableOne
 
 
 tb1simple <- function(input, output, session, data, matdata, data_label, data_varStruct = NULL, group_var, showAllLevels = T){
@@ -525,13 +523,11 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 #' @seealso
 #'  \code{\link[jstable]{CreateTableOneJS}}
 #'  \code{\link[survey]{svydesign}}
-#'  \code{\link[tableone]{svyCreateTableOne}}
 #' @rdname tb1simple2
 #' @export
-#' @importFrom jstable CreateTableOneJS
+#' @importFrom jstable CreateTableOneJS svyCreateTableOneJS
 #' @importFrom survey svydesign
-#' @importFrom tableone svyCreateTableOne
-#'
+
 tb1simple2 <- function(input, output, session, data, matdata, data_label, data_varStruct = NULL, vlist, group_var, showAllLevels = T){
 
   if (is.null(data_varStruct)){

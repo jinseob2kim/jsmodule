@@ -147,5 +147,4 @@ server <- function(input, output, session) {
 \seealso{
 \code{\link[jstable]{CreateTableOneJS}}
  \code{\link[survey]{svydesign}}
- \code{\link[tableone]{svyCreateTableOne}}
 }

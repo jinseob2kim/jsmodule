@@ -77,8 +77,6 @@ coxUI <- function(id) {
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
 #' @importFrom stats glm as.formula model.frame step
-#' @importFrom epiDisplay regress.display
-#' @importFrom jstable LabelepiDisplay
 #' @importFrom purrr map_lgl
 #' @importFrom survival cluster coxph Surv
 

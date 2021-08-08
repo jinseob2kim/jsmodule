@@ -2,7 +2,7 @@
 % Please edit documentation in R/tb1.R
 \name{tb1module2}
 \alias{tb1module2}
-\title{tb1module: table 1 shiny module server for reactive data.}
+\title{tb1module2: table 1 shiny module server for reactive data.}
 \usage{
 tb1module2(
   input,

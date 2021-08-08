@@ -257,8 +257,6 @@ ROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
 #'  \code{\link[geepack]{geeglm}}
 #'  \code{\link[survey]{svyglm}}
 #'  \code{\link[see]{theme_modern}}
-#'  \code{\link[devEMF]{emf}}
-#'  \code{\link[grDevices]{dev}}
 #' @rdname rocModule
 #' @export
 #' @importFrom stats quantile
@@ -267,9 +265,8 @@ ROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
 #' @importFrom geepack geeglm
 #' @importFrom survey svyglm
 #' @importFrom see theme_modern
-#' @importFrom devEMF emf
-#' @importFrom grDevices dev.off
-
+#' @importFrom rvg dml
+#' @importFrom officer read_pptx add_slide ph_with ph_location
 
 rocModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
 
@@ -577,8 +574,8 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
     tagList(
       column(4,
              selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                            choices = c("jpg","pdf", "tiff", "svg", "emf"), multiple = F,
-                            selected = "jpg"
+                            choices = c("jpg","pdf", "tiff", "svg", "pptx"), multiple = F,
+                            selected = "pptx"
              )
       ),
       column(4,
@@ -616,10 +613,12 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
                        Sys.sleep(0.01)
                      }
 
-                     if (input$file_ext == "emf"){
-                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300, emfPlus = F)
-                       print(rocList()$plot)
-                       grDevices::dev.off()
+                     if (input$file_ext == "pptx"){
+                       my_vec_graph <- rvg::dml(ggobj  = rocList()$plot)
+                       doc <- officer::read_pptx()
+                       doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
+                       doc <- officer::ph_with(doc, my_vec_graph, location = officer:: ph_location(width = input$fig_width, height = input$fig_height))
+                       print(doc, target = file)
 
                      } else{
                        ggsave(file, rocList()$plot, dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
@@ -691,8 +690,6 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 #'  \code{\link[geepack]{geeglm}}
 #'  \code{\link[survey]{svyglm}}
 #'  \code{\link[see]{theme_modern}}
-#'  \code{\link[devEMF]{emf}}
-#'  \code{\link[grDevices]{dev}}
 #' @rdname rocModule2
 #' @export
 #' @importFrom stats quantile
@@ -701,8 +698,8 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 #' @importFrom geepack geeglm
 #' @importFrom survey svyglm
 #' @importFrom see theme_modern
-#' @importFrom devEMF emf
-#' @importFrom grDevices dev.off
+#' @importFrom rvg dml
+#' @importFrom officer read_pptx add_slide ph_with ph_location
 
 
 
@@ -995,8 +992,8 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
     tagList(
       column(4,
              selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                            choices = c("jpg","pdf", "tiff", "svg", "emf"), multiple = F,
-                            selected = "jpg"
+                            choices = c("jpg","pdf", "tiff", "svg", "pptx"), multiple = F,
+                            selected = "pptx"
              )
       ),
       column(4,
@@ -1034,10 +1031,13 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
                        Sys.sleep(0.01)
                      }
 
-                     if (input$file_ext == "emf"){
-                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300, emfPlus = F)
-                       print(rocList()$plot)
-                       grDevices::dev.off()
+                     if (input$file_ext == "pptx"){
+                       my_vec_graph <- rvg::dml(ggobj  = rocList()$plot)
+
+                       doc <- officer::read_pptx()
+                       doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
+                       doc <- officer::ph_with(doc, my_vec_graph, location = officer:: ph_location(width = input$fig_width, height = input$fig_height))
+                       print(doc, target = file)
 
                      } else{
                        ggsave(file, rocList()$plot, dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)

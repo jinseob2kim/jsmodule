@@ -149,7 +149,6 @@ regressModuleUI <- function(id) {
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
 #' @importFrom stats glm as.formula model.frame model.matrix step
-#' @importFrom epiDisplay regress.display
 #' @importFrom purrr map_lgl
 
 regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
@@ -527,7 +526,6 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
 #' @importFrom stats glm as.formula binomial model.frame quasibinomial step
-#' @importFrom epiDisplay logistic.display
 #' @importFrom purrr map_lgl
 
 

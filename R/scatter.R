@@ -102,7 +102,8 @@ scatterUI <- function(id, label = "scatterplot") {
 #' @importFrom data.table data.table .SD :=
 #' @importFrom ggpubr ggscatter
 #' @importFrom ggplot2 ggsave
-
+#' @importFrom rvg dml
+#' @importFrom officer read_pptx add_slide ph_with ph_location
 
 scatterServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
   moduleServer(id,
@@ -267,8 +268,8 @@ scatterServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.l
                    tagList(
                      column(4,
                             selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                                           choices = c("jpg","pdf", "tiff", "svg", "emf"), multiple = F,
-                                           selected = "jpg"
+                                           choices = c("jpg","pdf", "tiff", "svg", "pptx"), multiple = F,
+                                           selected = "pptx"
                             )
                      ),
                      column(4,
@@ -298,10 +299,13 @@ scatterServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.l
                                       Sys.sleep(0.01)
                                     }
 
-                                    if (input$file_ext == "emf"){
-                                      devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300, emfPlus = F)
-                                      graphics::plot(scatterInput())
-                                      grDevices::dev.off()
+                                    if (input$file_ext == "pptx"){
+                                      my_vec_graph <- rvg::dml(ggobj  = scatterInput())
+
+                                      doc <- officer::read_pptx()
+                                      doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
+                                      doc <- officer::ph_with(doc, my_vec_graph, location = officer:: ph_location(width = input$fig_width, height = input$fig_height))
+                                      print(doc, target = file)
 
                                     } else{
                                       ggplot2::ggsave(file, scatterInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)

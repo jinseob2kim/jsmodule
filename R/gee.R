@@ -109,7 +109,6 @@ GEEModuleUI <- function(id) {
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
 #' @importFrom stats glm as.formula model.frame complete.cases
-#' @importFrom epiDisplay regress.display
 #' @importFrom purrr map_lgl
 #' @importFrom geepack geeglm
 
@@ -364,7 +363,6 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
 #' @importFrom stats glm as.formula model.frame complete.cases
-#' @importFrom epiDisplay regress.display
 #' @importFrom purrr map_lgl
 #' @importFrom geepack geeglm
 

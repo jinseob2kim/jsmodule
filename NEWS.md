@@ -2,8 +2,7 @@
 
 ## Update
 
-* Faster AUC and 95% CI calculation when time-dependent ROC: use **Harrell's c-statistic**
-
+* Change **emf** to **pptx**(editable) in figure download.
 
 # jsmodule 1.1.7
 
@@ -26,7 +25,7 @@
 * Fix PS matching error with missing values  
 
 # jsmodule 1.1.5
-25
+
 ## Fix 
 
 * Fix according to **[MatchIt](https://github.com/kosukeimai/MatchIt) 4.0** update.

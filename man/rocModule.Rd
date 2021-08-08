@@ -85,6 +85,4 @@ server <- function(input, output, session) {
  \code{\link[geepack]{geeglm}}
  \code{\link[survey]{svyglm}}
  \code{\link[see]{theme_modern}}
- \code{\link[devEMF]{emf}}
- \code{\link[grDevices]{dev}}
 }

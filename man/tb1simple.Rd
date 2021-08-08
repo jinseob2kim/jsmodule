@@ -145,5 +145,4 @@ server <- function(input, output, session) {
 \code{\link[labelled]{var_label}}
  \code{\link[jstable]{CreateTableOneJS}}
  \code{\link[survey]{svydesign}}
- \code{\link[tableone]{svyCreateTableOne}}
 }

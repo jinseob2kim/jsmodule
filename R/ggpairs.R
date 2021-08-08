@@ -152,6 +152,8 @@ ggpairsModuleUI2 <- function(id) {
 #' @import ggplot2
 #' @importFrom data.table data.table .SD :=
 #' @importFrom GGally ggpairs
+#' @importFrom rvg dml
+#' @importFrom officer read_pptx add_slide ph_with ph_location
 
 
 ggpairsModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 20) {
@@ -270,19 +272,20 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
       if (is.null(input$vars)){
         return(NULL)
       } else if (input$strata == "None"){
-        p = GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label[variable == x, var_label][1]}),
+        p <- GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label[variable == x, var_label][1]}),
                             upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
                             lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
                             diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
                             axisLabels='show')
       } else {
-        p = GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label[variable == x, var_label][1]}),
+        p <- GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label[variable == x, var_label][1]}),
                             mapping = aes_string(color = input$strata),
                             upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
                             lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
                             diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
                             axisLabels='show')
       }
+      class(p) <- c(class(p), "ggplot")
       if (is.null(input$theme)){
         return(p)
       }
@@ -310,8 +313,8 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
       tagList(
         column(4,
                selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                              choices = c("jpg","pdf", "tiff", "svg", "emf"), multiple = F,
-                              selected = "jpg"
+                              choices = c("jpg","pdf", "tiff", "svg", "pptx"), multiple = F,
+                              selected = "pptx"
                )
         ),
         column(4,
@@ -339,10 +342,12 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
                          incProgress(1/15)
                          Sys.sleep(0.01)
                        }
-                       if (input$file_ext == "emf"){
-                         devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300, emfPlus = F)
-                         print(ggpairsInput())
-                         grDevices::dev.off()
+                       if (input$file_ext == "pptx"){
+                         my_vec_graph <- rvg::dml(ggobj  =  ggpairsInput())
+                         doc <- officer::read_pptx()
+                         doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
+                         doc <- officer::ph_with(doc, my_vec_graph, location = officer:: ph_location(width = input$fig_width, height = input$fig_height))
+                         print(doc, target = file)
 
                        } else{
                          ggsave(file, ggpairsInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
@@ -404,6 +409,8 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
 #' @import ggplot2
 #' @importFrom data.table data.table .SD :=
 #' @importFrom GGally ggpairs
+#' @importFrom rvg dml
+#' @importFrom officer read_pptx add_slide ph_with ph_location
 
 ggpairsModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 20) {
 
@@ -556,19 +563,20 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
     if (is.null(input$vars)){
       return(NULL)
     } else if (input$strata == "None"){
-      p = GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label()[variable == x, var_label][1]}),
+      p <- GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label()[variable == x, var_label][1]}),
                           upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
                           lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
                           diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
                           axisLabels='show')
     } else {
-      p = GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label()[variable == x, var_label][1]}),
+      p <- GGally::ggpairs(data.val, columns = input$vars, columnLabels = sapply(input$vars, function(x){data_label()[variable == x, var_label][1]}),
                           mapping = aes_string(color = input$strata),
                           upper = list(continuous = input$gytpe_upper_conti, combo = input$gytpe_upper_combo, discrete = input$gytpe_upper_discrete, na = "na"),
                           lower = list(continuous = input$gytpe_lower_conti, combo = input$gytpe_lower_combo, discrete = input$gytpe_lower_discrete, na = "na"),
                           diag = list(continuous = input$gytpe_diag_conti, discrete = input$gytpe_diag_discrete,  na = "na"),
                           axisLabels='show')
     }
+    class(p) <- c(class(p), "ggplot")
     if (is.null(input$theme)){
       return(p)
     }
@@ -596,8 +604,8 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
     tagList(
       column(4,
              selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                            choices = c("jpg","pdf", "tiff", "svg", "emf"), multiple = F,
-                            selected = "jpg"
+                            choices = c("jpg","pdf", "tiff", "svg", "pptx"), multiple = F,
+                            selected = "pptx"
              )
       ),
       column(4,
@@ -626,10 +634,12 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
                        Sys.sleep(0.01)
                      }
 
-                     if (input$file_ext == "emf"){
-                       devEMF::emf(file, width = input$fig_width, height = input$fig_height, coordDPI = 300, emfPlus = F)
-                       print(ggpairsInput())
-                       grDevices::dev.off()
+                     if (input$file_ext == "pptx"){
+                       my_vec_graph <- rvg::dml(ggobj  = ggpairsInput())
+                       doc <- officer::read_pptx()
+                       doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
+                       doc <- officer::ph_with(doc, my_vec_graph, location = officer:: ph_location(width = input$fig_width, height = input$fig_height))
+                       print(doc, target = file)
 
                      } else{
                        ggsave(file, ggpairsInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)

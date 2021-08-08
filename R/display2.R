@@ -169,7 +169,7 @@ regress.display2 <- function (regress.model, alpha = 0.05, crude = FALSE, crude.
       }
     }
     modified.coeff.array <- a
-    table1 <- tableGlm(model, modified.coeff.array, decimal)
+    table1 <- epiDisplay::tableGlm(model, modified.coeff.array, decimal)
   }
   if (simplified) {
     first.line <- NULL
@@ -364,7 +364,7 @@ logistic.display2 <- function (logistic.model, alpha = 0.05, crude = TRUE, crude
       }
     }
     modified.coeff.array <- a
-    table1 <- tableGlm(model, modified.coeff.array, decimal)
+    table1 <- epiDisplay::tableGlm(model, modified.coeff.array, decimal)
   }
   if(simplified) {
     first.line <- NULL

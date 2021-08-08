@@ -97,7 +97,7 @@ tb1moduleUI <- function(id) {
 #' @importFrom data.table fread data.table .SD :=
 #' @importFrom labelled var_label<-
 #' @importFrom stats fisher.test chisq.test shapiro.test oneway.test kruskal.test
-#' @importFrom jstable CreateTableOneJS
+#' @importFrom jstable CreateTableOneJS svyCreateTableOneJS
 #' @importFrom methods is
 
 
@@ -315,7 +315,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 
 
 
-#' @title tb1module: table 1 shiny module server for reactive data.
+#' @title tb1module2: table 1 shiny module server for reactive data.
 #' @description Table 1 shiny module server for descriptive statistics for reactive data.
 #' @param input input
 #' @param output output
@@ -363,7 +363,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @importFrom data.table fread data.table .SD :=
 #' @importFrom labelled var_label<-
 #' @importFrom stats fisher.test chisq.test shapiro.test oneway.test kruskal.test
-#' @importFrom jstable CreateTableOneJS
+#' @importFrom jstable CreateTableOneJS svyCreateTableOneJS
 #' @importFrom methods is
 
 

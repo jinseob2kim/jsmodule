@@ -11,7 +11,6 @@
 #' @rdname jsBasicGadget
 #' @export
 #' @importFrom GGally ggpairs
-#' @importFrom epiDisplay regress.display logistic.display
 #' @importFrom stats as.formula binomial glm
 #' @importFrom data.table data.table := .SD
 #' @importFrom DT datatable %>% formatStyle styleEqual renderDT DTOutput
