@@ -304,7 +304,7 @@ scatterServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.l
 
                                       doc <- officer::read_pptx()
                                       doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
-                                      doc <- officer::ph_with(doc, my_vec_graph, location = officer:: ph_location(width = input$fig_width, height = input$fig_height))
+                                      doc <- officer::ph_with(doc, my_vec_graph, location = officer::ph_location(width = input$fig_width, height = input$fig_height))
                                       print(doc, target = file)
 
                                     } else{
