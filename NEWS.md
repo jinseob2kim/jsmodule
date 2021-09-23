@@ -1,3 +1,9 @@
+# jsmodule 1.1.9
+
+## Update
+
+* Faster `timerocModule`: Change AUC/AUC difference 95%CI calculation method to `survival::concordance`
+
 # jsmodule 1.1.8
 
 ## Update

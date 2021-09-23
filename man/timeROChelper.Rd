@@ -11,8 +11,7 @@ timeROChelper(
   t,
   data,
   design.survey = NULL,
-  id.cluster = NULL,
-  iid = T
+  id.cluster = NULL
 )
 }
 \arguments{
@@ -29,11 +28,9 @@ timeROChelper(
 \item{design.survey}{survey data, Default: NULL}
 
 \item{id.cluster}{cluster variable if marginal model, Default: NULL}
-
-\item{iid}{logical. if calculationg confidence interval, Default: T}
 }
 \value{
-timeROC object
+timeROC and coxph object
 }
 \description{
 Helper function for timerocModule

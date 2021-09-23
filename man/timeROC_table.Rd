@@ -2,12 +2,12 @@
 % Please edit documentation in R/timeroc.R
 \name{timeROC_table}
 \alias{timeROC_table}
-\title{timeROC_table: extract AUC information from list of timeROC object.}
+\title{timeROC_table: extract AUC information from list of timeROChelper object.}
 \usage{
 timeROC_table(ListModel, dec.auc = 3, dec.p = 3)
 }
 \arguments{
-\item{ListModel}{list of timeROC object}
+\item{ListModel}{list of timeROChelper object}
 
 \item{dec.auc}{digits for AUC, Default: 3}
 
@@ -17,10 +17,10 @@ timeROC_table(ListModel, dec.auc = 3, dec.p = 3)
 table of AUC information
 }
 \description{
-extract AUC information from list of timeROC object.
+extract AUC information from list of timeROChelper object.
 }
 \details{
-extract AUC information from list of timeROC object.
+extract AUC information from list of timeROChelper object.
 }
 \examples{
 #library(survival)
