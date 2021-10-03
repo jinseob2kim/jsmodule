@@ -44,6 +44,7 @@ coxUI <- function(id) {
 #' @param default.unires Set default independent variables using univariate analysis.
 #' @param limit.unires Change to default.unires = F if number of independent variables > limit.unires, Default: 20
 #' @param id.cluster reactive cluster variable if marginal cox model, Default: NULL
+#' @param ties.coxph 'coxph' ties option, one of 'efron', 'breslow', 'exact', default: 'erfon'
 #' @return Shiny modulde server for Cox's model.
 #' @details Shiny modulde server for Cox's model.
 #' @examples
@@ -80,7 +81,7 @@ coxUI <- function(id) {
 #' @importFrom purrr map_lgl
 #' @importFrom survival cluster coxph Surv
 
-coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, id.cluster = NULL) {
+coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, id.cluster = NULL, ties.coxph = "efron") {
 
   ## To remove NOTE.
   data.cox.step <- level <- val_label <- variable <- NULL
@@ -205,10 +206,10 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
                           function(v){
                             if (is.null(id.cluster)){
                               forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, sep = ""))
-                              coef <- tryCatch(summary(survival::coxph(forms, data = data.cox))$coefficients, error = function(e){return(NULL)})
+                              coef <- tryCatch(summary(survival::coxph(forms, data = data.cox, ties = ties.coxph))$coefficients, error = function(e){return(NULL)})
                             } else{
                               forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, " + cluster(", id.cluster(), ")", sep = ""))
-                              coef <- tryCatch(summary(survival::coxph(forms, data = data.cox, robust = T))$coefficients, error = function(e){return(NULL)})
+                              coef <- tryCatch(summary(survival::coxph(forms, data = data.cox, robust = T, ties = ties.coxph))$coefficients, error = function(e){return(NULL)})
                             }
                             sigOK <- ifelse(is.null(coef), F, !all(coef[, "Pr(>|z|)"] > 0.05))
                             return(sigOK)
@@ -382,9 +383,9 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
     if (is.null(design.survey)){
       if (is.null(id.cluster)){
-        cc <- substitute(survival::coxph(.form, data= data.cox, model = T), list(.form= form.cox()))
+        cc <- substitute(survival::coxph(.form, data= data.cox, model = T, ties = .ties), list(.form= form.cox(), .ties = ties.coxph))
       } else{
-        cc <- substitute(survival::coxph(.form, data= data.cox, model = T, robust = T), list(.form= form.cox()))
+        cc <- substitute(survival::coxph(.form, data= data.cox, model = T, robust = T, ties = .ties), list(.form= form.cox(), .ties = ties.coxph))
       }
       res.cox <- eval(cc)
       if (input$step_check == T){
@@ -399,9 +400,9 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
         data.cox.step <<- data.cox[complete.cases(data.cox[, .SD, .SDcols = c(input$time_cox, input$event_cox, input$indep_cox)])]
 
         if (is.null(id.cluster)){
-          cc.step <- substitute(survival::coxph(.form, data= data.cox.step, model = T), list(.form= form.cox()))
+          cc.step <- substitute(survival::coxph(.form, data= data.cox.step, model = T, ties = .ties), list(.form= form.cox(), .ties = ties.coxph))
         } else{
-          cc.step <- substitute(survival::coxph(.form, data= data.cox.step, model = T, robust = T), list(.form= form.cox()))
+          cc.step <- substitute(survival::coxph(.form, data= data.cox.step, model = T, robust = T, ties = .ties), list(.form= form.cox(), .ties = ties.coxph))
         }
 
         res.cox <- stats::step(eval(cc.step), direction = input$step_direction, scope = list(upper = scope[[1]], lower = scope[[2]]))

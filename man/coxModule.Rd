@@ -15,7 +15,8 @@ coxModule(
   design.survey = NULL,
   default.unires = T,
   limit.unires = 20,
-  id.cluster = NULL
+  id.cluster = NULL,
+  ties.coxph = "efron"
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ coxModule(
 \item{limit.unires}{Change to default.unires = F if number of independent variables > limit.unires, Default: 20}
 
 \item{id.cluster}{reactive cluster variable if marginal cox model, Default: NULL}
+
+\item{ties.coxph}{'coxph' ties option, one of 'efron', 'breslow', 'exact', default: 'erfon'}
 }
 \value{
 Shiny modulde server for Cox's model.
