@@ -75,7 +75,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.2.0</span>
       </span>
     </div>
 
@@ -143,7 +143,8 @@
   <span class='kw'>design.survey</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>default.unires</span> <span class='kw'>=</span> <span class='no'>T</span>,
   <span class='kw'>limit.unires</span> <span class='kw'>=</span> <span class='fl'>20</span>,
-  <span class='kw'>id.cluster</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+  <span class='kw'>id.cluster</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>ties.coxph</span> <span class='kw'>=</span> <span class='st'>"efron"</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -192,6 +193,10 @@
     <tr>
       <th>id.cluster</th>
       <td><p>reactive cluster variable if marginal cox model, Default: NULL</p></td>
+    </tr>
+    <tr>
+      <th>ties.coxph</th>
+      <td><p>'coxph' ties option, one of 'efron', 'breslow', 'exact', default: 'erfon'</p></td>
     </tr>
     </table>
 
