@@ -580,7 +580,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
   kmInput <- reactive({
     req(kmList())
-    req(input$timeby > 1)
+    req(input$timeby >= 1)
     req(input$xlims)
     req(input$ylims)
     res.km <- kmList()$res
