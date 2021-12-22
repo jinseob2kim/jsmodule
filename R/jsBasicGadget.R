@@ -153,7 +153,40 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                            ggplotdownUI("kaplan")
                                          )
                                        )
-                              )
+                              ),
+                              tabPanel("Boxplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           boxxxUI("box")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("box_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("box")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Barplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           barrrUI("bar")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("bar_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("bar")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Lineplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           lineeeUI("line")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("line_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("line")
+                                         )
+                                       )
+                              ),
 
                    ),
                    navbarMenu("ROC analysis", icon = icon("check"),
@@ -496,6 +529,24 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       print(out_kaplan())
     })
 
+    out_box <- boxxxServer("box", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    
+    output$box_plot <- renderPlot({
+      print(out_box())
+    })
+    
+    out_bar <- barrrServer("bar", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    
+    output$bar_plot <- renderPlot({
+      print(out_bar())
+    })
+    
+    out_line <- lineeeServer("line", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    
+    output$line_plot <- renderPlot({
+      print(out_line())
+    })
+    
     out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$plot_roc <- renderPlot({
@@ -695,7 +746,40 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                            ggplotdownUI("kaplan")
                                          )
                                        )
-                              )
+                              ),
+                              tabPanel("Boxplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           boxxxUI("box")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("box_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("box")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Barplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           barrrUI("bar")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("bar_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("bar")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Lineplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           lineeeUI("line")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("line_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("line")
+                                         )
+                                       )
+                              ),
 
                    ),
                    navbarMenu("ROC analysis", icon = icon("check"),
@@ -850,6 +934,24 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
       print(out_kaplan())
     })
 
+    out_box <- boxxxServer("box", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    
+    output$box_plot <- renderPlot({
+      print(out_box())
+    })
+    
+    out_bar <- barrrServer("bar", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    
+    output$bar_plot <- renderPlot({
+      print(out_bar())
+    })
+    
+    out_line <- lineeeServer("line", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    
+    output$line_plot <- renderPlot({
+      print(out_line())
+    })
+    
     out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$plot_roc <- renderPlot({
@@ -889,3 +991,4 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
   #viewer <- paneViewer()
   runGadget(ui, server, viewer = viewer)
 }
+
