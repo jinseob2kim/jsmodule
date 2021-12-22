@@ -120,40 +120,40 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                    #
                    # ),
                    navbarMenu("Plot", icon = icon("bar-chart-o"),
-                              tabPanel("Basic plot",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           ggpairsModuleUI1("ggpairs")
-                                         ),
-                                         mainPanel(
-                                           withLoader(plotOutput("ggpairs_plot"), type="html", loader="loader6"),
-                                           ggpairsModuleUI2("ggpairs")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Scatterplot",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           scatterUI("scatter")
-                                         ),
-                                         mainPanel(
-                                           withLoader(plotOutput("scatter_plot"), type="html", loader="loader6"),
-                                           ggplotdownUI("scatter")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Kaplan-meier plot",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           kaplanUI("kaplan")
-                                         ),
-                                         mainPanel(
-                                           optionUI("kaplan"),
-                                           withLoader(plotOutput("kaplan_plot"), type="html", loader="loader6"),
-                                           ggplotdownUI("kaplan")
-                                         )
-                                       )
-                              ),
+                              # tabPanel("Basic plot",
+                              #          sidebarLayout(
+                              #            sidebarPanel(
+                              #              ggpairsModuleUI1("ggpairs")
+                              #            ),
+                              #            mainPanel(
+                              #              withLoader(plotOutput("ggpairs_plot"), type="html", loader="loader6"),
+                              #              ggpairsModuleUI2("ggpairs")
+                              #            )
+                              #          )
+                              # ),
+                              # tabPanel("Scatterplot",
+                              #          sidebarLayout(
+                              #            sidebarPanel(
+                              #              scatterUI("scatter")
+                              #            ),
+                              #            mainPanel(
+                              #              withLoader(plotOutput("scatter_plot"), type="html", loader="loader6"),
+                              #              ggplotdownUI("scatter")
+                              #            )
+                              #          )
+                              # ),
+                              # tabPanel("Kaplan-meier plot",
+                              #          sidebarLayout(
+                              #            sidebarPanel(
+                              #              kaplanUI("kaplan")
+                              #            ),
+                              #            mainPanel(
+                              #              optionUI("kaplan"),
+                              #              withLoader(plotOutput("kaplan_plot"), type="html", loader="loader6"),
+                              #              ggplotdownUI("kaplan")
+                              #            )
+                              #          )
+                              # ),
                               tabPanel("barplot",
                                        sidebarLayout(
                                          sidebarPanel(
