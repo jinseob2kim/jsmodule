@@ -1,6 +1,6 @@
 #####
 # library(shiny);library(ggplot2);library(ggpubr);library(jsmodule);library(data.table);
-#' @title lineeeUI: shiny module UI for lineplot
+#' @title lineUI: shiny module UI for lineplot
 #' @description Shiny module UI for lineplot
 #' @param id id
 #' @param label label
@@ -11,7 +11,7 @@
 #' ui <- fluidPage(
 #'    sidebarLayout(
 #'    sidebarPanel(
-#'      lineeeUI("line")
+#'      lineUI("line")
 #'    ),
 #'    mainPanel(
 #'      plotOutput("line_plot"),
@@ -25,24 +25,24 @@
 #'   data <- reactive(mtcars)
 #'   data.label <- reactive(jstable::mk.lev(mtcars))
 #'
-#'   out_line <- lineeeServer("line", data = data, data_label = data.label,
+#'   out_line <- lineServer("line", data = data, data_label = data.label,
 #'     data_varStruct = NULL)
 #'
 #'   output$line_plot <- renderPlot({
 #'     print(out_line())
 #'   })
 #'}
-#' @rdname lineeeUI
+#' @rdname lineUI
 #' @export
 
 
-lineeeUI <- function(id, label = "lineeeplot") {
+lineUI <- function(id, label = "lineplot") {
   # Create a namespace function using the provided id
   ns <- NS(id)
   
   tagList(
-    uiOutput(ns("vars_lineee")),
-    uiOutput(ns("strata_lineee")),
+    uiOutput(ns("vars_line")),
+    uiOutput(ns("strata_line")),
     radioButtons(ns("options"), "Option", choices = c("Mean_SE", "Mean_SD", "Median_IQR"), selected = "Mean_SE", inline = T),
     checkboxInput(ns("linetype"), "Linetype"),
     checkboxInput(ns("jitter"), "Jitter"),
@@ -55,7 +55,7 @@ lineeeUI <- function(id, label = "lineeeplot") {
 
 
 
-lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
+lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
   moduleServer(id,
                function(input, output, session) {
                  ## To remove NOTE.
@@ -88,13 +88,13 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
                                select_vars = select_vars, select_list = select_list))
                  })
                  
-                 output$vars_lineee <- renderUI({
+                 output$vars_line <- renderUI({
                    tagList(
-                     selectizeInput(session$ns("x_lineee"), "X variable",
+                     selectizeInput(session$ns("x_line"), "X variable",
                                     choices = vlist()$factor_vars, multiple = F,
                                     selected = vlist()$select_vars[1]
                      ),
-                     selectizeInput(session$ns("y_lineee"), "Y variable",
+                     selectizeInput(session$ns("y_line"), "Y variable",
                                     choices = vlist()$select_list, multiple = F,
                                     selected = ifelse(length(vlist()$select_vars) > 1, vlist()$select_vars[2], vlist()$select_vars[1])
                      )
@@ -102,9 +102,9 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
                    
                  })
                  
-                 output$strata_lineee <- renderUI({
+                 output$strata_line <- renderUI({
                    strata_vars <- setdiff(vlist()$factor_vars, vlist()$except_vars)
-                   strata_vars <- setdiff(strata_vars, input$x_lineee)
+                   strata_vars <- setdiff(strata_vars, input$x_line)
                    strata_list <- mklist(data_varStruct(), strata_vars)
                    strata_select <- c("None", strata_list)
                    selectizeInput(session$ns("strata"), "Strata",
@@ -118,9 +118,9 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
                  observeEvent(input$subcheck, {
                    output$subvar <- renderUI({
                      req(input$subcheck == T)
-                     req(!is.null(input$x_lineee))
+                     req(!is.null(input$x_line))
                      
-                     var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$x_lineee, input$y_lineee, input$strata))
+                     var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$x_line, input$y_line, input$strata))
                      
                      var_subgroup_list <- mklist(data_varStruct(), var_subgroup)
                      validate(
@@ -162,8 +162,8 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
                    
                  })
                  
-                 lineeeInput <- reactive({
-                   req(c(input$x_lineee, input$y_lineee, input$strata))
+                 lineInput <- reactive({
+                   req(c(input$x_line, input$y_line, input$strata))
                    data <- data.table(data())
                    label <- data_label()
                    add <- switch(input$options,
@@ -181,7 +181,7 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
                    
                    
                    color <- ifelse(input$strata == "None", "black", input$strata)
-                   fill <- ifelse(input$strata=="None", input$x_lineee , input$strata)
+                   fill <- ifelse(input$strata=="None", input$x_line , input$strata)
                    if (input$strata != "None"){
                      data <- data[!is.na(get(input$strata))]
                    }
@@ -201,9 +201,9 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
                    }
                    
                    
-                   ggpubr::ggline(data, input$x_lineee, input$y_lineee, color = color, add = add, add.params = add.params, conf.int = input$lineci,
-                                  xlab = label[variable == input$x_lineee, var_label][1],
-                                  ylab = label[variable == input$y_lineee, var_label][1], na.rm = T, 
+                   ggpubr::ggline(data, input$x_line, input$y_line, color = color, add = add, add.params = add.params, conf.int = input$lineci,
+                                  xlab = label[variable == input$x_line, var_label][1],
+                                  ylab = label[variable == input$y_line, var_label][1], na.rm = T, 
                                   linetype = linetype
                    )
                  })
@@ -231,7 +231,7 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
                  
                  output$downloadButton <- downloadHandler(
                    filename =  function() {
-                     paste(input$x_lineee, "_", input$y_lineee,"_lineeeplot.",input$file_ext ,sep="")
+                     paste(input$x_line, "_", input$y_line,"_lineplot.",input$file_ext ,sep="")
                      
                    },
                    # content is a function with argument file. content writes the plot to the device
@@ -244,7 +244,7 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
                                     }
                                     
                                     if (input$file_ext == "pptx"){
-                                      my_vec_graph <- rvg::dml(ggobj  = lineeeInput())
+                                      my_vec_graph <- rvg::dml(ggobj  = lineInput())
                                       
                                       doc <- officer::read_pptx()
                                       doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
@@ -252,14 +252,14 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
                                       print(doc, target = file)
                                       
                                     } else{
-                                      ggplot2::ggsave(file, lineeeInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                                      ggplot2::ggsave(file, lineInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
                                     }
                                   })
                      
                    }
                  )
                  
-                 return(lineeeInput)
+                 return(lineInput)
                  
                  
                  
@@ -294,11 +294,11 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
 # ui <- fluidPage(
 #   sidebarLayout(
 #     sidebarPanel(
-#       lineeeUI("lineee")
+#       lineUI("line")
 #     ),
 #     mainPanel(
-#       plotOutput("lineee_plot"),
-#       ggplotdownUI("lineee")
+#       plotOutput("line_plot"),
+#       ggplotdownUI("line")
 #     )
 #   )
 # )
@@ -311,11 +311,11 @@ lineeeServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.li
 #   mtcars$cyl <- as.factor(mtcars$cyl)
 #   data <- reactive(mtcars)
 #   data.label <- reactive(jstable::mk.lev(mtcars))
-#   out_lineee <- lineeeServer("lineee", data = data, data_label = data.label,
+#   out_line <- lineServer("line", data = data, data_label = data.label,
 #                              data_varStruct = NULL)
 #   
-#   output$lineee_plot <- renderPlot({
-#     print(out_lineee())
+#   output$line_plot <- renderPlot({
+#     print(out_line())
 #   })
 # }
 # 

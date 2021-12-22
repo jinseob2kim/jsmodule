@@ -1,7 +1,7 @@
 #####
 # library(shiny);library(ggplot2);library(ggpubr);library(jsmodule);library(data.table);
 
-#' @title boxxxUI: shiny module UI for boxplot
+#' @title boxUI: shiny module UI for boxplot
 #' @description Shiny module UI for boxplot
 #' @param id id
 #' @param label label
@@ -12,7 +12,7 @@
 #' ui <- fluidPage(
 #'    sidebarLayout(
 #'    sidebarPanel(
-#'      boxxxUI("box")
+#'      boxUI("box")
 #'    ),
 #'    mainPanel(
 #'      plotOutput("box_plot"),
@@ -26,24 +26,24 @@
 #'   data <- reactive(mtcars)
 #'   data.label <- reactive(jstable::mk.lev(mtcars))
 #'
-#'   out_box <- boxxxServer("box", data = data, data_label = data.label,
+#'   out_box <- boxServer("box", data = data, data_label = data.label,
 #'     data_varStruct = NULL)
 #'
 #'   output$box_plot <- renderPlot({
 #'     print(out_box())
 #'   })
 #'}
-#' @rdname boxxxUI
+#' @rdname boxUI
 #' @export
 
 
-boxxxUI <- function(id, label = "boxxxplot") {
+boxUI <- function(id, label = "boxplot") {
   # Create a namespace function using the provided id
   ns <- NS(id)
   
   tagList(
-    uiOutput(ns("vars_boxxx")),
-    uiOutput(ns("strata_boxxx")),
+    uiOutput(ns("vars_box")),
+    uiOutput(ns("strata_box")),
     checkboxInput(ns("errorbar"), "Errorbar"),
     checkboxInput(ns("jitter"), "Points"),
     checkboxInput(ns("fillcolor"), "Fill"),
@@ -56,7 +56,7 @@ boxxxUI <- function(id, label = "boxxxplot") {
 
 
 
-boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
+boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
   moduleServer(id,
                function(input, output, session) {
                  ## To remove NOTE.
@@ -89,13 +89,13 @@ boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                                select_vars = select_vars, select_list = select_list))
                  })
                  
-                 output$vars_boxxx <- renderUI({
+                 output$vars_box <- renderUI({
                    tagList(
-                     selectizeInput(session$ns("x_boxxx"), "X variable",
+                     selectizeInput(session$ns("x_box"), "X variable",
                                     choices = vlist()$factor_vars, multiple = F,
                                     selected = vlist()$select_vars[1]
                      ),
-                     selectizeInput(session$ns("y_boxxx"), "Y variable",
+                     selectizeInput(session$ns("y_box"), "Y variable",
                                     choices = vlist()$select_list, multiple = F,
                                     selected = ifelse(length(vlist()$select_vars) > 1, vlist()$select_vars[2], vlist()$select_vars[1])
                      )
@@ -103,9 +103,9 @@ boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                    
                  })
                  
-                 output$strata_boxxx <- renderUI({
+                 output$strata_box <- renderUI({
                    strata_vars <- setdiff(vlist()$factor_vars, vlist()$except_vars)
-                   strata_vars <- setdiff(strata_vars, input$x_boxxx)
+                   strata_vars <- setdiff(strata_vars, input$x_box)
                    strata_list <- mklist(data_varStruct(), strata_vars)
                    strata_select <- c("None", strata_list)
                    selectizeInput(session$ns("strata"), "Strata",
@@ -119,9 +119,9 @@ boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                  observeEvent(input$subcheck, {
                    output$subvar <- renderUI({
                      req(input$subcheck == T)
-                     req(!is.null(input$x_boxxx))
+                     req(!is.null(input$x_box))
                      
-                     var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$x_boxxx, input$y_boxxx, input$strata))
+                     var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$x_box, input$y_box, input$strata))
                      
                      var_subgroup_list <- mklist(data_varStruct(), var_subgroup)
                      validate(
@@ -163,12 +163,12 @@ boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                    
                  })
                  
-                 boxxxInput <- reactive({
-                   req(c(input$x_boxxx, input$y_boxxx, input$strata))
+                 boxInput <- reactive({
+                   req(c(input$x_box, input$y_box, input$strata))
                    data <- data.table(data())
                    label <- data_label()
-                   color <- ifelse(input$strata == "None", input$x_boxxx, input$strata)
-                   fill <- ifelse(input$strata=="None", input$x_boxxx , input$strata)
+                   color <- ifelse(input$strata == "None", input$x_box, input$strata)
+                   fill <- ifelse(input$strata=="None", input$x_box , input$strata)
                    if (input$strata != "None"){
                      data <- data[!is.na(get(input$strata))]
                    }
@@ -185,9 +185,9 @@ boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                      fillcolor <-"gray"
                    }
                    
-                   ggpubr::ggboxplot(data, input$x_boxxx, input$y_boxxx, color = color, add = add, add.params = add.params, conf.int = input$lineci,
-                                     xlab = label[variable == input$x_boxxx, var_label][1],
-                                     ylab = label[variable == input$y_boxxx, var_label][1], na.rm = T, fill=fillcolor, error.plot = "errorbar", 
+                   ggpubr::ggboxplot(data, input$x_box, input$y_box, color = color, add = add, add.params = add.params, conf.int = input$lineci,
+                                     xlab = label[variable == input$x_box, var_label][1],
+                                     ylab = label[variable == input$y_box, var_label][1], na.rm = T, fill=fillcolor, error.plot = "errorbar", 
                                      bxp.errorbar = input$errorbar
                    )
                  })
@@ -215,7 +215,7 @@ boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                  
                  output$downloadButton <- downloadHandler(
                    filename =  function() {
-                     paste(input$x_boxxx, "_", input$y_boxxx,"_boxxxplot.",input$file_ext ,sep="")
+                     paste(input$x_box, "_", input$y_box,"_boxplot.",input$file_ext ,sep="")
                      
                    },
                    # content is a function with argument file. content writes the plot to the device
@@ -228,7 +228,7 @@ boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                                     }
                                     
                                     if (input$file_ext == "pptx"){
-                                      my_vec_graph <- rvg::dml(ggobj  = boxxxInput())
+                                      my_vec_graph <- rvg::dml(ggobj  = boxInput())
                                       
                                       doc <- officer::read_pptx()
                                       doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
@@ -236,14 +236,14 @@ boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                                       print(doc, target = file)
                                       
                                     } else{
-                                      ggplot2::ggsave(file, boxxxInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                                      ggplot2::ggsave(file, boxInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
                                     }
                                   })
                      
                    }
                  )
                  
-                 return(boxxxInput)
+                 return(boxInput)
                  
                  
                  
@@ -278,11 +278,11 @@ boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
 # ui <- fluidPage(
 #   sidebarLayout(
 #     sidebarPanel(
-#       boxxxUI("boxxx")
+#       boxUI("box")
 #     ),
 #     mainPanel(
-#       plotOutput("boxxx_plot"),
-#       ggplotdownUI("boxxx")
+#       plotOutput("box_plot"),
+#       ggplotdownUI("box")
 #     )
 #   )
 # )
@@ -295,11 +295,11 @@ boxxxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
 #   mtcars$cyl <- as.factor(mtcars$cyl)
 #   data <- reactive(mtcars)
 #   data.label <- reactive(jstable::mk.lev(mtcars))
-#   out_boxxx <- boxxxServer("boxxx", data = data, data_label = data.label,
+#   out_box <- boxServer("box", data = data, data_label = data.label,
 #                            data_varStruct = NULL)
 #   
-#   output$boxxx_plot <- renderPlot({
-#     print(out_boxxx())
+#   output$box_plot <- renderPlot({
+#     print(out_box())
 #   })
 # }
 # 

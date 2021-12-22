@@ -157,7 +157,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                               tabPanel("Boxplot",
                                        sidebarLayout(
                                          sidebarPanel(
-                                           boxxxUI("box")
+                                           boxUI("box")
                                          ),
                                          mainPanel(
                                            withLoader(plotOutput("box_plot"), type="html", loader="loader6"),
@@ -168,7 +168,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                               tabPanel("Barplot",
                                        sidebarLayout(
                                          sidebarPanel(
-                                           barrrUI("bar")
+                                           barUI("bar")
                                          ),
                                          mainPanel(
                                            withLoader(plotOutput("bar_plot"), type="html", loader="loader6"),
@@ -179,7 +179,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                               tabPanel("Lineplot",
                                        sidebarLayout(
                                          sidebarPanel(
-                                           lineeeUI("line")
+                                           lineUI("line")
                                          ),
                                          mainPanel(
                                            withLoader(plotOutput("line_plot"), type="html", loader="loader6"),
@@ -529,19 +529,19 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       print(out_kaplan())
     })
 
-    out_box <- boxxxServer("box", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_box <- boxServer("box", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     
     output$box_plot <- renderPlot({
       print(out_box())
     })
     
-    out_bar <- barrrServer("bar", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_bar <- barServer("bar", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     
     output$bar_plot <- renderPlot({
       print(out_bar())
     })
     
-    out_line <- lineeeServer("line", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_line <- lineServer("line", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     
     output$line_plot <- renderPlot({
       print(out_line())
@@ -750,7 +750,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               tabPanel("Boxplot",
                                        sidebarLayout(
                                          sidebarPanel(
-                                           boxxxUI("box")
+                                           boxUI("box")
                                          ),
                                          mainPanel(
                                            withLoader(plotOutput("box_plot"), type="html", loader="loader6"),
@@ -761,7 +761,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               tabPanel("Barplot",
                                        sidebarLayout(
                                          sidebarPanel(
-                                           barrrUI("bar")
+                                           barUI("bar")
                                          ),
                                          mainPanel(
                                            withLoader(plotOutput("bar_plot"), type="html", loader="loader6"),
@@ -772,7 +772,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               tabPanel("Lineplot",
                                        sidebarLayout(
                                          sidebarPanel(
-                                           lineeeUI("line")
+                                           lineUI("line")
                                          ),
                                          mainPanel(
                                            withLoader(plotOutput("line_plot"), type="html", loader="loader6"),
@@ -934,19 +934,19 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
       print(out_kaplan())
     })
 
-    out_box <- boxxxServer("box", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_box <- boxServer("box", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     
     output$box_plot <- renderPlot({
       print(out_box())
     })
     
-    out_bar <- barrrServer("bar", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_bar <- barServer("bar", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     
     output$bar_plot <- renderPlot({
       print(out_bar())
     })
     
-    out_line <- lineeeServer("line", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    out_line <- lineServer("line", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     
     output$line_plot <- renderPlot({
       print(out_line())

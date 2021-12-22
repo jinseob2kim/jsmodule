@@ -1,7 +1,7 @@
 #####
 # library(shiny);library(ggplot2);library(ggpubr);library(jsmodule);library(data.table);
 
-#' @title barrrUI: shiny module UI for barplot
+#' @title barUI: shiny module UI for barplot
 #' @description Shiny module UI for barplot
 #' @param id id
 #' @param label label
@@ -12,7 +12,7 @@
 #' ui <- fluidPage(
 #'    sidebarLayout(
 #'    sidebarPanel(
-#'      barrrUI("bar")
+#'      barUI("bar")
 #'    ),
 #'    mainPanel(
 #'      plotOutput("bar_plot"),
@@ -26,25 +26,25 @@
 #'   data <- reactive(mtcars)
 #'   data.label <- reactive(jstable::mk.lev(mtcars))
 #'
-#'   out_bar <- barrrServer("bar", data = data, data_label = data.label,
+#'   out_bar <- barServer("bar", data = data, data_label = data.label,
 #'     data_varStruct = NULL)
 #'
 #'   output$bar_plot <- renderPlot({
 #'     print(out_bar())
 #'   })
 #'}
-#' @rdname barrrUI
+#' @rdname barUI
 #' @export
 
 
 
-barrrUI <- function(id, label = "barrrplot") {
+barUI <- function(id, label = "barplot") {
   # Create a namespace function using the provided id
   ns <- NS(id)
   
   tagList(
-    uiOutput(ns("vars_barrr")),
-    uiOutput(ns("strata_barrr")),
+    uiOutput(ns("vars_bar")),
+    uiOutput(ns("strata_bar")),
     checkboxInput(ns("fill"), "Fill"),
     checkboxInput(ns("mean"), "Mean_SE"),
     checkboxInput(ns("jitter"), "Jitter"),
@@ -57,7 +57,7 @@ barrrUI <- function(id, label = "barrrplot") {
 
 
 
-barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
+barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
   moduleServer(id,
                function(input, output, session) {
                  ## To remove NOTE.
@@ -90,13 +90,13 @@ barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                                select_vars = select_vars, select_list = select_list))
                  })
                  
-                 output$vars_barrr <- renderUI({
+                 output$vars_bar <- renderUI({
                    tagList(
-                     selectizeInput(session$ns("x_barrr"), "X variable",
+                     selectizeInput(session$ns("x_bar"), "X variable",
                                     choices = vlist()$factor_vars, multiple = F,
                                     selected = vlist()$select_vars[1]
                      ),
-                     selectizeInput(session$ns("y_barrr"), "Y variable",
+                     selectizeInput(session$ns("y_bar"), "Y variable",
                                     choices = vlist()$select_list, multiple = F,
                                     selected = ifelse(length(vlist()$select_vars) > 1, vlist()$select_vars[2], vlist()$select_vars[1])
                      )
@@ -104,9 +104,9 @@ barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                    
                  })
                  
-                 output$strata_barrr <- renderUI({
+                 output$strata_bar <- renderUI({
                    strata_vars <- setdiff(vlist()$factor_vars, vlist()$except_vars)
-                   strata_vars <- setdiff(strata_vars, input$x_barrr)
+                   strata_vars <- setdiff(strata_vars, input$x_bar)
                    strata_list <- mklist(data_varStruct(), strata_vars)
                    strata_select <- c("None", strata_list)
                    selectizeInput(session$ns("strata"), "Strata",
@@ -120,9 +120,9 @@ barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                  observeEvent(input$subcheck, {
                    output$subvar <- renderUI({
                      req(input$subcheck == T)
-                     req(!is.null(input$x_barrr))
+                     req(!is.null(input$x_bar))
                      
-                     var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$x_barrr, input$y_barrr, input$strata))
+                     var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$x_bar, input$y_bar, input$strata))
                      
                      var_subgroup_list <- mklist(data_varStruct(), var_subgroup)
                      validate(
@@ -164,14 +164,14 @@ barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                    
                  })
                  
-                 barrrInput <- reactive({
-                   req(c(input$x_barrr, input$y_barrr, input$strata))
+                 barInput <- reactive({
+                   req(c(input$x_bar, input$y_bar, input$strata))
                    data <- data.table(data())
                    label <- data_label()
                    color <- ifelse(input$strata == "None", "black", input$strata)
                    fill = "white"
                    if(input$fill){
-                     fill <- ifelse(input$strata == "None", input$x_barrr, input$strata)
+                     fill <- ifelse(input$strata == "None", input$x_bar, input$strata)
                    }
                    
                    if (input$strata != "None"){
@@ -193,9 +193,9 @@ barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                    
             
                    
-                   ggpubr::ggbarplot(data, input$x_barrr, input$y_barrr, color = color, add = add, add.params = add.params, conf.int = input$lineci,
-                                     xlab = label[variable == input$x_barrr, var_label][1],
-                                     ylab = label[variable == input$y_barrr, var_label][1], na.rm = T, 
+                   ggpubr::ggbarplot(data, input$x_bar, input$y_bar, color = color, add = add, add.params = add.params, conf.int = input$lineci,
+                                     xlab = label[variable == input$x_bar, var_label][1],
+                                     ylab = label[variable == input$y_bar, var_label][1], na.rm = T, 
                                      position = position_dodge(),fill=fill, 
 
                    )
@@ -224,7 +224,7 @@ barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                  
                  output$downloadButton <- downloadHandler(
                    filename =  function() {
-                     paste(input$x_barrr, "_", input$y_barrr,"_barrrplot.",input$file_ext ,sep="")
+                     paste(input$x_bar, "_", input$y_bar,"_barplot.",input$file_ext ,sep="")
                      
                    },
                    # content is a function with argument file. content writes the plot to the device
@@ -237,7 +237,7 @@ barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                                     }
                                     
                                     if (input$file_ext == "pptx"){
-                                      my_vec_graph <- rvg::dml(ggobj  = barrrInput())
+                                      my_vec_graph <- rvg::dml(ggobj  = barInput())
                                       
                                       doc <- officer::read_pptx()
                                       doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
@@ -245,14 +245,14 @@ barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
                                       print(doc, target = file)
                                       
                                     } else{
-                                      ggplot2::ggsave(file, barrrInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
+                                      ggplot2::ggsave(file, barInput(), dpi = 300, units = "in", width = input$fig_width, height =input$fig_height)
                                     }
                                   })
                      
                    }
                  )
                  
-                 return(barrrInput)
+                 return(barInput)
                  
                  
                  
@@ -287,11 +287,11 @@ barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
 # ui <- fluidPage(
 #   sidebarLayout(
 #     sidebarPanel(
-#       barrrUI("barrr")
+#       barUI("bar")
 #     ),
 #     mainPanel(
-#       plotOutput("barrr_plot"),
-#       ggplotdownUI("barrr")
+#       plotOutput("bar_plot"),
+#       ggplotdownUI("bar")
 #     )
 #   )
 # )
@@ -304,11 +304,11 @@ barrrServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.lim
 #   mtcars$cyl <- as.factor(mtcars$cyl)
 #   data <- reactive(mtcars)
 #   data.label <- reactive(jstable::mk.lev(mtcars))
-#   out_barrr <- barrrServer("barrr", data = data, data_label = data.label,
+#   out_bar <- barServer("bar", data = data, data_label = data.label,
 #                            data_varStruct = NULL)
 #   
-#   output$barrr_plot <- renderPlot({
-#     print(out_barrr())
+#   output$bar_plot <- renderPlot({
+#     print(out_bar())
 #   })
 # }
 # 
