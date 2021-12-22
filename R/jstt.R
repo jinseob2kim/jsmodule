@@ -430,7 +430,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
     })
     
     out_box <- boxServer("box", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+    print(data)
     output$box_plot <- renderPlot({
       print(out_box())
     })
