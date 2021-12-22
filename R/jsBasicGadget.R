@@ -46,79 +46,79 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 
 
   ui <- navbarPage("Basic statistics",
-                   tabPanel("Data", icon = icon("table"),
-                            sidebarLayout(
-                              sidebarPanel(
-                                uiOutput("factor"),
-                                uiOutput("binary_check"),
-                                uiOutput("binary_var"),
-                                uiOutput("binary_val"),
-                                uiOutput("ref_check"),
-                                uiOutput("ref_var"),
-                                uiOutput("ref_val"),
-                                uiOutput("subset_check"),
-                                uiOutput("subset_var"),
-                                uiOutput("subset_val")
-                              ),
-                              mainPanel(
-                                tabsetPanel(type = "pills",
-                                            tabPanel("Data", withLoader(DTOutput("data"), type="html", loader="loader6")),
-                                            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type="html", loader="loader6"))
-                                )
-                              )
-                            )
-                   ),
-                   tabPanel("Table 1", icon = icon("percentage"),
-                            sidebarLayout(
-                              sidebarPanel(
-                                tb1moduleUI("tb1")
-                              ),
-                              mainPanel(
-                                withLoader(DTOutput("table1"), type="html", loader="loader6"),
-                                wellPanel(
-                                  h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                  h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
-                                  h5("Categorical variables  are summarized with table")
-                                )
-                              )
-                            )
-
-                   ),
-                   navbarMenu("Regression", icon = icon("list-alt"),
-                              tabPanel("Linear regression",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           regressModuleUI("linear")
-                                         ),
-                                         mainPanel(
-                                           withLoader(DTOutput("lineartable"), type="html", loader="loader6"),
-                                           br(),
-                                           uiOutput("warning_linear")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Logistic regression",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           regressModuleUI("logistic")
-                                         ),
-                                         mainPanel(
-                                           withLoader(DTOutput("logistictable"), type="html", loader="loader6")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Cox model",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           coxUI("cox")
-                                         ),
-                                         mainPanel(
-                                           withLoader(DTOutput("coxtable"), type="html", loader="loader6")
-                                         )
-                                       )
-                              )
-
-                   ),
+                   # tabPanel("Data", icon = icon("table"),
+                   #          sidebarLayout(
+                   #            sidebarPanel(
+                   #              uiOutput("factor"),
+                   #              uiOutput("binary_check"),
+                   #              uiOutput("binary_var"),
+                   #              uiOutput("binary_val"),
+                   #              uiOutput("ref_check"),
+                   #              uiOutput("ref_var"),
+                   #              uiOutput("ref_val"),
+                   #              uiOutput("subset_check"),
+                   #              uiOutput("subset_var"),
+                   #              uiOutput("subset_val")
+                   #            ),
+                   #            mainPanel(
+                   #              tabsetPanel(type = "pills",
+                   #                          tabPanel("Data", withLoader(DTOutput("data"), type="html", loader="loader6")),
+                   #                          tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type="html", loader="loader6"))
+                   #              )
+                   #            )
+                   #          )
+                   # ),
+                   # tabPanel("Table 1", icon = icon("percentage"),
+                   #          sidebarLayout(
+                   #            sidebarPanel(
+                   #              tb1moduleUI("tb1")
+                   #            ),
+                   #            mainPanel(
+                   #              withLoader(DTOutput("table1"), type="html", loader="loader6"),
+                   #              wellPanel(
+                   #                h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
+                   #                h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+                   #                h5("Categorical variables  are summarized with table")
+                   #              )
+                   #            )
+                   #          )
+                   #
+                   # ),
+                   # navbarMenu("Regression", icon = icon("list-alt"),
+                   #            tabPanel("Linear regression",
+                   #                     sidebarLayout(
+                   #                       sidebarPanel(
+                   #                         regressModuleUI("linear")
+                   #                       ),
+                   #                       mainPanel(
+                   #                         withLoader(DTOutput("lineartable"), type="html", loader="loader6"),
+                   #                         br(),
+                   #                         uiOutput("warning_linear")
+                   #                       )
+                   #                     )
+                   #            ),
+                   #            tabPanel("Logistic regression",
+                   #                     sidebarLayout(
+                   #                       sidebarPanel(
+                   #                         regressModuleUI("logistic")
+                   #                       ),
+                   #                       mainPanel(
+                   #                         withLoader(DTOutput("logistictable"), type="html", loader="loader6")
+                   #                       )
+                   #                     )
+                   #            ),
+                   #            tabPanel("Cox model",
+                   #                     sidebarLayout(
+                   #                       sidebarPanel(
+                   #                         coxUI("cox")
+                   #                       ),
+                   #                       mainPanel(
+                   #                         withLoader(DTOutput("coxtable"), type="html", loader="loader6")
+                   #                       )
+                   #                     )
+                   #            )
+                   #
+                   # ),
                    navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Basic plot",
                                        sidebarLayout(
@@ -189,32 +189,32 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                               ),
 
                    ),
-                   navbarMenu("ROC analysis", icon = icon("check"),
-                              tabPanel("ROC",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           rocUI("roc")
-                                         ),
-                                         mainPanel(
-                                           withLoader(plotOutput("plot_roc"), type="html", loader="loader6"),
-                                           ggplotdownUI("roc"),
-                                           withLoader(DTOutput("table_roc"), type="html", loader="loader6")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Time-dependent ROC",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           timerocUI("timeroc")
-                                         ),
-                                         mainPanel(
-                                           withLoader(plotOutput("plot_timeroc"), type="html", loader="loader6"),
-                                           ggplotdownUI("timeroc"),
-                                           withLoader(DTOutput("table_timeroc"), type="html", loader="loader6")
-                                         )
-                                       )
-                              )
-                   )
+                   # navbarMenu("ROC analysis", icon = icon("check"),
+                   #            tabPanel("ROC",
+                   #                     sidebarLayout(
+                   #                       sidebarPanel(
+                   #                         rocUI("roc")
+                   #                       ),
+                   #                       mainPanel(
+                   #                         withLoader(plotOutput("plot_roc"), type="html", loader="loader6"),
+                   #                         ggplotdownUI("roc"),
+                   #                         withLoader(DTOutput("table_roc"), type="html", loader="loader6")
+                   #                       )
+                   #                     )
+                   #            ),
+                   #            tabPanel("Time-dependent ROC",
+                   #                     sidebarLayout(
+                   #                       sidebarPanel(
+                   #                         timerocUI("timeroc")
+                   #                       ),
+                   #                       mainPanel(
+                   #                         withLoader(plotOutput("plot_timeroc"), type="html", loader="loader6"),
+                   #                         ggplotdownUI("timeroc"),
+                   #                         withLoader(DTOutput("table_timeroc"), type="html", loader="loader6")
+                   #                       )
+                   #                     )
+                   #            )
+                   # )
   )
 
   server <- function(input, output, session) {
@@ -587,356 +587,356 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
   runGadget(ui, server, viewer = viewer)
 }
 
-
-
-#' @title jsBasicAddin: Rstudio addin of jsBasicGadget
-#' @description Rstudio addin of jsBasicGadget
-#' @return Rstudio addin of jsBasicGadget
-#' @details Rstudio addin of jsBasicGadget
-#' @examples
-#' if(interactive()){
-#'  jsBasicAddin()
-#'  }
-#' @seealso
-#'  \code{\link[rstudioapi]{rstudio-editors}}
-#' @rdname jsBasicAddin
-#' @export
-#' @importFrom rstudioapi getActiveDocumentContext
-
-
-jsBasicAddin <- function(){
-  context <- rstudioapi::getActiveDocumentContext()
-  # Set the default data to use based on the selection.
-  dataString <- context$selection[[1]]$text
-  data <- get(dataString, envir = .GlobalEnv)
-  #viewer <- dialogViewer("Subset", width = 1000, height = 800)
-  jsBasicGadget(data)
-}
-
-
-
-
-
-#' @title jsBasicExtAddin: RStudio Addin for basic data analysis with external data.
-#' @description RStudio Addin for basic data analysis with external csv/xlsx/sas7bdat/sav/dta file.
-#' @param nfactor.limit nlevels limit for categorical variables, Default: 20
-#' @param max.filesize Maximum file size to upload (MB), Default: 2048 (2 GB)
-#' @return RStudio Addin for basic data analysis with external data.
-#' @details RStudio Addin for basic data analysis with external csv/xlsx/sas7bdat/sav/dta file.
-#' @examples
-#' if(interactive()){
-#'  jsBasicExtAddin()
-#'  }
-#' @seealso
-#'  \code{\link[survival]{lung}}
-#'  \code{\link[data.table]{fwrite}}
-#'  \code{\link[jstable]{opt.tbreg}}
-#' @rdname jsBasicExtAddin
-#' @export
-#' @importFrom data.table fwrite
-#' @importFrom jstable opt.tbreg
-#' @importFrom DT datatable %>% formatStyle styleEqual renderDT DTOutput
-#' @importFrom shinycustomloader withLoader
-#' @import shiny
-
-
-jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
-
-  options(shiny.maxRequestSize = max.filesize * 1024^2)
-
-  ui <- navbarPage("Basic statistics",
-                   tabPanel("Data", icon = icon("table"),
-                            sidebarLayout(
-                              sidebarPanel(
-                                uiOutput("import"),
-                                downloadButton("downloadData", "Example data")
-                              ),
-                              mainPanel(
-                                tabsetPanel(type = "pills",
-                                            tabPanel("Data", withLoader(DTOutput("data"), type="html", loader="loader6")),
-                                            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type="html", loader="loader6"))
-                                ),
-                                htmlOutput("naomit")
-
-                              )
-                            )
-                   ),
-                   tabPanel("Table 1", icon = icon("percentage"),
-                            sidebarLayout(
-                              sidebarPanel(
-                                tb1moduleUI("tb1")
-                              ),
-                              mainPanel(
-                                withLoader(DTOutput("table1"), type="html", loader="loader6"),
-                                wellPanel(
-                                  h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                  h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
-                                  h5("Categorical variables  are summarized with table")
-                                )
-                              )
-                            )
-
-                   ),
-                   navbarMenu("Regression", icon = icon("list-alt"),
-                              tabPanel("Linear regression",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           regressModuleUI("linear")
-                                         ),
-                                         mainPanel(
-                                           withLoader(DTOutput("lineartable"), type="html", loader="loader6"),
-                                           br(),
-                                           uiOutput("warning_linear")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Logistic regression",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           regressModuleUI("logistic")
-                                         ),
-                                         mainPanel(
-                                           withLoader(DTOutput("logistictable"), type="html", loader="loader6")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Cox model",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           coxUI("cox")
-                                         ),
-                                         mainPanel(
-                                           withLoader(DTOutput("coxtable"), type="html", loader="loader6")
-                                         )
-                                       )
-                              )
-
-                   ),
-                   navbarMenu("Plot", icon = icon("bar-chart-o"),
-                              tabPanel("Basic plot",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           ggpairsModuleUI1("ggpairs")
-                                         ),
-                                         mainPanel(
-                                           withLoader(plotOutput("ggpairs_plot"), type="html", loader="loader6"),
-                                           ggpairsModuleUI2("ggpairs")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Scatterplot",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           scatterUI("scatter")
-                                         ),
-                                         mainPanel(
-                                           withLoader(plotOutput("scatter_plot"), type="html", loader="loader6"),
-                                           ggplotdownUI("scatter")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Kaplan-meier plot",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           kaplanUI("kaplan")
-                                         ),
-                                         mainPanel(
-                                           optionUI("kaplan"),
-                                           withLoader(plotOutput("kaplan_plot"), type="html", loader="loader6"),
-                                           ggplotdownUI("kaplan")
-                                         )
-                                       )
-                              )
-
-                   ),
-                   navbarMenu("ROC analysis", icon = icon("check"),
-                              tabPanel("ROC",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           rocUI("roc")
-                                         ),
-                                         mainPanel(
-                                           withLoader(plotOutput("plot_roc"), type="html", loader="loader6"),
-                                           ggplotdownUI("roc"),
-                                           withLoader(DTOutput("table_roc"), type="html", loader="loader6")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Time-dependent ROC",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           timerocUI("timeroc")
-                                         ),
-                                         mainPanel(
-                                           withLoader(plotOutput("plot_timeroc"), type="html", loader="loader6"),
-                                           ggplotdownUI("timeroc"),
-                                           withLoader(DTOutput("table_timeroc"), type="html", loader="loader6")
-                                         )
-                                       )
-                              )
-                   )
-  )
-
-
-
-
-  server <- function(input, output, session) {
-
-    output$downloadData <- downloadHandler(
-      filename = function() {
-        paste("example_basic", ".csv", sep = "")
-      },
-      content = function(file) {
-        out <- survival::lung
-        out$status <- as.integer(out$status == 1)
-        data.table::fwrite(out, file)
-      }
-    )
-
-    output$import <- renderUI({
-      csvFileInput("datafile")
-
-    })
-
-    data.info <- callModule(csvFile, "datafile", nfactor.limit = nfactor.limit)
-    data <- reactive(data.info()$data)
-    data.label <- reactive(data.info()$label)
-
-    output$data <- renderDT({
-      datatable(data(), rownames=F, editable = F, extensions= "Buttons", caption = "Data",
-                options = c(opt.data("data"), list(scrollX = TRUE))
-      )
-    })
-
-
-    output$data_label <- renderDT({
-      datatable(data.label(), rownames=F, editable = F, extensions= "Buttons", caption = "Label of data",
-                options = c(opt.data("label"), list(scrollX = TRUE))
-      )
-    })
-
-    output$naomit <- renderText({
-      data.info()$naomit
-    })
-
-
-
-
-    out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-
-    output$table1 <- renderDT({
-      tb = out_tb1()$table
-      cap = out_tb1()$caption
-      out.tb1 = datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
-                          options = c(opt.tb1("tb1"),
-                                      list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
-                                      ),
-                                      list(scrollX = TRUE)
-                          )
-      )
-      if ("sig" %in% colnames(tb)){
-        out.tb1 = out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
-      }
-      return(out.tb1)
-    })
-
-    out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
-
-    output$lineartable <- renderDT({
-      hide = which(colnames(out_linear()$table) == "sig")
-      datatable(out_linear()$table, rownames=T, extensions= "Buttons", caption = out_linear()$caption,
-                options = c(opt.tbreg(out_linear()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
-    })
-
-    output$warning_linear <- renderText({
-      paste("<b>", out_linear()$warning, "</b>")
-    })
-
-    out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-
-    output$logistictable <- renderDT({
-      hide = which(colnames(out_logistic()$table) == "sig")
-      datatable(out_logistic()$table, rownames=T, extensions= "Buttons", caption = out_logistic()$caption,
-                options = c(opt.tbreg(out_logistic()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
-    })
-
-
-    out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
-
-    output$coxtable <- renderDT({
-      hide <- which(colnames(out_cox()$table) == c("sig"))
-      datatable(out_cox()$table, rownames=T, extensions= "Buttons", caption = out_cox()$caption,
-                options = c(opt.tbreg(out_cox()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets= hide))
-                            )
-                )
-      )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
-    })
-
-    out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-
-    output$ggpairs_plot <- renderPlot({
-      print(out_ggpairs())
-    })
-
-    out_scatter <- scatterServer("scatter", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-
-    output$scatter_plot <- renderPlot({
-      print(out_scatter())
-    })
-
-    out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-
-    output$kaplan_plot <- renderPlot({
-      print(out_kaplan())
-    })
-
-    out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-
-    output$plot_roc <- renderPlot({
-      print(out_roc()$plot)
-    })
-
-    output$table_roc <- renderDT({
-      datatable(out_roc()$tb, rownames=F, editable = F, extensions= "Buttons",
-                caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
-    })
-
-
-
-    out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-
-    output$plot_timeroc <- renderPlot({
-      print(out_timeroc()$plot)
-    })
-
-    output$table_timeroc <- renderDT({
-      datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
-    })
-
-    session$onSessionEnded(function() {
-      stopApp()
-    })
-  }
-
-
-
-
-
-  #viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
-  viewer <- browserViewer(browser = getOption("browser"))
-  #viewer <- paneViewer()
-  runGadget(ui, server, viewer = viewer)
-}
+#'
+#'
+#' #' @title jsBasicAddin: Rstudio addin of jsBasicGadget
+#' #' @description Rstudio addin of jsBasicGadget
+#' #' @return Rstudio addin of jsBasicGadget
+#' #' @details Rstudio addin of jsBasicGadget
+#' #' @examples
+#' #' if(interactive()){
+#' #'  jsBasicAddin()
+#' #'  }
+#' #' @seealso
+#' #'  \code{\link[rstudioapi]{rstudio-editors}}
+#' #' @rdname jsBasicAddin
+#' #' @export
+#' #' @importFrom rstudioapi getActiveDocumentContext
+#'
+#'
+#' jsBasicAddin <- function(){
+#'   context <- rstudioapi::getActiveDocumentContext()
+#'   # Set the default data to use based on the selection.
+#'   dataString <- context$selection[[1]]$text
+#'   data <- get(dataString, envir = .GlobalEnv)
+#'   #viewer <- dialogViewer("Subset", width = 1000, height = 800)
+#'   jsBasicGadget(data)
+#' }
+#'
+#'
+#'
+#'
+#'
+#' #' @title jsBasicExtAddin: RStudio Addin for basic data analysis with external data.
+#' #' @description RStudio Addin for basic data analysis with external csv/xlsx/sas7bdat/sav/dta file.
+#' #' @param nfactor.limit nlevels limit for categorical variables, Default: 20
+#' #' @param max.filesize Maximum file size to upload (MB), Default: 2048 (2 GB)
+#' #' @return RStudio Addin for basic data analysis with external data.
+#' #' @details RStudio Addin for basic data analysis with external csv/xlsx/sas7bdat/sav/dta file.
+#' #' @examples
+#' #' if(interactive()){
+#' #'  jsBasicExtAddin()
+#' #'  }
+#' #' @seealso
+#' #'  \code{\link[survival]{lung}}
+#' #'  \code{\link[data.table]{fwrite}}
+#' #'  \code{\link[jstable]{opt.tbreg}}
+#' #' @rdname jsBasicExtAddin
+#' #' @export
+#' #' @importFrom data.table fwrite
+#' #' @importFrom jstable opt.tbreg
+#' #' @importFrom DT datatable %>% formatStyle styleEqual renderDT DTOutput
+#' #' @importFrom shinycustomloader withLoader
+#' #' @import shiny
+#'
+#'
+#' jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
+#'
+#'   options(shiny.maxRequestSize = max.filesize * 1024^2)
+#'
+#'   ui <- navbarPage("Basic statistics",
+#'                    tabPanel("Data", icon = icon("table"),
+#'                             sidebarLayout(
+#'                               sidebarPanel(
+#'                                 uiOutput("import"),
+#'                                 downloadButton("downloadData", "Example data")
+#'                               ),
+#'                               mainPanel(
+#'                                 tabsetPanel(type = "pills",
+#'                                             tabPanel("Data", withLoader(DTOutput("data"), type="html", loader="loader6")),
+#'                                             tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type="html", loader="loader6"))
+#'                                 ),
+#'                                 htmlOutput("naomit")
+#'
+#'                               )
+#'                             )
+#'                    ),
+#'                    tabPanel("Table 1", icon = icon("percentage"),
+#'                             sidebarLayout(
+#'                               sidebarPanel(
+#'                                 tb1moduleUI("tb1")
+#'                               ),
+#'                               mainPanel(
+#'                                 withLoader(DTOutput("table1"), type="html", loader="loader6"),
+#'                                 wellPanel(
+#'                                   h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
+#'                                   h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+#'                                   h5("Categorical variables  are summarized with table")
+#'                                 )
+#'                               )
+#'                             )
+#'
+#'                    ),
+#'                    navbarMenu("Regression", icon = icon("list-alt"),
+#'                               tabPanel("Linear regression",
+#'                                        sidebarLayout(
+#'                                          sidebarPanel(
+#'                                            regressModuleUI("linear")
+#'                                          ),
+#'                                          mainPanel(
+#'                                            withLoader(DTOutput("lineartable"), type="html", loader="loader6"),
+#'                                            br(),
+#'                                            uiOutput("warning_linear")
+#'                                          )
+#'                                        )
+#'                               ),
+#'                               tabPanel("Logistic regression",
+#'                                        sidebarLayout(
+#'                                          sidebarPanel(
+#'                                            regressModuleUI("logistic")
+#'                                          ),
+#'                                          mainPanel(
+#'                                            withLoader(DTOutput("logistictable"), type="html", loader="loader6")
+#'                                          )
+#'                                        )
+#'                               ),
+#'                               tabPanel("Cox model",
+#'                                        sidebarLayout(
+#'                                          sidebarPanel(
+#'                                            coxUI("cox")
+#'                                          ),
+#'                                          mainPanel(
+#'                                            withLoader(DTOutput("coxtable"), type="html", loader="loader6")
+#'                                          )
+#'                                        )
+#'                               )
+#'
+#'                    ),
+#'                    navbarMenu("Plot", icon = icon("bar-chart-o"),
+#'                               tabPanel("Basic plot",
+#'                                        sidebarLayout(
+#'                                          sidebarPanel(
+#'                                            ggpairsModuleUI1("ggpairs")
+#'                                          ),
+#'                                          mainPanel(
+#'                                            withLoader(plotOutput("ggpairs_plot"), type="html", loader="loader6"),
+#'                                            ggpairsModuleUI2("ggpairs")
+#'                                          )
+#'                                        )
+#'                               ),
+#'                               tabPanel("Scatterplot",
+#'                                        sidebarLayout(
+#'                                          sidebarPanel(
+#'                                            scatterUI("scatter")
+#'                                          ),
+#'                                          mainPanel(
+#'                                            withLoader(plotOutput("scatter_plot"), type="html", loader="loader6"),
+#'                                            ggplotdownUI("scatter")
+#'                                          )
+#'                                        )
+#'                               ),
+#'                               tabPanel("Kaplan-meier plot",
+#'                                        sidebarLayout(
+#'                                          sidebarPanel(
+#'                                            kaplanUI("kaplan")
+#'                                          ),
+#'                                          mainPanel(
+#'                                            optionUI("kaplan"),
+#'                                            withLoader(plotOutput("kaplan_plot"), type="html", loader="loader6"),
+#'                                            ggplotdownUI("kaplan")
+#'                                          )
+#'                                        )
+#'                               )
+#'
+#'                    ),
+#'                    navbarMenu("ROC analysis", icon = icon("check"),
+#'                               tabPanel("ROC",
+#'                                        sidebarLayout(
+#'                                          sidebarPanel(
+#'                                            rocUI("roc")
+#'                                          ),
+#'                                          mainPanel(
+#'                                            withLoader(plotOutput("plot_roc"), type="html", loader="loader6"),
+#'                                            ggplotdownUI("roc"),
+#'                                            withLoader(DTOutput("table_roc"), type="html", loader="loader6")
+#'                                          )
+#'                                        )
+#'                               ),
+#'                               tabPanel("Time-dependent ROC",
+#'                                        sidebarLayout(
+#'                                          sidebarPanel(
+#'                                            timerocUI("timeroc")
+#'                                          ),
+#'                                          mainPanel(
+#'                                            withLoader(plotOutput("plot_timeroc"), type="html", loader="loader6"),
+#'                                            ggplotdownUI("timeroc"),
+#'                                            withLoader(DTOutput("table_timeroc"), type="html", loader="loader6")
+#'                                          )
+#'                                        )
+#'                               )
+#'                    )
+#'   )
+#'
+#'
+#'
+#'
+#'   server <- function(input, output, session) {
+#'
+#'     output$downloadData <- downloadHandler(
+#'       filename = function() {
+#'         paste("example_basic", ".csv", sep = "")
+#'       },
+#'       content = function(file) {
+#'         out <- survival::lung
+#'         out$status <- as.integer(out$status == 1)
+#'         data.table::fwrite(out, file)
+#'       }
+#'     )
+#'
+#'     output$import <- renderUI({
+#'       csvFileInput("datafile")
+#'
+#'     })
+#'
+#'     data.info <- callModule(csvFile, "datafile", nfactor.limit = nfactor.limit)
+#'     data <- reactive(data.info()$data)
+#'     data.label <- reactive(data.info()$label)
+#'
+#'     output$data <- renderDT({
+#'       datatable(data(), rownames=F, editable = F, extensions= "Buttons", caption = "Data",
+#'                 options = c(opt.data("data"), list(scrollX = TRUE))
+#'       )
+#'     })
+#'
+#'
+#'     output$data_label <- renderDT({
+#'       datatable(data.label(), rownames=F, editable = F, extensions= "Buttons", caption = "Label of data",
+#'                 options = c(opt.data("label"), list(scrollX = TRUE))
+#'       )
+#'     })
+#'
+#'     output$naomit <- renderText({
+#'       data.info()$naomit
+#'     })
+#'
+#'
+#'
+#'
+#'     out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+#'
+#'     output$table1 <- renderDT({
+#'       tb = out_tb1()$table
+#'       cap = out_tb1()$caption
+#'       out.tb1 = datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
+#'                           options = c(opt.tb1("tb1"),
+#'                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
+#'                                       ),
+#'                                       list(scrollX = TRUE)
+#'                           )
+#'       )
+#'       if ("sig" %in% colnames(tb)){
+#'         out.tb1 = out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+#'       }
+#'       return(out.tb1)
+#'     })
+#'
+#'     out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
+#'
+#'     output$lineartable <- renderDT({
+#'       hide = which(colnames(out_linear()$table) == "sig")
+#'       datatable(out_linear()$table, rownames=T, extensions= "Buttons", caption = out_linear()$caption,
+#'                 options = c(opt.tbreg(out_linear()$caption),
+#'                             list(columnDefs = list(list(visible=FALSE, targets =hide))
+#'                             ),
+#'                             list(scrollX = TRUE)
+#'                 )
+#'       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+#'     })
+#'
+#'     output$warning_linear <- renderText({
+#'       paste("<b>", out_linear()$warning, "</b>")
+#'     })
+#'
+#'     out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+#'
+#'     output$logistictable <- renderDT({
+#'       hide = which(colnames(out_logistic()$table) == "sig")
+#'       datatable(out_logistic()$table, rownames=T, extensions= "Buttons", caption = out_logistic()$caption,
+#'                 options = c(opt.tbreg(out_logistic()$caption),
+#'                             list(columnDefs = list(list(visible=FALSE, targets =hide))
+#'                             ),
+#'                             list(scrollX = TRUE)
+#'                 )
+#'       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+#'     })
+#'
+#'
+#'     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
+#'
+#'     output$coxtable <- renderDT({
+#'       hide <- which(colnames(out_cox()$table) == c("sig"))
+#'       datatable(out_cox()$table, rownames=T, extensions= "Buttons", caption = out_cox()$caption,
+#'                 options = c(opt.tbreg(out_cox()$caption),
+#'                             list(columnDefs = list(list(visible=FALSE, targets= hide))
+#'                             )
+#'                 )
+#'       )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+#'     })
+#'
+#'     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+#'
+#'     output$ggpairs_plot <- renderPlot({
+#'       print(out_ggpairs())
+#'     })
+#'
+#'     out_scatter <- scatterServer("scatter", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+#'
+#'     output$scatter_plot <- renderPlot({
+#'       print(out_scatter())
+#'     })
+#'
+#'     out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+#'
+#'     output$kaplan_plot <- renderPlot({
+#'       print(out_kaplan())
+#'     })
+#'
+#'     out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+#'
+#'     output$plot_roc <- renderPlot({
+#'       print(out_roc()$plot)
+#'     })
+#'
+#'     output$table_roc <- renderDT({
+#'       datatable(out_roc()$tb, rownames=F, editable = F, extensions= "Buttons",
+#'                 caption = "ROC results",
+#'                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+#'     })
+#'
+#'
+#'
+#'     out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+#'
+#'     output$plot_timeroc <- renderPlot({
+#'       print(out_timeroc()$plot)
+#'     })
+#'
+#'     output$table_timeroc <- renderDT({
+#'       datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
+#'                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+#'     })
+#'
+#'     session$onSessionEnded(function() {
+#'       stopApp()
+#'     })
+#'   }
+#'
+#'
+#'
+#'
+#'
+#'   #viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
+#'   viewer <- browserViewer(browser = getOption("browser"))
+#'   #viewer <- paneViewer()
+#'   runGadget(ui, server, viewer = viewer)
+#' }
