@@ -22,17 +22,17 @@
 jsBasicGadget <- function(data, nfactor.limit = 20) {
   requireNamespace("survival")
   requireNamespace("survC1")
-  
+
   ## To remove NOTE.
   val_label <- BinaryGroupRandom <- variable <- NULL
-  
+
   out <- data.table(data, check.names = F)
   name.old <- names(out)
   out <- data.table(data, check.names = T)
   name.new <- names(out)
   #ref <- data.table(name.old = name.old, name.new = name.new);setkey(ref, name.new)
   ref <- list(name.old = name.old, name.new = name.new)
-  
+
   ## factor variable
   factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
   out[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
@@ -40,11 +40,11 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
   nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x))}), .SDcols = conti_vars])
   #except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
   add_vars <- names(nclass)[nclass >= 1 &  nclass <= 5]
-  
+
   data.list <- list(data = out, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars)
-  
-  
-  
+
+
+
   ui <- navbarPage("Basic statistics",
                    tabPanel("Data", icon = icon("table"),
                             sidebarLayout(
@@ -82,7 +82,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                 )
                               )
                             )
-                            
+
                    ),
                    navbarMenu("Regression", icon = icon("list-alt"),
                               tabPanel("Linear regression",
@@ -117,7 +117,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                          )
                                        )
                               )
-                              
+
                    ),
                    navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Basic plot",
@@ -153,8 +153,41 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                            ggplotdownUI("kaplan")
                                          )
                                        )
-                              )
-                              
+                              ),
+                              tabPanel("barplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           barUI("bar")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("bar_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("bar")
+                                         )
+                                       )
+                              ),
+                              tabPanel("boxplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           boxUI("box")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("box_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("box")
+                                         )
+                                       )
+                              ),
+                              tabPanel("lineplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           lineUI("line")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("line_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("line")
+                                         )
+                                       )
+                              ),
+
                    ),
                    navbarMenu("ROC analysis", icon = icon("check"),
                               tabPanel("ROC",
@@ -183,30 +216,30 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                               )
                    )
   )
-  
+
   server <- function(input, output, session) {
-    
+
     output$factor <- renderUI({
       selectInput("factor_vname", label = "Additional categorical variables",
                   choices = data.list$factor_adds_list, multiple = T,
                   selected = data.list$factor_adds)
     })
-    
+
     observeEvent(input$factor_vname, {
       output$binary_check <- renderUI({
         checkboxInput("check_binary", "Make binary variables")
       })
-      
+
       output$ref_check <- renderUI({
         checkboxInput("check_ref", "Change reference of categorical variables")
       })
-      
-      
+
+
       output$subset_check <- renderUI({
         checkboxInput("check_subset", "Subset data")
       })
     })
-    
+
     observeEvent(input$check_binary, {
       var.conti <- setdiff(names(data.list$data), c(data.list$factor_original, input$factor_vname))
       output$binary_var <- renderUI({
@@ -215,7 +248,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                     choices = var.conti, multiple = T,
                     selected = var.conti[1])
       })
-      
+
       output$binary_val <- renderUI({
         req(input$check_binary == T)
         req(length(input$var_binary) > 0)
@@ -230,13 +263,13 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                                  value = med[2], min = med[1], max = med[3]
                                     )
           )
-          
+
         }
         outUI
-        
+
       })
     })
-    
+
     observeEvent(input$check_ref, {
       var.factor <- c(data.list$factor_original, input$factor_vname)
       output$ref_var <- renderUI({
@@ -245,7 +278,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                     choices = var.factor, multiple = T,
                     selected = var.factor[1])
       })
-      
+
       output$ref_val <- renderUI({
         req(input$check_ref == T)
         req(length(input$var_ref) > 0)
@@ -253,36 +286,36 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
         for (v in seq_along(input$var_ref)){
           outUI[[v]] <- selectInput(paste0("con_ref", v), paste0("Reference: ", input$var_ref[[v]]),
                                     choices = levels(factor(data.list$data[[input$var_ref[[v]]]])), selected = levels(factor(data.list$data[[input$var_ref[[v]]]]))[2])
-          
+
         }
         outUI
-        
+
       })
     })
-    
+
     observeEvent(input$check_subset, {
       output$subset_var <- renderUI({
         req(input$check_subset == T)
         #factor_subset <- c(data.list$factor_original, input$factor_vname)
-        
+
         #validate(
         #  need(length(factor_subset) > 0 , "No factor variable for subsetting")
         #)
-        
+
         tagList(
           selectInput("var_subset", "Subset variables",
                       choices = names(data.list$data), multiple = T,
                       selected = names(data.list$data)[1])
         )
       })
-      
+
       output$subset_val <- renderUI({
         req(input$check_subset == T)
         req(length(input$var_subset) > 0)
         var.factor <- c(data.list$factor_original, input$factor_vname)
-        
+
         outUI <- tagList()
-        
+
         for (v in seq_along(input$var_subset)){
           if (input$var_subset[[v]] %in% var.factor){
             varlevel <- levels(as.factor(data.list$data[[input$var_subset[[v]]]]))
@@ -295,13 +328,13 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                       min = val[1], max = val[5],
                                       value = c(val[2], val[4]))
           }
-          
+
         }
         outUI
       })
     })
-    
-    
+
+
     data.info <- reactive({
       out <- data.table::data.table(data.list$data)
       out[, (data.list$conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = data.list$conti_original]
@@ -310,7 +343,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       }
       out.label <- mk.lev(out)
       #out.label[, var_label := ref[out.label$variable, name.old]]
-      
+
       req(!is.null(input$check_binary))
       if (input$check_binary == T){
         validate(
@@ -332,18 +365,18 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
           } else{
             out[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) > input[[paste0("cut_binary", v)]]))]
           }
-          
+
           cn.new <- paste0(input$var_binary[[v]], "_group_", sym.ineq2[input[[paste0("con_binary", v)]]], input[[paste0("cut_binary", v)]])
           data.table::setnames(out, "BinaryGroupRandom", cn.new)
-          
+
           label.binary <- mk.lev(out[, .SD, .SDcols = cn.new])
           label.binary[, var_label := paste0(input$var_binary[[v]], " _group")]
           label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
           out.label <- rbind(out.label, label.binary)
         }
-        
+
       }
-      
+
       if (!is.null(input$check_ref)){
         if (input$check_ref){
           validate(
@@ -354,11 +387,11 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
             out[[input$var_ref[[v]]]] <- stats::relevel(out[[input$var_ref[[v]]]], ref = input[[paste0("con_ref", v)]])
             out.label[variable == input$var_ref[[v]], ':='(level = levels(out[[input$var_ref[[v]]]]), val_label = levels(out[[input$var_ref[[v]]]]))]
           }
-          
+
         }
       }
-      
-      
+
+
       if (!is.null(input$check_subset)){
         if (input$check_subset){
           validate(
@@ -367,7 +400,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
           )
           var.factor <- c(data.list$factor_original, input$factor_vname)
           #var.conti <- setdiff(data()$conti_original, input$factor_vname)
-          
+
           for (v in seq_along(input$var_subset)){
             if (input$var_subset[[v]] %in% var.factor){
               out <- out[get(input$var_subset[[v]]) %in% input[[paste0("val_subset", v)]]]
@@ -387,38 +420,38 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
               out.label <- out.label[out.label2]
             }
           }
-          
+
         }
       }
       for (vn in ref[["name.new"]]){
         w <- which(ref[["name.new"]] == vn)
         out.label[variable == vn, var_label := ref[["name.old"]][w]]
       }
-      
+
       return(list(data = out, label = out.label))
     })
-    
+
     data <- reactive(data.info()$data)
     data.label <- reactive(data.info()$label)
-    
+
     output$data <- renderDT({
       datatable(data(), rownames=F, editable = F, extensions= "Buttons", caption = "Data",
                 options = c(jstable::opt.data("data"), list(scrollX = TRUE))
       )
     })
-    
-    
+
+
     output$data_label <- renderDT({
       datatable(data.label(), rownames=F, editable = F, extensions= "Buttons", caption = "Label of data",
                 options = c(jstable::opt.data("label"), list(scrollX = TRUE))
       )
     })
-    
-    
-    
-    
+
+
+
+
     out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, showAllLevels = T)
-    
+
     output$table1 <- renderDT({
       tb <- out_tb1()$table
       cap <- out_tb1()$caption
@@ -434,9 +467,9 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       }
       return(out.tb1)
     })
-    
+
     out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$lineartable <- renderDT({
       hide = which(colnames(out_linear()$table) == "sig")
       datatable(out_linear()$table, rownames=T, extensions = "Buttons", caption = out_linear()$caption,
@@ -447,13 +480,13 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                 )
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
-    
+
     output$warning_linear <- renderText({
       paste("<b>", out_linear()$warning, "</b>")
     })
-    
+
     out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$logistictable <- renderDT({
       hide = which(colnames(out_logistic()$table) == "sig")
       datatable(out_logistic()$table, rownames=T, extensions = "Buttons", caption = out_logistic()$caption,
@@ -464,9 +497,9 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                 )
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
-    
+
     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
-    
+
     output$coxtable <- renderDT({
       hide = which(colnames(out_cox()$table) == c("sig"))
       datatable(out_cox()$table, rownames=T, extensions= "Buttons", caption = out_cox()$caption,
@@ -476,60 +509,78 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                 )
       )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
-    
-    
+
+
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$ggpairs_plot <- renderPlot({
       print(out_ggpairs())
     })
-    
+
     out_scatter <- scatterServer("scatter", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$scatter_plot <- renderPlot({
       print(out_scatter())
     })
-    
+
     out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$kaplan_plot <- renderPlot({
       print(out_kaplan())
     })
-    
+
+    out_bar <- barServer("bar", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    output$bar_plot <- renderPlot({
+      print(out_bar())
+    })
+
+    out_box <- boxServer("box", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    output$box_plot <- renderPlot({
+      print(out_box())
+    })
+
+    out_line <- lineServer("line", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    output$line_plot <- renderPlot({
+      print(out_line())
+    })
+
     out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$plot_roc <- renderPlot({
       print(out_roc()$plot)
     })
-    
+
     output$table_roc <- renderDT({
       datatable(out_roc()$tb, rownames=F, editable = F, extensions= "Buttons",
                 caption = "ROC results",
                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
-    
-    
+
+
     out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$plot_timeroc <- renderPlot({
       print(out_timeroc()$plot)
     })
-    
+
     output$table_timeroc <- renderDT({
       datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
-    
+
     session$onSessionEnded(function() {
       stopApp()
     })
-    
+
   }
-  
-  
-  
-  
-  
+
+
+
+
+
   #viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
   #viewer <- paneViewer()
@@ -590,9 +641,9 @@ jsBasicAddin <- function(){
 
 
 jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
-  
+
   options(shiny.maxRequestSize = max.filesize * 1024^2)
-  
+
   ui <- navbarPage("Basic statistics",
                    tabPanel("Data", icon = icon("table"),
                             sidebarLayout(
@@ -606,7 +657,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                             tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type="html", loader="loader6"))
                                 ),
                                 htmlOutput("naomit")
-                                
+
                               )
                             )
                    ),
@@ -624,7 +675,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                 )
                               )
                             )
-                            
+
                    ),
                    navbarMenu("Regression", icon = icon("list-alt"),
                               tabPanel("Linear regression",
@@ -659,7 +710,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                          )
                                        )
                               )
-                              
+
                    ),
                    navbarMenu("Plot", icon = icon("bar-chart-o"),
                               tabPanel("Basic plot",
@@ -696,7 +747,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                          )
                                        )
                               )
-                              
+
                    ),
                    navbarMenu("ROC analysis", icon = icon("check"),
                               tabPanel("ROC",
@@ -725,12 +776,12 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                               )
                    )
   )
-  
-  
-  
-  
+
+
+
+
   server <- function(input, output, session) {
-    
+
     output$downloadData <- downloadHandler(
       filename = function() {
         paste("example_basic", ".csv", sep = "")
@@ -741,38 +792,38 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
         data.table::fwrite(out, file)
       }
     )
-    
+
     output$import <- renderUI({
       csvFileInput("datafile")
-      
+
     })
-    
+
     data.info <- callModule(csvFile, "datafile", nfactor.limit = nfactor.limit)
     data <- reactive(data.info()$data)
     data.label <- reactive(data.info()$label)
-    
+
     output$data <- renderDT({
       datatable(data(), rownames=F, editable = F, extensions= "Buttons", caption = "Data",
                 options = c(opt.data("data"), list(scrollX = TRUE))
       )
     })
-    
-    
+
+
     output$data_label <- renderDT({
       datatable(data.label(), rownames=F, editable = F, extensions= "Buttons", caption = "Label of data",
                 options = c(opt.data("label"), list(scrollX = TRUE))
       )
     })
-    
+
     output$naomit <- renderText({
       data.info()$naomit
     })
-    
-    
-    
-    
+
+
+
+
     out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$table1 <- renderDT({
       tb = out_tb1()$table
       cap = out_tb1()$caption
@@ -788,9 +839,9 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
       }
       return(out.tb1)
     })
-    
+
     out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
-    
+
     output$lineartable <- renderDT({
       hide = which(colnames(out_linear()$table) == "sig")
       datatable(out_linear()$table, rownames=T, extensions= "Buttons", caption = out_linear()$caption,
@@ -801,13 +852,13 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                 )
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
-    
+
     output$warning_linear <- renderText({
       paste("<b>", out_linear()$warning, "</b>")
     })
-    
+
     out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$logistictable <- renderDT({
       hide = which(colnames(out_logistic()$table) == "sig")
       datatable(out_logistic()$table, rownames=T, extensions= "Buttons", caption = out_logistic()$caption,
@@ -818,10 +869,10 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                 )
       ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
-    
-    
+
+
     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
-    
+
     output$coxtable <- renderDT({
       hide <- which(colnames(out_cox()$table) == c("sig"))
       datatable(out_cox()$table, rownames=T, extensions= "Buttons", caption = out_cox()$caption,
@@ -831,59 +882,59 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                 )
       )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
     })
-    
+
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$ggpairs_plot <- renderPlot({
       print(out_ggpairs())
     })
-    
+
     out_scatter <- scatterServer("scatter", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$scatter_plot <- renderPlot({
       print(out_scatter())
     })
-    
+
     out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$kaplan_plot <- renderPlot({
       print(out_kaplan())
     })
-    
+
     out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$plot_roc <- renderPlot({
       print(out_roc()$plot)
     })
-    
+
     output$table_roc <- renderDT({
       datatable(out_roc()$tb, rownames=F, editable = F, extensions= "Buttons",
                 caption = "ROC results",
                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
-    
-    
-    
+
+
+
     out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-    
+
     output$plot_timeroc <- renderPlot({
       print(out_timeroc()$plot)
     })
-    
+
     output$table_timeroc <- renderDT({
       datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
-    
+
     session$onSessionEnded(function() {
       stopApp()
     })
   }
-  
-  
-  
-  
-  
+
+
+
+
+
   #viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
   #viewer <- paneViewer()
