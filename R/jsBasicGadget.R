@@ -186,9 +186,9 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                            ggplotdownUI("line")
                                          )
                                        )
-                              ),
+                              )
 
-                   ),
+                   )
                    # navbarMenu("ROC analysis", icon = icon("check"),
                    #            tabPanel("ROC",
                    #                     sidebarLayout(
@@ -547,29 +547,29 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       print(out_line())
     })
 
-    out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-
-    output$plot_roc <- renderPlot({
-      print(out_roc()$plot)
-    })
-
-    output$table_roc <- renderDT({
-      datatable(out_roc()$tb, rownames=F, editable = F, extensions= "Buttons",
-                caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
-    })
-
-
-    out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
-
-    output$plot_timeroc <- renderPlot({
-      print(out_timeroc()$plot)
-    })
-
-    output$table_timeroc <- renderDT({
-      datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
-    })
+    # out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    #
+    # output$plot_roc <- renderPlot({
+    #   print(out_roc()$plot)
+    # })
+    #
+    # output$table_roc <- renderDT({
+    #   datatable(out_roc()$tb, rownames=F, editable = F, extensions= "Buttons",
+    #             caption = "ROC results",
+    #             options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+    # })
+    #
+    #
+    # out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+    #
+    # output$plot_timeroc <- renderPlot({
+    #   print(out_timeroc()$plot)
+    # })
+    #
+    # output$table_timeroc <- renderDT({
+    #   datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
+    #             options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+    # })
 
     session$onSessionEnded(function() {
       stopApp()
