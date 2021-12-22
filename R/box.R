@@ -90,7 +90,7 @@ boxUI <- function(id, label = "boxplot") {
 #' @export
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
-#' @importFrom ggpubr ggbox
+#' @importFrom ggpubr ggboxplot
 #' @importFrom ggplot2 ggsave
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location

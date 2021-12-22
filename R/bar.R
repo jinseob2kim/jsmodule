@@ -91,7 +91,7 @@ barUI <- function(id, label = "barplot") {
 #' @export
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
-#' @importFrom ggpubr ggbar
+#' @importFrom ggpubr ggbarplot
 #' @importFrom ggplot2 ggsave
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
