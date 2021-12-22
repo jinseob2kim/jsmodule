@@ -1,6 +1,40 @@
 #####
 # library(shiny);library(ggplot2);library(ggpubr);library(jsmodule);library(data.table);
 
+#' @title boxxxUI: shiny module UI for boxplot
+#' @description Shiny module UI for boxplot
+#' @param id id
+#' @param label label
+#' @return Shiny module UI for boxplot
+#' @details Shiny module UI for boxplot
+#' @examples
+#' library(shiny);library(ggplot2);library(ggpubr);
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      boxxxUI("box")
+#'    ),
+#'    mainPanel(
+#'      plotOutput("box_plot"),
+#'      ggplotdownUI("box")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_box <- boxxxServer("box", data = data, data_label = data.label,
+#'     data_varStruct = NULL)
+#'
+#'   output$box_plot <- renderPlot({
+#'     print(out_box())
+#'   })
+#'}
+#' @rdname boxxxUI
+#' @export
 
 
 boxxxUI <- function(id, label = "boxxxplot") {

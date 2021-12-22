@@ -1,6 +1,41 @@
 #####
 # library(shiny);library(ggplot2);library(ggpubr);library(jsmodule);library(data.table);
 
+#' @title barrrUI: shiny module UI for barplot
+#' @description Shiny module UI for barplot
+#' @param id id
+#' @param label label
+#' @return Shiny module UI for barplot
+#' @details Shiny module UI for barplot
+#' @examples
+#' library(shiny);library(ggplot2);library(ggpubr);
+#' ui <- fluidPage(
+#'    sidebarLayout(
+#'    sidebarPanel(
+#'      barrrUI("bar")
+#'    ),
+#'    mainPanel(
+#'      plotOutput("bar_plot"),
+#'      ggplotdownUI("bar")
+#'    )
+#'  )
+#')
+#'
+#' server <- function(input, output, session) {
+#'
+#'   data <- reactive(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(mtcars))
+#'
+#'   out_bar <- barrrServer("bar", data = data, data_label = data.label,
+#'     data_varStruct = NULL)
+#'
+#'   output$bar_plot <- renderPlot({
+#'     print(out_bar())
+#'   })
+#'}
+#' @rdname barrrUI
+#' @export
+
 
 
 barrrUI <- function(id, label = "barrrplot") {
