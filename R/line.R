@@ -1,5 +1,3 @@
-#####
-# library(shiny);library(ggplot2);library(ggpubr);library(jsmodule);library(data.table);
 #' @title lineUI: shiny module UI for lineplot
 #' @description Shiny module UI for lineplot
 #' @param id id

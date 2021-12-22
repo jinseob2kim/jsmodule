@@ -1,6 +1,3 @@
-#####
-# library(shiny);library(ggplot2);library(ggpubr);library(jsmodule);library(data.table);
-
 #' @title boxUI: shiny module UI for boxplot
 #' @description Shiny module UI for boxplot
 #' @param id id

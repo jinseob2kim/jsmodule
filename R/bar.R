@@ -1,6 +1,3 @@
-#####
-# library(shiny);library(ggplot2);library(ggpubr);library(jsmodule);library(data.table);
-
 #' @title barUI: shiny module UI for barplot
 #' @description Shiny module UI for barplot
 #' @param id id
