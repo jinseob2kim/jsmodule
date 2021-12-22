@@ -342,11 +342,11 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 #
 #
  # output$box_plot <- renderPlot({
-  #  print(out_box())
-  })
-}
-
-shinyApp(ui, server)
+#   #  print(out_box())
+#   })
+# }
+#
+# shinyApp(ui, server)
 
 #
 #
