@@ -735,6 +735,39 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                          )
                                        )
                               ),
+                              tabPanel("Boxplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           boxUI("box")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("box_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("box")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Barplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           barUI("bar")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("bar_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("bar")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Lineplot",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           lineUI("line")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("line_plot"), type="html", loader="loader6"),
+                                           ggplotdownUI("line")
+                                         )
+                                       )
+                              ),
                               tabPanel("Kaplan-meier plot",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -894,6 +927,25 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     output$scatter_plot <- renderPlot({
       print(out_scatter())
     })
+
+    out_box <- boxServer("box", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    output$box_plot <- renderPlot({
+      print(out_box())
+    })
+
+    out_bar <- barServer("bar", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    output$bar_plot <- renderPlot({
+      print(out_bar())
+    })
+
+    out_line <- lineServer("line", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    output$line_plot <- renderPlot({
+      print(out_line())
+    })
+
 
     out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
