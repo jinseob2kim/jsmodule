@@ -1,3 +1,10 @@
+# jsmodule 1.3.0
+
+## New module (Thanks for [Hyunki Lee](https://github.com/leevenstar))
+
+* Boxplot(`boxUI`, `boxServer`), Lineplot(`LineUI`, `LineServer`), Barplot(`BarUI`, `BarServer`)
+
+
 # jsmodule 1.2.0
 
 ## Update
