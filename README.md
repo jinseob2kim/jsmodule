@@ -111,10 +111,4 @@ jsPropensityExtAddin()
 
 ## Web applications
 
-  - Basic statistics: <http://app.zarathu.com/basic>
-
-  - Repeated measure analysis: <http://app.zarathu.com/repeated>
-
-  - Survey data analysis: <http://app.zarathu.com/survey>
-
-  - Propensity score analysis(experimental): <http://app.zarathu.com/ps>
+  - https://openstat.ai
