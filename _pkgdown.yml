@@ -3,6 +3,8 @@ URL: https://jinseob2kim.github.io/jsmodule/, https://github.com/jinseob2kim/jsm
 development:
   mode: auto
 
+template:
+  bootstrap: 5
 
 authors:
   Jinseob Kim:

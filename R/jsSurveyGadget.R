@@ -22,7 +22,7 @@
 
 jsSurveyGadget <- function(data, nfactor.limit = 20) {
   requireNamespace("survival")
-  requireNamespace("survC1")
+  #requireNamespace("survC1")
   options(survey.lonely.psu = "certainty")
 
   ## To remove NOTE.

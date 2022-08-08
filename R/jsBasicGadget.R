@@ -21,7 +21,7 @@
 
 jsBasicGadget <- function(data, nfactor.limit = 20) {
   requireNamespace("survival")
-  requireNamespace("survC1")
+  #requireNamespace("survC1")
 
   ## To remove NOTE.
   val_label <- BinaryGroupRandom <- variable <- NULL

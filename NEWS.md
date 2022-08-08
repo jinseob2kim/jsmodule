@@ -1,3 +1,10 @@
+# jsmodule 1.3.1
+
+## Fix
+
+* Fix cutoff label of Kaplan-meier plot when continuous independent variable
+
+
 # jsmodule 1.3.0
 
 ## New module (Thanks for [Hyunki Lee](https://github.com/leevenstar))

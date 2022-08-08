@@ -476,7 +476,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         yst.lab <- label.regress[variable == input$indep_km, val_label]
       } else{
         yst.name <- paste(label.regress[variable == input$indep_km, var_label], "group")
-        yst.lab <- paste(label.regress[variable == input$indep_km, var_label], paste(c(">", "\u2264"), input$cut5, sep=""))
+        yst.lab <- paste(label.regress[variable == input$indep_km, var_label], paste(c("\u2264", ">"), input$cut5, sep=""))
       }
       ylab <- ifelse(input$cumhaz, "Cumulative incidence", "Survival")
       return(list(res = res.km, ylab = ylab, yst.name = yst.name, yst.lab = yst.lab, data = data.km))
@@ -536,9 +536,9 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       if (is.null(design.survey)){
         xmax <- max(res.km$time)
       } else{
-        if (class(res.km) == "svykmlist"){
+        if (is(res.km, "svykmlist")){
           xmax <- max(sapply(res.km, function(x){max(x$time)}))
-        } else if(class(res.km) == "svykm"){
+        } else if(is(res.km, "svykm")){
 
           xmax <- max(res.km$time)
         }
