@@ -60,7 +60,7 @@ regress.display2 <- function (regress.model, alpha = 0.05, crude = FALSE, crude.
     }
     else {
       if (length(class(model)) == 1) {
-        if (class(model) != "lm") {
+        if (!is(model, "lm")) {
           stop("Model not from linear regression")
         }
       }
