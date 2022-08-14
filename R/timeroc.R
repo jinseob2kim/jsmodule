@@ -101,6 +101,9 @@ timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey 
   }
 
   lp <- stats::predict(cmodel, type = "lp")
+  if (summary(cmodel)$coefficients[1, 1] < 0){
+    lp <- -lp
+  }
   vec.y <- sapply(cmodel$y, `[[`, 1)
   out <- timeROC::timeROC(T = vec.y[1:(length(vec.y)/2)],
                           delta = vec.y[(length(vec.y)/2 +1):length(vec.y)],
@@ -310,11 +313,12 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 #' @importFrom data.table setkey rbindlist data.table
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
+#' @importFrom timeROC SeSpPPVNPV
 
 timerocModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL, iid = T, NRIIDI = T) {
 
   ## To remove NOTE.
-  ListModel <- compare <- level <- variable <- FP <- TP <- model <- NULL
+  ListModel <- compare <- level <- variable <- FP <- TP <- model <- Sensitivity <- Specificity <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -568,6 +572,19 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 
         if ((nmodel() == 1 | NRIIDI == F)){
           res.tb <- timeROC_table(res.roc)
+          res.cut <- NULL
+          if (length(indeps()[[1]]) == 1){
+            res.cut <- data.table::rbindlist(lapply(unique(data.km[[indeps()[[1]][1]]]), function(cut){
+              zz <- timeROC::SeSpPPVNPV(cutpoint = cut, T=data.km[[input$time_km]],
+                                        delta = data.km[[input$event_km]],
+                                        marker = data.km[[indeps()[[1]][1]]],
+                                        cause = 1,weighting = "marginal",
+                                        times = input$time_to_roc ,
+                                        iid = F)
+              return(data.table::data.table(cut = cut, Sensitivity = zz$TP[[2]], Specificity =  1 - zz$FP[[2]]))
+            }))[Sensitivity + Specificity == max(Sensitivity + Specificity)][1, ]
+          }
+
 
         } else{
           res.tb <- cbind(timeROC_table(res.roc),
@@ -575,6 +592,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
                                             list.vars.ind = indeps(),
                                             t = input$time_to_roc,
                                             data = data.km))
+          res.cut <- NULL
         }
 
 
@@ -583,6 +601,18 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 
         if (nmodel() == 1 | NRIIDI == F){
           res.tb <- timeROC_table(res.roc)
+          res.cut <- NULL
+          if (length(indeps()[[1]]) == 1){
+            res.cut <- data.table::rbindlist(lapply(unique(data.km[[indeps()[[1]][1]]]), function(cut){
+              zz <- timeROC::SeSpPPVNPV(cutpoint = cut, T=data.km[[input$time_km]],
+                                        delta = data.km[[input$event_km]],
+                                        marker=data.km[[indeps()[[1]][1]]],
+                                        cause=1,weighting="marginal",
+                                        times = input$time_to_roc ,
+                                        iid=F)
+              return(data.table::data.table(cut = cut, Sensitivity = zz$TP[[2]], Specificity =  1 - zz$FP[[2]]))
+            }))[Sensitivity + Specificity == max(Sensitivity + Specificity)][1, ]
+          }
 
         } else{
           res.tb <- cbind(timeROC_table(res.roc),
@@ -591,6 +621,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
                                             t = input$time_to_roc,
                                             data = data.km, id.cluster = id.cluster())
                           )
+          res.cut <- NULL
         }
 
 
@@ -631,6 +662,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 
       if (nmodel() == 1 | NRIIDI == F){
         res.tb <- timeROC_table(res.roc)
+        res.cut <- NULL
 
       } else{
         res.tb <- cbind(timeROC_table(res.roc),
@@ -638,6 +670,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
                                           list.vars.ind = indeps(),
                                           t = input$time_to_roc,
                                           data = data.km))
+        res.cut <- NULL
       }
     }
 
@@ -652,7 +685,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 
     p <- ggplot(data.rocplot, aes(FP, TP, colour = model)) + geom_line() + geom_abline(slope = 1, lty = 2) + xlab("1-Specificity") + ylab("Sensitivity")
 
-    return(list(plot = p, tb = res.tb))
+    return(list(plot = p, tb = res.tb, cut = res.cut))
   })
 
 
@@ -788,7 +821,7 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 timerocModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL, iid = T, NRIIDI = T) {
 
   ## To remove NOTE.
-  ListModel <- compare <- level <- variable <- FP <- TP <- model <- NULL
+  ListModel <- compare <- level <- variable <- FP <- TP <- model <- Sensitivity <- Specificity <- NULL
 
   if (is.null(data_varStruct)){
     data_varStruct <- reactive(list(variable = names(data())))
@@ -1022,6 +1055,18 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
 
         if (nmodel() == 1 | NRIIDI == F){
           res.tb <- timeROC_table(res.roc)
+          res.cut <- NULL
+          if (length(indeps()[[1]]) == 1){
+            res.cut <- data.table::rbindlist(lapply(unique(data.km[[indeps()[[1]][1]]]), function(cut){
+              zz <- timeROC::SeSpPPVNPV(cutpoint = cut, T=data.km[[input$time_km]],
+                                        delta = data.km[[input$event_km]],
+                                        marker=data.km[[indeps()[[1]][1]]],
+                                        cause=1,weighting="marginal",
+                                        times = input$time_to_roc ,
+                                        iid=F)
+              return(data.table::data.table(cut = cut, Sensitivity = zz$TP[[2]], Specificity =  1 - zz$FP[[2]]))
+            }))[Sensitivity + Specificity == max(Sensitivity + Specificity)][1, ]
+          }
 
         } else{
           res.tb <- cbind(timeROC_table(res.roc),
@@ -1037,6 +1082,18 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
 
         if (nmodel() == 1 | NRIIDI == F){
           res.tb <- timeROC_table(res.roc)
+          res.cut <- NULL
+          if (length(indeps()[[1]]) == 1){
+            res.cut <- data.table::rbindlist(lapply(unique(data.km[[indeps()[[1]][1]]]), function(cut){
+              zz <- timeROC::SeSpPPVNPV(cutpoint = cut, T=data.km[[input$time_km]],
+                                        delta = data.km[[input$event_km]],
+                                        marker=data.km[[indeps()[[1]][1]]],
+                                        cause=1,weighting="marginal",
+                                        times = input$time_to_roc ,
+                                        iid=F)
+              return(data.table::data.table(cut = cut, Sensitivity = zz$TP[[2]], Specificity =  1 - zz$FP[[2]]))
+            }))[Sensitivity + Specificity == max(Sensitivity + Specificity)][1, ]
+          }
 
         } else{
           res.tb <- cbind(timeROC_table(res.roc),
@@ -1045,6 +1102,7 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
                                             t = input$time_to_roc,
                                             data = data.km, id.cluster = id.cluster())
           )
+          res.cut <- NULL
         }
 
 
@@ -1085,6 +1143,18 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
 
       if (nmodel() == 1 | NRIIDI == F){
         res.tb <- timeROC_table(res.roc)
+        res.cut <- NULL
+        if (length(indeps()[[1]]) == 1){
+          res.cut <- data.table::rbindlist(lapply(unique(data.km[[indeps()[[1]][1]]]), function(cut){
+            zz <- timeROC::SeSpPPVNPV(cutpoint = cut, T=data.km[[input$time_km]],
+                                      delta = data.km[[input$event_km]],
+                                      marker=data.km[[indeps()[[1]][1]]],
+                                      cause=1,weighting="marginal",
+                                      times = input$time_to_roc ,
+                                      iid=F)
+            return(data.table::data.table(cut = cut, Sensitivity = zz$TP[[2]], Specificity =  1 - zz$FP[[2]]))
+          }))[Sensitivity + Specificity == max(Sensitivity + Specificity)][1, ]
+        }
 
       } else{
         res.tb <- cbind(timeROC_table(res.roc),
@@ -1092,6 +1162,7 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
                                           list.vars.ind = indeps(),
                                           t = input$time_to_roc,
                                           data = data.km))
+        res.cut <- NULL
       }
     }
 

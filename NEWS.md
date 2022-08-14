@@ -1,3 +1,10 @@
+# jsmodule 1.3.2
+
+## Update
+
+* Add cutoff information to `timerocModule` when 1 model, 1 indpendent variable.
+
+
 # jsmodule 1.3.1
 
 ## Fix
