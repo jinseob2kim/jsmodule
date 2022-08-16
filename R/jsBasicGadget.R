@@ -209,6 +209,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                          ),
                                          mainPanel(
                                            withLoader(plotOutput("plot_timeroc"), type="html", loader="loader6"),
+                                           withLoader(tableOutput("cut_timeroc"), type="html", loader="loader6"),
                                            ggplotdownUI("timeroc"),
                                            withLoader(DTOutput("table_timeroc"), type="html", loader="loader6")
                                          )
@@ -571,6 +572,10 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
 
+    output$cut_timeroc <- renderTable({
+      out_timeroc()$cut
+    }, caption = "Best cutoff", caption.placement = "top")
+
     session$onSessionEnded(function() {
       stopApp()
     })
@@ -802,6 +807,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                          ),
                                          mainPanel(
                                            withLoader(plotOutput("plot_timeroc"), type="html", loader="loader6"),
+                                           withLoader(tableOutput("cut_timeroc"), type="html", loader="loader6"),
                                            ggplotdownUI("timeroc"),
                                            withLoader(DTOutput("table_timeroc"), type="html", loader="loader6")
                                          )
@@ -977,6 +983,10 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
       datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
                 options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
     })
+
+    output$cut_timeroc <- renderTable({
+      out_timeroc()$cut
+    }, caption = "Best cutoff", caption.placement = "top")
 
     session$onSessionEnded(function() {
       stopApp()
