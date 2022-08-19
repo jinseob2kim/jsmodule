@@ -12,6 +12,7 @@
 #'    ),
 #'    mainPanel(
 #'      plotOutput("plot_roc"),
+#'      tableOutput("cut_roc"),
 #'      ggplotdownUI("roc"),
 #'      DTOutput("table_roc")
 #'    )
@@ -21,13 +22,17 @@
 #' server <- function(input, output, session) {
 #'
 #'   data <- reactive(mtcars)
-#'   data.label <- jstable::mk.lev(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(data1))
 #'
 #'   out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label,
 #'                             data_varStruct = NULL)
 #'
 #'   output$plot_roc <- renderPlot({
 #'     print(out_roc()$plot)
+#'   })
+#'
+#'   output$cut_roc <- renderTable({
+#'    print(out_roc()$cut)
 #'   })
 #'
 #'   output$table_roc <- renderDT({
@@ -226,6 +231,7 @@ ROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
 #'    ),
 #'    mainPanel(
 #'      plotOutput("plot_roc"),
+#'      tableOutput("cut_roc"),
 #'      ggplotdownUI("roc"),
 #'      DTOutput("table_roc")
 #'    )
@@ -235,13 +241,17 @@ ROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
 #' server <- function(input, output, session) {
 #'
 #'   data <- reactive(mtcars)
-#'   data.label <- jstable::mk.lev(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(data1))
 #'
 #'   out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label,
 #'                             data_varStruct = NULL)
 #'
 #'   output$plot_roc <- renderPlot({
 #'     print(out_roc()$plot)
+#'   })
+#'
+#'   output$cut_roc <- renderTable({
+#'    print(out_roc()$cut)
 #'   })
 #'
 #'   output$table_roc <- renderDT({
@@ -261,7 +271,7 @@ ROC_table <- function(ListModel, dec.auc =3, dec.p = 3){
 #' @export
 #' @importFrom stats quantile
 #' @importFrom data.table setkey
-#' @importFrom pROC roc ggroc
+#' @importFrom pROC roc ggroc coords
 #' @importFrom geepack geeglm
 #' @importFrom survey svyglm
 #' @importFrom see theme_modern
@@ -511,12 +521,20 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
           mm <- glm(as.formula(forms), data = data.roc, family = binomial)
           pROC::roc(mm$y, predict(mm, type = "response"))})
 
+        if (nmodel()==1 & length(indeps()) == 1){
+          res.cut <- pROC::coords(res.roc[[1]], x="best", input="threshold", best.method="youden")
+        }else{
+          res.cut <- NULL
+        }
+
 
       } else{
         res.roc <- lapply(indeps(), function(x){
           forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
           mm <- geepack::geeglm(as.formula(forms), data = data.roc, family = "binomial", id = get(id.cluster()), corstr = "exchangeable")
           pROC::roc(mm$y, predict(mm, type = "response"))})
+
+        res.cut <- NULL
 
       }
 
@@ -556,6 +574,12 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
         mm <- survey::svyglm(as.formula(forms), design = data.design, family=quasibinomial())
         pROC::roc(mm$y, as.matrix(predict(mm, type= "response")))})
 
+      if (nmodel()==1 & length(indeps()) == 1){
+        res.cut <- pROC::coords(res.roc[[1]], x="best", input="threshold", best.method="youden")
+      }else{
+        res.cut <- NULL
+      }
+
       res.tb <- ROC_table(res.roc, dec.auc = 3, dec.p = 3)
     }
 
@@ -563,7 +587,7 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
     p <- pROC::ggroc(res.roc) + see::theme_modern() + geom_abline(slope = 1, intercept = 1, lty = 2) +
       xlab("Specificity") + ylab("Sensitivity") + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
 
-    return(list(plot = p, tb = res.tb))
+    return(list(plot = p, cut = res.cut, tb = res.tb))
   })
 
 
@@ -659,6 +683,7 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 #'    ),
 #'    mainPanel(
 #'      plotOutput("plot_roc"),
+#'      tableOutput("cut_roc"),
 #'      ggplotdownUI("roc"),
 #'      DTOutput("table_roc")
 #'    )
@@ -668,13 +693,17 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 #' server <- function(input, output, session) {
 #'
 #'   data <- reactive(mtcars)
-#'   data.label <- jstable::mk.lev(mtcars)
+#'   data.label <- reactive(jstable::mk.lev(data1))
 #'
 #'   out_roc <- callModule(rocModule2, "roc", data = data, data_label = data.label,
 #'                             data_varStruct = NULL)
 #'
 #'   output$plot_roc <- renderPlot({
 #'     print(out_roc()$plot)
+#'   })
+#'
+#'   output$cut_roc <- renderTable({
+#'    print(out_roc()$cut)
 #'   })
 #'
 #'   output$table_roc <- renderDT({
@@ -694,7 +723,7 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 #' @export
 #' @importFrom stats quantile
 #' @importFrom data.table setkey
-#' @importFrom pROC roc ggroc
+#' @importFrom pROC roc ggroc coords
 #' @importFrom geepack geeglm
 #' @importFrom survey svyglm
 #' @importFrom see theme_modern
@@ -929,12 +958,20 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
           mm <- glm(as.formula(forms), data = data.roc, family = binomial)
           pROC::roc(mm$y, predict(mm, type = "response"))})
 
+        if (nmodel()==1 & length(indeps()) == 1){
+          res.cut <- pROC::coords(res.roc[[1]], x="best", input="threshold", best.method="youden")
+        }else{
+          res.cut <- NULL
+        }
+
 
       } else{
         res.roc <- lapply(indeps(), function(x){
           forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
           mm <- geepack::geeglm(as.formula(forms), data = data.roc, family = "binomial", id = get(id.cluster()), corstr = "exchangeable")
           pROC::roc(mm$y, predict(mm, type = "response"))})
+
+        res.cut <- NULL
 
       }
 
@@ -974,6 +1011,12 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
         mm <- survey::svyglm(as.formula(forms), design = data.design, family=quasibinomial())
         pROC::roc(mm$y, as.matrix(predict(mm, type= "response")))})
 
+      if (nmodel()==1 & length(indeps()) == 1){
+        res.cut <- pROC::coords(res.roc[[1]], x="best", input="threshold", best.method="youden")
+      }else{
+        res.cut <- NULL
+      }
+
       res.tb <- ROC_table(res.roc, dec.auc = 3, dec.p = 3)
     }
 
@@ -981,7 +1024,7 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
     p <- pROC::ggroc(res.roc) + see::theme_modern() + geom_abline(slope = 1, intercept = 1, lty = 2) +
       xlab("Specificity") + ylab("Sensitivity") + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
 
-    return(list(plot = p, tb = res.tb))
+    return(list(plot = p, cut = res.cut ,tb = res.tb))
   })
 
 
