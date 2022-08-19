@@ -101,16 +101,23 @@ timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey 
   }
 
   lp <- stats::predict(cmodel, type = "lp")
-  if (summary(cmodel)$coefficients[1, 1] < 0){
-    lp <- -lp
-  }
   vec.y <- sapply(cmodel$y, `[[`, 1)
+
   out <- timeROC::timeROC(T = vec.y[1:(length(vec.y)/2)],
                           delta = vec.y[(length(vec.y)/2 +1):length(vec.y)],
                           marker = lp,
                           cause = 1,
                           weighting="marginal",
                           times = t)
+
+  if (out$AUC[2] < 0.5){
+    out <- timeROC::timeROC(T = vec.y[1:(length(vec.y)/2)],
+                            delta = vec.y[(length(vec.y)/2 +1):length(vec.y)],
+                            marker = -lp,
+                            cause = 1,
+                            weighting="marginal",
+                            times = t)
+  }
 
   ## Coxph object
   data[[var.event]][data[[var.event]] == 1 & data[[var.time]] > t] <- 0
