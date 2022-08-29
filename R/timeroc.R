@@ -581,15 +581,31 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
           res.tb <- timeROC_table(res.roc)
           res.cut <- NULL
           if (length(indeps()[[1]]) == 1){
-            res.cut <- data.table::rbindlist(lapply(unique(data.km[[indeps()[[1]][1]]]), function(cut){
+            troc <- timeROC::timeROC(T = data.km[[input$time_km]],
+                                     delta = data.km[[input$event_km]],
+                                     marker = data.km[[indeps()[[1]][1]]],
+                                     cause = 1,
+                                     weighting="marginal",
+                                     times = input$time_to_roc, iid = F)
+
+            mk <- data.km[[indeps()[[1]][1]]]
+            if (troc$AUC[2] < 0.5){
+              mk <- -mk
+            }
+
+            res.cut <- data.table::rbindlist(lapply(unique(mk), function(cut){
               zz <- timeROC::SeSpPPVNPV(cutpoint = cut, T=data.km[[input$time_km]],
                                         delta = data.km[[input$event_km]],
-                                        marker = data.km[[indeps()[[1]][1]]],
+                                        marker = mk,
                                         cause = 1,weighting = "marginal",
                                         times = input$time_to_roc ,
                                         iid = F)
               return(data.table::data.table(cut = cut, Sensitivity = zz$TP[[2]], Specificity =  1 - zz$FP[[2]]))
             }))[Sensitivity + Specificity == max(Sensitivity + Specificity)][1, ]
+
+            if (troc$AUC[2] < 0.5){
+              res.cut[, cut := -cut]
+            }
           }
 
 
@@ -610,15 +626,31 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
           res.tb <- timeROC_table(res.roc)
           res.cut <- NULL
           if (length(indeps()[[1]]) == 1){
-            res.cut <- data.table::rbindlist(lapply(unique(data.km[[indeps()[[1]][1]]]), function(cut){
+            troc <- timeROC::timeROC(T = data.km[[input$time_km]],
+                                     delta = data.km[[input$event_km]],
+                                     marker = data.km[[indeps()[[1]][1]]],
+                                     cause = 1,
+                                     weighting="marginal",
+                                     times = input$time_to_roc, iid = F)
+
+            mk <- data.km[[indeps()[[1]][1]]]
+            if (troc$AUC[2] < 0.5){
+              mk <- -mk
+            }
+
+            res.cut <- data.table::rbindlist(lapply(unique(mk), function(cut){
               zz <- timeROC::SeSpPPVNPV(cutpoint = cut, T=data.km[[input$time_km]],
                                         delta = data.km[[input$event_km]],
-                                        marker=data.km[[indeps()[[1]][1]]],
-                                        cause=1,weighting="marginal",
+                                        marker = mk,
+                                        cause = 1,weighting = "marginal",
                                         times = input$time_to_roc ,
-                                        iid=F)
+                                        iid = F)
               return(data.table::data.table(cut = cut, Sensitivity = zz$TP[[2]], Specificity =  1 - zz$FP[[2]]))
             }))[Sensitivity + Specificity == max(Sensitivity + Specificity)][1, ]
+
+            if (troc$AUC[2] < 0.5){
+              res.cut[, cut := -cut]
+            }
           }
 
         } else{
@@ -1064,15 +1096,31 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
           res.tb <- timeROC_table(res.roc)
           res.cut <- NULL
           if (length(indeps()[[1]]) == 1){
-            res.cut <- data.table::rbindlist(lapply(unique(data.km[[indeps()[[1]][1]]]), function(cut){
+            troc <- timeROC::timeROC(T = data.km[[input$time_km]],
+                                     delta = data.km[[input$event_km]],
+                                     marker = data.km[[indeps()[[1]][1]]],
+                                     cause = 1,
+                                     weighting="marginal",
+                                     times = input$time_to_roc, iid = F)
+
+            mk <- data.km[[indeps()[[1]][1]]]
+            if (troc$AUC[2] < 0.5){
+              mk <- -mk
+            }
+
+            res.cut <- data.table::rbindlist(lapply(unique(mk), function(cut){
               zz <- timeROC::SeSpPPVNPV(cutpoint = cut, T=data.km[[input$time_km]],
                                         delta = data.km[[input$event_km]],
-                                        marker=data.km[[indeps()[[1]][1]]],
-                                        cause=1,weighting="marginal",
+                                        marker = mk,
+                                        cause = 1,weighting = "marginal",
                                         times = input$time_to_roc ,
-                                        iid=F)
+                                        iid = F)
               return(data.table::data.table(cut = cut, Sensitivity = zz$TP[[2]], Specificity =  1 - zz$FP[[2]]))
             }))[Sensitivity + Specificity == max(Sensitivity + Specificity)][1, ]
+
+            if (troc$AUC[2] < 0.5){
+              res.cut[, cut := -cut]
+            }
           }
 
         } else{
@@ -1091,15 +1139,31 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
           res.tb <- timeROC_table(res.roc)
           res.cut <- NULL
           if (length(indeps()[[1]]) == 1){
-            res.cut <- data.table::rbindlist(lapply(unique(data.km[[indeps()[[1]][1]]]), function(cut){
+            troc <- timeROC::timeROC(T = data.km[[input$time_km]],
+                                     delta = data.km[[input$event_km]],
+                                     marker = data.km[[indeps()[[1]][1]]],
+                                     cause = 1,
+                                     weighting="marginal",
+                                     times = input$time_to_roc, iid = F)
+
+            mk <- data.km[[indeps()[[1]][1]]]
+            if (troc$AUC[2] < 0.5){
+              mk <- -mk
+            }
+
+            res.cut <- data.table::rbindlist(lapply(unique(mk), function(cut){
               zz <- timeROC::SeSpPPVNPV(cutpoint = cut, T=data.km[[input$time_km]],
                                         delta = data.km[[input$event_km]],
-                                        marker=data.km[[indeps()[[1]][1]]],
-                                        cause=1,weighting="marginal",
+                                        marker = mk,
+                                        cause = 1,weighting = "marginal",
                                         times = input$time_to_roc ,
-                                        iid=F)
+                                        iid = F)
               return(data.table::data.table(cut = cut, Sensitivity = zz$TP[[2]], Specificity =  1 - zz$FP[[2]]))
             }))[Sensitivity + Specificity == max(Sensitivity + Specificity)][1, ]
+
+            if (troc$AUC[2] < 0.5){
+              res.cut[, cut := -cut]
+            }
           }
 
         } else{
