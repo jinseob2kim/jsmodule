@@ -53,6 +53,7 @@ ui <- fluidPage(
    ),
    mainPanel(
      plotOutput("plot_roc"),
+     tableOutput("cut_roc"),
      ggplotdownUI("roc"),
      DTOutput("table_roc")
    )
@@ -62,13 +63,17 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   data <- reactive(mtcars)
-  data.label <- jstable::mk.lev(mtcars)
+  data.label <- reactive(jstable::mk.lev(data1))
 
   out_roc <- callModule(rocModule2, "roc", data = data, data_label = data.label,
                             data_varStruct = NULL)
 
   output$plot_roc <- renderPlot({
     print(out_roc()$plot)
+  })
+
+  output$cut_roc <- renderTable({
+   print(out_roc()$cut)
   })
 
   output$table_roc <- renderDT({

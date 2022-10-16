@@ -15,7 +15,7 @@
 #'     ),
 #'     mainPanel(
 #'       plotOutput("histogram"),
-#'       ggplotdownUI("histogram")
+#'       ggplotdownUI("histogsram")
 #'     )
 #'   )
 #' )
@@ -149,7 +149,7 @@ histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         strata_select <- c("None", strata_list)
         selectizeInput(session$ns("strata"), "Strata",
           choices = strata_select, multiple = F,
-          selected = unlist(strata_select)[2]
+          selected = unlist(strata_select)[1]
         )
       })
 
@@ -278,35 +278,35 @@ histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
   )
 }
 
-library(shiny)
-library(data.table)
-library(jsmodule)
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-      histogramUI("histogram")
-    ),
-    mainPanel(
-      plotOutput("histogram_plot"),
-      ggplotdownUI("histogram")
-    )
-  )
-)
-
-server <- function(input, output, session) {
-  mtcars$am <- as.factor(mtcars$am)
-  mtcars$vs <- as.factor(mtcars$vs)
-  mtcars$gear <- as.factor(mtcars$gear)
-  mtcars$carb <- as.factor(mtcars$carb)
-  mtcars$cyl <- as.factor(mtcars$cyl)
-  data <- reactive(mtcars)
-  data.label <- reactive(jstable::mk.lev(mtcars))
-  out_histogram <- histogramServer("histogram", data = data, data_label = data.label,
-                           data_varStruct = NULL)
-
-  output$histogram_plot <- renderPlot({
-    print(out_histogram())
-  })
-}
-
-shinyApp(ui, server)
+# library(shiny)
+# library(data.table)
+# library(jsmodule)
+# ui <- fluidPage(
+#   sidebarLayout(
+#     sidebarPanel(
+#       histogramUI("histogram")
+#     ),
+#     mainPanel(
+#       plotOutput("histogram_plot"),
+#       ggplotdownUI("histogram")
+#     )
+#   )
+# )
+#
+# server <- function(input, output, session) {
+#   mtcars$am <- as.factor(mtcars$am)
+#   mtcars$vs <- as.factor(mtcars$vs)
+#   mtcars$gear <- as.factor(mtcars$gear)
+#   mtcars$carb <- as.factor(mtcars$carb)
+#   mtcars$cyl <- as.factor(mtcars$cyl)
+#   data <- reactive(mtcars)
+#   data.label <- reactive(jstable::mk.lev(mtcars))
+#   out_histogram <- histogramServer("histogram", data = data, data_label = data.label,
+#                            data_varStruct = NULL)
+#
+#   output$histogram_plot <- renderPlot({
+#     print(out_histogram())
+#   })
+# }
+#
+# shinyApp(ui, server)
