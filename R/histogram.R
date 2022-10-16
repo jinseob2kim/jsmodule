@@ -29,11 +29,11 @@
 #'     data_varStruct = NULL
 #'   )
 #'
-#'   output$box_plot <- renderPlot({
+#'   output$histogram <- renderPlot({
 #'     print(out_histogram())
 #'   })
 #' }
-#' @rdname boxUI
+#' @rdname histogramUI
 #' @export
 
 
@@ -44,11 +44,6 @@ histogramUI <- function(id, label = "histogram") {
   tagList(
     uiOutput(ns("vars_histogram")),
     uiOutput(ns("strata_histogram")),
-    # checkboxInput(ns("errorbar"), "Errorbar"),
-    # checkboxInput(ns("jitter"), "Points"),
-    checkboxInput(ns("fillcolor"), "Fill"),
-    # uiOutput(ns("subvar")),
-    # uiOutput(ns("subval"))
   )
 }
 
@@ -82,7 +77,7 @@ histogramUI <- function(id, label = "histogram") {
 #'   data <- reactive(mtcars)
 #'   data.label <- reactive(jstable::mk.lev(mtcars))
 #'
-#'   out_histogram <- histogramServer("box",
+#'   out_histogram <- histogramServer("histogram",
 #'     data = data, data_label = data.label,
 #'     data_varStruct = NULL
 #'   )
@@ -91,7 +86,7 @@ histogramUI <- function(id, label = "histogram") {
 #'     print(out_histogram())
 #'   })
 #' }
-#' @rdname boxServer
+#' @rdname histogramServer
 #' @export
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
@@ -118,7 +113,6 @@ histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         data <- data.table(data(), stringsAsFactors = T)
 
         factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
-        # data[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
         factor_list <- mklist(data_varStruct(), factor_vars)
 
         nclass_factor <- unlist(data[, lapply(.SD, function(x) {
@@ -145,10 +139,6 @@ histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
             choices = vlist()$select_vars, multiple = F,
             selected = vlist()$select_vars[1]
           ),
-          # selectizeInput(session$ns("y_histogram"), "Y variable",
-          #   choices = vlist()$select_list, multiple = F,
-          #   selected = ifelse(length(vlist()$select_vars) > 1, vlist()$select_vars[2], vlist()$select_vars[1])
-          # )
         )
       })
 
@@ -210,7 +200,6 @@ histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
       })
 
       histogramInput <- reactive({
-        # req(c(input$x_histogram, input$y_histogram, input$strata))
         req(c(input$x_histogram, input$strata))
         data <- data.table(data())
         label <- data_label()
@@ -222,22 +211,10 @@ histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         add.params <- list()
         cor.coeff.args <- list(p.accuracy = 0.001)
 
-        # add <- "none"
-        # if (input$jitter) {
-        #   add <- "jitter"
-        # }
-
-        # fillcolor <- "white"
-        # if (input$fillcolor) {
-        #   fillcolor <- "gray"
-        # }
-
         ggpubr::gghistogram(data = data, x = input$x_histogram,
           color = "black", conf.int = input$lineci,
           xlab = label[variable == input$x_histogram, var_label][1],
-          #ylab = label[variable == input$y_histogram, var_label][1],
           na.rm = T, fill = color,
-          #add = add, add.params = add.params,
         )
       })
 
