@@ -227,16 +227,16 @@ histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         #   add <- "jitter"
         # }
 
-        fillcolor <- "white"
-        if (input$fillcolor) {
-          fillcolor <- "gray"
-        }
+        # fillcolor <- "white"
+        # if (input$fillcolor) {
+        #   fillcolor <- "gray"
+        # }
 
         ggpubr::gghistogram(data = data, x = input$x_histogram,
-          color = color, conf.int = input$lineci,
+          color = "black", conf.int = input$lineci,
           xlab = label[variable == input$x_histogram, var_label][1],
           #ylab = label[variable == input$y_histogram, var_label][1],
-          na.rm = T, fill = fillcolor,
+          na.rm = T, fill = color,
           #add = add, add.params = add.params,
         )
       })
@@ -300,45 +300,10 @@ histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
     }
   )
 }
-#####
 
-
-#
-# ui <- navbarPage("basic statistics",
-#                  navbarMenu("Plot", icon = icon("bar-chart-o"),
-#                             tabPanel("Boxplot",
-#                                      sidebarLayout(
-#                                        sidebarPanel(
-#                                          histogramUI("histogram")
-#                                        ),
-#                                        mainPanel(
-#                                          withLoader(plotOutput("histogram"), type="html", loader="loader6"),
-#                                          ggplotdownUI("histogram")
-#                                        )
-#                                      )
-#                             )
-#                  )
-# )
-#
-# server <- function(input, output, session){
-#
-#       data <- reactive(mtcars)
-#       data.label <- reactive(jstable::mk.lev(mtcars))
-#       out_histogram <- histogramServer("box", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = 20)
-#
-#       output$histogram <- renderPlot({
-#         print(out_histogram())
-#
-#
-# output$histogram <- renderPlot({
-#   #  print(out_histogram())
-#   })
-# }
-#
-# shinyApp(ui, server)
-
-
-
+library(shiny)
+library(data.table)
+library(jsmodule)
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
