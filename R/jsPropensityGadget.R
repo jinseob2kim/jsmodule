@@ -6,9 +6,9 @@
 #' @return Shiny Gadget including original/matching/IPTW data, Label info, Table 1, Cox model, Basic/kaplan-meier plot.
 #' @details Shiny Gadget including original/matching/IPTW data, Label info, Table 1, Cox model, Basic/kaplan-meier plot.
 #' @examples
-#' if(interactive()){
-#'  jsPropensityGadget(mtcars)
-#'  }
+#' if (interactive()) {
+#'   jsPropensityGadget(mtcars)
+#' }
 #' @seealso
 #'  \code{\link[data.table]{data.table}}
 #'  \code{\link[MatchIt]{matchit}},\code{\link[MatchIt]{match.data}}
@@ -29,10 +29,9 @@
 #' @importFrom purrr map_lgl
 #' @importFrom stats model.frame
 
-jsPropensityGadget <- function(data, nfactor.limit = 20){
-
+jsPropensityGadget <- function(data, nfactor.limit = 20) {
   requireNamespace("survival")
-  #requireNamespace("survC1")
+  # requireNamespace("survC1")
 
   ## To remove NOTE.
   ID.pscal2828 <- level <- val_label <- BinaryGroupRandom <- variable <- NULL
@@ -44,280 +43,325 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
   name.new <- names(out)
   ref <- list(name.old = name.old, name.new = name.new)
 
-  data_varStruct1 = list(variable = names(out))
+  data_varStruct1 <- list(variable = names(out))
 
 
   ## Vars
   naCol <- names(out)[colSums(is.na(out)) > 0]
-  #out <- out[, .SD, .SDcols = -naCol]
+  # out <- out[, .SD, .SDcols = -naCol]
 
   factor_vars <- names(out)[out[, lapply(.SD, class) %in% c("factor", "character")]]
-  if (!is.null(factor_vars) & length(factor_vars) > 0){
-    out[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
+  if (!is.null(factor_vars) & length(factor_vars) > 0) {
+    out[, (factor_vars) := lapply(.SD, as.factor), .SDcols = factor_vars]
   }
 
   factor_original <- factor_vars
   conti_original <- setdiff(names(out), factor_vars)
-  nclass <- unlist(out[, lapply(.SD, function(x){length(unique(x))}), .SDcols = conti_original])
-  factor_adds_list = mklist(data_varStruct1, names(nclass)[nclass <= nfactor.limit])
-  except_vars <- names(nclass)[ nclass== 1]
-  #except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
-  factor_adds <- names(nclass)[nclass >= 1 &  nclass <= 5]
+  nclass <- unlist(out[, lapply(.SD, function(x) {
+    length(unique(x))
+  }), .SDcols = conti_original])
+  factor_adds_list <- mklist(data_varStruct1, names(nclass)[nclass <= nfactor.limit])
+  except_vars <- names(nclass)[nclass == 1]
+  # except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
+  factor_adds <- names(nclass)[nclass >= 1 & nclass <= 5]
 
 
 
 
 
-  ui <- navbarPage("Propensity score analysis",
-                   tabPanel("Data", icon = icon("table"),
-                            sidebarLayout(
-                              sidebarPanel(
-                                uiOutput("factor"),
-                                uiOutput("binary_check"),
-                                uiOutput("binary_var"),
-                                uiOutput("binary_val"),
-                                uiOutput("ref_check"),
-                                uiOutput("ref_var"),
-                                uiOutput("ref_val"),
-                                uiOutput("subset_check"),
-                                uiOutput("subset_var"),
-                                uiOutput("subset_val"),
-                                uiOutput("group_ps"),
-                                uiOutput("indep_ps"),
-                                uiOutput("pcut"),
-                                uiOutput("caliperps"),
-                                uiOutput("ratio")
-
-                              ),
-                              mainPanel(
-                                tabsetPanel(type = "pills",
-                                            tabPanel("Data", withLoader(DTOutput("data"), type="html", loader="loader6")),
-                                            tabPanel("Matching data", withLoader(DTOutput("matdata"), type="html", loader="loader6")),
-                                            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type="html", loader="loader6"))
-                                ),
-                                htmlOutput("naomit")
-                              )
-                            )
-                   ),
-                   tabPanel("Table 1", icon = icon("percentage"),
-                            sidebarLayout(
-                              sidebarPanel(
-                                tb1moduleUI("tb1")
-                              ),
-                              mainPanel(
-                                tabsetPanel(type = "pills",
-                                            tabPanel("Original",
-                                                     withLoader(DTOutput("table1_original"), type="html", loader="loader6"),
-                                                     wellPanel(
-                                                       h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
-                                                       h5("Categorical variables  are summarized with table")
-                                                     )
-                                            ),
-                                            tabPanel("Matching",
-                                                     withLoader(DTOutput("table1_ps"), type="html", loader="loader6"),
-                                                     wellPanel(
-                                                       h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
-                                                       h5("Categorical variables  are summarized with table")
-                                                     )
-                                            ),
-                                            tabPanel("IPTW",
-                                                     withLoader(DTOutput("table1_iptw"), type="html", loader="loader6"),
-                                                     wellPanel(
-                                                       h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
-                                                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and complex sampling rank test"),
-                                                       h5("Categorical variables  are summarized with table")
-                                                     )
-                                            )
-                                )
-                              )
-                            )
-                   ),
-                   navbarMenu("Regression", icon = icon("list-alt"),
-                              tabPanel("Linear regression",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           regressModuleUI("linear")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(DTOutput("linear_original"), type="html", loader="loader6"),
-                                                                br(),
-                                                                uiOutput("warning_linear_original")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(DTOutput("linear_ps"), type="html", loader="loader6"),
-                                                                br(),
-                                                                uiOutput("warning_linear_ps")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(DTOutput("linear_iptw"), type="html", loader="loader6")
-                                                       )
-                                           )
-
-                                         )
-                                       )
-                              ),
-                              tabPanel("Logistic regression",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           regressModuleUI("logistic")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(DTOutput("logistic_original"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(DTOutput("logistic_ps"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(DTOutput("logistic_iptw"), type="html", loader="loader6")
-                                                       )
-                                           )
-                                         )
-                                       )
-                              ),
-                              tabPanel("Cox model",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           coxUI("cox")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(DTOutput("cox_original"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(DTOutput("cox_ps"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(DTOutput("cox_iptw"), type="html", loader="loader6")
-                                                       )
-                                           )
-                                         )
-                                       )
-                              )
-
-                   ),
-                   navbarMenu("Plot", icon = icon("bar-chart-o"),
-                              tabPanel("Scatter plot",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           ggpairsModuleUI1("ggpairs")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(plotOutput("ggpairs_plot_original"), type="html", loader="loader6")
-
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(plotOutput("ggpairs_plot_ps"), type="html", loader="loader6")
-                                                       )
-
-                                           ),
-                                           ggpairsModuleUI2("ggpairs")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Kaplan-meier plot",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           kaplanUI("kaplan")
-                                         ),
-                                         mainPanel(
-                                           optionUI("kaplan"),
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(plotOutput("kaplan_plot_original"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(plotOutput("kaplan_plot_ps"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(plotOutput("kaplan_plot_iptw"), type="html", loader="loader6")
-                                                       )
-                                           ),
-                                           ggplotdownUI("kaplan")
-                                         )
-                                       )
-                              )
-                   ),
-                   navbarMenu("ROC analysis", icon = icon("check"),
-                              tabPanel("ROC",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           rocUI("roc")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(plotOutput("plot_roc_original"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_roc_original"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(plotOutput("plot_roc_ps"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_roc_ps"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(plotOutput("plot_roc_iptw"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_roc_iptw"), type="html", loader="loader6")
-                                                       )
-                                           ),
-                                           ggplotdownUI("roc")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Time-dependent ROC",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           timerocUI("timeroc")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(plotOutput("plot_timeroc_original"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_timeroc_original"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(plotOutput("plot_timeroc_ps"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_timeroc_ps"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(plotOutput("plot_timeroc_iptw"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_timeroc_iptw"), type="html", loader="loader6")
-                                                       )
-                                           ),
-                                           ggplotdownUI("timeroc")
-                                         )
-                                       )
-                              )
-                   )
-
-
+  ui <- navbarPage(
+    "Propensity score analysis",
+    tabPanel("Data",
+      icon = icon("table"),
+      sidebarLayout(
+        sidebarPanel(
+          uiOutput("factor"),
+          uiOutput("binary_check"),
+          uiOutput("binary_var"),
+          uiOutput("binary_val"),
+          uiOutput("ref_check"),
+          uiOutput("ref_var"),
+          uiOutput("ref_val"),
+          uiOutput("subset_check"),
+          uiOutput("subset_var"),
+          uiOutput("subset_val"),
+          uiOutput("group_ps"),
+          uiOutput("indep_ps"),
+          uiOutput("pcut"),
+          uiOutput("caliperps"),
+          uiOutput("ratio")
+        ),
+        mainPanel(
+          tabsetPanel(
+            type = "pills",
+            tabPanel("Data", withLoader(DTOutput("data"), type = "html", loader = "loader6")),
+            tabPanel("Matching data", withLoader(DTOutput("matdata"), type = "html", loader = "loader6")),
+            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type = "html", loader = "loader6"))
+          ),
+          htmlOutput("naomit")
+        )
+      )
+    ),
+    tabPanel("Table 1",
+      icon = icon("percentage"),
+      sidebarLayout(
+        sidebarPanel(
+          tb1moduleUI("tb1")
+        ),
+        mainPanel(
+          tabsetPanel(
+            type = "pills",
+            tabPanel(
+              "Original",
+              withLoader(DTOutput("table1_original"), type = "html", loader = "loader6"),
+              wellPanel(
+                h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
+                h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+                h5("Categorical variables  are summarized with table")
+              )
+            ),
+            tabPanel(
+              "Matching",
+              withLoader(DTOutput("table1_ps"), type = "html", loader = "loader6"),
+              wellPanel(
+                h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
+                h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+                h5("Categorical variables  are summarized with table")
+              )
+            ),
+            tabPanel(
+              "IPTW",
+              withLoader(DTOutput("table1_iptw"), type = "html", loader = "loader6"),
+              wellPanel(
+                h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
+                h5("Non-normal continuous variables are summarized with median [IQR or min,max] and complex sampling rank test"),
+                h5("Categorical variables  are summarized with table")
+              )
+            )
+          )
+        )
+      )
+    ),
+    navbarMenu("Regression",
+      icon = icon("list-alt"),
+      tabPanel(
+        "Linear regression",
+        sidebarLayout(
+          sidebarPanel(
+            regressModuleUI("linear")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(DTOutput("linear_original"), type = "html", loader = "loader6"),
+                br(),
+                uiOutput("warning_linear_original")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(DTOutput("linear_ps"), type = "html", loader = "loader6"),
+                br(),
+                uiOutput("warning_linear_ps")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(DTOutput("linear_iptw"), type = "html", loader = "loader6")
+              )
+            )
+          )
+        )
+      ),
+      tabPanel(
+        "Logistic regression",
+        sidebarLayout(
+          sidebarPanel(
+            regressModuleUI("logistic")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(DTOutput("logistic_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(DTOutput("logistic_ps"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(DTOutput("logistic_iptw"), type = "html", loader = "loader6")
+              )
+            )
+          )
+        )
+      ),
+      tabPanel(
+        "Cox model",
+        sidebarLayout(
+          sidebarPanel(
+            coxUI("cox")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(DTOutput("cox_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(DTOutput("cox_ps"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(DTOutput("cox_iptw"), type = "html", loader = "loader6")
+              )
+            )
+          )
+        )
+      )
+    ),
+    navbarMenu("Plot",
+      icon = icon("bar-chart-o"),
+      tabPanel(
+        "Scatter plot",
+        sidebarLayout(
+          sidebarPanel(
+            ggpairsModuleUI1("ggpairs")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(plotOutput("ggpairs_plot_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(plotOutput("ggpairs_plot_ps"), type = "html", loader = "loader6")
+              )
+            ),
+            ggpairsModuleUI2("ggpairs")
+          )
+        )
+      ),
+      tabPanel(
+        "Kaplan-meier plot",
+        sidebarLayout(
+          sidebarPanel(
+            kaplanUI("kaplan")
+          ),
+          mainPanel(
+            optionUI("kaplan"),
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(plotOutput("kaplan_plot_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(plotOutput("kaplan_plot_ps"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(plotOutput("kaplan_plot_iptw"), type = "html", loader = "loader6")
+              )
+            ),
+            ggplotdownUI("kaplan")
+          )
+        )
+      )
+    ),
+    navbarMenu("ROC analysis",
+      icon = icon("check"),
+      tabPanel(
+        "ROC",
+        sidebarLayout(
+          sidebarPanel(
+            rocUI("roc")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(plotOutput("plot_roc_original"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_roc_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(plotOutput("plot_roc_ps"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_roc_ps"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(plotOutput("plot_roc_iptw"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_roc_iptw"), type = "html", loader = "loader6")
+              )
+            ),
+            ggplotdownUI("roc")
+          )
+        )
+      ),
+      tabPanel(
+        "Time-dependent ROC",
+        sidebarLayout(
+          sidebarPanel(
+            timerocUI("timeroc")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(plotOutput("plot_timeroc_original"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_timeroc_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(plotOutput("plot_timeroc_ps"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_timeroc_ps"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(plotOutput("plot_timeroc_iptw"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_timeroc_iptw"), type = "html", loader = "loader6")
+              )
+            ),
+            ggplotdownUI("timeroc")
+          )
+        )
+      )
+    )
   )
 
   server <- function(input, output, session) {
-
     output$pcut <- renderUI({
-      radioButtons("pcut_ps", label = "Default p-value cut for ps calculation",
-                   choices = c("No", 0.05, 0.1, 0.2),
-                   selected = "No", inline =T)
+      radioButtons("pcut_ps",
+        label = "Default p-value cut for ps calculation",
+        choices = c("No", 0.05, 0.1, 0.2),
+        selected = "No", inline = T
+      )
     })
 
     output$ratio <- renderUI({
-      radioButtons("ratio_ps", label = "Case:control ratio",
-                   choices = c("1:1" = 1, "1:2" = 2, "1:3" = 3, "1:4" = 4),
-                   selected = 1, inline =T)
+      radioButtons("ratio_ps",
+        label = "Case:control ratio",
+        choices = c("1:1" = 1, "1:2" = 2, "1:3" = 3, "1:4" = 4),
+        selected = 1, inline = T
+      )
     })
 
     output$factor <- renderUI({
-      selectInput("factor_vname", label = "Additional categorical variables",
-                  choices = factor_adds_list, multiple = T,
-                  selected = factor_adds)
+      selectInput("factor_vname",
+        label = "Additional categorical variables",
+        choices = factor_adds_list, multiple = T,
+        selected = factor_adds
+      )
     })
 
     observeEvent(c(factor_original, input$factor_vname), {
@@ -340,28 +384,28 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
       output$binary_var <- renderUI({
         req(input$check_binary == T)
         selectInput("var_binary", "Variables to dichotomize",
-                    choices = var.conti, multiple = T,
-                    selected = var.conti[1])
+          choices = var.conti, multiple = T,
+          selected = var.conti[1]
+        )
       })
 
       output$binary_val <- renderUI({
         req(input$check_binary == T)
         req(length(input$var_binary) > 0)
         outUI <- tagList()
-        for (v in seq_along(input$var_binary)){
+        for (v in seq_along(input$var_binary)) {
           med <- stats::quantile(out[[input$var_binary[[v]]]], c(0.05, 0.5, 0.95), na.rm = T)
-          outUI[[v]] <- splitLayout(cellWidths = c("25%", "75%"),
-                                    selectInput(paste0("con_binary", v), paste0("Define reference:"),
-                                                choices = c("\u2264", "\u2265", "\u003c", "\u003e"), selected = "\u2264"
-                                    ),
-                                    numericInput(paste0("cut_binary", v), input$var_binary[[v]],
-                                                 value = med[2], min = med[1], max = med[3]
-                                    )
+          outUI[[v]] <- splitLayout(
+            cellWidths = c("25%", "75%"),
+            selectInput(paste0("con_binary", v), paste0("Define reference:"),
+              choices = c("\u2264", "\u2265", "\u003c", "\u003e"), selected = "\u2264"
+            ),
+            numericInput(paste0("cut_binary", v), input$var_binary[[v]],
+              value = med[2], min = med[1], max = med[3]
+            )
           )
-
         }
         outUI
-
       })
     })
 
@@ -370,37 +414,38 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
       output$ref_var <- renderUI({
         req(input$check_ref == T)
         selectInput("var_ref", "Variables to change reference",
-                    choices = var.factor, multiple = T,
-                    selected = var.factor[1])
+          choices = var.factor, multiple = T,
+          selected = var.factor[1]
+        )
       })
 
       output$ref_val <- renderUI({
         req(input$check_ref == T)
         req(length(input$var_ref) > 0)
         outUI <- tagList()
-        for (v in seq_along(input$var_ref)){
+        for (v in seq_along(input$var_ref)) {
           outUI[[v]] <- selectInput(paste0("con_ref", v), paste0("Reference: ", input$var_ref[[v]]),
-                                    choices = levels(factor(out[[input$var_ref[[v]]]])), selected = levels(factor(out[[input$var_ref[[v]]]]))[2])
-
+            choices = levels(factor(out[[input$var_ref[[v]]]])), selected = levels(factor(out[[input$var_ref[[v]]]]))[2]
+          )
         }
         outUI
-
       })
     })
 
     observeEvent(input$check_subset, {
       output$subset_var <- renderUI({
         req(input$check_subset == T)
-        #factor_subset <- c(factor_original, input$factor_vname)
+        # factor_subset <- c(factor_original, input$factor_vname)
 
-        #validate(
+        # validate(
         #  need(length(factor_subset) > 0 , "No factor variable for subsetting")
-        #)
+        # )
 
         tagList(
           selectInput("var_subset", "Subset variables",
-                      choices = names(out), multiple = T,
-                      selected = names(out)[1])
+            choices = names(out), multiple = T,
+            selected = names(out)[1]
+          )
         )
       })
 
@@ -411,19 +456,20 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
         outUI <- tagList()
 
-        for (v in seq_along(input$var_subset)){
-          if (input$var_subset[[v]] %in% var.factor){
+        for (v in seq_along(input$var_subset)) {
+          if (input$var_subset[[v]] %in% var.factor) {
             varlevel <- levels(as.factor(out[[input$var_subset[[v]]]]))
             outUI[[v]] <- selectInput(session$ns(paste0("val_subset", v)), paste0("Subset value: ", input$var_subset[[v]]),
-                                      choices = varlevel, multiple = T,
-                                      selected = varlevel[1])
-          } else{
+              choices = varlevel, multiple = T,
+              selected = varlevel[1]
+            )
+          } else {
             val <- stats::quantile(out[[input$var_subset[[v]]]], na.rm = T)
             outUI[[v]] <- sliderInput(session$ns(paste0("val_subset", v)), paste0("Subset range: ", input$var_subset[[v]]),
-                                      min = val[1], max = val[5],
-                                      value = c(val[2], val[4]))
+              min = val[1], max = val[5],
+              value = c(val[2], val[4])
+            )
           }
-
         }
         outUI
       })
@@ -433,33 +479,34 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
     data.info <- reactive({
       out1 <- data.table::data.table(out)
-      out1[, (conti_original) := lapply(.SD, function(x){as.numeric(as.vector(x))}), .SDcols = conti_original]
-      if (!is.null(input$factor_vname) & length(input$factor_vname) > 0){
-        out1[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols= input$factor_vname]
+      out1[, (conti_original) := lapply(.SD, function(x) {
+        as.numeric(as.vector(x))
+      }), .SDcols = conti_original]
+      if (!is.null(input$factor_vname) & length(input$factor_vname) > 0) {
+        out1[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols = input$factor_vname]
       }
 
       out.label <- mk.lev(out1)
 
-      if (!is.null(input$check_binary)){
-        if (input$check_binary){
+      if (!is.null(input$check_binary)) {
+        if (input$check_binary) {
           validate(
-            need(length(input$var_binary) > 0 , "No variables to dichotomize")
+            need(length(input$var_binary) > 0, "No variables to dichotomize")
           )
           sym.ineq <- c("\u2264", "\u2265", "\u003c", "\u003e")
           names(sym.ineq) <- sym.ineq[4:1]
           sym.ineq2 <- c("le", "ge", "l", "g")
           names(sym.ineq2) <- sym.ineq
-          for (v in seq_along(input$var_binary)){
+          for (v in seq_along(input$var_binary)) {
             req(input[[paste0("con_binary", v)]])
             req(input[[paste0("cut_binary", v)]])
-            if (input[[paste0("con_binary", v)]] == "\u2264"){
+            if (input[[paste0("con_binary", v)]] == "\u2264") {
               out1[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) <= input[[paste0("cut_binary", v)]]))]
-
-            } else if (input[[paste0("con_binary", v)]] == "\u2265"){
+            } else if (input[[paste0("con_binary", v)]] == "\u2265") {
               out1[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) >= input[[paste0("cut_binary", v)]]))]
-            } else if (input[[paste0("con_binary", v)]] == "\u003c"){
+            } else if (input[[paste0("con_binary", v)]] == "\u003c") {
               out1[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) < input[[paste0("cut_binary", v)]]))]
-            } else{
+            } else {
               out1[, BinaryGroupRandom := factor(1 - as.integer(get(input$var_binary[[v]]) > input[[paste0("cut_binary", v)]]))]
             }
 
@@ -468,50 +515,48 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
             label.binary <- mk.lev(out1[, .SD, .SDcols = cn.new])
             label.binary[, var_label := paste0(input$var_binary[[v]], " _group")]
-            #label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
+            # label.binary[, val_label := paste0(c(input[[paste0("con_binary", v)]], sym.ineq[input[[paste0("con_binary", v)]]]), " ", input[[paste0("cut_binary", v)]])]
             out.label <- rbind(out.label, label.binary)
           }
-
         }
       }
 
-      if (!is.null(input$check_ref)){
-        if (input$check_ref){
+      if (!is.null(input$check_ref)) {
+        if (input$check_ref) {
           validate(
-            need(length(input$var_ref) > 0 , "No variables to change reference")
+            need(length(input$var_ref) > 0, "No variables to change reference")
           )
-          for (v in seq_along(input$var_ref)){
+          for (v in seq_along(input$var_ref)) {
             req(input[[paste0("con_ref", v)]])
             out1[[input$var_ref[[v]]]] <- stats::relevel(out1[[input$var_ref[[v]]]], ref = input[[paste0("con_ref", v)]])
-            out.label[variable == input$var_ref[[v]], ':='(level = levels(out1[[input$var_ref[[v]]]]), val_label = levels(out1[[input$var_ref[[v]]]]))]
+            out.label[variable == input$var_ref[[v]], ":="(level = levels(out1[[input$var_ref[[v]]]]), val_label = levels(out1[[input$var_ref[[v]]]]))]
           }
-
         }
       }
 
 
-      if (!is.null(input$check_subset)){
-        if (input$check_subset){
+      if (!is.null(input$check_subset)) {
+        if (input$check_subset) {
           validate(
-            need(length(input$var_subset) > 0 , "No variable for subsetting"),
-            need(all(sapply(1:length(input$var_subset), function(x){length(input[[paste0("val_subset", x)]])})), "No value for subsetting")
-
+            need(length(input$var_subset) > 0, "No variable for subsetting"),
+            need(all(sapply(1:length(input$var_subset), function(x) {
+              length(input[[paste0("val_subset", x)]])
+            })), "No value for subsetting")
           )
           var.factor <- c(factor_original, input$factor_vname)
 
-          for (v in seq_along(input$var_subset)){
-            if (input$var_subset[[v]] %in% var.factor){
+          for (v in seq_along(input$var_subset)) {
+            if (input$var_subset[[v]] %in% var.factor) {
               out1 <- out1[get(input$var_subset[[v]]) %in% input[[paste0("val_subset", v)]]]
-              #var.factor <- c(data()$factor_original, input$factor_vname)
+              # var.factor <- c(data()$factor_original, input$factor_vname)
               out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
               out.label2 <- mk.lev(out1)[, c("variable", "level")]
               data.table::setkey(out.label, "variable", "level")
               data.table::setkey(out.label2, "variable", "level")
               out.label <- out.label[out.label2]
-
-            } else{
+            } else {
               out1 <- out1[get(input$var_subset[[v]]) >= input[[paste0("val_subset", v)]][1] & get(input$var_subset[[v]]) <= input[[paste0("val_subset", v)]][2]]
-              #var.factor <- c(data()$factor_original, input$factor_vname)
+              # var.factor <- c(data()$factor_original, input$factor_vname)
               out1[, (var.factor) := lapply(.SD, factor), .SDcols = var.factor]
               out.label2 <- mk.lev(out1)[, c("variable", "level")]
               data.table::setkey(out.label, "variable", "level")
@@ -519,11 +564,10 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
               out.label <- out.label[out.label2]
             }
           }
-
         }
       }
 
-      for (vn in ref[["name.new"]]){
+      for (vn in ref[["name.new"]]) {
         w <- which(ref[["name.new"]] == vn)
         out.label[variable == vn, var_label := ref[["name.old"]][w]]
       }
@@ -532,16 +576,18 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
       return(list(data = out1, label = out.label))
     })
 
-    observeEvent(data.info(),{
+    observeEvent(data.info(), {
       output$group_ps <- renderUI({
         factor_vars <- names(data.info()$data)[data.info()$data[, lapply(.SD, class) %in% c("factor", "character")]]
         validate(
           need(!is.null(factor_vars) & length(factor_vars) > 0, "No categorical variables in data")
         )
 
-        class01_factor <- unlist(data.info()$data[, lapply(.SD, function(x){identical(levels(x), c("0", "1"))}), .SDcols = factor_vars])
-        #nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
-        #factor_2vars <- names(nclass_factor)[nclass_factor == 2]
+        class01_factor <- unlist(data.info()$data[, lapply(.SD, function(x) {
+          identical(levels(x), c("0", "1"))
+        }), .SDcols = factor_vars])
+        # nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
+        # factor_2vars <- names(nclass_factor)[nclass_factor == 2]
 
 
         validate(
@@ -549,40 +595,49 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
         )
 
         factor_01vars <- factor_vars[class01_factor]
-        factor_01vars_case_small <- factor_01vars[unlist(sapply(factor_01vars, function(x){diff(table(data.info()$data[[x]])) <= 0}))]
+        factor_01vars_case_small <- factor_01vars[unlist(sapply(factor_01vars, function(x) {
+          diff(table(data.info()$data[[x]])) <= 0
+        }))]
 
         validate(
           need(length(factor_01vars_case_small) > 0, "No candidate group variable for PS calculation")
         )
 
 
-        selectInput("group_pscal", label = "Group variable for PS calculation (0, 1 coding)",
-                    choices = mklist(list(variable = names(data.info()$data)), factor_01vars_case_small), multiple = F,
-                    selected = factor_01vars_case_small[1])
-
+        selectInput("group_pscal",
+          label = "Group variable for PS calculation (0, 1 coding)",
+          choices = mklist(list(variable = names(data.info()$data)), factor_01vars_case_small), multiple = F,
+          selected = factor_01vars_case_small[1]
+        )
       })
 
       output$indep_ps <- renderUI({
         req(!is.null(input$group_pscal))
-        if (is.null(input$group_pscal)){
+        if (is.null(input$group_pscal)) {
           return(NULL)
         }
         validate(
           need(length(input$group_pscal) > 0, "No group variables in data")
         )
 
-        vars <- setdiff(setdiff(names(data.info()$data), except_vars),  c(input$var_subset, input$group_pscal))
-        varsIni <- sapply(vars,
-                          function(v){
-                            forms <- as.formula(paste(input$group_pscal, "~", v))
-                            coef <- tryCatch(summary(glm(forms, data = data.info()$data, family = binomial))$coefficients, error = function(e){return(NULL)})
-                            sigOK <- !all(coef[-1, 4] > as.numeric(input$pcut_ps))
-                            return(sigOK)
-                          })
+        vars <- setdiff(setdiff(names(data.info()$data), except_vars), c(input$var_subset, input$group_pscal))
+        varsIni <- sapply(
+          vars,
+          function(v) {
+            forms <- as.formula(paste(input$group_pscal, "~", v))
+            coef <- tryCatch(summary(glm(forms, data = data.info()$data, family = binomial))$coefficients, error = function(e) {
+              return(NULL)
+            })
+            sigOK <- !all(coef[-1, 4] > as.numeric(input$pcut_ps))
+            return(sigOK)
+          }
+        )
         tagList(
-          selectInput("indep_pscal", label = "Independent variables for PS calculation",
-                      choices = mklist(list(variable = names(data.info()$data)), vars), multiple = T,
-                      selected = vars[varsIni])
+          selectInput("indep_pscal",
+            label = "Independent variables for PS calculation",
+            choices = mklist(list(variable = names(data.info()$data)), vars), multiple = T,
+            selected = vars[varsIni]
+          )
         )
       })
 
@@ -599,7 +654,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
     mat.info <- eventReactive(c(input$indep_pscal, input$group_pscal, input$caliper, input$ratio_ps, data.info()), {
       req(input$indep_pscal)
-      if (is.null(input$group_pscal) | is.null(input$indep_pscal)){
+      if (is.null(input$group_pscal) | is.null(input$indep_pscal)) {
         return(NULL)
       }
 
@@ -611,14 +666,14 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
       data.na$pscore <- NA
       data.na$iptw <- NA
       caliper <- NULL
-      if (input$caliper > 0){
+      if (input$caliper > 0) {
         caliper <- input$caliper
       }
 
-      forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep=""))
+      forms <- as.formula(paste(input$group_pscal, " ~ ", paste(input$indep_pscal, collapse = "+"), sep = ""))
       m.out <- MatchIt::matchit(forms, data = data.naomit[, .SD, .SDcols = c("ID.pscal2828", input$group_pscal, input$indep_pscal)], caliper = caliper, ratio = as.integer(input$ratio_ps))
       pscore <- m.out$distance
-      iptw <- ifelse(m.out$treat == levels(factor(m.out$treat))[2], 1/pscore,  1/(1-pscore))
+      iptw <- ifelse(m.out$treat == levels(factor(m.out$treat))[2], 1 / pscore, 1 / (1 - pscore))
 
       wdata <- rbind(data.na, cbind(data.naomit, pscore, iptw))
       return(list(data = wdata, matdata = data[ID.pscal2828 %in% match.data(m.out)$ID.pscal2828]))
@@ -630,27 +685,30 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
 
     output$data <- renderDT({
-      datatable(mat.info()$data, rownames=F, editable = F, extensions= "Buttons", caption = "Data with ps, iptw",
-                options = c(opt.data("data"), list(scrollX = TRUE))
+      datatable(mat.info()$data,
+        rownames = F, editable = F, extensions = "Buttons", caption = "Data with ps, iptw",
+        options = c(opt.data("data"), list(scrollX = TRUE))
       )
     })
 
     output$matdata <- renderDT({
-      datatable(mat.info()$matdata, rownames=F, editable = F, extensions= "Buttons", caption = "Matching data",
-                options = c(opt.data("matching_data"), list(scrollX = TRUE))
+      datatable(mat.info()$matdata,
+        rownames = F, editable = F, extensions = "Buttons", caption = "Matching data",
+        options = c(opt.data("matching_data"), list(scrollX = TRUE))
       )
     })
 
     output$data_label <- renderDT({
-      datatable(data.info()$label, rownames=F, editable = F, extensions= "Buttons", caption = "Label of data",
-                options = c(opt.data("data_label"), list(scrollX = TRUE))
+      datatable(data.info()$label,
+        rownames = F, editable = F, extensions = "Buttons", caption = "Label of data",
+        options = c(opt.data("data_label"), list(scrollX = TRUE))
       )
     })
 
     output$naomit <- renderText({
       if (length(naCol) == 0) {
         return("Data has <B>no</B> missing values.")
-      } else{
+      } else {
         txt_miss <- paste(naCol, collapse = ", ")
         return(paste("Column <B>", txt_miss, "</B> contain missing values.", sep = ""))
       }
@@ -663,8 +721,8 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     })
     matdata <- reactive(data.table::data.table(mat.info()$matdata))
     data.label <- reactive(data.info()$label)
-    #data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
-    design.survey <- reactive(survey::svydesign(ids = ~ 1, data = mat.info()$data[!is.na(iptw), ], weights = ~ iptw))
+    # data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
+    design.survey <- reactive(survey::svydesign(ids = ~1, data = mat.info()$data[!is.na(iptw), ], weights = ~iptw))
 
 
     tb1_original <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = nfactor.limit)
@@ -675,15 +733,16 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     output$table1_original <- renderDT({
       tb <- tb1_original()$table
       cap <- tb1_original()$caption
-      out.tb1 <- datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
-                           options = c(opt.tb1("tb1"),
-                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
-                                       ),
-                                       list(scrollX = TRUE)
-                           )
+      out.tb1 <- datatable(tb,
+        rownames = T, extensions = "Buttons", caption = cap,
+        options = c(
+          opt.tb1("tb1"),
+          list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
+          list(scrollX = TRUE)
+        )
       )
-      if ("sig" %in% colnames(tb)){
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+      if ("sig" %in% colnames(tb)) {
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
       }
       return(out.tb1)
     })
@@ -691,15 +750,16 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     output$table1_ps <- renderDT({
       tb <- tb1_ps()$table
       cap <- tb1_ps()$caption
-      out.tb1 <- datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
-                           options = c(opt.tb1("tb1"),
-                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
-                                       ),
-                                       list(scrollX = TRUE)
-                           )
+      out.tb1 <- datatable(tb,
+        rownames = T, extensions = "Buttons", caption = cap,
+        options = c(
+          opt.tb1("tb1"),
+          list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
+          list(scrollX = TRUE)
+        )
       )
-      if ("sig" %in% colnames(tb)){
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+      if ("sig" %in% colnames(tb)) {
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
       }
       return(out.tb1)
     })
@@ -707,15 +767,16 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     output$table1_iptw <- renderDT({
       tb <- tb1_iptw()$table
       cap <- tb1_iptw()$caption
-      out.tb1 <- datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
-                           options = c(opt.tb1("tb1"),
-                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
-                                       ),
-                                       list(scrollX = TRUE)
-                           )
+      out.tb1 <- datatable(tb,
+        rownames = T, extensions = "Buttons", caption = cap,
+        options = c(
+          opt.tb1("tb1"),
+          list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
+          list(scrollX = TRUE)
+        )
       )
-      if ("sig" %in% colnames(tb)){
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+      if ("sig" %in% colnames(tb)) {
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
       }
       return(out.tb1)
     })
@@ -730,13 +791,14 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
     output$linear_original <- renderDT({
       hide <- which(colnames(out_linear_original()$table) == "sig")
-      datatable(out_linear_original()$table, rownames=T, extensions= "Buttons", caption = out_linear_original()$caption,
-                options = c(opt.tbreg(out_linear_original()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      datatable(out_linear_original()$table,
+        rownames = T, extensions = "Buttons", caption = out_linear_original()$caption,
+        options = c(
+          opt.tbreg(out_linear_original()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$warning_linear_original <- renderText({
@@ -745,13 +807,14 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
     output$linear_ps <- renderDT({
       hide <- which(colnames(out_linear_ps()$table) == "sig")
-      datatable(out_linear_ps()$table, rownames=T, extensions= "Buttons", caption = out_linear_ps()$caption,
-                options = c(opt.tbreg(out_linear_ps()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      datatable(out_linear_ps()$table,
+        rownames = T, extensions = "Buttons", caption = out_linear_ps()$caption,
+        options = c(
+          opt.tbreg(out_linear_ps()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$warning_linear_ps <- renderText({
@@ -760,13 +823,14 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
     output$linear_iptw <- renderDT({
       hide <- which(colnames(out_linear_iptw()$table) == "sig")
-      datatable(out_linear_iptw()$table, rownames=T, extensions= "Buttons", caption = out_linear_iptw()$caption,
-                options = c(opt.tbreg(out_linear_iptw()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      datatable(out_linear_iptw()$table,
+        rownames = T, extensions = "Buttons", caption = out_linear_iptw()$caption,
+        options = c(
+          opt.tbreg(out_linear_iptw()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
 
@@ -778,36 +842,39 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 
 
     output$logistic_original <- renderDT({
-      hide = which(colnames(out_logistic_original()$table) == "sig")
-      datatable(out_logistic_original()$table, rownames=T, extensions= "Buttons", caption = out_logistic_original()$caption,
-                options = c(opt.tbreg(out_logistic_original()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_logistic_original()$table) == "sig")
+      datatable(out_logistic_original()$table,
+        rownames = T, extensions = "Buttons", caption = out_logistic_original()$caption,
+        options = c(
+          opt.tbreg(out_logistic_original()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$logistic_ps <- renderDT({
-      hide = which(colnames(out_logistic_ps()$table) == "sig")
-      datatable(out_logistic_ps()$table, rownames=T, extensions= "Buttons", caption = out_logistic_ps()$caption,
-                options = c(opt.tbreg(out_logistic_ps()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_logistic_ps()$table) == "sig")
+      datatable(out_logistic_ps()$table,
+        rownames = T, extensions = "Buttons", caption = out_logistic_ps()$caption,
+        options = c(
+          opt.tbreg(out_logistic_ps()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$logistic_iptw <- renderDT({
-      hide = which(colnames(out_logistic_iptw()$table) == "sig")
-      datatable(out_logistic_iptw()$table, rownames=T, extensions= "Buttons", caption = out_logistic_iptw()$caption,
-                options = c(opt.tbreg(out_logistic_iptw()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_logistic_iptw()$table) == "sig")
+      datatable(out_logistic_iptw()$table,
+        rownames = T, extensions = "Buttons", caption = out_logistic_iptw()$caption,
+        options = c(
+          opt.tbreg(out_logistic_iptw()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
 
@@ -818,33 +885,36 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     out_cox_iptw <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
     output$cox_original <- renderDT({
-      hide = which(colnames(out_cox_original()$table) == c("sig"))
-      datatable(out_cox_original()$table, rownames=T, extensions= "Buttons", caption = out_cox_original()$caption,
-                options = c(opt.tbreg(out_cox_original()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets= hide))
-                            )
-                )
-      )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_cox_original()$table) == c("sig"))
+      datatable(out_cox_original()$table,
+        rownames = T, extensions = "Buttons", caption = out_cox_original()$caption,
+        options = c(
+          opt.tbreg(out_cox_original()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide)))
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$cox_ps <- renderDT({
-      hide = which(colnames(out_cox_ps()$table) == c("sig"))
-      datatable(out_cox_ps()$table, rownames=T, extensions= "Buttons", caption = out_cox_ps()$caption,
-                options = c(opt.tbreg(out_cox_ps()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets= hide))
-                            )
-                )
-      )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_cox_ps()$table) == c("sig"))
+      datatable(out_cox_ps()$table,
+        rownames = T, extensions = "Buttons", caption = out_cox_ps()$caption,
+        options = c(
+          opt.tbreg(out_cox_ps()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide)))
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$cox_iptw <- renderDT({
-      hide = which(colnames(out_cox_iptw()$table) == c("sig"))
-      datatable(out_cox_iptw()$table, rownames=T, extensions= "Buttons", caption = out_cox_iptw()$caption,
-                options = c(opt.tbreg(out_cox_iptw()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets= hide))
-                            )
-                )
-      )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_cox_iptw()$table) == c("sig"))
+      datatable(out_cox_iptw()$table,
+        rownames = T, extensions = "Buttons", caption = out_cox_iptw()$caption,
+        options = c(
+          opt.tbreg(out_cox_iptw()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide)))
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     ## ggpairs
@@ -892,9 +962,11 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     })
 
     output$table_roc_original <- renderDT({
-      datatable(out_roc_original()$tb, rownames=F, editable = F, extensions= "Buttons",
-                caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_roc_original()$tb,
+        rownames = F, editable = F, extensions = "Buttons",
+        caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     output$plot_roc_ps <- renderPlot({
@@ -902,9 +974,11 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     })
 
     output$table_roc_ps <- renderDT({
-      datatable(out_roc_ps()$tb, rownames=F, editable = F, extensions= "Buttons",
-                caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_roc_ps()$tb,
+        rownames = F, editable = F, extensions = "Buttons",
+        caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     output$plot_roc_iptw <- renderPlot({
@@ -912,9 +986,11 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     })
 
     output$table_roc_iptw <- renderDT({
-      datatable(out_roc_iptw()$tb, rownames=F, editable = F, extensions= "Buttons",
-                caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_roc_iptw()$tb,
+        rownames = F, editable = F, extensions = "Buttons",
+        caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     ## Time-ROC
@@ -929,8 +1005,10 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     })
 
     output$table_timeroc_original <- renderDT({
-      datatable(out_timeroc_original()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_timeroc_original()$tb,
+        rownames = F, editable = F, extensions = "Buttons", caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     output$plot_timeroc_ps <- renderPlot({
@@ -938,8 +1016,10 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     })
 
     output$table_timeroc_ps <- renderDT({
-      datatable(out_timeroc_ps()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_timeroc_ps()$tb,
+        rownames = F, editable = F, extensions = "Buttons", caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     output$plot_timeroc_iptw <- renderPlot({
@@ -947,20 +1027,21 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
     })
 
     output$table_timeroc_iptw <- renderDT({
-      datatable(out_timeroc_iptw()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_timeroc_iptw()$tb,
+        rownames = F, editable = F, extensions = "Buttons", caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     session$onSessionEnded(function() {
       stopApp()
     })
-
   }
 
 
 
 
-  #viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
+  # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
   runGadget(ui, server, viewer = viewer)
 }
@@ -972,9 +1053,9 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 #' @return Rstudio addin of jsPropensityGadget
 #' @details Rstudio addin of jsPropensityGadget
 #' @examples
-#' if(interactive()){
-#'  jsPropensityAddin()
-#'  }
+#' if (interactive()) {
+#'   jsPropensityAddin()
+#' }
 #' @seealso
 #'  \code{\link[rstudioapi]{rstudio-editors}}
 #' @rdname jsPropensityAddin
@@ -982,12 +1063,12 @@ jsPropensityGadget <- function(data, nfactor.limit = 20){
 #' @importFrom rstudioapi getActiveDocumentContext
 
 
-jsPropensityAddin <- function(){
+jsPropensityAddin <- function() {
   context <- rstudioapi::getActiveDocumentContext()
   # Set the default data to use based on the selection.
   dataString <- context$selection[[1]]$text
   data <- get(dataString, envir = .GlobalEnv)
-  #viewer <- dialogViewer("Subset", width = 1000, height = 800)
+  # viewer <- dialogViewer("Subset", width = 1000, height = 800)
   jsPropensityGadget(data)
 }
 
@@ -1002,9 +1083,9 @@ jsPropensityAddin <- function(){
 #' @return RStudio Addin for propensity score analysis with external data.
 #' @details RStudio Addin for propensity score analysis with external csv/xlsx/sas7bdat/sav/dta file.
 #' @examples
-#' if(interactive()){
-#'  jsPropensityExtAddin()
-#'  }
+#' if (interactive()) {
+#'   jsPropensityExtAddin()
+#' }
 #' @seealso
 #'  \code{\link[survival]{pbc}}
 #'  \code{\link[data.table]{fwrite}},\code{\link[data.table]{data.table}}
@@ -1019,233 +1100,271 @@ jsPropensityAddin <- function(){
 #' @importFrom shinycustomloader withLoader
 #' @import shiny
 
-jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
+jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
   iptw <- NULL
   options(shiny.maxRequestSize = max.filesize * 1024^2)
 
-  ui <- navbarPage("Propensity score analysis",
-                   tabPanel("Data", icon = icon("table"),
-                            sidebarLayout(
-                              sidebarPanel(
-                                uiOutput("import"),
-                                downloadButton("downloadData", "Example data")
-                              ),
-                              mainPanel(
-                                tabsetPanel(type = "pills",
-                                            tabPanel("Data", withLoader(DTOutput("data"), type="html", loader="loader6")),
-                                            tabPanel("Matching data", withLoader(DTOutput("matdata"), type="html", loader="loader6")),
-                                            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type="html", loader="loader6"))
-                                ),
-                                htmlOutput("naomit")
-                              )
-                            )
-                   ),
-                   tabPanel("Table 1", icon = icon("percentage"),
-                            sidebarLayout(
-                              sidebarPanel(
-                                tb1moduleUI("tb1")
-                              ),
-                              mainPanel(
-                                tabsetPanel(type = "pills",
-                                            tabPanel("Original",
-                                                     withLoader(DTOutput("table1_original"), type="html", loader="loader6"),
-                                                     wellPanel(
-                                                       h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
-                                                       h5("Categorical variables  are summarized with table")
-                                                     )
-                                            ),
-                                            tabPanel("Matching",
-                                                     withLoader(DTOutput("table1_ps"), type="html", loader="loader6"),
-                                                     wellPanel(
-                                                       h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                                                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
-                                                       h5("Categorical variables  are summarized with table")
-                                                     )
-                                            ),
-                                            tabPanel("IPTW",
-                                                     withLoader(DTOutput("table1_iptw"), type="html", loader="loader6"),
-                                                     wellPanel(
-                                                       h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
-                                                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and complex sampling rank test"),
-                                                       h5("Categorical variables  are summarized with table")
-                                                     )
-                                            )
-                                )
-                              )
-                            )
-                   ),
-                   navbarMenu("Regression", icon = icon("list-alt"),
-                              tabPanel("Linear regression",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           regressModuleUI("linear")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(DTOutput("linear_original"), type="html", loader="loader6"),
-                                                                br(),
-                                                                uiOutput("warning_linear_original")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(DTOutput("linear_ps"), type="html", loader="loader6"),
-                                                                br(),
-                                                                uiOutput("warning_linear_ps")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(DTOutput("linear_iptw"), type="html", loader="loader6")
-                                                       )
-                                           )
-
-                                         )
-                                       )
-                              ),
-                              tabPanel("Logistic regression",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           regressModuleUI("logistic")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(DTOutput("logistic_original"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(DTOutput("logistic_ps"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(DTOutput("logistic_iptw"), type="html", loader="loader6")
-                                                       )
-                                           )
-                                         )
-                                       )
-                              ),
-                              tabPanel("Cox model",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           coxUI("cox")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(DTOutput("cox_original"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(DTOutput("cox_ps"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(DTOutput("cox_iptw"), type="html", loader="loader6")
-                                                       )
-                                           )
-                                         )
-                                       )
-                              )
-
-                   ),
-                   navbarMenu("Plot", icon = icon("bar-chart-o"),
-                              tabPanel("Scatter plot",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           ggpairsModuleUI1("ggpairs")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(plotOutput("ggpairs_plot_original"), type="html", loader="loader6")
-
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(plotOutput("ggpairs_plot_ps"), type="html", loader="loader6")
-                                                       )
-
-                                           ),
-                                           ggpairsModuleUI2("ggpairs")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Kaplan-meier plot",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           kaplanUI("kaplan")
-                                         ),
-                                         mainPanel(
-                                           optionUI("kaplan"),
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(plotOutput("kaplan_plot_original"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(plotOutput("kaplan_plot_ps"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(plotOutput("kaplan_plot_iptw"), type="html", loader="loader6")
-                                                       )
-                                           ),
-                                           ggplotdownUI("kaplan")
-                                         )
-                                       )
-                              )
-                   ),
-                   navbarMenu("ROC analysis", icon = icon("check"),
-                              tabPanel("ROC",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           rocUI("roc")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(plotOutput("plot_roc_original"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_roc_original"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(plotOutput("plot_roc_ps"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_roc_ps"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(plotOutput("plot_roc_iptw"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_roc_iptw"), type="html", loader="loader6")
-                                                       )
-                                           ),
-                                           ggplotdownUI("roc")
-                                         )
-                                       )
-                              ),
-                              tabPanel("Time-dependent ROC",
-                                       sidebarLayout(
-                                         sidebarPanel(
-                                           timerocUI("timeroc")
-                                         ),
-                                         mainPanel(
-                                           tabsetPanel(type = "pills",
-                                                       tabPanel("Original",
-                                                                withLoader(plotOutput("plot_timeroc_original"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_timeroc_original"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("Matching",
-                                                                withLoader(plotOutput("plot_timeroc_ps"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_timeroc_ps"), type="html", loader="loader6")
-                                                       ),
-                                                       tabPanel("IPTW",
-                                                                withLoader(plotOutput("plot_timeroc_iptw"), type="html", loader="loader6"),
-                                                                withLoader(DTOutput("table_timeroc_iptw"), type="html", loader="loader6")
-                                                       )
-                                           ),
-                                           ggplotdownUI("timeroc")
-                                         )
-                                       )
-                              )
-                   )
-
-
+  ui <- navbarPage(
+    "Propensity score analysis",
+    tabPanel("Data",
+      icon = icon("table"),
+      sidebarLayout(
+        sidebarPanel(
+          uiOutput("import"),
+          downloadButton("downloadData", "Example data")
+        ),
+        mainPanel(
+          tabsetPanel(
+            type = "pills",
+            tabPanel("Data", withLoader(DTOutput("data"), type = "html", loader = "loader6")),
+            tabPanel("Matching data", withLoader(DTOutput("matdata"), type = "html", loader = "loader6")),
+            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type = "html", loader = "loader6"))
+          ),
+          htmlOutput("naomit")
+        )
+      )
+    ),
+    tabPanel("Table 1",
+      icon = icon("percentage"),
+      sidebarLayout(
+        sidebarPanel(
+          tb1moduleUI("tb1")
+        ),
+        mainPanel(
+          tabsetPanel(
+            type = "pills",
+            tabPanel(
+              "Original",
+              withLoader(DTOutput("table1_original"), type = "html", loader = "loader6"),
+              wellPanel(
+                h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
+                h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+                h5("Categorical variables  are summarized with table")
+              )
+            ),
+            tabPanel(
+              "Matching",
+              withLoader(DTOutput("table1_ps"), type = "html", loader = "loader6"),
+              wellPanel(
+                h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
+                h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+                h5("Categorical variables  are summarized with table")
+              )
+            ),
+            tabPanel(
+              "IPTW",
+              withLoader(DTOutput("table1_iptw"), type = "html", loader = "loader6"),
+              wellPanel(
+                h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
+                h5("Non-normal continuous variables are summarized with median [IQR or min,max] and complex sampling rank test"),
+                h5("Categorical variables  are summarized with table")
+              )
+            )
+          )
+        )
+      )
+    ),
+    navbarMenu("Regression",
+      icon = icon("list-alt"),
+      tabPanel(
+        "Linear regression",
+        sidebarLayout(
+          sidebarPanel(
+            regressModuleUI("linear")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(DTOutput("linear_original"), type = "html", loader = "loader6"),
+                br(),
+                uiOutput("warning_linear_original")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(DTOutput("linear_ps"), type = "html", loader = "loader6"),
+                br(),
+                uiOutput("warning_linear_ps")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(DTOutput("linear_iptw"), type = "html", loader = "loader6")
+              )
+            )
+          )
+        )
+      ),
+      tabPanel(
+        "Logistic regression",
+        sidebarLayout(
+          sidebarPanel(
+            regressModuleUI("logistic")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(DTOutput("logistic_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(DTOutput("logistic_ps"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(DTOutput("logistic_iptw"), type = "html", loader = "loader6")
+              )
+            )
+          )
+        )
+      ),
+      tabPanel(
+        "Cox model",
+        sidebarLayout(
+          sidebarPanel(
+            coxUI("cox")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(DTOutput("cox_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(DTOutput("cox_ps"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(DTOutput("cox_iptw"), type = "html", loader = "loader6")
+              )
+            )
+          )
+        )
+      )
+    ),
+    navbarMenu("Plot",
+      icon = icon("bar-chart-o"),
+      tabPanel(
+        "Scatter plot",
+        sidebarLayout(
+          sidebarPanel(
+            ggpairsModuleUI1("ggpairs")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(plotOutput("ggpairs_plot_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(plotOutput("ggpairs_plot_ps"), type = "html", loader = "loader6")
+              )
+            ),
+            ggpairsModuleUI2("ggpairs")
+          )
+        )
+      ),
+      tabPanel(
+        "Kaplan-meier plot",
+        sidebarLayout(
+          sidebarPanel(
+            kaplanUI("kaplan")
+          ),
+          mainPanel(
+            optionUI("kaplan"),
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(plotOutput("kaplan_plot_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(plotOutput("kaplan_plot_ps"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(plotOutput("kaplan_plot_iptw"), type = "html", loader = "loader6")
+              )
+            ),
+            ggplotdownUI("kaplan")
+          )
+        )
+      )
+    ),
+    navbarMenu("ROC analysis",
+      icon = icon("check"),
+      tabPanel(
+        "ROC",
+        sidebarLayout(
+          sidebarPanel(
+            rocUI("roc")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(plotOutput("plot_roc_original"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_roc_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(plotOutput("plot_roc_ps"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_roc_ps"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(plotOutput("plot_roc_iptw"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_roc_iptw"), type = "html", loader = "loader6")
+              )
+            ),
+            ggplotdownUI("roc")
+          )
+        )
+      ),
+      tabPanel(
+        "Time-dependent ROC",
+        sidebarLayout(
+          sidebarPanel(
+            timerocUI("timeroc")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                "Original",
+                withLoader(plotOutput("plot_timeroc_original"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_timeroc_original"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "Matching",
+                withLoader(plotOutput("plot_timeroc_ps"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_timeroc_ps"), type = "html", loader = "loader6")
+              ),
+              tabPanel(
+                "IPTW",
+                withLoader(plotOutput("plot_timeroc_iptw"), type = "html", loader = "loader6"),
+                withLoader(DTOutput("table_timeroc_iptw"), type = "html", loader = "loader6")
+              )
+            ),
+            ggplotdownUI("timeroc")
+          )
+        )
+      )
+    )
   )
 
 
 
 
   server <- function(input, output, session) {
-
     output$downloadData <- downloadHandler(
       filename = function() {
         paste("example_ps", ".csv", sep = "")
@@ -1265,26 +1384,29 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     mat.info <- callModule(FilePs, "datafile", nfactor.limit = nfactor.limit)
 
     output$data <- renderDT({
-      datatable(mat.info()$data, rownames=F, editable = F, extensions= "Buttons", caption = "Data with ps, iptw",
-                options = c(opt.data("data"), list(scrollX = TRUE))
+      datatable(mat.info()$data,
+        rownames = F, editable = F, extensions = "Buttons", caption = "Data with ps, iptw",
+        options = c(opt.data("data"), list(scrollX = TRUE))
       )
     })
 
     output$matdata <- renderDT({
-      datatable(mat.info()$matdata, rownames=F, editable = F, extensions= "Buttons", caption = "Matching data",
-                options = c(opt.data("matching_data"), list(scrollX = TRUE))
+      datatable(mat.info()$matdata,
+        rownames = F, editable = F, extensions = "Buttons", caption = "Matching data",
+        options = c(opt.data("matching_data"), list(scrollX = TRUE))
       )
     })
 
     output$data_label <- renderDT({
-      datatable(mat.info()$data.label, rownames=F, editable = F, extensions= "Buttons", caption = "Label of data",
-                options = c(opt.data("data_label"), list(scrollX = TRUE))
+      datatable(mat.info()$data.label,
+        rownames = F, editable = F, extensions = "Buttons", caption = "Label of data",
+        options = c(opt.data("data_label"), list(scrollX = TRUE))
       )
     })
 
     output$naomit <- renderText({
       paste("<font size = 5 ><b>", "The variables below contain missing values.</b></font><br>", '<font size = 4 color=\"#FF0000\"><b>', mat.info()$naomit, "</b></font>")
-      #mat.info()$naomit
+      # mat.info()$naomit
     })
 
 
@@ -1294,8 +1416,8 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     })
     matdata <- reactive(data.table::data.table(mat.info()$matdata))
     data.label <- reactive(mat.info()$data.label)
-    #data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
-    design.survey <- reactive(survey::svydesign(ids = ~ 1, data = mat.info()$data[!is.na(iptw), ], weights = ~ iptw))
+    # data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
+    design.survey <- reactive(survey::svydesign(ids = ~1, data = mat.info()$data[!is.na(iptw), ], weights = ~iptw))
 
 
     tb1_original <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = nfactor.limit)
@@ -1306,15 +1428,16 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     output$table1_original <- renderDT({
       tb <- tb1_original()$table
       cap <- tb1_original()$caption
-      out.tb1 <- datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
-                           options = c(opt.tb1("tb1"),
-                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
-                                       ),
-                                       list(scrollX = TRUE)
-                           )
+      out.tb1 <- datatable(tb,
+        rownames = T, extensions = "Buttons", caption = cap,
+        options = c(
+          opt.tb1("tb1"),
+          list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
+          list(scrollX = TRUE)
+        )
       )
-      if ("sig" %in% colnames(tb)){
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+      if ("sig" %in% colnames(tb)) {
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
       }
       return(out.tb1)
     })
@@ -1322,15 +1445,16 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     output$table1_ps <- renderDT({
       tb <- tb1_ps()$table
       cap <- tb1_ps()$caption
-      out.tb1 <- datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
-                           options = c(opt.tb1("tb1"),
-                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
-                                       ),
-                                       list(scrollX = TRUE)
-                           )
+      out.tb1 <- datatable(tb,
+        rownames = T, extensions = "Buttons", caption = cap,
+        options = c(
+          opt.tb1("tb1"),
+          list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
+          list(scrollX = TRUE)
+        )
       )
-      if ("sig" %in% colnames(tb)){
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+      if ("sig" %in% colnames(tb)) {
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
       }
       return(out.tb1)
     })
@@ -1338,15 +1462,16 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     output$table1_iptw <- renderDT({
       tb <- tb1_iptw()$table
       cap <- tb1_iptw()$caption
-      out.tb1 <- datatable(tb, rownames = T, extensions= "Buttons", caption = cap,
-                           options = c(opt.tb1("tb1"),
-                                       list(columnDefs = list(list(visible=FALSE, targets= which(colnames(tb) %in% c("test","sig"))))
-                                       ),
-                                       list(scrollX = TRUE)
-                           )
+      out.tb1 <- datatable(tb,
+        rownames = T, extensions = "Buttons", caption = cap,
+        options = c(
+          opt.tb1("tb1"),
+          list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
+          list(scrollX = TRUE)
+        )
       )
-      if ("sig" %in% colnames(tb)){
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = 'row' ,backgroundColor = styleEqual("**", 'yellow'))
+      if ("sig" %in% colnames(tb)) {
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
       }
       return(out.tb1)
     })
@@ -1361,13 +1486,14 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
     output$linear_original <- renderDT({
       hide <- which(colnames(out_linear_original()$table) == "sig")
-      datatable(out_linear_original()$table, rownames=T, extensions= "Buttons", caption = out_linear_original()$caption,
-                options = c(opt.tbreg(out_linear_original()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      datatable(out_linear_original()$table,
+        rownames = T, extensions = "Buttons", caption = out_linear_original()$caption,
+        options = c(
+          opt.tbreg(out_linear_original()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$warning_linear_original <- renderText({
@@ -1376,13 +1502,14 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
     output$linear_ps <- renderDT({
       hide <- which(colnames(out_linear_ps()$table) == "sig")
-      datatable(out_linear_ps()$table, rownames=T, extensions= "Buttons", caption = out_linear_ps()$caption,
-                options = c(opt.tbreg(out_linear_ps()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      datatable(out_linear_ps()$table,
+        rownames = T, extensions = "Buttons", caption = out_linear_ps()$caption,
+        options = c(
+          opt.tbreg(out_linear_ps()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$warning_linear_ps <- renderText({
@@ -1391,13 +1518,14 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
     output$linear_iptw <- renderDT({
       hide <- which(colnames(out_linear_iptw()$table) == "sig")
-      datatable(out_linear_iptw()$table, rownames=T, extensions= "Buttons", caption = out_linear_iptw()$caption,
-                options = c(opt.tbreg(out_linear_iptw()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      datatable(out_linear_iptw()$table,
+        rownames = T, extensions = "Buttons", caption = out_linear_iptw()$caption,
+        options = c(
+          opt.tbreg(out_linear_iptw()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
 
@@ -1409,36 +1537,39 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
 
     output$logistic_original <- renderDT({
-      hide = which(colnames(out_logistic_original()$table) == "sig")
-      datatable(out_logistic_original()$table, rownames=T, extensions= "Buttons", caption = out_logistic_original()$caption,
-                options = c(opt.tbreg(out_logistic_original()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_logistic_original()$table) == "sig")
+      datatable(out_logistic_original()$table,
+        rownames = T, extensions = "Buttons", caption = out_logistic_original()$caption,
+        options = c(
+          opt.tbreg(out_logistic_original()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$logistic_ps <- renderDT({
-      hide = which(colnames(out_logistic_ps()$table) == "sig")
-      datatable(out_logistic_ps()$table, rownames=T, extensions= "Buttons", caption = out_logistic_ps()$caption,
-                options = c(opt.tbreg(out_logistic_ps()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_logistic_ps()$table) == "sig")
+      datatable(out_logistic_ps()$table,
+        rownames = T, extensions = "Buttons", caption = out_logistic_ps()$caption,
+        options = c(
+          opt.tbreg(out_logistic_ps()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$logistic_iptw <- renderDT({
-      hide = which(colnames(out_logistic_iptw()$table) == "sig")
-      datatable(out_logistic_iptw()$table, rownames=T, extensions= "Buttons", caption = out_logistic_iptw()$caption,
-                options = c(opt.tbreg(out_logistic_iptw()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets =hide))
-                            ),
-                            list(scrollX = TRUE)
-                )
-      ) %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_logistic_iptw()$table) == "sig")
+      datatable(out_logistic_iptw()$table,
+        rownames = T, extensions = "Buttons", caption = out_logistic_iptw()$caption,
+        options = c(
+          opt.tbreg(out_logistic_iptw()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide))),
+          list(scrollX = TRUE)
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
 
@@ -1449,33 +1580,36 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     out_cox_iptw <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
     output$cox_original <- renderDT({
-      hide = which(colnames(out_cox_original()$table) == c("sig"))
-      datatable(out_cox_original()$table, rownames=T, extensions= "Buttons", caption = out_cox_original()$caption,
-                options = c(opt.tbreg(out_cox_original()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets= hide))
-                            )
-                )
-      )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_cox_original()$table) == c("sig"))
+      datatable(out_cox_original()$table,
+        rownames = T, extensions = "Buttons", caption = out_cox_original()$caption,
+        options = c(
+          opt.tbreg(out_cox_original()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide)))
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$cox_ps <- renderDT({
-      hide = which(colnames(out_cox_ps()$table) == c("sig"))
-      datatable(out_cox_ps()$table, rownames=T, extensions= "Buttons", caption = out_cox_ps()$caption,
-                options = c(opt.tbreg(out_cox_ps()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets= hide))
-                            )
-                )
-      )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_cox_ps()$table) == c("sig"))
+      datatable(out_cox_ps()$table,
+        rownames = T, extensions = "Buttons", caption = out_cox_ps()$caption,
+        options = c(
+          opt.tbreg(out_cox_ps()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide)))
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     output$cox_iptw <- renderDT({
-      hide = which(colnames(out_cox_iptw()$table) == c("sig"))
-      datatable(out_cox_iptw()$table, rownames=T, extensions= "Buttons", caption = out_cox_iptw()$caption,
-                options = c(opt.tbreg(out_cox_iptw()$caption),
-                            list(columnDefs = list(list(visible=FALSE, targets= hide))
-                            )
-                )
-      )  %>% formatStyle("sig", target = 'row',backgroundColor = styleEqual("**", 'yellow'))
+      hide <- which(colnames(out_cox_iptw()$table) == c("sig"))
+      datatable(out_cox_iptw()$table,
+        rownames = T, extensions = "Buttons", caption = out_cox_iptw()$caption,
+        options = c(
+          opt.tbreg(out_cox_iptw()$caption),
+          list(columnDefs = list(list(visible = FALSE, targets = hide)))
+        )
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
     ## ggpairs
@@ -1523,9 +1657,11 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     })
 
     output$table_roc_original <- renderDT({
-      datatable(out_roc_original()$tb, rownames=F, editable = F, extensions= "Buttons",
-                caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_roc_original()$tb,
+        rownames = F, editable = F, extensions = "Buttons",
+        caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     output$plot_roc_ps <- renderPlot({
@@ -1533,9 +1669,11 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     })
 
     output$table_roc_ps <- renderDT({
-      datatable(out_roc_ps()$tb, rownames=F, editable = F, extensions= "Buttons",
-                caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_roc_ps()$tb,
+        rownames = F, editable = F, extensions = "Buttons",
+        caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     output$plot_roc_iptw <- renderPlot({
@@ -1543,9 +1681,11 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     })
 
     output$table_roc_iptw <- renderDT({
-      datatable(out_roc_iptw()$tb, rownames=F, editable = F, extensions= "Buttons",
-                caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_roc_iptw()$tb,
+        rownames = F, editable = F, extensions = "Buttons",
+        caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     ## Time-ROC
@@ -1560,8 +1700,10 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     })
 
     output$table_timeroc_original <- renderDT({
-      datatable(out_timeroc_original()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_timeroc_original()$tb,
+        rownames = F, editable = F, extensions = "Buttons", caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     output$plot_timeroc_ps <- renderPlot({
@@ -1569,8 +1711,10 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     })
 
     output$table_timeroc_ps <- renderDT({
-      datatable(out_timeroc_ps()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_timeroc_ps()$tb,
+        rownames = F, editable = F, extensions = "Buttons", caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     output$plot_timeroc_iptw <- renderPlot({
@@ -1578,8 +1722,10 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
     })
 
     output$table_timeroc_iptw <- renderDT({
-      datatable(out_timeroc_iptw()$tb, rownames=F, editable = F, extensions= "Buttons", caption = "ROC results",
-                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+      datatable(out_timeroc_iptw()$tb,
+        rownames = F, editable = F, extensions = "Buttons", caption = "ROC results",
+        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+      )
     })
 
     session$onSessionEnded(function() {
@@ -1589,8 +1735,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
 
 
-  #viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
+  # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
   runGadget(ui, server, viewer = viewer)
-
 }

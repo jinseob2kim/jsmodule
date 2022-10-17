@@ -211,7 +211,8 @@ histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         add.params <- list()
         cor.coeff.args <- list(p.accuracy = 0.001)
 
-        ggpubr::gghistogram(data = data, x = input$x_histogram,
+        ggpubr::gghistogram(
+          data = data, x = input$x_histogram,
           color = "black", conf.int = input$lineci,
           xlab = label[variable == input$x_histogram, var_label][1],
           na.rm = T, fill = color,
