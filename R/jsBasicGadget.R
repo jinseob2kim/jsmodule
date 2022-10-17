@@ -131,6 +131,17 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                                          )
                                        )
                               ),
+                              tabPanel("Histogram",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           histogramUI("histogram")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("histogram"), type="html", loader="loader6"),
+                                           ggplotdownUI("histogram")
+                                         )
+                                       )
+                              ),
                               tabPanel("Scatterplot",
                                        sidebarLayout(
                                          sidebarPanel(
@@ -530,6 +541,12 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       print(out_box())
     })
 
+    out_histogram <- histogramServer("histogram", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    output$histogram <- renderPlot({
+      print(out_histogram())
+    })
+
     out_bar <- barServer("bar", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$bar_plot <- renderPlot({
@@ -617,9 +634,6 @@ jsBasicAddin <- function(){
   #viewer <- dialogViewer("Subset", width = 1000, height = 800)
   jsBasicGadget(data)
 }
-
-
-
 
 
 #' @title jsBasicExtAddin: RStudio Addin for basic data analysis with external data.
@@ -726,6 +740,17 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
                                          mainPanel(
                                            withLoader(plotOutput("ggpairs_plot"), type="html", loader="loader6"),
                                            ggpairsModuleUI2("ggpairs")
+                                         )
+                                       )
+                              ),
+                              tabPanel("Histogram",
+                                       sidebarLayout(
+                                         sidebarPanel(
+                                           histogramUI("histogram")
+                                         ),
+                                         mainPanel(
+                                           withLoader(plotOutput("histogram"), type="html", loader="loader6"),
+                                           ggplotdownUI("histogram")
                                          )
                                        )
                               ),
@@ -938,6 +963,12 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048){
 
     output$box_plot <- renderPlot({
       print(out_box())
+    })
+
+    out_histogram <- histogramServer("histogram", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    output$histogram <- renderPlot({
+      print(out_histogram())
     })
 
     out_bar <- barServer("bar", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
