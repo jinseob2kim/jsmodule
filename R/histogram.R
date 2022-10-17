@@ -15,7 +15,7 @@
 #'     ),
 #'     mainPanel(
 #'       plotOutput("histogram"),
-#'       ggplotdownUI("histogsram")
+#'       ggplotdownUI("histogram")
 #'     )
 #'   )
 #' )
@@ -244,7 +244,7 @@ histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
 
       output$downloadButton <- downloadHandler(
         filename = function() {
-          paste(input$x_histogram, "_", input$y_histogram, "_histogram.", input$file_ext, sep = "")
+          paste(input$x_histogram, "_histogram.", input$file_ext, sep = "")
         },
         # content is a function with argument file. content writes the plot to the device
         content = function(file) {

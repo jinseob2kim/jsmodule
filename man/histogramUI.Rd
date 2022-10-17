@@ -31,7 +31,7 @@ ui <- fluidPage(
     ),
     mainPanel(
       plotOutput("histogram"),
-      ggplotdownUI("histogsram")
+      ggplotdownUI("histogram")
     )
   )
 )
