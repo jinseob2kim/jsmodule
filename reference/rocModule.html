@@ -209,6 +209,7 @@
    ),
    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>mainPanel</a></span>(
      <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/plotOutput.html'>plotOutput</a></span>(<span class='st'>"plot_roc"</span>),
+     <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/renderTable.html'>tableOutput</a></span>(<span class='st'>"cut_roc"</span>),
      <span class='fu'><a href='ggplotdownUI.html'>ggplotdownUI</a></span>(<span class='st'>"roc"</span>),
      <span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>DTOutput</a></span>(<span class='st'>"table_roc"</span>)
    )
@@ -218,13 +219,17 @@
 <span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
 
   <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='no'>mtcars</span>)
-  <span class='no'>data.label</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jstable/man/mk.lev.html'>mk.lev</a></span>(<span class='no'>mtcars</span>)
+  <span class='no'>data.label</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jstable/man/mk.lev.html'>mk.lev</a></span>(<span class='no'>data1</span>))
 
   <span class='no'>out_roc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/callModule.html'>callModule</a></span>(<span class='no'>rocModule</span>, <span class='st'>"roc"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>,
                             <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
   <span class='no'>output</span>$<span class='no'>plot_roc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/renderPlot.html'>renderPlot</a></span>({
     <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='fu'>out_roc</span>()$<span class='no'>plot</span>)
+  })
+
+  <span class='no'>output</span>$<span class='no'>cut_roc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/renderTable.html'>renderTable</a></span>({
+   <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='fu'>out_roc</span>()$<span class='no'>cut</span>)
   })
 
   <span class='no'>output</span>$<span class='no'>table_roc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>renderDT</a></span>({
@@ -250,7 +255,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by <a href='https://github.com/jinseob2kim'>Jinseob Kim</a>, <a href='https://www.zarathu.com'><img src="https://raw.githubusercontent.com/zarathucorp/zarathu/master/Color%20logo%20-%20no%20background.png" height="24" /></a>, Hyunki Lee.</p>
+  <p>Developed by <a href='https://github.com/jinseob2kim'>Jinseob Kim</a>, <a href='https://www.zarathu.com'><img src="https://raw.githubusercontent.com/zarathucorp/zarathu/master/Color%20logo%20-%20no%20background.png" height="24" /></a>, Hyunki Lee, Changwoo Lim.</p>
 </div>
 
 <div class="pkgdown">
