@@ -10,10 +10,11 @@ test_that("Run reclassification", {
   roc2 <- roc(m2$y, predict(m2, type = "response"))
   roc3 <- roc(m3$y, predict(m3, type = "response"))
 
-  expect_is(reclassificationJS(data = mtcars, cOutcome = 8,
-                               predrisk1 = predict(m1, type = "response"),
-                               predrisk2=predict(m2, type = "response"), cutoff = c(0,.20,.40,1)) , "data.frame")
+  expect_is(reclassificationJS(
+    data = mtcars, cOutcome = 8,
+    predrisk1 = predict(m1, type = "response"),
+    predrisk2 = predict(m2, type = "response"), cutoff = c(0, .20, .40, 1)
+  ), "data.frame")
 
   expect_is(ROC_table(list(roc1, roc2, roc3)), "data.frame")
-
 })

@@ -1,9 +1,9 @@
-#' @title lineUI: shiny module UI for lineplot
-#' @description Shiny module UI for lineplot
+#' @title histogramUI: shiny module UI for histogram
+#' @description Shiny module UI for histogram
 #' @param id id
 #' @param label label
-#' @return Shiny module UI for lineplot
-#' @details Shiny module UI for lineplot
+#' @return Shiny module UI for histogram
+#' @details Shiny module UI for histogram
 #' @examples
 #' library(shiny)
 #' library(ggplot2)
@@ -11,11 +11,11 @@
 #' ui <- fluidPage(
 #'   sidebarLayout(
 #'     sidebarPanel(
-#'       lineUI("line")
+#'       histogramUI("histogram")
 #'     ),
 #'     mainPanel(
-#'       plotOutput("line_plot"),
-#'       ggplotdownUI("line")
+#'       plotOutput("histogram"),
+#'       ggplotdownUI("histogram")
 #'     )
 #'   )
 #' )
@@ -24,44 +24,39 @@
 #'   data <- reactive(mtcars)
 #'   data.label <- reactive(jstable::mk.lev(mtcars))
 #'
-#'   out_line <- lineServer("line",
+#'   out_histogram <- histogramServer("histogram",
 #'     data = data, data_label = data.label,
 #'     data_varStruct = NULL
 #'   )
 #'
-#'   output$line_plot <- renderPlot({
-#'     print(out_line())
+#'   output$histogram <- renderPlot({
+#'     print(out_histogram())
 #'   })
 #' }
-#' @rdname lineUI
+#' @rdname histogramUI
 #' @export
 
 
-lineUI <- function(id, label = "lineplot") {
+histogramUI <- function(id, label = "histogram") {
   # Create a namespace function using the provided id
   ns <- NS(id)
 
   tagList(
-    uiOutput(ns("vars_line")),
-    uiOutput(ns("strata_line")),
-    radioButtons(ns("options"), "Option", choices = c("Mean_SE", "Mean_SD", "Median_IQR"), selected = "Mean_SE", inline = T),
-    checkboxInput(ns("linetype"), "Linetype"),
-    checkboxInput(ns("jitter"), "Jitter"),
-    uiOutput(ns("subvar")),
-    uiOutput(ns("subval"))
+    uiOutput(ns("vars_histogram")),
+    uiOutput(ns("strata_histogram")),
   )
 }
 
 
-#' @title lineServer: shiny module server for lineplot.
-#' @description Shiny module server for lineplot.
+#' @title histogramServer: shiny module server for histogram.
+#' @description Shiny module server for histogram.
 #' @param id id
 #' @param data Reactive data
 #' @param data_label Reactive data label
 #' @param data_varStruct Reactive List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
-#' @return Shiny module server for lineplot.
-#' @details Shiny module server for lineplot.
+#' @return Shiny module server for histogram.
+#' @details Shiny module server for histogram.
 #' @examples
 #' library(shiny)
 #' library(ggplot2)
@@ -69,11 +64,11 @@ lineUI <- function(id, label = "lineplot") {
 #' ui <- fluidPage(
 #'   sidebarLayout(
 #'     sidebarPanel(
-#'       lineUI("line")
+#'       histogramUI("histogram")
 #'     ),
 #'     mainPanel(
-#'       plotOutput("line_plot"),
-#'       ggplotdownUI("line")
+#'       plotOutput("histogram"),
+#'       ggplotdownUI("histogram")
 #'     )
 #'   )
 #' )
@@ -82,27 +77,27 @@ lineUI <- function(id, label = "lineplot") {
 #'   data <- reactive(mtcars)
 #'   data.label <- reactive(jstable::mk.lev(mtcars))
 #'
-#'   out_line <- lineServer("line",
+#'   out_histogram <- histogramServer("histogram",
 #'     data = data, data_label = data.label,
 #'     data_varStruct = NULL
 #'   )
 #'
-#'   output$line_plot <- renderPlot({
-#'     print(out_line())
+#'   output$histogram <- renderPlot({
+#'     print(out_histogram())
 #'   })
 #' }
-#' @rdname lineServer
+#' @rdname histogramServer
 #' @export
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
-#' @importFrom ggpubr ggline
+#' @importFrom ggpubr gghistogram
 #' @importFrom ggplot2 ggsave
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
 
 
-lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
+histogramServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -118,7 +113,6 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         data <- data.table(data(), stringsAsFactors = T)
 
         factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
-        # data[, (factor_vars) := lapply(.SD, as.factor), .SDcols= factor_vars]
         factor_list <- mklist(data_varStruct(), factor_vars)
 
         nclass_factor <- unlist(data[, lapply(.SD, function(x) {
@@ -139,22 +133,18 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         ))
       })
 
-      output$vars_line <- renderUI({
+      output$vars_histogram <- renderUI({
         tagList(
-          selectizeInput(session$ns("x_line"), "X variable",
-            choices = vlist()$factor_vars, multiple = F,
+          selectizeInput(session$ns("x_histogram"), "X variable",
+            choices = vlist()$select_vars, multiple = F,
             selected = vlist()$select_vars[1]
           ),
-          selectizeInput(session$ns("y_line"), "Y variable",
-            choices = vlist()$select_list, multiple = F,
-            selected = ifelse(length(vlist()$select_vars) > 1, vlist()$select_vars[2], vlist()$select_vars[1])
-          )
         )
       })
 
-      output$strata_line <- renderUI({
+      output$strata_histogram <- renderUI({
         strata_vars <- setdiff(vlist()$factor_vars, vlist()$except_vars)
-        strata_vars <- setdiff(strata_vars, input$x_line)
+        strata_vars <- setdiff(strata_vars, input$x_histogram)
         strata_list <- mklist(data_varStruct(), strata_vars)
         strata_select <- c("None", strata_list)
         selectizeInput(session$ns("strata"), "Strata",
@@ -167,9 +157,9 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
       observeEvent(input$subcheck, {
         output$subvar <- renderUI({
           req(input$subcheck == T)
-          req(!is.null(input$x_line))
+          req(!is.null(input$x_histogram))
 
-          var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$x_line, input$y_line, input$strata))
+          var_subgroup <- setdiff(names(data()), c(vlist()$except_vars, input$x_histogram, input$y_histogram, input$strata))
 
           var_subgroup_list <- mklist(data_varStruct(), var_subgroup)
           validate(
@@ -209,49 +199,23 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         outUI
       })
 
-      lineInput <- reactive({
-        req(c(input$x_line, input$y_line, input$strata))
+      histogramInput <- reactive({
+        req(c(input$x_histogram, input$strata))
         data <- data.table(data())
         label <- data_label()
-        add <- switch(input$options,
-          "Mean_SE" = "mean_se",
-          "Mean_SD" = "mean_sd",
-          "Median_IQR" = "median_iqr"
-        )
-        if (input$jitter) {
-          add <- switch(input$options,
-            "Mean_SE" = c("jitter", "mean_se"),
-            "Mean_SD" = c("jitter", "mean_sd"),
-            "Median_IQR" = c("jitter", "median_iqr")
-          )
-        }
-
-
-        color <- ifelse(input$strata == "None", "black", input$strata)
-        fill <- ifelse(input$strata == "None", input$x_line, input$strata)
+        color <- ifelse(input$strata == "None", input$x_histogram, input$strata)
+        fill <- ifelse(input$strata == "None", input$x_histogram, input$strata)
         if (input$strata != "None") {
           data <- data[!is.na(get(input$strata))]
         }
         add.params <- list()
         cor.coeff.args <- list(p.accuracy = 0.001)
 
-
-
-        linetype <- 19
-        if (input$linetype) {
-          if (input$strata == "None") {
-            linetype <- 20
-          } else {
-            linetype <- input$strata
-          }
-        }
-
-
-        ggpubr::ggline(data, input$x_line, input$y_line,
-          color = color, add = add, add.params = add.params, conf.int = input$lineci,
-          xlab = label[variable == input$x_line, var_label][1],
-          ylab = label[variable == input$y_line, var_label][1], na.rm = T,
-          linetype = linetype
+        ggpubr::gghistogram(
+          data = data, x = input$x_histogram,
+          color = "black", conf.int = input$lineci,
+          xlab = label[variable == input$x_histogram, var_label][1],
+          na.rm = T, fill = color,
         )
       })
 
@@ -281,7 +245,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
 
       output$downloadButton <- downloadHandler(
         filename = function() {
-          paste(input$x_line, "_", input$y_line, "_lineplot.", input$file_ext, sep = "")
+          paste(input$x_histogram, "_histogram.", input$file_ext, sep = "")
         },
         # content is a function with argument file. content writes the plot to the device
         content = function(file) {
@@ -296,37 +260,36 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
               }
 
               if (input$file_ext == "pptx") {
-                my_vec_graph <- rvg::dml(ggobj = lineInput())
+                my_vec_graph <- rvg::dml(ggobj = histogramInput())
 
                 doc <- officer::read_pptx()
                 doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
                 doc <- officer::ph_with(doc, my_vec_graph, location = officer::ph_location(width = input$fig_width, height = input$fig_height))
                 print(doc, target = file)
               } else {
-                ggplot2::ggsave(file, lineInput(), dpi = 300, units = "in", width = input$fig_width, height = input$fig_height)
+                ggplot2::ggsave(file, histogramInput(), dpi = 300, units = "in", width = input$fig_width, height = input$fig_height)
               }
             }
           )
         }
       )
 
-      return(lineInput)
+      return(histogramInput)
     }
   )
 }
-#####
 
-
-
-
+# library(shiny)
+# library(data.table)
+# library(jsmodule)
 # ui <- fluidPage(
 #   sidebarLayout(
 #     sidebarPanel(
-#       lineUI("line")
+#       histogramUI("histogram")
 #     ),
 #     mainPanel(
-#       plotOutput("line_plot"),
-#       ggplotdownUI("line")
+#       plotOutput("histogram_plot"),
+#       ggplotdownUI("histogram")
 #     )
 #   )
 # )
@@ -339,11 +302,11 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
 #   mtcars$cyl <- as.factor(mtcars$cyl)
 #   data <- reactive(mtcars)
 #   data.label <- reactive(jstable::mk.lev(mtcars))
-#   out_line <- lineServer("line", data = data, data_label = data.label,
-#                              data_varStruct = NULL)
+#   out_histogram <- histogramServer("histogram", data = data, data_label = data.label,
+#                            data_varStruct = NULL)
 #
-#   output$line_plot <- renderPlot({
-#     print(out_line())
+#   output$histogram_plot <- renderPlot({
+#     print(out_histogram())
 #   })
 # }
 #
