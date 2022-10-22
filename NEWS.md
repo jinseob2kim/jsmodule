@@ -1,3 +1,8 @@
+# jsmodule 1.3.4
+
+## Fix
+* cutoff fix: `rocModule`
+
 # jsmodule 1.3.3
 
 ## New module (Thanks for [Changwoo Lim](https://github.com/leevenstar))
