@@ -1,3 +1,10 @@
+# jsmodule 1.3.3
+
+## New module (Thanks for [Changwoo Lim](https://github.com/leevenstar))
+
+* Histogram(`histogramUI`, `histogramServer`)
+
+
 # jsmodule 1.3.2
 
 ## Update 

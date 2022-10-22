@@ -66,9 +66,11 @@
 #'     )
 #'     factor_01vars <- factor_vars[class01_factor]
 #'     factor_01_list <- mklist(data_varStruct(), factor_01vars)
-#'     group_vars <- factor_vars[nclass_factor >= 2 & nclass_factor <= 10 & nclass_factor < nrow(data())]
+#'     group_vars <- factor_vars[nclass_factor >= 2 & nclass_factor <= 10 &
+#'                               nclass_factor < nrow(data())]
 #'     group_list <- mklist(data_varStruct(), group_vars)
-#'     except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data())]
+#'     except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 |
+#'                    nclass_factor == nrow(data())]
 #'
 #'     ## non-normal: shapiro test
 #'     f <- function(x) {
@@ -214,9 +216,11 @@ tb1simpleUI <- function(id) {
 #'     )
 #'     factor_01vars <- factor_vars[class01_factor]
 #'     factor_01_list <- mklist(data_varStruct(), factor_01vars)
-#'     group_vars <- factor_vars[nclass_factor >= 2 & nclass_factor <= 10 & nclass_factor < nrow(data())]
+#'     group_vars <- factor_vars[nclass_factor >= 2 & nclass_factor <= 10 &
+#'                               nclass_factor < nrow(data())]
 #'     group_list <- mklist(data_varStruct(), group_vars)
-#'     except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data())]
+#'     except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 |
+#'                                nclass_factor == nrow(data())]
 #'
 #'     ## non-normal: shapiro test
 #'     f <- function(x) {
@@ -547,9 +551,11 @@ tb1simple <- function(input, output, session, data, matdata, data_label, data_va
 #'     )
 #'     factor_01vars <- factor_vars[class01_factor]
 #'     factor_01_list <- mklist(data_varStruct(), factor_01vars)
-#'     group_vars <- factor_vars[nclass_factor >= 2 & nclass_factor <= 10 & nclass_factor < nrow(data())]
+#'     group_vars <- factor_vars[nclass_factor >= 2 & nclass_factor <= 10 &
+#'                               nclass_factor < nrow(data())]
 #'     group_list <- mklist(data_varStruct(), group_vars)
-#'     except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 | nclass_factor == nrow(data())]
+#'     except_vars <- factor_vars[nclass_factor > 10 | nclass_factor == 1 |
+#'                                nclass_factor == nrow(data())]
 #'
 #'     ## non-normal: shapiro test
 #'     f <- function(x) {

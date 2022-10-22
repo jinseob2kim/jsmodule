@@ -72,70 +72,86 @@ shiny module server for time-dependent roc analysis
 shiny module server for time dependent roc analysis- input number of model as integer
 }
 \examples{
-library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
-library(timeROC);library(survIDINRI)
+library(shiny)
+library(DT)
+library(data.table)
+library(jstable)
+library(ggplot2)
+library(timeROC)
+library(survIDINRI)
 ui <- fluidPage(
-   sidebarLayout(
-   sidebarPanel(
-     timerocUI("timeroc")
-   ),
-   mainPanel(
-     plotOutput("plot_timeroc"),
-     ggplotdownUI("timeroc"),
-     DTOutput("table_timeroc")
-   )
- )
+  sidebarLayout(
+    sidebarPanel(
+      timerocUI("timeroc")
+    ),
+    mainPanel(
+      plotOutput("plot_timeroc"),
+      ggplotdownUI("timeroc"),
+      DTOutput("table_timeroc")
+    )
+  )
 )
 
 server <- function(input, output, session) {
-
   data <- reactive(mtcars)
   data.label <- jstable::mk.lev(mtcars)
 
-  out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label,
-                            data_varStruct = NULL)
+  out_timeroc <- callModule(timerocModule, "timeroc",
+    data = data, data_label = data.label,
+    data_varStruct = NULL
+  )
 
   output$plot_timeroc <- renderPlot({
     print(out_timeroc()$plot)
   })
 
   output$table_timeroc <- renderDT({
-    datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons",
-              caption = "ROC results",
-              options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+    datatable(out_timeroc()$tb,
+      rownames = F, editable = F, extensions = "Buttons",
+      caption = "ROC results",
+      options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+    )
   })
 }
-library(shiny);library(DT);library(data.table);library(jstable);library(ggplot2)
-library(timeROC);library(survIDINRI)
+library(shiny)
+library(DT)
+library(data.table)
+library(jstable)
+library(ggplot2)
+library(timeROC)
+library(survIDINRI)
 ui <- fluidPage(
-   sidebarLayout(
-   sidebarPanel(
-     timerocUI("timeroc")
-   ),
-   mainPanel(
-     plotOutput("plot_timeroc"),
-     ggplotdownUI("timeroc"),
-     DTOutput("table_timeroc")
-   )
- )
+  sidebarLayout(
+    sidebarPanel(
+      timerocUI("timeroc")
+    ),
+    mainPanel(
+      plotOutput("plot_timeroc"),
+      ggplotdownUI("timeroc"),
+      DTOutput("table_timeroc")
+    )
+  )
 )
 
 server <- function(input, output, session) {
-
   data <- reactive(mtcars)
   data.label <- jstable::mk.lev(mtcars)
 
-  out_timeroc <- callModule(timerocModule2, "timeroc", data = data, data_label = data.label,
-                            data_varStruct = NULL)
+  out_timeroc <- callModule(timerocModule2, "timeroc",
+    data = data, data_label = data.label,
+    data_varStruct = NULL
+  )
 
   output$plot_timeroc <- renderPlot({
     print(out_timeroc()$plot)
   })
 
   output$table_timeroc <- renderDT({
-    datatable(out_timeroc()$tb, rownames=F, editable = F, extensions= "Buttons",
-              caption = "ROC results",
-              options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE)))
+    datatable(out_timeroc()$tb,
+      rownames = F, editable = F, extensions = "Buttons",
+      caption = "ROC results",
+      options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+    )
   })
 }
 }

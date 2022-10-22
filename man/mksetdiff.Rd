@@ -21,6 +21,6 @@ Function to make variable list excluding specific variables.
 Internal function
 }
 \examples{
- data_varStruct <- list(variable = names(mtcars))
- mksetdiff(data_varStruct, "mpg")
+data_varStruct <- list(variable = names(mtcars))
+mksetdiff(data_varStruct, "mpg")
 }

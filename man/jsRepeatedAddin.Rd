@@ -16,9 +16,9 @@ Rstudio addin of jsRepeatedGadjet
 Rstudio addin of jsRepeatedGadjet
 }
 \examples{
-if(interactive()){
- jsRepeatedAddin()
- }
+if (interactive()) {
+  jsRepeatedAddin()
+}
 }
 \seealso{
 \code{\link[rstudioapi]{rstudio-editors}}

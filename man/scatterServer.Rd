@@ -27,26 +27,29 @@ Shiny module server for scatterplot.
 Shiny module server for scatterplot.
 }
 \examples{
-library(shiny);library(ggplot2);library(ggpubr);
+library(shiny)
+library(ggplot2)
+library(ggpubr)
 ui <- fluidPage(
-   sidebarLayout(
-   sidebarPanel(
-     scatterUI("scatter")
-   ),
-   mainPanel(
-     plotOutput("scatter_plot"),
-     ggplotdownUI("scatter")
-   )
- )
+  sidebarLayout(
+    sidebarPanel(
+      scatterUI("scatter")
+    ),
+    mainPanel(
+      plotOutput("scatter_plot"),
+      ggplotdownUI("scatter")
+    )
+  )
 )
 
 server <- function(input, output, session) {
-
   data <- reactive(mtcars)
   data.label <- reactive(jstable::mk.lev(mtcars))
 
-  out_scatter <- scatterServer("scatter", data = data, data_label = data.label,
-    data_varStruct = NULL)
+  out_scatter <- scatterServer("scatter",
+    data = data, data_label = data.label,
+    data_varStruct = NULL
+  )
 
   output$scatter_plot <- renderPlot({
     print(out_scatter())

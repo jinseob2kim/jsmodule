@@ -25,20 +25,25 @@ Shiny module Server for file upload for propensity score matching.
 Shiny module Server for file upload for propensity score matching.
 }
 \examples{
-library(shiny);library(DT);library(data.table);library(readxl);library(jstable)
+library(shiny)
+library(DT)
+library(data.table)
+library(readxl)
+library(jstable)
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       FilePsInput("datafile")
     ),
     mainPanel(
-      tabsetPanel(type = "pills",
-                  tabPanel("Data", DTOutput("data")),
-                  tabPanel("Matching data", DTOutput("matdata")),
-                  tabPanel("Label", DTOutput("data_label", width = "100\%"))
-                 )
-   )
- )
+      tabsetPanel(
+        type = "pills",
+        tabPanel("Data", DTOutput("data")),
+        tabPanel("Matching data", DTOutput("matdata")),
+        tabPanel("Label", DTOutput("data_label", width = "100\%"))
+      )
+    )
+  )
 )
 
 server <- function(input, output, session) {

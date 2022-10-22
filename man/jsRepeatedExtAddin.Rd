@@ -21,9 +21,9 @@ RStudio Addin for repeated measure analysis with external csv/xlsx/sas7bdat/sav/
 RStudio Addin for repeated measure analysis with external csv/xlsx/sas7bdat/sav/dta file.
 }
 \examples{
-if(interactive()){
- jsRepeatedExtAddin()
- }
+if (interactive()) {
+  jsRepeatedExtAddin()
+}
 }
 \seealso{
 \code{\link[data.table]{fwrite}}

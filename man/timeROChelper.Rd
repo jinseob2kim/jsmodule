@@ -39,8 +39,8 @@ Helper function for timerocModule
 Helper function for timerocModule
 }
 \examples{
-#library(survival)
-#timeROChelper("status", "time", c("age", "sex"), t = 365, data = lung)
+# library(survival)
+# timeROChelper("status", "time", c("age", "sex"), t = 365, data = lung)
 }
 \seealso{
 \code{\link[survival]{coxph}}

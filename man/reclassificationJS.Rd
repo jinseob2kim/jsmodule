@@ -39,11 +39,13 @@ Modified function of PredictABEL::reclassification: return output table
 Modified function of PredictABEL::reclassification
 }
 \examples{
- m1 <- glm(vs ~ am + gear, data = mtcars, family = binomial)
- m2 <- glm(vs ~ am + gear + wt, data = mtcars, family = binomial)
- reclassificationJS(data = mtcars, cOutcome = 8,
-                    predrisk1 = predict(m1, type = "response"),
-                    predrisk2=predict(m2, type = "response"), cutoff = c(0,.20,.40,1))
+m1 <- glm(vs ~ am + gear, data = mtcars, family = binomial)
+m2 <- glm(vs ~ am + gear + wt, data = mtcars, family = binomial)
+reclassificationJS(
+  data = mtcars, cOutcome = 8,
+  predrisk1 = predict(m1, type = "response"),
+  predrisk2 = predict(m2, type = "response"), cutoff = c(0, .20, .40, 1)
+)
 }
 \seealso{
 \code{\link[Hmisc]{rcorrp.cens}}

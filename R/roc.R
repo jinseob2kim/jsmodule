@@ -577,7 +577,8 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
         })
 
         if (nmodel() == 1 & length(indeps()) == 1) {
-          res.cut <- pROC::coords(res.roc[[1]], x = "best", input = "threshold", best.method = "youden")
+          res.roc2 <- pROC::roc(data.roc[[input$event_roc]] ,data.roc[[indeps()]])
+          res.cut <- pROC::coords(res.roc2, x = "best", input = "threshold", best.method = "youden")
         } else {
           res.cut <- NULL
         }
@@ -627,7 +628,9 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
       })
 
       if (nmodel() == 1 & length(indeps()) == 1) {
-        res.cut <- pROC::coords(res.roc[[1]], x = "best", input = "threshold", best.method = "youden")
+        res.roc2 <- pROC::roc(data.design$variables[[input$event_roc]] ,data.design$variables[[indeps()]])
+        res.cut <- pROC::coords(res.roc2, x = "best", input = "threshold", best.method = "youden")
+        #res.cut <- pROC::coords(res.roc[[1]], x = "best", input = "threshold", best.method = "youden")
       } else {
         res.cut <- NULL
       }

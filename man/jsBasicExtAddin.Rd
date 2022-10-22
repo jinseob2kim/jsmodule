@@ -21,9 +21,9 @@ RStudio Addin for basic data analysis with external csv/xlsx/sas7bdat/sav/dta fi
 RStudio Addin for basic data analysis with external csv/xlsx/sas7bdat/sav/dta file.
 }
 \examples{
-if(interactive()){
- jsBasicExtAddin()
- }
+if (interactive()) {
+  jsBasicExtAddin()
+}
 }
 \seealso{
 \code{\link[survival]{lung}}

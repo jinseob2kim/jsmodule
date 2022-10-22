@@ -21,9 +21,9 @@ RStudio Addin for propensity score analysis with external csv/xlsx/sas7bdat/sav/
 RStudio Addin for propensity score analysis with external csv/xlsx/sas7bdat/sav/dta file.
 }
 \examples{
-if(interactive()){
- jsPropensityExtAddin()
- }
+if (interactive()) {
+  jsPropensityExtAddin()
+}
 }
 \seealso{
 \code{\link[survival]{pbc}}

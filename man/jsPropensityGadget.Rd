@@ -21,9 +21,9 @@ Shiny Gadget including original/matching/IPTW data, Label info, Table 1, Cox mod
 Shiny Gadget including original/matching/IPTW data, Label info, Table 1, Cox model, Basic/kaplan-meier plot.
 }
 \examples{
-if(interactive()){
- jsPropensityGadget(mtcars)
- }
+if (interactive()) {
+  jsPropensityGadget(mtcars)
+}
 }
 \seealso{
 \code{\link[data.table]{data.table}}

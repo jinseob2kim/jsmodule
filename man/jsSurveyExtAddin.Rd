@@ -21,9 +21,9 @@ RStudio Addin for survey data analysis with external csv/xlsx/sas7bdat/sav/dta f
 RStudio Addin for survey data analysis with external csv/xlsx/sas7bdat/sav/dta file.
 }
 \examples{
-if(interactive()){
- jsSurveyExtAddin()
- }
+if (interactive()) {
+  jsSurveyExtAddin()
+}
 }
 \seealso{
 \code{\link[data.table]{fwrite}}

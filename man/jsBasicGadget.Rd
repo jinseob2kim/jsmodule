@@ -21,7 +21,7 @@ Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), 
 Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plot
 }
 \examples{
-if(interactive()){
- jsBasicGadjet(mtcars)
- }
+if (interactive()) {
+  jsBasicGadjet(mtcars)
+}
 }

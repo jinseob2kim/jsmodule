@@ -21,7 +21,7 @@ Shiny Gadget including Data, Label info, Table 1, svyglm, Basic plot
 Shiny Gadget including Data, Label info, Table 1, svyglm, Basic plot
 }
 \examples{
-if(interactive()){
- jsSurveyGadget(mtcars)
- }
+if (interactive()) {
+  jsSurveyGadget(mtcars)
+}
 }

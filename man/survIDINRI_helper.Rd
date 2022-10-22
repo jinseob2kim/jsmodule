@@ -42,8 +42,8 @@ Helper function for IDI.INF.OUT in survIDINRI packages
 Helper function for IDI.INF.OUT in survIDINRI packages
 }
 \examples{
-#library(survival)
-#survIDINRI_helper("status", "time", list.vars.ind = list("age", c("age", "sex")),
+# library(survival)
+# survIDINRI_helper("status", "time", list.vars.ind = list("age", c("age", "sex")),
 #                  t = 365, data = lung)
 }
 \seealso{

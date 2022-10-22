@@ -48,28 +48,32 @@ Shiny modulde server for logistic regression for reactive data.
 Shiny modulde server for logistic regression.
 }
 \examples{
-library(shiny);library(DT);library(data.table);library(jstable)
+library(shiny)
+library(DT)
+library(data.table)
+library(jstable)
 ui <- fluidPage(
-   sidebarLayout(
-   sidebarPanel(
-     regressModuleUI("logistic")
-   ),
-   mainPanel(
-     DTOutput("logistictable")
-   )
- )
+  sidebarLayout(
+    sidebarPanel(
+      regressModuleUI("logistic")
+    ),
+    mainPanel(
+      DTOutput("logistictable")
+    )
+  )
 )
 
 server <- function(input, output, session) {
-
   data <- reactive(mtcars)
   data.label <- reactive(jstable::mk.lev(mtcars))
 
-  out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label,
-                           data_varStruct = NULL)
+  out_logistic <- callModule(logisticModule2, "logistic",
+    data = data, data_label = data.label,
+    data_varStruct = NULL
+  )
 
   output$logistictable <- renderDT({
-    datatable(out_logistic()$table, rownames=T, caption = out_logistic()$caption)
+    datatable(out_logistic()$table, rownames = T, caption = out_logistic()$caption)
   })
 }
 }

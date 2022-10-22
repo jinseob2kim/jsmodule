@@ -27,26 +27,29 @@ Shiny module server for barplot.
 Shiny module server for barplot.
 }
 \examples{
-library(shiny);library(ggplot2);library(ggpubr);
+library(shiny)
+library(ggplot2)
+library(ggpubr)
 ui <- fluidPage(
-   sidebarLayout(
-   sidebarPanel(
-     barUI("bar")
-   ),
-   mainPanel(
-     plotOutput("bar_plot"),
-     ggplotdownUI("bar")
-   )
- )
+  sidebarLayout(
+    sidebarPanel(
+      barUI("bar")
+    ),
+    mainPanel(
+      plotOutput("bar_plot"),
+      ggplotdownUI("bar")
+    )
+  )
 )
 
 server <- function(input, output, session) {
-
   data <- reactive(mtcars)
   data.label <- reactive(jstable::mk.lev(mtcars))
 
-  out_bar <- barServer("bar", data = data, data_label = data.label,
-    data_varStruct = NULL)
+  out_bar <- barServer("bar",
+    data = data, data_label = data.label,
+    data_varStruct = NULL
+  )
 
   output$bar_plot <- renderPlot({
     print(out_bar())

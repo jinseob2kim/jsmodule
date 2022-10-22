@@ -21,6 +21,6 @@ Function to make variable list lncluding specific variables.
 Internal function
 }
 \examples{
- data_varStruct <- list(variable = names(mtcars))
- mklist(data_varStruct, names(mtcars))
+data_varStruct <- list(variable = names(mtcars))
+mklist(data_varStruct, names(mtcars))
 }

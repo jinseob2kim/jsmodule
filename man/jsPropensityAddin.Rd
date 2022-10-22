@@ -16,9 +16,9 @@ Rstudio addin of jsPropensityGadget
 Rstudio addin of jsPropensityGadget
 }
 \examples{
-if(interactive()){
- jsPropensityAddin()
- }
+if (interactive()) {
+  jsPropensityAddin()
+}
 }
 \seealso{
 \code{\link[rstudioapi]{rstudio-editors}}

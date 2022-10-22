@@ -19,5 +19,5 @@ Shiny modulde UI for Cox's model.
 Shiny modulde UI for Cox's model.
 }
 \examples{
- coxUI(1)
+coxUI(1)
 }

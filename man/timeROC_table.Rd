@@ -23,12 +23,12 @@ extract AUC information from list of timeROChelper object.
 extract AUC information from list of timeROChelper object.
 }
 \examples{
-#library(survival)
-#list.timeROC <- lapply(list("age", c("age", "sex")),
+# library(survival)
+# list.timeROC <- lapply(list("age", c("age", "sex")),
 #                      function(x){
 #                        timeROChelper("status", "time", x, t = 365, data = lung)
 #                       })
-#timeROC_table(list.timeROC)
+# timeROC_table(list.timeROC)
 }
 \seealso{
 \code{\link[stats]{confint}}

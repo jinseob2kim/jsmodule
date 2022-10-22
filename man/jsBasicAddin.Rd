@@ -16,9 +16,9 @@ Rstudio addin of jsBasicGadget
 Rstudio addin of jsBasicGadget
 }
 \examples{
-if(interactive()){
- jsBasicAddin()
- }
+if (interactive()) {
+  jsBasicAddin()
+}
 }
 \seealso{
 \code{\link[rstudioapi]{rstudio-editors}}

@@ -16,9 +16,9 @@ Rstudio addin of jsSurveyGadget
 Rstudio addin of jsSurveyGadget
 }
 \examples{
-if(interactive()){
- jsSurveydAddin()
- }
+if (interactive()) {
+  jsSurveydAddin()
+}
 }
 \seealso{
 \code{\link[rstudioapi]{rstudio-editors}}
