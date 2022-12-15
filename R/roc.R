@@ -574,16 +574,17 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
         res.roc <- lapply(indeps(), function(x) {
           forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
           mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
-          if (length(x) > 1){
-            return(pROC::roc(mm$y, predict(mm, type = "response")))
-          } else{
-            return(pROC::roc(mm$y, mm$x[, 2]))
-          }
+          return(pROC::roc(mm$y, predict(mm, type = "response")))
 
         })
 
         if (nmodel() == 1 & length(indeps()) == 1) {
-          res.cut <- pROC::coords(res.roc[[1]], x = "best", input = "threshold", best.method = "youden")
+          res.roc1 <- lapply(indeps(), function(x) {
+            forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
+            mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
+            return(pROC::roc(mm$y, mm$x[, 2]))
+          })
+          res.cut <- pROC::coords(res.roc1[[1]], x = "best", input = "threshold", best.method = "youden")
         } else {
           res.cut <- NULL
         }
@@ -629,15 +630,16 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
       res.roc <- lapply(indeps(), function(x) {
         forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
         mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x= T)
-        if (length(x) > 1){
-          return(pROC::roc(mm$y, predict(mm, type = "response")))
-        } else{
-          return(pROC::roc(mm$y, mm$x[, 2]))
-        }
+        return(pROC::roc(mm$y, predict(mm, type = "response")))
       })
 
       if (nmodel() == 1 & length(indeps()) == 1) {
-        res.cut <- pROC::coords(res.roc[[1]], x = "best", input = "threshold", best.method = "youden")
+        res.roc1 <- lapply(indeps(), function(x) {
+          forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
+          mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x= T)
+          return(pROC::roc(mm$y, mm$x[, 2]))
+        })
+        res.cut <- pROC::coords(res.roc1[[1]], x = "best", input = "threshold", best.method = "youden")
       } else {
         res.cut <- NULL
       }
@@ -1039,15 +1041,16 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
         res.roc <- lapply(indeps(), function(x) {
           forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
           mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
-          if (length(x) > 1){
-            return(pROC::roc(mm$y, predict(mm, type = "response")))
-          } else{
-            return(pROC::roc(mm$y, mm$x[, 2]))
-          }
+          return(pROC::roc(mm$y, predict(mm, type = "response")))
         })
 
         if (nmodel() == 1 & length(indeps()) == 1) {
-          res.cut <- pROC::coords(res.roc[[1]], x = "best", input = "threshold", best.method = "youden")
+          res.roc1 <- lapply(indeps(), function(x) {
+            forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
+            mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
+            return(pROC::roc(mm$y, mm$x[, 2]))
+          })
+          res.cut <- pROC::coords(res.roc1[[1]], x = "best", input = "threshold", best.method = "youden")
         } else {
           res.cut <- NULL
         }
@@ -1093,15 +1096,16 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
       res.roc <- lapply(indeps(), function(x) {
         forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
         mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x= T)
-        if (length(x) > 1){
-          return(pROC::roc(mm$y, predict(mm, type = "response")))
-        } else{
-          return(pROC::roc(mm$y, mm$x[, 2]))
-        }
+        return(pROC::roc(mm$y, predict(mm, type = "response")))
       })
 
       if (nmodel() == 1 & length(indeps()) == 1) {
-        res.cut <- pROC::coords(res.roc[[1]], x = "best", input = "threshold", best.method = "youden")
+        res.roc1 <- lapply(indeps(), function(x) {
+          forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
+          mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x= T)
+          return(pROC::roc(mm$y, mm$x[, 2]))
+        })
+        res.cut <- pROC::coords(res.roc1[[1]], x = "best", input = "threshold", best.method = "youden")
       } else {
         res.cut <- NULL
       }
