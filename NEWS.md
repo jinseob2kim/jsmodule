@@ -1,7 +1,11 @@
 # jsmodule 1.3.4
 
-## Fix
+## Fix and Update: `rocModule`
+
 * cutoff fix: `rocModule`
+
+* Add **"Show 1-specificity"** option
+
 
 # jsmodule 1.3.3
 

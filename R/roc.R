@@ -62,7 +62,8 @@ rocUI <- function(id) {
     uiOutput(ns("addmodel")),
     checkboxInput(ns("subcheck"), "Sub-group analysis"),
     uiOutput(ns("subvar")),
-    uiOutput(ns("subval"))
+    uiOutput(ns("subval")),
+    checkboxInput(ns("spetype"), "Show 1-specificity", T)
   )
 }
 
@@ -645,8 +646,7 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
     }
 
 
-    p <- pROC::ggroc(res.roc) + see::theme_modern() + geom_abline(slope = 1, intercept = 1, lty = 2) +
-      xlab("Specificity") + ylab("Sensitivity") + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
+    p <- pROC::ggroc(res.roc, legacy.axes = input$spetype) + see::theme_modern() + geom_abline(slope = 1, intercept = as.integer(!input$spetype), lty = 2)  + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
 
     return(list(plot = p, cut = res.cut, tb = res.tb))
   })
@@ -1110,8 +1110,7 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
     }
 
 
-    p <- pROC::ggroc(res.roc) + see::theme_modern() + geom_abline(slope = 1, intercept = 1, lty = 2) +
-      xlab("Specificity") + ylab("Sensitivity") + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
+    p <- pROC::ggroc(res.roc, legacy.axes = input$spetype) + see::theme_modern() + geom_abline(slope = 1, intercept = as.integer(!input$spetype), lty = 2)  + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
 
     return(list(plot = p, cut = res.cut, tb = res.tb))
   })
