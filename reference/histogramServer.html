@@ -75,7 +75,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.3.4</span>
       </span>
     </div>
 
@@ -176,28 +176,28 @@
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shiny</span>)
 <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>ggplot2</span>)
 <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>ggpubr</span>)
-<span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/fluidPage.html'>fluidPage</a></span>(
-  <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarLayout</a></span>(
-    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarPanel</a></span>(
+<span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/fluidPage.html'>fluidPage</a></span>(
+  <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/sidebarLayout.html'>sidebarLayout</a></span>(
+    <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/sidebarLayout.html'>sidebarPanel</a></span>(
       <span class='fu'><a href='histogramUI.html'>histogramUI</a></span>(<span class='st'>"histogram"</span>)
     ),
-    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>mainPanel</a></span>(
-      <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/plotOutput.html'>plotOutput</a></span>(<span class='st'>"histogram"</span>),
+    <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/sidebarLayout.html'>mainPanel</a></span>(
+      <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/plotOutput.html'>plotOutput</a></span>(<span class='st'>"histogram"</span>),
       <span class='fu'><a href='ggplotdownUI.html'>ggplotdownUI</a></span>(<span class='st'>"histogram"</span>)
     )
   )
 )
 
 <span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
-  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='no'>mtcars</span>)
-  <span class='no'>data.label</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jstable/man/mk.lev.html'>mk.lev</a></span>(<span class='no'>mtcars</span>))
+  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/reactive.html'>reactive</a></span>(<span class='no'>mtcars</span>)
+  <span class='no'>data.label</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/reactive.html'>reactive</a></span>(<span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jstable/man/mk.lev.html'>mk.lev</a></span>(<span class='no'>mtcars</span>))
 
   <span class='no'>out_histogram</span> <span class='kw'>&lt;-</span> <span class='fu'>histogramServer</span>(<span class='st'>"histogram"</span>,
     <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>data.label</span>,
     <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
   )
 
-  <span class='no'>output</span>$<span class='no'>histogram</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/renderPlot.html'>renderPlot</a></span>({
+  <span class='no'>output</span>$<span class='no'>histogram</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://shiny.rstudio.com/reference/shiny/latest/renderPlot.html'>renderPlot</a></span>({
     <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='fu'>out_histogram</span>())
   })
 }</div></pre>

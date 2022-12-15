@@ -73,7 +73,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.3.4</span>
       </span>
     </div>
 
@@ -125,6 +125,33 @@
       <small>Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="jsmodule-134" class="section level1">
+<h1 class="page-header">
+<a href="#jsmodule-134" class="anchor"></a>jsmodule 1.3.4<small> Unreleased </small>
+</h1>
+<div id="fix-and-update-rocmodule" class="section level2">
+<h2 class="hasAnchor">
+<a href="#fix-and-update-rocmodule" class="anchor"></a>Fix and Update: <code>rocModule</code>
+</h2>
+<ul>
+<li><p>cutoff fix: <code>rocModule</code></p></li>
+<li><p>Add <strong>“Show 1-specificity”</strong> option</p></li>
+</ul>
+</div>
+</div>
+    <div id="jsmodule-133" class="section level1">
+<h1 class="page-header">
+<a href="#jsmodule-133" class="anchor"></a>jsmodule 1.3.3<small> 2022-10-18 </small>
+</h1>
+<div id="new-module-thanks-for-changwoo-lim" class="section level2">
+<h2 class="hasAnchor">
+<a href="#new-module-thanks-for-changwoo-lim" class="anchor"></a>New module (Thanks for <a href="https://github.com/leevenstar">Changwoo Lim</a>)</h2>
+<ul>
+<li>Histogram(<code>histogramUI</code>,
+<code>histogramServer</code>)</li>
+</ul>
+</div>
+</div>
     <div id="jsmodule-132" class="section level1">
 <h1 class="page-header">
 <a href="#jsmodule-132" class="anchor"></a>jsmodule 1.3.2<small> 2022-09-12 </small>
@@ -133,7 +160,8 @@
 <h2 class="hasAnchor">
 <a href="#update" class="anchor"></a>Update</h2>
 <ul>
-<li>Add cutoff information to <code>timerocModule</code>, <code>rocModule</code> when 1 model, 1 indpendent variable.</li>
+<li>Add cutoff information to <code>timerocModule</code>,
+<code>rocModule</code> when 1 model, 1 indpendent variable.</li>
 </ul>
 </div>
 <div id="fix" class="section level2">
@@ -153,7 +181,8 @@
 <h2 class="hasAnchor">
 <a href="#fix-1" class="anchor"></a>Fix</h2>
 <ul>
-<li>Fix cutoff label of Kaplan-meier plot when continuous independent variable</li>
+<li>Fix cutoff label of Kaplan-meier plot when continuous independent
+variable</li>
 </ul>
 </div>
 </div>
@@ -165,7 +194,9 @@
 <h2 class="hasAnchor">
 <a href="#new-module-thanks-for-hyunki-lee" class="anchor"></a>New module (Thanks for <a href="https://github.com/leevenstar">Hyunki Lee</a>)</h2>
 <ul>
-<li>Boxplot(<code>boxUI</code>, <code>boxServer</code>), Lineplot(<code>LineUI</code>, <code>LineServer</code>), Barplot(<code>BarUI</code>, <code>BarServer</code>)</li>
+<li>Boxplot(<code>boxUI</code>, <code>boxServer</code>),
+Lineplot(<code>LineUI</code>, <code>LineServer</code>),
+Barplot(<code>BarUI</code>, <code>BarServer</code>)</li>
 </ul>
 </div>
 </div>
@@ -177,7 +208,8 @@
 <h2 class="hasAnchor">
 <a href="#update-1" class="anchor"></a>Update</h2>
 <ul>
-<li>Add <code>coxph</code> ties option to <code>coxModule</code>: <strong>ties.coxph</strong>
+<li>Add <code>coxph</code> ties option to <code>coxModule</code>:
+<strong>ties.coxph</strong>
 </li>
 </ul>
 </div>
@@ -186,7 +218,8 @@
 <a href="#bugfix" class="anchor"></a>Bugfix</h2>
 <ul>
 <li>
-<code>kaplanModule</code> runs even if <strong>timeby = 1</strong>
+<code>kaplanModule</code> runs even if <strong>timeby =
+1</strong>
 </li>
 </ul>
 </div>
@@ -199,7 +232,8 @@
 <h2 class="hasAnchor">
 <a href="#update-2" class="anchor"></a>Update</h2>
 <ul>
-<li>Faster <code>timerocModule</code>: Change AUC/AUC difference 95%CI calculation method to <code><a href="https://rdrr.io/pkg/survival/man/concordance.html">survival::concordance</a></code>
+<li>Faster <code>timerocModule</code>: Change AUC/AUC difference 95%CI
+calculation method to <code><a href="https://rdrr.io/pkg/survival/man/concordance.html">survival::concordance</a></code>
 </li>
 </ul>
 </div>
@@ -212,7 +246,8 @@
 <h2 class="hasAnchor">
 <a href="#update-3" class="anchor"></a>Update</h2>
 <ul>
-<li>Change <strong>emf</strong> to <strong>pptx</strong>(editable) in figure download.</li>
+<li>Change <strong>emf</strong> to <strong>pptx</strong>(editable) in
+figure download.</li>
 </ul>
 </div>
 </div>
@@ -236,10 +271,15 @@
 <h2 class="hasAnchor">
 <a href="#fix--update" class="anchor"></a>Fix &amp; update</h2>
 <ul>
-<li><p>New module <code>scatterplotUI</code> &amp; <code>scatterplotServer</code>: scatterplot using <strong><a href="https://rpkgs.datanovia.com/ggpubr/">ggpubr</a></strong>: apply to <strong>Basic statistics</strong></p></li>
-<li><p><code>timerocModule</code>, <code>rocModule</code>: Compare ROC curve even if there are different sample size(na omit)</p></li>
-<li><p>Change <strong>timeby unit</strong> from 1 to 0.5 (when &lt;365)</p></li>
-<li><p>Add <strong>surv.scale</strong> option to kaplan-meier plot</p></li>
+<li><p>New module <code>scatterplotUI</code> &amp;
+<code>scatterplotServer</code>: scatterplot using <strong><a href="https://rpkgs.datanovia.com/ggpubr/">ggpubr</a></strong>: apply to
+<strong>Basic statistics</strong></p></li>
+<li><p><code>timerocModule</code>, <code>rocModule</code>: Compare ROC
+curve even if there are different sample size(na omit)</p></li>
+<li><p>Change <strong>timeby unit</strong> from 1 to 0.5 (when
+&lt;365)</p></li>
+<li><p>Add <strong>surv.scale</strong> option to kaplan-meier
+plot</p></li>
 <li><p>Fix PS matching error with missing values</p></li>
 </ul>
 </div>
@@ -252,7 +292,8 @@
 <h2 class="hasAnchor">
 <a href="#fix-2" class="anchor"></a>Fix</h2>
 <ul>
-<li><p>Fix according to <strong><a href="https://github.com/kosukeimai/MatchIt">MatchIt</a> 4.0</strong> update.</p></li>
+<li><p>Fix according to <strong><a href="https://github.com/kosukeimai/MatchIt">MatchIt</a> 4.0</strong>
+update.</p></li>
 <li><p>Erratum: Cumulative hazard -&gt; Cumulative incidence</p></li>
 </ul>
 </div>
@@ -266,7 +307,9 @@
 <a href="#update-4" class="anchor"></a>Update</h2>
 <ul>
 <li>
-<strong>Show survival probabilities(%)</strong> at kaplan-meier plot. This requires <strong><a href="https://github.com/jinseob2kim/jskm">jskm</a> 0.4.2</strong> or higher.</li>
+<strong>Show survival probabilities(%)</strong> at kaplan-meier
+plot. This requires <strong><a href="https://github.com/jinseob2kim/jskm">jskm</a> 0.4.2</strong> or
+higher.</li>
 </ul>
 </div>
 </div>
@@ -290,7 +333,8 @@
 <h2 class="hasAnchor">
 <a href="#update-6" class="anchor"></a>Update</h2>
 <ul>
-<li>Add <strong>No</strong> initial covariate option when ps calculation</li>
+<li>Add <strong>No</strong> initial covariate option when ps
+calculation</li>
 </ul>
 </div>
 </div>
@@ -302,8 +346,10 @@
 <h2 class="hasAnchor">
 <a href="#update-7" class="anchor"></a>Update</h2>
 <ul>
-<li><p>Add landmark analysis to kaplan-meier analysis. Pease update <strong>jskm to 0.4.0</strong> version.</p></li>
-<li><p>Add option <strong>hide 95%CI of AUC, NRIIDI</strong> to <code>timerocModule</code>. It reduces computation time.</p></li>
+<li><p>Add landmark analysis to kaplan-meier analysis. Pease update
+<strong>jskm to 0.4.0</strong> version.</p></li>
+<li><p>Add option <strong>hide 95%CI of AUC, NRIIDI</strong> to
+<code>timerocModule</code>. It reduces computation time.</p></li>
 </ul>
 </div>
 </div>
@@ -312,8 +358,11 @@
 <a href="#jsmodule-110" class="anchor"></a>jsmodule 1.1.0<small> 2020-07-09 </small>
 </h1>
 <ul>
-<li><p>Apply <strong>AIC based stepwise selection</strong> to linear/logistic regression, cox model.</p></li>
-<li><p>Deprecated fucntion: <code>regressModule</code> &amp; <code>logisticModule</code>, please use <code>regressModule2</code> &amp; <code>logisticModule2</code></p></li>
+<li><p>Apply <strong>AIC based stepwise selection</strong> to
+linear/logistic regression, cox model.</p></li>
+<li><p>Deprecated fucntion: <code>regressModule</code> &amp;
+<code>logisticModule</code>, please use <code>regressModule2</code>
+&amp; <code>logisticModule2</code></p></li>
 </ul>
 </div>
     <div id="jsmodule-108" class="section level1">
@@ -321,7 +370,9 @@
 <a href="#jsmodule-108" class="anchor"></a>jsmodule 1.0.8<small> 2020-06-04 </small>
 </h1>
 <ul>
-<li>Add option to <code>tb1module1</code> ,<code>tb1module2</code>: get simulated p value in Fisher exact test when larger than 2 by 2 tables.</li>
+<li>Add option to <code>tb1module1</code> ,<code>tb1module2</code>: get
+simulated p value in Fisher exact test when larger than 2 by 2
+tables.</li>
 </ul>
 </div>
     <div id="jsmodule-107" class="section level1">
@@ -344,14 +395,16 @@
 <h2 class="hasAnchor">
 <a href="#bug-fix-1" class="anchor"></a>Bug fix</h2>
 <ul>
-<li>PS matching: <strong>Duplicated independent variables UI</strong> in ROC/timeROC analysis.</li>
+<li>PS matching: <strong>Duplicated independent variables UI</strong> in
+ROC/timeROC analysis.</li>
 </ul>
 </div>
 <div id="update-8" class="section level2">
 <h2 class="hasAnchor">
 <a href="#update-8" class="anchor"></a>Update</h2>
 <ul>
-<li>Change <strong>minimum timeby</strong> in kaplan-meier plot: 1 to 0</li>
+<li>Change <strong>minimum timeby</strong> in kaplan-meier plot: 1 to
+0</li>
 </ul>
 </div>
 </div>
@@ -363,7 +416,8 @@
 <h2 class="hasAnchor">
 <a href="#update-9" class="anchor"></a>Update</h2>
 <ul>
-<li>PS matching: Change font size &amp; color of the message with missing value information.</li>
+<li>PS matching: Change font size &amp; color of the message with
+missing value information.</li>
 </ul>
 </div>
 </div>
@@ -389,7 +443,8 @@
 <a href="#bug-fixes-1" class="anchor"></a>Bug fixes</h2>
 <ul>
 <li><p>Incorrect p-value when applying cluster options.</p></li>
-<li><p>PS matching: allow continuous variables as Independent variables</p></li>
+<li><p>PS matching: allow continuous variables as Independent
+variables</p></li>
 </ul>
 </div>
 <div id="update-10" class="section level2">
@@ -416,8 +471,10 @@
 <h2 class="hasAnchor">
 <a href="#update-11" class="anchor"></a>Update</h2>
 <ul>
-<li><p><strong>Change reference</strong> of categorical variables</p></li>
-<li><p>Add <strong>line type</strong> option to <strong>kaplan-meier</strong> plot</p></li>
+<li><p><strong>Change reference</strong> of categorical
+variables</p></li>
+<li><p>Add <strong>line type</strong> option to
+<strong>kaplan-meier</strong> plot</p></li>
 </ul>
 </div>
 <div id="bug-fixes-2" class="section level2">
@@ -438,13 +495,18 @@
 <a href="#update-12" class="anchor"></a>Update</h2>
 <ul>
 <li><p>Change UI: ROC/time-dependent ROC analysis.</p></li>
-<li><p>Choose cut-off value in <strong>kaplan-meier analysis with continuous independent variable</strong>.</p></li>
+<li><p>Choose cut-off value in <strong>kaplan-meier analysis with
+continuous independent variable</strong>.</p></li>
 <li><p>Add some icons.</p></li>
-<li><p>Choose <strong>multiple conditions when subsetting data</strong>.</p></li>
-<li><p>Add <strong>caliper</strong> option when propensity score matching.</p></li>
-<li><p><strong>Make binary variables</strong> from contiuous variables.</p></li>
+<li><p>Choose <strong>multiple conditions when subsetting
+data</strong>.</p></li>
+<li><p>Add <strong>caliper</strong> option when propensity score
+matching.</p></li>
+<li><p><strong>Make binary variables</strong> from contiuous
+variables.</p></li>
 <li><p>Non-normal variables can be summarized with [min,max].</p></li>
-<li><p>Add <strong>line color</strong>, <strong>x-axis label</strong> option to <strong>kaplan-meier</strong> plot</p></li>
+<li><p>Add <strong>line color</strong>, <strong>x-axis label</strong>
+option to <strong>kaplan-meier</strong> plot</p></li>
 </ul>
 </div>
 <div id="bug-fixes-3" class="section level2">
@@ -463,10 +525,14 @@
 <h2 class="hasAnchor">
 <a href="#new-addins" class="anchor"></a>New addins</h2>
 <ul>
-<li><p>Basic statistics with external file: <code>jsBasicExtAddin</code></p></li>
-<li><p>Propensity score analysis with external file: <code>jsPropensityExtAddin</code></p></li>
-<li><p>Repeated measure analysis with external file: <code>jsRepeatedExtAddin</code></p></li>
-<li><p>Survey data analysis with external file: <code>jsSurveyExtAddin</code></p></li>
+<li><p>Basic statistics with external file:
+<code>jsBasicExtAddin</code></p></li>
+<li><p>Propensity score analysis with external file:
+<code>jsPropensityExtAddin</code></p></li>
+<li><p>Repeated measure analysis with external file:
+<code>jsRepeatedExtAddin</code></p></li>
+<li><p>Survey data analysis with external file:
+<code>jsSurveyExtAddin</code></p></li>
 </ul>
 </div>
 <div id="bug-fixes-4" class="section level2">
@@ -493,7 +559,8 @@
 <h2 class="hasAnchor">
 <a href="#bug-fixes-repeated-measure-analysis" class="anchor"></a>Bug fixes: repeated measure analysis</h2>
 <ul>
-<li><p>Error if repeated measure variable is <strong>id</strong>.</p></li>
+<li><p>Error if repeated measure variable is
+<strong>id</strong>.</p></li>
 <li><p>Error if there are missing values.</p></li>
 </ul>
 </div>
@@ -518,7 +585,8 @@
 <a href="#jsmodule-092" class="anchor"></a>jsmodule 0.9.2<small> 2019-06-18 </small>
 </h1>
 <ul>
-<li>Bug fixes: Apply nested survey design to <code>jsSurveyGadget</code> and <code>FileSurveyInput</code>
+<li>Bug fixes: Apply nested survey design to <code>jsSurveyGadget</code>
+and <code>FileSurveyInput</code>
 </li>
 </ul>
 </div>
@@ -530,15 +598,19 @@
 <h2 class="hasAnchor">
 <a href="#bug-fixes-5" class="anchor"></a>Bug fixes</h2>
 <ul>
-<li><p>Encoding issues when reading <code>sav/sas7bdat/dta</code> formats.</p></li>
-<li><p>Default independent variables when running <strong>regression/logistic/cox</strong> analysis</p></li>
+<li><p>Encoding issues when reading <code>sav/sas7bdat/dta</code>
+formats.</p></li>
+<li><p>Default independent variables when running
+<strong>regression/logistic/cox</strong> analysis</p></li>
 </ul>
 </div>
 <div id="update-13" class="section level2">
 <h2 class="hasAnchor">
 <a href="#update-13" class="anchor"></a>Update</h2>
 <ul>
-<li>Add <code>limit.unires</code> option to <strong>regression/logistic/cox</strong> analysis to prevent computation burden.</li>
+<li>Add <code>limit.unires</code> option to
+<strong>regression/logistic/cox</strong> analysis to prevent computation
+burden.</li>
 </ul>
 </div>
 </div>
@@ -550,15 +622,18 @@
 <h2 class="hasAnchor">
 <a href="#new-module" class="anchor"></a>New module</h2>
 <ul>
-<li><p>Shiny module forROC analysis : <code>rocUI</code> <code>rocModule</code>.</p></li>
-<li><p>Add this module to <code>jsBasicGadget</code> and <code>jsRepeatedGadjet</code>.</p></li>
+<li><p>Shiny module forROC analysis : <code>rocUI</code>
+<code>rocModule</code>.</p></li>
+<li><p>Add this module to <code>jsBasicGadget</code> and
+<code>jsRepeatedGadjet</code>.</p></li>
 </ul>
 </div>
 <div id="update-14" class="section level2">
 <h2 class="hasAnchor">
 <a href="#update-14" class="anchor"></a>Update</h2>
 <ul>
-<li>Apply time-dependent ROC to survey data analysis(<code>jsSurveyGadget</code>)</li>
+<li>Apply time-dependent ROC to survey data
+analysis(<code>jsSurveyGadget</code>)</li>
 </ul>
 </div>
 </div>
@@ -570,8 +645,10 @@
 <h2 class="hasAnchor">
 <a href="#update-15" class="anchor"></a>Update</h2>
 <ul>
-<li><p>Change <strong>candidate time variables</strong> in survival analysis : allow only &gt; 0</p></li>
-<li><p>Add option to <strong>change legend, p-value position in kaplan-meier plot</strong></p></li>
+<li><p>Change <strong>candidate time variables</strong> in survival
+analysis : allow only &gt; 0</p></li>
+<li><p>Add option to <strong>change legend, p-value position in
+kaplan-meier plot</strong></p></li>
 </ul>
 </div>
 <div id="bug-fixes-6" class="section level2">
@@ -588,7 +665,8 @@
 </h1>
 <ul>
 <li>
-<strong>Keep original variable’s name</strong> in tables/figures</li>
+<strong>Keep original variable’s name</strong> in
+tables/figures</li>
 </ul>
 </div>
     <div id="jsmodule-084" class="section level1">
@@ -612,7 +690,8 @@
 <a href="#jsmodule-0821" class="anchor"></a>jsmodule 0.8.2.1<small> Unreleased </small>
 </h1>
 <ul>
-<li>Bug fix: <strong>emf</strong> format can recognize figure’s line.</li>
+<li>Bug fix: <strong>emf</strong> format can recognize figure’s
+line.</li>
 </ul>
 </div>
     <div id="jsmodule-082" class="section level1">
@@ -620,7 +699,8 @@
 <a href="#jsmodule-082" class="anchor"></a>jsmodule 0.8.2<small> 2019-05-11 </small>
 </h1>
 <ul>
-<li>Add <strong>emf</strong> format to the plot download modules. You can customize the plot in <strong>MS powerpoint</strong>.</li>
+<li>Add <strong>emf</strong> format to the plot download modules. You
+can customize the plot in <strong>MS powerpoint</strong>.</li>
 </ul>
 </div>
     <div id="jsmodule-081" class="section level1">
@@ -629,7 +709,8 @@
 </h1>
 <ul>
 <li>
-<strong>Change default time</strong> when time-dependent ROC analysis.</li>
+<strong>Change default time</strong> when time-dependent ROC
+analysis.</li>
 </ul>
 </div>
     <div id="jsmodule-080" class="section level1">
@@ -640,8 +721,10 @@
 <h2 class="hasAnchor">
 <a href="#new-module-1" class="anchor"></a>New module</h2>
 <ul>
-<li><p>Shiny module for time-dependent ROC analysis : <code>timerocUI</code> <code>timerocModule</code>.</p></li>
-<li><p>Add this module to <code>jsBasicGadget</code> and <code>jsRepeatedGadjet</code>.</p></li>
+<li><p>Shiny module for time-dependent ROC analysis :
+<code>timerocUI</code> <code>timerocModule</code>.</p></li>
+<li><p>Add this module to <code>jsBasicGadget</code> and
+<code>jsRepeatedGadjet</code>.</p></li>
 </ul>
 </div>
 </div>
@@ -650,7 +733,8 @@
 <a href="#jsmodule-0710" class="anchor"></a>jsmodule 0.7.10<small> 2019-03-08 </small>
 </h1>
 <ul>
-<li>Add Kaplan-meier plot options: <strong>timeby, x/y-axis ranges</strong>.</li>
+<li>Add Kaplan-meier plot options: <strong>timeby, x/y-axis
+ranges</strong>.</li>
 </ul>
 </div>
     <div id="jsmodule-079" class="section level1">
@@ -661,16 +745,21 @@
 <h2 class="hasAnchor">
 <a href="#update-16" class="anchor"></a>Update</h2>
 <ul>
-<li><p>Add <strong>progress bar</strong> to download handlers of scatterplot and kaplan-meier plot.</p></li>
-<li><p>Kaplan-meier plot in <code>Basic statistics</code> can use <strong>continuous variables as group variables</strong>. The module suggest best 5 cuts based on the p-values of logrank test.</p></li>
-<li><p>Add <strong>number at risk</strong> table option to weighted kalan-meier plot.</p></li>
+<li><p>Add <strong>progress bar</strong> to download handlers of
+scatterplot and kaplan-meier plot.</p></li>
+<li><p>Kaplan-meier plot in <code>Basic statistics</code> can use
+<strong>continuous variables as group variables</strong>. The module
+suggest best 5 cuts based on the p-values of logrank test.</p></li>
+<li><p>Add <strong>number at risk</strong> table option to weighted
+kalan-meier plot.</p></li>
 </ul>
 </div>
 <div id="bug-fixes-7" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bug-fixes-7" class="anchor"></a>Bug fixes</h2>
 <ul>
-<li>Add namespace <strong>survival::cluster</strong> for marginal cox model.</li>
+<li>Add namespace <strong>survival::cluster</strong> for marginal cox
+model.</li>
 </ul>
 </div>
 </div>
@@ -682,8 +771,11 @@
 <h2 class="hasAnchor">
 <a href="#update-17" class="anchor"></a>Update</h2>
 <ul>
-<li><p>Add sub-group analysis based on the range of <strong>continuous variable</strong>.</p></li>
-<li><p>Add <strong>multiple factor choice</strong> option when doing sub-group analysis based on <strong>categorical variable</strong>.</p></li>
+<li><p>Add sub-group analysis based on the range of <strong>continuous
+variable</strong>.</p></li>
+<li><p>Add <strong>multiple factor choice</strong> option when doing
+sub-group analysis based on <strong>categorical
+variable</strong>.</p></li>
 </ul>
 </div>
 </div>
@@ -700,7 +792,8 @@
 <a href="#jsmodule-076" class="anchor"></a>jsmodule 0.7.6<small> Unreleased </small>
 </h1>
 <ul>
-<li>You can get <strong>Subset data</strong> based on the range of continuous variables.</li>
+<li>You can get <strong>Subset data</strong> based on the range of
+continuous variables.</li>
 </ul>
 </div>
     <div id="jsmodule-075" class="section level1">
@@ -711,15 +804,18 @@
 <h2 class="hasAnchor">
 <a href="#update-18" class="anchor"></a>Update</h2>
 <ul>
-<li>Add <strong>Subset data</strong> feature to all Addins and input modules. You can select subset data before analysis.</li>
+<li>Add <strong>Subset data</strong> feature to all Addins and input
+modules. You can select subset data before analysis.</li>
 </ul>
 </div>
 <div id="bug-fixes-8" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bug-fixes-8" class="anchor"></a>Bug fixes</h2>
 <ul>
-<li><p>Fix <code>warn</code> variable error in <code>regressModule</code>, <code>logisticModule</code>.</p></li>
-<li><p>Fix list of except variables in <code>ggpairsModule</code>.</p></li>
+<li><p>Fix <code>warn</code> variable error in
+<code>regressModule</code>, <code>logisticModule</code>.</p></li>
+<li><p>Fix list of except variables in
+<code>ggpairsModule</code>.</p></li>
 </ul>
 </div>
 </div>
@@ -739,7 +835,8 @@
 <a href="#update-19" class="anchor"></a>Update</h2>
 <ul>
 <li><p>Update <strong>travis-ci</strong>.</p></li>
-<li><p>Add <strong>appveyor</strong> CI to test <strong>window</strong> environment.</p></li>
+<li><p>Add <strong>appveyor</strong> CI to test <strong>window</strong>
+environment.</p></li>
 </ul>
 </div>
 </div>
@@ -751,7 +848,8 @@
 <h2 class="hasAnchor">
 <a href="#update-20" class="anchor"></a>Update</h2>
 <ul>
-<li>Warning if there are stongly correlated independent variables in <code>regressModule</code>, <code>jsBasicGadget</code>.</li>
+<li>Warning if there are stongly correlated independent variables in
+<code>regressModule</code>, <code>jsBasicGadget</code>.</li>
 </ul>
 </div>
 </div>
@@ -763,7 +861,8 @@
 <h2 class="hasAnchor">
 <a href="#update-21" class="anchor"></a>Update</h2>
 <ul>
-<li>Show <strong>unweighted &amp; weighted table 1</strong> at same tab in <code>jsSurveyGadget</code>
+<li>Show <strong>unweighted &amp; weighted table 1</strong> at same tab
+in <code>jsSurveyGadget</code>
 </li>
 </ul>
 </div>
@@ -784,7 +883,8 @@
 <h2 class="hasAnchor">
 <a href="#update-22" class="anchor"></a>Update</h2>
 <ul>
-<li>Add <strong>unweighted table 1</strong> to <code>jsSurveyGadget</code>
+<li>Add <strong>unweighted table 1</strong> to
+<code>jsSurveyGadget</code>
 </li>
 </ul>
 </div>
@@ -792,8 +892,12 @@
 <h2 class="hasAnchor">
 <a href="#bug-fixes-11" class="anchor"></a>Bug fixes</h2>
 <ul>
-<li><p>Apply list tye independent variables to <code>regressModule</code>, <code>logisticModule</code>, <code>GEEModuleLinear</code> and <code>GEEModuleLogistic</code></p></li>
-<li><p>Change <strong>sub-group analysis’s reactive methods</strong>: <code>regressModule</code>, <code>logisticModule</code>, <code>GEEModuleLinear</code> and <code>GEEModuleLogistic</code></p></li>
+<li><p>Apply list tye independent variables to
+<code>regressModule</code>, <code>logisticModule</code>,
+<code>GEEModuleLinear</code> and <code>GEEModuleLogistic</code></p></li>
+<li><p>Change <strong>sub-group analysis’s reactive methods</strong>:
+<code>regressModule</code>, <code>logisticModule</code>,
+<code>GEEModuleLinear</code> and <code>GEEModuleLogistic</code></p></li>
 </ul>
 </div>
 </div>
@@ -805,17 +909,25 @@
 <h2 class="hasAnchor">
 <a href="#update-23" class="anchor"></a>Update</h2>
 <ul>
-<li><p>Add <strong>marginal cox model</strong> option to <code>coxModule</code>, <code>kaplanModule</code> and <code>jsRepeatedGadget</code></p></li>
-<li><p>Add <strong>Overall kaplan-meier plot</strong> to <code>kaplanModule</code></p></li>
-<li><p>Set default <strong>cluster, strata and weights</strong> to <strong>None</strong> in <code>jsSurveyGadget</code>, <code>FileSurveyInput</code></p></li>
+<li><p>Add <strong>marginal cox model</strong> option to
+<code>coxModule</code>, <code>kaplanModule</code> and
+<code>jsRepeatedGadget</code></p></li>
+<li><p>Add <strong>Overall kaplan-meier plot</strong> to
+<code>kaplanModule</code></p></li>
+<li><p>Set default <strong>cluster, strata and weights</strong> to
+<strong>None</strong> in <code>jsSurveyGadget</code>,
+<code>FileSurveyInput</code></p></li>
 </ul>
 </div>
 <div id="bug-fixes-12" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bug-fixes-12" class="anchor"></a>Bug fixes</h2>
 <ul>
-<li><p>Some error comments in <code>coxModule</code> and <code>kaplanModule</code></p></li>
-<li><p>Change default candidate dependent variables to <strong>categorical variables with 0, 1</strong> in <code>GEEModuleLogistic</code>, <code>jsRepeatedGadget</code></p></li>
+<li><p>Some error comments in <code>coxModule</code> and
+<code>kaplanModule</code></p></li>
+<li><p>Change default candidate dependent variables to
+<strong>categorical variables with 0, 1</strong> in
+<code>GEEModuleLogistic</code>, <code>jsRepeatedGadget</code></p></li>
 </ul>
 </div>
 </div>
@@ -827,15 +939,19 @@
 <h2 class="hasAnchor">
 <a href="#new-module-2" class="anchor"></a>New module</h2>
 <ul>
-<li><p>Module for <strong>Survival analysis</strong>: <code>coxUI</code>, <code>coxModule</code>, <code>kaplanUI</code> and <code>kaplanModule</code></p></li>
-<li><p>Module for <strong>ggplot download UI</strong>: <code>ggplotdownUI</code></p></li>
+<li><p>Module for <strong>Survival analysis</strong>:
+<code>coxUI</code>, <code>coxModule</code>, <code>kaplanUI</code> and
+<code>kaplanModule</code></p></li>
+<li><p>Module for <strong>ggplot download UI</strong>:
+<code>ggplotdownUI</code></p></li>
 </ul>
 </div>
 <div id="update-24" class="section level2">
 <h2 class="hasAnchor">
 <a href="#update-24" class="anchor"></a>Update</h2>
 <ul>
-<li>Add survival analysis to <code>jsBasicGadget</code>, <code>jsSurveyGadget</code>
+<li>Add survival analysis to <code>jsBasicGadget</code>,
+<code>jsSurveyGadget</code>
 </li>
 </ul>
 </div>
@@ -852,8 +968,10 @@
 <a href="#jsmodule-062" class="anchor"></a>jsmodule 0.6.2<small> Unreleased </small>
 </h1>
 <ul>
-<li><p>Bug fixes : Label information in <code>regressModule</code>, <code>logisticModule</code></p></li>
-<li><p>Update: <strong>default.unires</strong> option to <code>regressModule</code>, <code>logisticModule</code></p></li>
+<li><p>Bug fixes : Label information in <code>regressModule</code>,
+<code>logisticModule</code></p></li>
+<li><p>Update: <strong>default.unires</strong> option to
+<code>regressModule</code>, <code>logisticModule</code></p></li>
 </ul>
 </div>
     <div id="jsmodule-061" class="section level1">
@@ -861,7 +979,9 @@
 <a href="#jsmodule-061" class="anchor"></a>jsmodule 0.6.1<small> Unreleased </small>
 </h1>
 <ul>
-<li>Update : Apply <strong>complex survey design</strong> to <code>FileSurvey</code>, <code>regressModule</code>, <code>logisticModule</code> and <code>jsSurveyGadget</code>
+<li>Update : Apply <strong>complex survey design</strong> to
+<code>FileSurvey</code>, <code>regressModule</code>,
+<code>logisticModule</code> and <code>jsSurveyGadget</code>
 </li>
 </ul>
 </div>
@@ -873,7 +993,8 @@
 <h2 class="hasAnchor">
 <a href="#new-gadget" class="anchor"></a>New Gadget</h2>
 <ul>
-<li>Shiny Gadget for survey data analysis: <code>jsSurveyGadget</code>
+<li>Shiny Gadget for survey data analysis:
+<code>jsSurveyGadget</code>
 </li>
 </ul>
 </div>
@@ -881,7 +1002,8 @@
 <h2 class="hasAnchor">
 <a href="#new-module-3" class="anchor"></a>New module</h2>
 <ul>
-<li>Module for <strong>survey data analysis</strong>: <code>FileSurvey</code>
+<li>Module for <strong>survey data analysis</strong>:
+<code>FileSurvey</code>
 </li>
 </ul>
 </div>
@@ -889,7 +1011,8 @@
 <h2 class="hasAnchor">
 <a href="#update-25" class="anchor"></a>Update</h2>
 <ul>
-<li>Survey analysis option to <code>regressModule</code>, <code>logisticModule</code> and <code>tb1</code>
+<li>Survey analysis option to <code>regressModule</code>,
+<code>logisticModule</code> and <code>tb1</code>
 </li>
 </ul>
 </div>
@@ -899,7 +1022,10 @@
 <a href="#jsmodule-057" class="anchor"></a>jsmodule 0.5.7<small> Unreleased </small>
 </h1>
 <ul>
-<li>Bug fixes: <strong>sub-group option</strong> in <code>regressModule</code>, <code>logisticModule</code>, <code>jsPropensityGadget</code>, <code>GEEModuleLinear</code> and <code>GEEModuleLogistic</code>
+<li>Bug fixes: <strong>sub-group option</strong> in
+<code>regressModule</code>, <code>logisticModule</code>,
+<code>jsPropensityGadget</code>, <code>GEEModuleLinear</code> and
+<code>GEEModuleLogistic</code>
 </li>
 </ul>
 </div>
@@ -919,7 +1045,9 @@
 <h2 class="hasAnchor">
 <a href="#new-module-4" class="anchor"></a>New module</h2>
 <ul>
-<li>Modules for repeated measure analysis: <code>FileRepeated</code>, <code>GEEModuleUI</code>, <code>GEEModuleLinear</code> and <code>GEEModuleLogistic</code>
+<li>Modules for repeated measure analysis: <code>FileRepeated</code>,
+<code>GEEModuleUI</code>, <code>GEEModuleLinear</code> and
+<code>GEEModuleLogistic</code>
 </li>
 </ul>
 </div>
@@ -927,7 +1055,8 @@
 <h2 class="hasAnchor">
 <a href="#new-gadget-1" class="anchor"></a>New Gadget</h2>
 <ul>
-<li>Shiny Gadget for repeated measure analysis: <code>jsRepeatedGadget</code>
+<li>Shiny Gadget for repeated measure analysis:
+<code>jsRepeatedGadget</code>
 </li>
 </ul>
 </div>
@@ -940,7 +1069,10 @@
 <h2 class="hasAnchor">
 <a href="#update-26" class="anchor"></a>Update</h2>
 <ul>
-<li>New option: <code>nfactor.limit</code> in <code>regressModule</code>, <code>logisticModule</code>, <code>jsBasicGadget</code>, <code>csvFileInput</code> and <code>FilePsInput</code>
+<li>New option: <code>nfactor.limit</code> in
+<code>regressModule</code>, <code>logisticModule</code>,
+<code>jsBasicGadget</code>, <code>csvFileInput</code> and
+<code>FilePsInput</code>
 </li>
 </ul>
 </div>
@@ -948,8 +1080,11 @@
 <h2 class="hasAnchor">
 <a href="#bug-fixes-14" class="anchor"></a>Bug fixes</h2>
 <ul>
-<li><p><code>regressModule</code>, <code>logisticModule</code>, <code>jsPropensityGadget</code> can deal missing data issue.</p></li>
-<li><p><code>csvFileInput</code>, <code>FilePSInput</code> change variable class <strong>integer64</strong> to <strong>double</strong>.</p></li>
+<li><p><code>regressModule</code>, <code>logisticModule</code>,
+<code>jsPropensityGadget</code> can deal missing data issue.</p></li>
+<li><p><code>csvFileInput</code>, <code>FilePSInput</code> change
+variable class <strong>integer64</strong> to
+<strong>double</strong>.</p></li>
 </ul>
 </div>
 </div>
@@ -966,7 +1101,9 @@
 <a href="#jsmodule-051" class="anchor"></a>jsmodule 0.5.1<small> Unreleased </small>
 </h1>
 <ul>
-<li>Modify <code>tb1module</code>, <code>tb1module2</code>, <code>tb1simple</code> ,<code>tb1simple2</code>: compatible with updated <code>jstable</code>
+<li>Modify <code>tb1module</code>, <code>tb1module2</code>,
+<code>tb1simple</code> ,<code>tb1simple2</code>: compatible with updated
+<code>jstable</code>
 </li>
 </ul>
 </div>
@@ -978,15 +1115,20 @@
 <h2 class="hasAnchor">
 <a href="#update-27" class="anchor"></a>Update</h2>
 <ul>
-<li><p>Add sub-group analysis to <code>regressModule</code>, <code>logisticModule</code> and <code>jsPropensityGadget</code>.</p></li>
-<li><p>Apply the updated <code>cox2.display</code> function in <strong>jstable</strong> package to <code>jsPropensityGadget</code>.</p></li>
+<li><p>Add sub-group analysis to <code>regressModule</code>,
+<code>logisticModule</code> and
+<code>jsPropensityGadget</code>.</p></li>
+<li><p>Apply the updated <code>cox2.display</code> function in
+<strong>jstable</strong> package to
+<code>jsPropensityGadget</code>.</p></li>
 </ul>
 </div>
 <div id="typo" class="section level2">
 <h2 class="hasAnchor">
 <a href="#typo" class="anchor"></a>Typo</h2>
 <ul>
-<li>Strata variable in <code>ggpairsModule</code>, <code>ggpairsModule2</code>.</li>
+<li>Strata variable in <code>ggpairsModule</code>,
+<code>ggpairsModule2</code>.</li>
 </ul>
 </div>
 </div>
@@ -998,7 +1140,8 @@
 <h2 class="hasAnchor">
 <a href="#bug-fixes-15" class="anchor"></a>Bug fixes</h2>
 <ul>
-<li><p>IPTW table in <code>tb1simple</code> and <code>tb1simple2</code> modules.</p></li>
+<li><p>IPTW table in <code>tb1simple</code> and <code>tb1simple2</code>
+modules.</p></li>
 <li><p>Kaplan-meier UI in <code>jsPropensityGadget</code></p></li>
 </ul>
 </div>
@@ -1009,7 +1152,8 @@
 </h1>
 <ul>
 <li>
-<code>tb1module</code> and <code>tb1module2</code> can control the maximum factor levels to include.</li>
+<code>tb1module</code> and <code>tb1module2</code> can control the
+maximum factor levels to include.</li>
 </ul>
 </div>
     <div id="jsmodule-046" class="section level1">
@@ -1017,7 +1161,8 @@
 <a href="#jsmodule-046" class="anchor"></a>jsmodule 0.4.6<small> Unreleased </small>
 </h1>
 <ul>
-<li>Bug fixes : Modules for regression exclude <code>NA</code> when selecting binary variables.</li>
+<li>Bug fixes : Modules for regression exclude <code>NA</code> when
+selecting binary variables.</li>
 </ul>
 </div>
     <div id="jsmodule-045" class="section level1">
@@ -1033,7 +1178,8 @@
 <a href="#jsmodule-044" class="anchor"></a>jsmodule 0.4.4<small> Unreleased </small>
 </h1>
 <ul>
-<li>Change regression table function to <code>glmshow.display</code> in <strong>jstable</strong> package.</li>
+<li>Change regression table function to <code>glmshow.display</code> in
+<strong>jstable</strong> package.</li>
 </ul>
 </div>
     <div id="jsmodule-043" class="section level1">
@@ -1052,8 +1198,11 @@
 <h2 class="hasAnchor">
 <a href="#update-28" class="anchor"></a>Update</h2>
 <ul>
-<li><p>Excluded non-normal variable selection feature from <code>tb1simple</code> module.</p></li>
-<li><p>Apply original variable names to label information : <code>csvFileInput</code> &amp; <code>FilePsInput</code> functions.</p></li>
+<li><p>Excluded non-normal variable selection feature from
+<code>tb1simple</code> module.</p></li>
+<li><p>Apply original variable names to label information :
+<code>csvFileInput</code> &amp; <code>FilePsInput</code>
+functions.</p></li>
 </ul>
 </div>
 </div>
@@ -1066,7 +1215,8 @@
 <a href="#new-module-5" class="anchor"></a>New module</h2>
 <ul>
 <li>
-<code>tb1simpleUI</code>, <code>tb1simple</code>, <code>tb1simple2</code> for propensity score analysis</li>
+<code>tb1simpleUI</code>, <code>tb1simple</code>,
+<code>tb1simple2</code> for propensity score analysis</li>
 </ul>
 </div>
 </div>
@@ -1078,7 +1228,8 @@
 <h2 class="hasAnchor">
 <a href="#bug-fixes-16" class="anchor"></a>Bug fixes</h2>
 <ul>
-<li>factor variable criteria in <code>csvInput</code>, <code>tb1module</code> and <code>tb1module2</code>
+<li>factor variable criteria in <code>csvInput</code>,
+<code>tb1module</code> and <code>tb1module2</code>
 </li>
 </ul>
 </div>
@@ -1092,14 +1243,16 @@
 <a href="#new-module-6" class="anchor"></a>New module</h2>
 <ul>
 <li>
-<code>FilePsInput</code>, <code>FilePs</code> are modules of data input for propensity score calculation.</li>
+<code>FilePsInput</code>, <code>FilePs</code> are modules of data
+input for propensity score calculation.</li>
 </ul>
 </div>
 <div id="minor-update" class="section level2">
 <h2 class="hasAnchor">
 <a href="#minor-update" class="anchor"></a>Minor update</h2>
 <ul>
-<li>Change default <code>data.table</code> &amp; <code>fread</code> <strong>check.names</strong> option to <code>TRUE</code>
+<li>Change default <code>data.table</code> &amp; <code>fread</code>
+<strong>check.names</strong> option to <code>TRUE</code>
 </li>
 </ul>
 </div>
@@ -1121,7 +1274,8 @@
 <a href="#minor-update-1" class="anchor"></a>Minor update</h2>
 <ul>
 <li>
-<code>csvFile</code> changes variable name including <code><a href="https://rdrr.io/r/base/Arithmetic.html">/</a></code> to <code>_</code> and etc.</li>
+<code>csvFile</code> changes variable name including <code><a href="https://rdrr.io/r/base/Arithmetic.html">/</a></code>
+to <code>_</code> and etc.</li>
 </ul>
 </div>
 <div id="bug-fixes-17" class="section level2">
@@ -1161,7 +1315,8 @@
 <a href="#bug-fixes-19" class="anchor"></a>Bug fixes:</h2>
 <ul>
 <li>
-<code>tbmoduleUI</code>, <code>tbmoduleUI2</code> : Apply <code>shapiro.test</code>
+<code>tbmoduleUI</code>, <code>tbmoduleUI2</code> : Apply
+<code>shapiro.test</code>
 </li>
 </ul>
 </div>
@@ -1169,9 +1324,12 @@
 <h2 class="hasAnchor">
 <a href="#new-module-7" class="anchor"></a>New module</h2>
 <ul>
-<li><p><code>regressModuleUI</code>, <code>regressModule</code>, <code>regressModule2</code></p></li>
-<li><p><code>logisticModuleUI</code>, <code>logisticModule</code>, <code>logisticModule2</code></p></li>
-<li><p><code>ggpairsModuleUI1</code>, <code>ggpairsModuleUI2</code>, <code>ggpairsModule</code></p></li>
+<li><p><code>regressModuleUI</code>, <code>regressModule</code>,
+<code>regressModule2</code></p></li>
+<li><p><code>logisticModuleUI</code>, <code>logisticModule</code>,
+<code>logisticModule2</code></p></li>
+<li><p><code>ggpairsModuleUI1</code>, <code>ggpairsModuleUI2</code>,
+<code>ggpairsModule</code></p></li>
 </ul>
 </div>
 <div id="new-function" class="section level2">
@@ -1179,7 +1337,8 @@
 <a href="#new-function" class="anchor"></a>New function</h2>
 <ul>
 <li>
-<code>regress.display2</code>, <code>logistic.display2</code> : Regression table for reactive data.</li>
+<code>regress.display2</code>, <code>logistic.display2</code> :
+Regression table for reactive data.</li>
 </ul>
 </div>
 </div>
@@ -1192,7 +1351,8 @@
 <a href="#update-29" class="anchor"></a>Update</h2>
 <ul>
 <li>
-<code>csvFile</code> : Add <em>n_</em> to column names that begin with a number.</li>
+<code>csvFile</code> : Add <em>n_</em> to column names that begin
+with a number.</li>
 </ul>
 </div>
 <div id="new-module-8" class="section level2">
@@ -1200,7 +1360,8 @@
 <a href="#new-module-8" class="anchor"></a>New module</h2>
 <ul>
 <li>
-<code>tb1moduleUI2</code> can deal <strong>reactive data</strong>
+<code>tb1moduleUI2</code> can deal <strong>reactive
+data</strong>
 </li>
 </ul>
 </div>
@@ -1237,6 +1398,8 @@
     <div id="tocnav">
       <h2>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
+        <li><a href="#jsmodule-134">1.3.4</a></li>
+        <li><a href="#jsmodule-133">1.3.3</a></li>
         <li><a href="#jsmodule-132">1.3.2</a></li>
         <li><a href="#jsmodule-131">1.3.1</a></li>
         <li><a href="#jsmodule-130">1.3.0</a></li>

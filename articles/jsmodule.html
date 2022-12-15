@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.3.4</span>
       </span>
     </div>
 
@@ -78,13 +78,13 @@
 
       
 
-      </header><script src="jsmodule_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="jsmodule_files/header-attrs-2.18/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Introduce RStudio Addins in jsmodule</h1>
                         <h4 class="author">Jinseob Kim</h4>
             
-            <h4 class="date">2022-10-18</h4>
+            <h4 class="date">2022-12-15</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/jinseob2kim/jsmodule/blob/master/vignettes/jsmodule.Rmd"><code>vignettes/jsmodule.Rmd</code></a></small>
       <div class="hidden name"><code>jsmodule.Rmd</code></div>
@@ -96,7 +96,7 @@
 <div id="install" class="section level2">
 <h2 class="hasAnchor">
 <a href="#install" class="anchor"></a>Install</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>remotes<span class="op">::</span><span class="kw"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span>(<span class="st">'jinseob2kim/jsmodule'</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">'jinseob2kim/jsmodule'</span>)</span></code></pre></div>
 </div>
 <div id="rstudio-addins" class="section level2">
 <h2 class="hasAnchor">
@@ -104,25 +104,25 @@
 <div id="basic-statistics" class="section level3">
 <h3 class="hasAnchor">
 <a href="#basic-statistics" class="anchor"></a>Basic statistics</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw"><a href="../reference/jsBasicGadget.html">jsBasicGadget</a></span>(mtcars)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">jsBasicGadget</span>(mtcars)</span></code></pre></div>
 <p><img src="figures/addin.gif"></p>
 </div>
 <div id="repeated-measure-analysis" class="section level3">
 <h3 class="hasAnchor">
 <a href="#repeated-measure-analysis" class="anchor"></a>Repeated measure analysis</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">jsRepeatedGadget</span>(mtcars)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">jsRepeatedGadget</span>(mtcars)</span></code></pre></div>
 </div>
 <div id="survey-data-analysis" class="section level3">
 <h3 class="hasAnchor">
 <a href="#survey-data-analysis" class="anchor"></a>Survey data analysis</h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(survey)</span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="kw"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(api)</span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="kw"><a href="../reference/jsSurveyGadget.html">jsSurveyGadget</a></span>(apistrat)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survey)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(api)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">jsSurveyGadget</span>(apistrat)</span></code></pre></div>
 </div>
 <div id="propensity-score-analysisexperimental" class="section level3">
 <h3 class="hasAnchor">
 <a href="#propensity-score-analysisexperimental" class="anchor"></a>Propensity score analysis(experimental)</h3>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw"><a href="../reference/jsPropensityGadget.html">jsPropensityGadget</a></span>(mtcars)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">jsPropensityGadget</span>(mtcars)</span></code></pre></div>
 <p><img src="figures/ps.png"></p>
 </div>
 </div>
@@ -141,9 +141,11 @@
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#install">Install</a></li>
-      <li><a href="#rstudio-addins">RStudio Addins</a></li>
-      <li><a href="#web-applications">Web applications</a></li>
+<li><a href="#install" id="toc-install">Install</a></li>
+      <li><a href="#rstudio-addins" id="toc-rstudio-addins">RStudio
+      Addins</a></li>
+      <li><a href="#web-applications" id="toc-web-applications">Web
+      applications</a></li>
       </ul>
 </div>
       </div>
