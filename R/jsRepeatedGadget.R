@@ -8,7 +8,7 @@
 #' if (interactive()) {
 #'   jsRepeatedGadjet(mtcars)
 #' }
-#' @rdname jsRepeatedGadjet
+#' @rdname jsRepeatedGadget
 #' @export
 #' @importFrom GGally ggpairs
 #' @importFrom stats as.formula binomial
@@ -20,7 +20,7 @@
 #' @import ggplot2
 #' @import shiny
 
-jsRepeatedGadjet <- function(data, nfactor.limit = 20) {
+jsRepeatedGadget <- function(data, nfactor.limit = 20) {
   requireNamespace("survival")
   # requireNamespace("survC1")
 

@@ -1,6 +1,10 @@
 # jsmodule 1.3.5
 
-## Fix: `rocModule`
+## Fix: 
+
+* `rocModule`
+
+* Change `jsRepeatedGadjet` to `jsRepeatedGadget`
 
 
 # jsmodule 1.3.4
