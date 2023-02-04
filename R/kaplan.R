@@ -721,7 +721,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
           }
 
           if (input$file_ext == "pptx") {
-            my_vec_graph <- rvg::dml(ggobj = ggpubr::as_ggplot(kmInput()))
+            my_vec_graph <- rvg::dml(ggobj = kmInput())
             doc <- officer::read_pptx()
             doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
             doc <- officer::ph_with(doc, my_vec_graph, location = officer::ph_location(width = input$fig_width, height = input$fig_height))

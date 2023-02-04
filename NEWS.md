@@ -1,3 +1,10 @@
+# jsmodule 1.3.6
+
+## Fix: 
+
+* `kaplanModule` PPT download
+
+
 # jsmodule 1.3.5
 
 ## Fix: 
