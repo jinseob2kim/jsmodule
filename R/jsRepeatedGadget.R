@@ -1,4 +1,4 @@
-#' @title jsRepeatedGadjet: Shiny Gadget of Repeated measure analysis.
+#' @title jsRepeatedGadget: Shiny Gadget of Repeated measure analysis.
 #' @description Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic plot
 #' @param data data
 #' @param nfactor.limit nlevels limit for categorical variables
@@ -6,7 +6,7 @@
 #' @details Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic plot
 #' @examples
 #' if (interactive()) {
-#'   jsRepeatedGadjet(mtcars)
+#'   jsRepeatedGadget(mtcars)
 #' }
 #' @rdname jsRepeatedGadget
 #' @export
@@ -554,10 +554,10 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
 
 
 
-#' @title jsRepeatedAddin: Rstudio addin of jsRepeatedGadjet
-#' @description Rstudio addin of jsRepeatedGadjet
-#' @return Rstudio addin of jsRepeatedGadjet
-#' @details Rstudio addin of jsRepeatedGadjet
+#' @title jsRepeatedAddin: Rstudio addin of jsRepeatedGadget
+#' @description Rstudio addin of jsRepeatedGadget
+#' @return Rstudio addin of jsRepeatedGadget
+#' @details Rstudio addin of jsRepeatedGadget
 #' @examples
 #' if (interactive()) {
 #'   jsRepeatedAddin()
@@ -575,7 +575,7 @@ jsRepeatedAddin <- function() {
   dataString <- context$selection[[1]]$text
   data <- get(dataString, envir = .GlobalEnv)
   # viewer <- dialogViewer("Subset", width = 1000, height = 800)
-  jsRepeatedGadjet(data, nfactor.limit = 20)
+  jsRepeatedGadget(data, nfactor.limit = 20)
 }
 
 

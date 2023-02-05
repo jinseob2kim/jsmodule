@@ -2,7 +2,7 @@
 % Please edit documentation in R/jsRepeatedGadget.R
 \name{jsRepeatedGadget}
 \alias{jsRepeatedGadget}
-\title{jsRepeatedGadjet: Shiny Gadget of Repeated measure analysis.}
+\title{jsRepeatedGadget: Shiny Gadget of Repeated measure analysis.}
 \usage{
 jsRepeatedGadget(data, nfactor.limit = 20)
 }
@@ -22,6 +22,6 @@ Shiny Gadget including Data, Label info, Table 1, GEE(linear, logistic), Basic p
 }
 \examples{
 if (interactive()) {
-  jsRepeatedGadjet(mtcars)
+  jsRepeatedGadget(mtcars)
 }
 }
