@@ -5,7 +5,8 @@ Date: 2023-02-06
 Authors@R: c(person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c("aut", "cre"),  comment = c(ORCID = "0000-0002-9403-605X")),
              person("Zarathu", role = c("cph", "fnd")),
              person("Hyunki", "Lee", email = "leevenstar@snu.ac.kr", role = c("aut")),
-             person("Changwoo", "Lim", email = "limcw@zarathu.com", role = c("aut"))
+             person("Changwoo", "Lim", email = "limcw@zarathu.com", role = c("aut")),
+             person("Jinhwan", "Kim", email = "jinhwan@zarathu.com", role = c("aut"))
              )
 Description: 'RStudio' addins and 'Shiny' modules for descriptive statistics, regression and survival analysis.
 Depends: R (>= 3.4.0)
