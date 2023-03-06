@@ -67,8 +67,8 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
         mainPanel(
           tabsetPanel(
             type = "pills",
-            tabPanel("Data", withLoader(DTOutput("data"), type = "html", loader = "loader6")),
-            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type = "html", loader = "loader6"))
+            tabPanel(title = "Data", withLoader(DTOutput("data"), type = "html", loader = "loader6")),
+            tabPanel(title = "Label", withLoader(DTOutput("data_label", width = "100%"), type = "html", loader = "loader6"))
           )
         )
       )
@@ -80,12 +80,13 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
           tb1moduleUI("tb1")
         ),
         mainPanel(
-          withLoader(DTOutput("table1"), type = "html", loader = "loader6"),
-          wellPanel(
-            h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-            h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
-            h5("Categorical variables  are summarized with table")
-          )
+          withLoader(
+            DTOutput("table1"), type = "html", loader = "loader6"),
+            wellPanel(
+              h5("Normal continuous variables  are summarized with Mean (SD) and t-test (2 groups) or ANOVA (> 2 groups)"),
+              h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+              h5("Categorical variables  are summarized with table")
+            )
         )
       )
     ),
@@ -128,7 +129,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       )
     ),
     navbarMenu("Plot",
-      icon = icon("bar-chart-o"),
+      icon = icon("chart-column"),
       tabPanel(
         "Basic plot",
         sidebarLayout(
@@ -693,135 +694,219 @@ jsBasicAddin <- function() {
 #' @importFrom shinycustomloader withLoader
 #' @import shiny
 
-
 jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
   options(shiny.maxRequestSize = max.filesize * 1024^2)
 
   ui <- navbarPage(
-    "Basic statistics",
-    tabPanel("Data",
+    header = tagList(
+      includeCSS('www/style.css'),
+      tags$head(tags$link(rel="shortcut icon", href="www/favicon.ico"))
+    ),
+    # theme = bslib::bs_theme(bootswatch = 'solar'),
+    inverse = TRUE,
+    title = span(
+      'Basic statistics',
+      span( # Github & Homepage
+        a(
+          icon('house'),
+          href = 'https://www.zarathu.com/',
+          target = "_blank",
+          style = 'color: white;margin-right: 1em;'
+        ),
+        a(
+          icon('github'),
+          href = 'https://github.com/jinseob2kim/jsmodule',
+          target = "_blank",
+          style = 'color: white;'
+        ),
+        style = "right: 1em; position: absolute;"
+      )
+    ),
+    # Data
+    tabPanel(
+      title = "Data",
       icon = icon("table"),
       sidebarLayout(
         sidebarPanel(
           uiOutput("import"),
-          downloadButton("downloadData", "Example data")
+          downloadButton(outputId = "downloadData", label = "Example data",class = 'primary')
         ),
         mainPanel(
           tabsetPanel(
             type = "pills",
-            tabPanel("Data", withLoader(DTOutput("data"), type = "html", loader = "loader6")),
-            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type = "html", loader = "loader6"))
+            tabPanel(
+              title = "Data",
+              style = 'margin-top:1em;',
+              markdown("> Category data is shown with <span style='background: #337ab7; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>**Blue**</span>."),
+              withLoader(
+                DTOutput("data"),
+                type = "html",
+                loader = "loader6"
+              )
+            ),
+            tabPanel(
+              title = "Label",
+              style = 'margin-top:1em;',
+              withLoader(
+                DTOutput("data_label", width = "100%"),
+                type = "html",
+                loader = "loader6"
+              )
+            )
           ),
           htmlOutput("naomit")
         )
       )
     ),
-    tabPanel("Table 1",
+
+    # Table 1
+    tabPanel(
+      title = "Table 1",
       icon = icon("percentage"),
       sidebarLayout(
         sidebarPanel(
           tb1moduleUI("tb1")
         ),
         mainPanel(
-          withLoader(DTOutput("table1"), type = "html", loader = "loader6"),
+          markdown("> Table 1 for Demographic and Other Baseline Characteristics, see
+          <a target = '_blank' href = 'https://www.ema.europa.eu/en/documents/scientific-guideline/ich-e-3-structure-content-clinical-study-reports-step-5_en.pdf'>Ich E3 Guideline 11.2</a>"),
+          withLoader(
+            DTOutput("table1"),
+            type = "html",
+            loader = "loader6"
+          ),
           wellPanel(
-            h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
+            h5("Normal continuous variables  are summarized with Mean (SD) and t-test (2 groups) or ANOVA (> 2 groups)"),
             h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
             h5("Categorical variables  are summarized with table")
           )
         )
       )
     ),
-    navbarMenu("Regression",
+
+    # Regression
+    navbarMenu(
+      title = "Regression",
       icon = icon("list-alt"),
       tabPanel(
-        "Linear regression",
+        title = "Linear regression",
         sidebarLayout(
           sidebarPanel(
             regressModuleUI("linear")
           ),
           mainPanel(
-            withLoader(DTOutput("lineartable"), type = "html", loader = "loader6"),
+            withLoader(
+              DTOutput("lineartable"),
+              type = "html",
+              loader = "loader6"
+            ),
             br(),
             uiOutput("warning_linear")
           )
         )
       ),
       tabPanel(
-        "Logistic regression",
+        title = "Logistic regression",
         sidebarLayout(
           sidebarPanel(
             regressModuleUI("logistic")
           ),
           mainPanel(
-            withLoader(DTOutput("logistictable"), type = "html", loader = "loader6")
+            withLoader(
+              DTOutput("logistictable"),
+              type = "html",
+              loader = "loader6"
+            )
           )
         )
       ),
       tabPanel(
-        "Cox model",
+        title = "Cox model",
         sidebarLayout(
           sidebarPanel(
             coxUI("cox")
           ),
           mainPanel(
-            withLoader(DTOutput("coxtable"), type = "html", loader = "loader6")
+            withLoader(
+              DTOutput("coxtable"),
+              type = "html",
+              loader = "loader6"
+            )
           )
         )
       )
     ),
-    navbarMenu("Plot",
-      icon = icon("bar-chart-o"),
+
+    # Plot
+    navbarMenu(
+      title = "Plot",
+      icon = icon("chart-column"),
       tabPanel(
-        "Basic plot",
+        title = "Basic plot",
         sidebarLayout(
           sidebarPanel(
             ggpairsModuleUI1("ggpairs")
           ),
           mainPanel(
-            withLoader(plotOutput("ggpairs_plot"), type = "html", loader = "loader6"),
+            withLoader(
+              plotOutput("ggpairs_plot"),
+              type = "html",
+              loader = "loader6"
+            ),
             ggpairsModuleUI2("ggpairs")
           )
         )
       ),
       tabPanel(
-        "Histogram",
+        title = "Histogram",
         sidebarLayout(
           sidebarPanel(
             histogramUI("histogram")
           ),
           mainPanel(
-            withLoader(plotOutput("histogram"), type = "html", loader = "loader6"),
+            withLoader(
+              plotOutput("histogram"),
+              type = "html",
+              loader = "loader6"
+            ),
             ggplotdownUI("histogram")
           )
         )
       ),
       tabPanel(
-        "Scatterplot",
+        title = "Scatterplot",
         sidebarLayout(
           sidebarPanel(
             scatterUI("scatter")
           ),
           mainPanel(
-            withLoader(plotOutput("scatter_plot"), type = "html", loader = "loader6"),
+            withLoader(
+              plotOutput("scatter_plot"),
+              type = "html",
+              loader = "loader6"
+            ),
             ggplotdownUI("scatter")
           )
         )
       ),
       tabPanel(
-        "Boxplot",
+        title = "Boxplot",
         sidebarLayout(
           sidebarPanel(
             boxUI("box")
           ),
           mainPanel(
-            withLoader(plotOutput("box_plot"), type = "html", loader = "loader6"),
+            withLoader(
+              plotOutput("box_plot"),
+              type = "html",
+              loader = "loader6"
+            ),
             ggplotdownUI("box")
           )
         )
       ),
       tabPanel(
-        "Barplot",
+        title = "Barplot",
         sidebarLayout(
           sidebarPanel(
             barUI("bar")
@@ -833,7 +918,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       ),
       tabPanel(
-        "Lineplot",
+        title = "Lineplot",
         sidebarLayout(
           sidebarPanel(
             lineUI("line")
@@ -845,7 +930,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       ),
       tabPanel(
-        "Kaplan-meier plot",
+        title = "Kaplan-meier plot",
         sidebarLayout(
           sidebarPanel(
             kaplanUI("kaplan")
@@ -858,10 +943,12 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       )
     ),
-    navbarMenu("ROC analysis",
+    # ROC Analysis
+    navbarMenu(
+      title = "ROC analysis",
       icon = icon("check"),
       tabPanel(
-        "ROC",
+        title = "ROC",
         sidebarLayout(
           sidebarPanel(
             rocUI("roc")
@@ -874,7 +961,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       ),
       tabPanel(
-        "Time-dependent ROC",
+        title = "Time-dependent ROC",
         sidebarLayout(
           sidebarPanel(
             timerocUI("timeroc")
@@ -886,12 +973,10 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             withLoader(DTOutput("table_timeroc"), type = "html", loader = "loader6")
           )
         )
-      )
+      ),
+
     )
   )
-
-
-
 
   server <- function(input, output, session) {
     output$downloadData <- downloadHandler(
@@ -906,34 +991,75 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     )
 
     output$import <- renderUI({
-      csvFileInput("datafile")
+      csvFileInput(id = "datafile")
     })
 
     data.info <- callModule(csvFile, "datafile", nfactor.limit = nfactor.limit)
     data <- reactive(data.info()$data)
     data.label <- reactive(data.info()$label)
 
+    data.label
+
     output$data <- renderDT({
-      datatable(data(),
-        rownames = F, editable = F, extensions = "Buttons", caption = "Data",
-        options = c(opt.data("data"), list(scrollX = TRUE))
+      PRdata <- data()
+      dl <- data.label()
+
+      nv <- dl$variable[which(dl$class %in% c('factor', 'character'))]
+
+      v <- sapply(colnames(PRdata), function(i){
+          if(i %in% nv)
+            return(paste0("<div style = 'background: #337ab7; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>", i, "</div>"))
+            return(i)
+      }, simplify = TRUE, USE.NAMES = FALSE)
+
+      colnames(PRdata) <- unlist(v)
+
+      datatable(
+        data = PRdata, # column name change
+        #data = data(),
+        rownames = F,
+        editable = F,
+        extensions = c("Buttons", 'ColReorder', 'KeyTable'),
+        # filter = 'top', # critical issue with scrollX
+        escape = FALSE,
+
+        # caption = "Data",
+        options =
+          # opt.data("data"),
+          list(
+            # dom = 'tlfBrip', # Length, Table, Filter, Button, Information, Pagination
+            dom = 'lftBrp', # Length, Table, Filter, Button, Information, Pagination
+            lengthMenu = list(c(10, 25, -1), c("10", "25", "All")),
+            pageLength = 10,
+            scrollX = TRUE,
+            buttons = c('copy', 'print', 'csv', 'excel', 'pdf', I('colvis')),
+            colReorder = TRUE,
+            keys = TRUE
+          )
       )
     })
 
-
     output$data_label <- renderDT({
-      datatable(data.label(),
-        rownames = F, editable = F, extensions = "Buttons", caption = "Label of data",
-        options = c(opt.data("label"), list(scrollX = TRUE))
+      datatable(
+        data = data.label(),
+        rownames = F,
+        editable = F,
+        extensions = c("Buttons", 'KeyTable'),
+        # filter = 'top', # Not works
+        # caption = "Label of data",
+        options = c(
+          opt.data("label"),
+          list(
+            scrollX = TRUE,
+            keys = TRUE
+          )
+        )
       )
     })
 
     output$naomit <- renderText({
       data.info()$naomit
     })
-
-
-
 
     out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
@@ -949,7 +1075,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#fed9cc"))
       }
       return(out.tb1)
     })
@@ -965,7 +1091,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#fed9cc"))
     })
 
     output$warning_linear <- renderText({
@@ -983,7 +1109,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#fed9cc"))
     })
 
 
@@ -997,7 +1123,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           opt.tbreg(out_cox()$caption),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#fed9cc"))
     })
 
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
@@ -1084,10 +1210,6 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       stopApp()
     })
   }
-
-
-
-
 
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
