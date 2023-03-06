@@ -770,8 +770,8 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           tb1moduleUI("tb1")
         ),
         mainPanel(
-          markdown("> Table 1 for Demographic and Other Baseline Characteristics, see
-          <a target = '_blank' href = 'https://www.ema.europa.eu/en/documents/scientific-guideline/ich-e-3-structure-content-clinical-study-reports-step-5_en.pdf'>Ich E3 Guideline 11.2</a>"),
+          markdown("> Table 1 for Descriptive statistics, see
+          <a target = '_blank' href = 'https://www.ema.europa.eu/en/documents/scientific-guideline/ich-e-3-structure-content-clinical-study-reports-step-5_en.pdf'>Ich E3 Guideline 11.2 for medical definition</a>"),
           withLoader(
             DTOutput("table1"),
             type = "html",
