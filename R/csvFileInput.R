@@ -1,4 +1,3 @@
-
 #' @title csvFileInput: Shiny module UI for file upload.
 #' @description Shiny module UI for file(csv or xlsx) upload.
 #' @param id id
@@ -42,12 +41,15 @@
 #' @import shiny
 
 csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
-
   # Create a namespace function using the provided id
   ns <- NS(id)
 
   tagList(
-    fileInput(ns("file"), label),
+    fileInput(
+      inputId = ns("file"),
+      label = label,
+      accept = c(".csv", ".xlsx", ".sav", ".sas7bdat", ".dta")
+    ),
     uiOutput(ns("factor")),
     uiOutput(ns("binary_check")),
     uiOutput(ns("binary_var")),
@@ -60,8 +62,6 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
     uiOutput(ns("subset_val"))
   )
 }
-
-
 
 #' @title csvFile: Shiny module Server for file upload.
 #' @description Shiny module Server for file(csv or xlsx) upload.
@@ -114,7 +114,6 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #' @importFrom haven read_sav read_sas read_dta
 
 csvFile <- function(input, output, session, nfactor.limit = 20) {
-
   ## To remove NOTE.
   val_label <- BinaryGroupRandom <- variable <- NULL
 
@@ -131,29 +130,38 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
   # )
 
   data <- eventReactive(input$file, {
-    validate(need((grepl("csv", userFile()$name) == T) | (grepl("xlsx", userFile()$name) == T) | (grepl("sav", userFile()$name) == T) | (grepl("sas7bdat", userFile()$name) == T), message = "Please upload csv/xlsx/sav/sas7bdat file"))
-    if (grepl("csv", userFile()$name) == T) {
-      out <- data.table::fread(userFile()$datapath, check.names = F, integer64 = "double")
-      if (readr::guess_encoding(userFile()$datapath)[1, 1] == "EUC-KR") {
-        out <- data.table::data.table(utils::read.csv(userFile()$datapath, check.names = F, fileEncoding = "EUC-KR"))
+
+    ext <- tools::file_ext(userFile()$name)
+
+    validate(need(
+      ext %in% c("csv", "xlsx", "sav", "sas7bdat"),
+      message = "Please upload csv/xlsx/sav/sas7bdat file"
+    ))
+
+    path <- userFile()$datapath
+
+    if (ext == "csv") {
+      out <- data.table::fread(path, check.names = F, integer64 = "double")
+      if (readr::guess_encoding(path)[1, 1] == "EUC-KR") {
+        out <- data.table::data.table(utils::read.csv(path, check.names = F, fileEncoding = "EUC-KR"))
       }
-    } else if (grepl("xlsx", userFile()$name) == T) {
-      out <- data.table::data.table(readxl::read_excel(userFile()$datapath), check.names = F, integer64 = "double")
-    } else if (grepl("sav", userFile()$name) == T) {
-      out <- data.table::data.table(tryCatch(haven::read_sav(userFile()$datapath), error = function(e) {
-        return(haven::read_sav(userFile()$datapath, encoding = "latin1"))
+    } else if (ext == "xlsx") {
+      out <- data.table::data.table(readxl::read_excel(path), check.names = F, integer64 = "double")
+    } else if (ext == "sav") {
+      out <- data.table::data.table(tryCatch(haven::read_sav(path), error = function(e) {
+        return(haven::read_sav(path, encoding = "latin1"))
       }), check.names = F)
-      # out = data.table::data.table(haven::read_sav(userFile()$datapath, encoding = "latin1"), check.names = F, integer64 = "double")
-    } else if (grepl("sas7bdat", userFile()$name) == T) {
-      out <- data.table::data.table(tryCatch(haven::read_sas(userFile()$datapath), error = function(e) {
-        return(haven::read_sas(userFile()$datapath, encoding = "latin1"))
+      # out = data.table::data.table(haven::read_sav(path, encoding = "latin1"), check.names = F, integer64 = "double")
+    } else if (ext == "sas7bdat") {
+      out <- data.table::data.table(tryCatch(haven::read_sas(path), error = function(e) {
+        return(haven::read_sas(path, encoding = "latin1"))
       }), check.names = F)
-      # out = data.table::data.table(haven::read_sas(userFile()$datapath), check.names = F, integer64 = "double")
-    } else if (grepl("dta", userFile()$name) == T) {
-      out <- data.table::data.table(tryCatch(haven::read_dta(userFile()$datapath), error = function(e) {
-        return(haven::read_dta(userFile()$datapath, encoding = "latin1"))
+      # out = data.table::data.table(haven::read_sas(path), check.names = F, integer64 = "double")
+    } else if (ext == "dta") {
+      out <- data.table::data.table(tryCatch(haven::read_dta(path), error = function(e) {
+        return(haven::read_dta(path, encoding = "latin1"))
       }), check.names = F)
-      # out = data.table::data.table(haven::read_dta(userFile()$datapath), check.names = F, integer64 = "double")
+      # out = data.table::data.table(haven::read_dta(path), check.names = F, integer64 = "double")
     } else {
       stop("Not supported format.")
     }
@@ -161,18 +169,24 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
     #  names(out) <- gsub(x[1], x[2], names(out))
     # }
 
+    # out : Imported Data
+
     naCol <- names(out)[unlist(out[, lapply(.SD, function(x) {
       all(is.na(x))
     })])]
     if (length(naCol) == 0) {
-      naomit <- NULL
+      naomit <- "There is no empty column excluded"
+      # NULL
     } else {
       out <- out[, .SD, .SDcols = -naCol]
       naomit <- paste("Column <B>", paste(naCol, collapse = ", "), "</B> are(is) excluded because it is empty.", sep = "")
     }
 
+    # backup
     out.old <- out
     name.old <- names(out.old)
+
+    # Make data.table
     out <- data.table::data.table(out, check.names = T)
     name.new <- names(out)
     ref <- list(name.old = name.old, name.new = name.new)
@@ -194,41 +208,61 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
     # except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
     add_vars <- names(nclass)[nclass >= 2 & nclass <= 5]
     # factor_vars_ini <- union(factor_vars, add_vars)
-    return(list(data = out, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars, ref = ref, naomit = naomit))
+    return(list(
+      data = out,
+      factor_original = factor_vars,
+      conti_original = conti_vars,
+      factor_adds_list = names(nclass)[nclass <= nfactor.limit],
+      factor_adds = add_vars,
+      ref = ref,
+      naomit = naomit
+    ))
   })
 
-
-
-
   output$factor <- renderUI({
-    selectInput(session$ns("factor_vname"),
+    selectInput(
+      inputId = session$ns("factor_vname"),
       label = "Additional categorical variables",
-      choices = data()$factor_adds_list, multiple = T,
+      choices = data()$factor_adds_list,
+      multiple = T,
       selected = data()$factor_adds
     )
   })
 
-
   observeEvent(c(data()$factor_original, input$factor_vname), {
     output$binary_check <- renderUI({
-      checkboxInput(session$ns("check_binary"), "Make binary variables")
+      checkboxInput(
+        inputId = session$ns("check_binary"),
+        label = "Make binary variables"
+      )
     })
 
     output$ref_check <- renderUI({
-      checkboxInput(session$ns("check_ref"), "Change reference of categorical variables")
+      checkboxInput(
+        inputId = session$ns("check_ref"),
+        label = "Change reference of categorical variables"
+      )
     })
 
     output$subset_check <- renderUI({
-      checkboxInput(session$ns("check_subset"), "Subset data")
+      checkboxInput(
+        inputId = session$ns("check_subset"),
+        label = "Subset data"
+      )
     })
   })
 
   observeEvent(input$check_binary, {
+
     var.conti <- setdiff(names(data()$data), c(data()$factor_original, input$factor_vname))
+
     output$binary_var <- renderUI({
       req(input$check_binary == T)
-      selectInput(session$ns("var_binary"), "Variables to dichotomize",
-        choices = var.conti, multiple = T,
+      selectInput(
+        inputId = session$ns("var_binary"),
+        label = "Variables to dichotomize",
+        choices = var.conti,
+        multiple = T,
         selected = var.conti[1]
       )
     })
@@ -236,19 +270,27 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
     output$binary_val <- renderUI({
       req(input$check_binary == T)
       req(length(input$var_binary) > 0)
+
       outUI <- tagList()
+
       for (v in seq_along(input$var_binary)) {
         med <- stats::quantile(data()$data[[input$var_binary[[v]]]], c(0.05, 0.5, 0.95), na.rm = T)
         outUI[[v]] <- splitLayout(
           cellWidths = c("25%", "75%"),
-          selectInput(session$ns(paste0("con_binary", v)), paste0("Define reference:"),
-            choices = c("\u2264", "\u2265", "\u003c", "\u003e"), selected = "\u2264"
+          selectInput(
+            inputId = session$ns(paste0("con_binary", v)),
+            label = paste0("Define reference:"),
+            choices = c("\u2264", "\u2265", "\u003c", "\u003e"),
+            selected = "\u2264"
           ),
-          numericInput(session$ns(paste0("cut_binary", v)), input$var_binary[[v]],
+          numericInput(
+            inputId = session$ns(paste0("cut_binary", v)),
+            label = input$var_binary[[v]],
             value = med[2], min = med[1], max = med[3]
           )
         )
       }
+
       outUI
     })
   })
@@ -276,7 +318,6 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
     })
   })
 
-
   observeEvent(input$check_subset, {
     output$subset_var <- renderUI({
       req(input$check_subset == T)
@@ -287,8 +328,11 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
       # )
 
       tagList(
-        selectInput(session$ns("var_subset"), "Subset variables",
-          choices = names(data()$data), multiple = T,
+        selectInput(
+          inputId = session$ns("var_subset"),
+          label = "Subset variables",
+          choices = names(data()$data),
+          multiple = T,
           selected = names(data()$data)[1]
         )
       )
@@ -321,13 +365,11 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
     })
   })
 
-
   # We can run observers in here if we want to
   observe({
     msg <- sprintf("File %s was uploaded", userFile()$name)
     cat(msg, "\n")
   })
-
 
   outdata <- reactive({
     out <- data()$data
@@ -424,10 +466,12 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
       out.label[variable == vn, var_label := ref[["name.old"]][w]]
     }
 
-    return(list(data = out, label = out.label, naomit = data()$naomit))
+    return(list(
+      data = out,
+      label = out.label,
+      naomit = data()$naomit
+    ))
   })
-
-
 
   # Return the reactive that yields the data frame
   return(outdata)
