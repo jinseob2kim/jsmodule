@@ -130,7 +130,6 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
   # )
 
   data <- eventReactive(input$file, {
-
     ext <- tools::file_ext(userFile()$name)
 
     validate(need(
@@ -253,7 +252,6 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
   })
 
   observeEvent(input$check_binary, {
-
     var.conti <- setdiff(names(data()$data), c(data()$factor_original, input$factor_vname))
 
     output$binary_var <- renderUI({

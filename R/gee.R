@@ -123,7 +123,6 @@ GEEModuleUI <- function(id) {
 #' @importFrom geepack geeglm
 
 GEEModuleLinear <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, id.gee) {
-
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
 
@@ -382,7 +381,6 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 #' @importFrom geepack geeglm
 
 GEEModuleLogistic <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, id.gee) {
-
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
 

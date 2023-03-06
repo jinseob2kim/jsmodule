@@ -346,7 +346,6 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 #' @importFrom timeROC SeSpPPVNPV
 
 timerocModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL, iid = T, NRIIDI = T) {
-
   ## To remove NOTE.
   ListModel <- compare <- level <- variable <- FP <- TP <- model <- Sensitivity <- Specificity <- NULL
 
@@ -925,7 +924,6 @@ timerocModule <- function(input, output, session, data, data_label, data_varStru
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 timerocModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL, iid = T, NRIIDI = T) {
-
   ## To remove NOTE.
   ListModel <- compare <- level <- variable <- FP <- TP <- model <- Sensitivity <- Specificity <- NULL
 

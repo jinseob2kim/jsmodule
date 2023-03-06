@@ -114,7 +114,6 @@ FileSurveyInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)
 
 
 FileSurvey <- function(input, output, session, nfactor.limit = 20) {
-
   ## To remove NOTE.
   val_label <- BinaryGroupRandom <- variable <- NULL
 

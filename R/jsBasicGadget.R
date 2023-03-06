@@ -81,12 +81,14 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
         ),
         mainPanel(
           withLoader(
-            DTOutput("table1"), type = "html", loader = "loader6"),
-            wellPanel(
-              h5("Normal continuous variables  are summarized with Mean (SD) and t-test (2 groups) or ANOVA (> 2 groups)"),
-              h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
-              h5("Categorical variables  are summarized with table")
-            )
+            DTOutput("table1"),
+            type = "html", loader = "loader6"
+          ),
+          wellPanel(
+            h5("Normal continuous variables  are summarized with Mean (SD) and t-test (2 groups) or ANOVA (> 2 groups)"),
+            h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+            h5("Categorical variables  are summarized with table")
+          )
         )
       )
     ),
@@ -699,25 +701,25 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
   ui <- navbarPage(
     header = tagList(
-      includeCSS('www/style.css'),
-      tags$head(tags$link(rel="shortcut icon", href="www/favicon.ico"))
+      includeCSS("www/style.css"),
+      tags$head(tags$link(rel = "shortcut icon", href = "www/favicon.ico"))
     ),
     # theme = bslib::bs_theme(bootswatch = 'solar'),
     inverse = TRUE,
     title = span(
-      'Basic statistics',
+      "Basic statistics",
       span( # Github & Homepage
         a(
-          icon('house'),
-          href = 'https://www.zarathu.com/',
+          icon("house"),
+          href = "https://www.zarathu.com/",
           target = "_blank",
-          style = 'color: white;margin-right: 1em;'
+          style = "color: white;margin-right: 1em;"
         ),
         a(
-          icon('github'),
-          href = 'https://github.com/jinseob2kim/jsmodule',
+          icon("github"),
+          href = "https://github.com/jinseob2kim/jsmodule",
           target = "_blank",
-          style = 'color: white;'
+          style = "color: white;"
         ),
         style = "right: 1em; position: absolute;"
       )
@@ -729,14 +731,14 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       sidebarLayout(
         sidebarPanel(
           uiOutput("import"),
-          downloadButton(outputId = "downloadData", label = "Example data",class = 'primary')
+          downloadButton(outputId = "downloadData", label = "Example data", class = "primary")
         ),
         mainPanel(
           tabsetPanel(
             type = "pills",
             tabPanel(
               title = "Data",
-              style = 'margin-top:1em;',
+              style = "margin-top:1em;",
               markdown("> Category data is shown with <span style='background: #337ab7; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>**Blue**</span>."),
               withLoader(
                 DTOutput("data"),
@@ -746,7 +748,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             ),
             tabPanel(
               title = "Label",
-              style = 'margin-top:1em;',
+              style = "margin-top:1em;",
               withLoader(
                 DTOutput("data_label", width = "100%"),
                 type = "html",
@@ -974,7 +976,6 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           )
         )
       ),
-
     )
   )
 
@@ -1004,35 +1005,36 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       PRdata <- data()
       dl <- data.label()
 
-      nv <- dl$variable[which(dl$class %in% c('factor', 'character'))]
+      nv <- dl$variable[which(dl$class %in% c("factor", "character"))]
 
-      v <- sapply(colnames(PRdata), function(i){
-          if(i %in% nv)
-            return(paste0("<div style = 'background: #337ab7; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>", i, "</div>"))
-            return(i)
+      v <- sapply(colnames(PRdata), function(i) {
+        if (i %in% nv) {
+          return(paste0("<div style = 'background: #337ab7; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>", i, "</div>"))
+        }
+        return(i)
       }, simplify = TRUE, USE.NAMES = FALSE)
 
       colnames(PRdata) <- unlist(v)
 
       datatable(
         data = PRdata, # column name change
-        #data = data(),
+        # data = data(),
         rownames = F,
         editable = F,
-        extensions = c("Buttons", 'ColReorder', 'KeyTable'),
+        extensions = c("Buttons", "ColReorder", "KeyTable"),
         # filter = 'top', # critical issue with scrollX
         escape = FALSE,
 
         # caption = "Data",
         options =
-          # opt.data("data"),
+        # opt.data("data"),
           list(
             # dom = 'tlfBrip', # Length, Table, Filter, Button, Information, Pagination
-            dom = 'lftBrp', # Length, Table, Filter, Button, Information, Pagination
+            dom = "lftBrp", # Length, Table, Filter, Button, Information, Pagination
             lengthMenu = list(c(10, 25, -1), c("10", "25", "All")),
             pageLength = 10,
             scrollX = TRUE,
-            buttons = c('copy', 'print', 'csv', 'excel', 'pdf', I('colvis')),
+            buttons = c("copy", "print", "csv", "excel", "pdf", I("colvis")),
             colReorder = TRUE,
             keys = TRUE
           )
@@ -1044,7 +1046,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         data = data.label(),
         rownames = F,
         editable = F,
-        extensions = c("Buttons", 'KeyTable'),
+        extensions = c("Buttons", "KeyTable"),
         # filter = 'top', # Not works
         # caption = "Label of data",
         options = c(

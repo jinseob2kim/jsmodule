@@ -1,4 +1,3 @@
-
 #' @title ggpairsModuleUI1: Variable selection module UI for ggpairs
 #' @description Variable selection module UI for ggpairs
 #' @param id id
@@ -173,7 +172,6 @@ ggpairsModuleUI2 <- function(id) {
 
 
 ggpairsModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 20) {
-
   ## To remove NOTE.
   val_label <- variable <- NULL
 
@@ -455,7 +453,6 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
 ggpairsModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 20) {
-
   ## To remove NOTE.
   val_label <- variable <- NULL
 

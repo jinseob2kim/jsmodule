@@ -164,7 +164,6 @@ regressModuleUI <- function(id) {
 #' @importFrom purrr map_lgl
 
 regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
-
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
 
@@ -561,7 +560,6 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 
 
 logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
-
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
 

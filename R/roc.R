@@ -98,12 +98,12 @@ rocUI <- function(id) {
 
 reclassificationJS <- function(data, cOutcome, predrisk1, predrisk2, cutoff, dec.value = 3, dec.p = 3) {
   c1 <- cut(predrisk1,
-            breaks = cutoff, include.lowest = TRUE,
-            right = FALSE
+    breaks = cutoff, include.lowest = TRUE,
+    right = FALSE
   )
   c2 <- cut(predrisk2,
-            breaks = cutoff, include.lowest = TRUE,
-            right = FALSE
+    breaks = cutoff, include.lowest = TRUE,
+    right = FALSE
   )
   tabReclas <- table(`Initial Model` = c1, `Updated Model` = c2)
   # cat(" _________________________________________\n")
@@ -113,19 +113,19 @@ reclassificationJS <- function(data, cOutcome, predrisk1, predrisk2, cutoff, dec
   # cat("\n Outcome: absent \n  \n")
   TabAbs <- ta[, , 1]
   tab1 <- cbind(TabAbs, ` % reclassified` = round((rowSums(TabAbs) -
-                                                     diag(TabAbs)) / rowSums(TabAbs), 2) * 100)
+    diag(TabAbs)) / rowSums(TabAbs), 2) * 100)
   names(dimnames(tab1)) <- c("Initial Model", "Updated Model")
   # print(tab1)
   # cat("\n \n Outcome: present \n  \n")
   TabPre <- ta[, , 2]
   tab2 <- cbind(TabPre, ` % reclassified` = round((rowSums(TabPre) -
-                                                     diag(TabPre)) / rowSums(TabPre), 2) * 100)
+    diag(TabPre)) / rowSums(TabPre), 2) * 100)
   names(dimnames(tab2)) <- c("Initial Model", "Updated Model")
   # print(tab2)
   # cat("\n \n Combined Data \n  \n")
   Tab <- tabReclas
   tab <- cbind(Tab, ` % reclassified` = round((rowSums(Tab) -
-                                                 diag(Tab)) / rowSums(Tab), 2) * 100)
+    diag(Tab)) / rowSums(Tab), 2) * 100)
   names(dimnames(tab)) <- c("Initial Model", "Updated Model")
   # print(tab)
   # cat(" _________________________________________\n")
@@ -320,7 +320,6 @@ ROC_table <- function(ListModel, dec.auc = 3, dec.p = 3) {
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
 rocModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
-
   ## To remove NOTE.
   level <- variable <- NULL
 
@@ -389,8 +388,8 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
     tagList(
       selectInput(session$ns("event_roc"), "Event",
-                  choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
-                  selected = NULL
+        choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
+        selected = NULL
       )
     )
   })
@@ -440,8 +439,8 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
   output$indep <- renderUI({
     selectInput(session$ns(paste0("indep_roc", 1)), paste0("Independent variables for Model ", 1),
-                choices = mklist(data_varStruct(), indeproc()), multiple = T,
-                selected = unlist(mklist(data_varStruct(), indeproc()))[1]
+      choices = mklist(data_varStruct(), indeproc()), multiple = T,
+      selected = unlist(mklist(data_varStruct(), indeproc()))[1]
     )
   })
 
@@ -450,8 +449,8 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
       selector = paste0("div:has(> #", session$ns("add"), ")"),
       where = "beforeBegin",
       ui = selectInput(session$ns(paste0("indep_roc", nmodel() + 1)), paste0("Independent variables for Model ", nmodel() + 1),
-                       choices = mklist(data_varStruct(), indeproc()), multiple = T,
-                       selected = unlist(mklist(data_varStruct(), indeproc()))[1:min(length(indeproc()), nmodel() + 1)]
+        choices = mklist(data_varStruct(), indeproc()), multiple = T,
+        selected = unlist(mklist(data_varStruct(), indeproc()))[1:min(length(indeproc()), nmodel() + 1)]
       )
     )
     nmodel(nmodel() + 1)
@@ -494,8 +493,8 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
       tagList(
         selectInput(session$ns("subvar_roc"), "Sub-group variables",
-                    choices = var_subgroup_list, multiple = T,
-                    selected = var_subgroup[1]
+          choices = var_subgroup_list, multiple = T,
+          selected = var_subgroup[1]
         )
       )
     })
@@ -511,14 +510,14 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
     for (v in seq_along(input$subvar_roc)) {
       if (input$subvar_roc[[v]] %in% vlist()$factor_vars) {
         outUI[[v]] <- selectInput(session$ns(paste0("subval_roc", v)), paste0("Sub-group value: ", input$subvar_roc[[v]]),
-                                  choices = data_label()[variable == input$subvar_roc[[v]], level], multiple = T,
-                                  selected = data_label()[variable == input$subvar_roc[[v]], level][1]
+          choices = data_label()[variable == input$subvar_roc[[v]], level], multiple = T,
+          selected = data_label()[variable == input$subvar_roc[[v]], level][1]
         )
       } else {
         val <- stats::quantile(data()[[input$subvar_roc[[v]]]], na.rm = T)
         outUI[[v]] <- sliderInput(session$ns(paste0("subval_roc", v)), paste0("Sub-group range: ", input$subvar_roc[[v]]),
-                                  min = val[1], max = val[5],
-                                  value = c(val[2], val[4])
+          min = val[1], max = val[5],
+          value = c(val[2], val[4])
         )
       }
     }
@@ -575,7 +574,6 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
           forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
           mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
           return(pROC::roc(mm$y, predict(mm, type = "response")))
-
         })
 
         if (nmodel() == 1 & length(indeps()) == 1) {
@@ -629,14 +627,14 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
       }
       res.roc <- lapply(indeps(), function(x) {
         forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
-        mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x= T)
+        mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x = T)
         return(pROC::roc(mm$y, predict(mm, type = "response")))
       })
 
       if (nmodel() == 1 & length(indeps()) == 1) {
         res.roc1 <- lapply(indeps(), function(x) {
           forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
-          mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x= T)
+          mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x = T)
           return(pROC::roc(mm$y, mm$x[, 2]))
         })
         res.cut <- pROC::coords(res.roc1[[1]], x = "best", input = "threshold", best.method = "youden")
@@ -648,7 +646,7 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
     }
 
 
-    p <- pROC::ggroc(res.roc, legacy.axes = input$spetype) + see::theme_modern() + geom_abline(slope = 1, intercept = as.integer(!input$spetype), lty = 2)  + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
+    p <- pROC::ggroc(res.roc, legacy.axes = input$spetype) + see::theme_modern() + geom_abline(slope = 1, intercept = as.integer(!input$spetype), lty = 2) + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
 
     return(list(plot = p, cut = res.cut, tb = res.tb))
   })
@@ -662,20 +660,20 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
       column(
         4,
         selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                       choices = c("jpg", "pdf", "tiff", "svg", "pptx"), multiple = F,
-                       selected = "pptx"
+          choices = c("jpg", "pdf", "tiff", "svg", "pptx"), multiple = F,
+          selected = "pptx"
         )
       ),
       column(
         4,
         sliderInput(session$ns("fig_width"), "Width (in):",
-                    min = 5, max = 15, value = 8
+          min = 5, max = 15, value = 8
         )
       ),
       column(
         4,
         sliderInput(session$ns("fig_height"), "Height (in):",
-                    min = 5, max = 15, value = 6
+          min = 5, max = 15, value = 6
         )
       )
     )
@@ -806,7 +804,6 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
 
 rocModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
-
   ## To remove NOTE.
   level <- variable <- NULL
 
@@ -875,8 +872,8 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
 
     tagList(
       selectInput(session$ns("event_roc"), "Event",
-                  choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
-                  selected = NULL
+        choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
+        selected = NULL
       )
     )
   })
@@ -922,8 +919,8 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
     lapply(1:nmodel(), {
       function(x) {
         selectInput(session$ns(paste0("indep_roc", x)), paste0("Independent variables for Model ", x),
-                    choices = mklist(data_varStruct(), indeproc()), multiple = T,
-                    selected = unlist(mklist(data_varStruct(), indeproc()))[x]
+          choices = mklist(data_varStruct(), indeproc()), multiple = T,
+          selected = unlist(mklist(data_varStruct(), indeproc()))[x]
         )
       }
     })
@@ -961,8 +958,8 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
 
       tagList(
         selectInput(session$ns("subvar_roc"), "Sub-group variables",
-                    choices = var_subgroup_list, multiple = T,
-                    selected = var_subgroup[1]
+          choices = var_subgroup_list, multiple = T,
+          selected = var_subgroup[1]
         )
       )
     })
@@ -978,14 +975,14 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
     for (v in seq_along(input$subvar_roc)) {
       if (input$subvar_roc[[v]] %in% vlist()$factor_vars) {
         outUI[[v]] <- selectInput(session$ns(paste0("subval_roc", v)), paste0("Sub-group value: ", input$subvar_roc[[v]]),
-                                  choices = data_label()[variable == input$subvar_roc[[v]], level], multiple = T,
-                                  selected = data_label()[variable == input$subvar_roc[[v]], level][1]
+          choices = data_label()[variable == input$subvar_roc[[v]], level], multiple = T,
+          selected = data_label()[variable == input$subvar_roc[[v]], level][1]
         )
       } else {
         val <- stats::quantile(data()[[input$subvar_roc[[v]]]], na.rm = T)
         outUI[[v]] <- sliderInput(session$ns(paste0("subval_roc", v)), paste0("Sub-group range: ", input$subvar_roc[[v]]),
-                                  min = val[1], max = val[5],
-                                  value = c(val[2], val[4])
+          min = val[1], max = val[5],
+          value = c(val[2], val[4])
         )
       }
     }
@@ -1095,14 +1092,14 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
       }
       res.roc <- lapply(indeps(), function(x) {
         forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
-        mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x= T)
+        mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x = T)
         return(pROC::roc(mm$y, predict(mm, type = "response")))
       })
 
       if (nmodel() == 1 & length(indeps()) == 1) {
         res.roc1 <- lapply(indeps(), function(x) {
           forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
-          mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x= T)
+          mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x = T)
           return(pROC::roc(mm$y, mm$x[, 2]))
         })
         res.cut <- pROC::coords(res.roc1[[1]], x = "best", input = "threshold", best.method = "youden")
@@ -1114,7 +1111,7 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
     }
 
 
-    p <- pROC::ggroc(res.roc, legacy.axes = input$spetype) + see::theme_modern() + geom_abline(slope = 1, intercept = as.integer(!input$spetype), lty = 2)  + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
+    p <- pROC::ggroc(res.roc, legacy.axes = input$spetype) + see::theme_modern() + geom_abline(slope = 1, intercept = as.integer(!input$spetype), lty = 2) + scale_color_discrete("Model", labels = paste("Model", 1:nmodel()))
 
     return(list(plot = p, cut = res.cut, tb = res.tb))
   })
@@ -1128,20 +1125,20 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
       column(
         4,
         selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-                       choices = c("jpg", "pdf", "tiff", "svg", "pptx"), multiple = F,
-                       selected = "pptx"
+          choices = c("jpg", "pdf", "tiff", "svg", "pptx"), multiple = F,
+          selected = "pptx"
         )
       ),
       column(
         4,
         sliderInput(session$ns("fig_width"), "Width (in):",
-                    min = 5, max = 15, value = 8
+          min = 5, max = 15, value = 8
         )
       ),
       column(
         4,
         sliderInput(session$ns("fig_height"), "Height (in):",
-                    min = 5, max = 15, value = 6
+          min = 5, max = 15, value = 6
         )
       )
     )
