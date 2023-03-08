@@ -54,7 +54,6 @@ ggpairsModuleUI1 <- function(id) {
   )
 }
 
-
 #' @title ggpairsModuleUI2: Option & download module UI for ggpairs
 #' @description Option & download module UI for ggpairs
 #' @param id id
@@ -113,9 +112,6 @@ ggpairsModuleUI2 <- function(id) {
     )
   )
 }
-
-
-
 
 #' @title ggpairsModule: shiny module server for basic/scatter plot.
 #' @description Shiny module server for basic/scatter plot.
@@ -202,7 +198,6 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
   select_vars <- setdiff(names(data), except_vars)
   select_list <- mklist(data_varStruct, select_vars)
 
-
   output$vars_ggpairs <- renderUI({
     selectizeInput(session$ns("vars"), "Variables",
       choices = select_list, multiple = T,
@@ -218,10 +213,6 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
       selected = "None"
     )
   })
-
-
-
-
 
   output$gtype <- renderUI({
     tagList(
@@ -287,7 +278,6 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
     )
   })
 
-
   ggpairsInput <- reactive({
     data.val <- data
     for (i in factor_vars) {
@@ -319,26 +309,12 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
       )
     }
     class(p) <- c(class(p), "ggplot")
-    if (is.null(input$theme)) {
+    if (is.null(input$theme) | input$theme == "default") {
       return(p)
     }
-    if (input$theme == "default") {
-      return(p)
-    } else if (input$theme == "bw") {
-      return(p + theme_bw())
-    } else if (input$theme == "linedraw") {
-      return(p + theme_linedraw())
-    } else if (input$theme == "light") {
-      return(p + theme_light())
-    } else if (input$theme == "dark") {
-      return(p + theme_dark())
-    } else if (input$theme == "minimal") {
-      return(p + theme_minimal())
-    } else if (input$theme == "classic") {
-      return(p + theme_classic())
-    } else if (input$theme == "void") {
-      return(p + theme_void())
-    }
+
+    eval(parse(text = paste0('p <- p + theme_', input$theme, '()')))
+    return(p)
   })
 
   output$downloadControls <- renderUI({
@@ -393,11 +369,8 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
       )
     }
   )
-
   return(ggpairsInput)
 }
-
-
 
 #' @title ggpairsModule2: shiny module server for basic/scatter plot for reactive data.
 #' @description Shiny module server for basic/scatter plot for reactive data.
@@ -460,7 +433,6 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
     data_varStruct <- reactive(list(variable = names(data())))
   }
 
-
   vlist <- reactive({
     mklist <- function(varlist, vars) {
       lapply(
@@ -501,9 +473,6 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
     ))
   })
 
-
-
-
   output$vars_ggpairs <- renderUI({
     selectizeInput(session$ns("vars"), "Variables",
       choices = vlist()$select_list, multiple = T,
@@ -531,10 +500,6 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
       selected = "None"
     )
   })
-
-
-
-
 
   output$gtype <- renderUI({
     tagList(
@@ -600,7 +565,6 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
     )
   })
 
-
   ggpairsInput <- reactive({
     data.val <- data()
     for (i in vlist()$factor_vars) {
@@ -632,26 +596,14 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
       )
     }
     class(p) <- c(class(p), "ggplot")
-    if (is.null(input$theme)) {
+
+    if (is.null(input$theme) | input$theme == "default") {
       return(p)
     }
-    if (input$theme == "default") {
-      return(p)
-    } else if (input$theme == "bw") {
-      return(p + theme_bw())
-    } else if (input$theme == "linedraw") {
-      return(p + theme_linedraw())
-    } else if (input$theme == "light") {
-      return(p + theme_light())
-    } else if (input$theme == "dark") {
-      return(p + theme_dark())
-    } else if (input$theme == "minimal") {
-      return(p + theme_minimal())
-    } else if (input$theme == "classic") {
-      return(p + theme_classic())
-    } else if (input$theme == "void") {
-      return(p + theme_void())
-    }
+
+    eval(parse(text = paste0('p <- p + theme_', input$theme, '()')))
+    return(p)
+
   })
 
   output$downloadControls <- renderUI({
