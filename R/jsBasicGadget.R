@@ -48,7 +48,30 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 
 
   ui <- navbarPage(
-    "Basic statistics",
+    header = tagList(
+      includeCSS("inst/www/style.css"),
+      tags$head(tags$link(rel = "shortcut icon", href = "www/favicon.ico"))
+    ),
+    # theme = bslib::bs_theme(bootswatch = 'solar'),
+    inverse = TRUE,
+    title = span(
+      "Basic statistics",
+      span( # Github & Homepage
+        a(
+          icon("house"),
+          href = "https://www.zarathu.com/",
+          target = "_blank",
+          style = "color: white;margin-right: 1em;"
+        ),
+        a(
+          icon("github"),
+          href = "https://github.com/jinseob2kim/jsmodule",
+          target = "_blank",
+          style = "color: white;"
+        ),
+        style = "right: 1em; position: absolute;"
+      )
+    ),
     tabPanel("Data",
       icon = icon("table"),
       sidebarLayout(
