@@ -213,10 +213,10 @@
     <span class='no'>factor_01vars</span> <span class='kw'>&lt;-</span> <span class='no'>factor_vars</span>[<span class='no'>class01_factor</span>]
     <span class='no'>factor_01_list</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='mklist.html'>mklist</a></span>(<span class='fu'>data_varStruct</span>(), <span class='no'>factor_01vars</span>)
     <span class='no'>group_vars</span> <span class='kw'>&lt;-</span> <span class='no'>factor_vars</span>[<span class='no'>nclass_factor</span> <span class='kw'>&gt;=</span> <span class='fl'>2</span> <span class='kw'>&amp;</span> <span class='no'>nclass_factor</span> <span class='kw'>&lt;=</span> <span class='fl'>10</span> <span class='kw'>&amp;</span>
-                              <span class='no'>nclass_factor</span> <span class='kw'>&lt;</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>())]
+      <span class='no'>nclass_factor</span> <span class='kw'>&lt;</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>())]
     <span class='no'>group_list</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='mklist.html'>mklist</a></span>(<span class='fu'>data_varStruct</span>(), <span class='no'>group_vars</span>)
     <span class='no'>except_vars</span> <span class='kw'>&lt;-</span> <span class='no'>factor_vars</span>[<span class='no'>nclass_factor</span> <span class='kw'>&gt;</span> <span class='fl'>10</span> <span class='kw'>|</span> <span class='no'>nclass_factor</span> <span class='kw'>==</span> <span class='fl'>1</span> <span class='kw'>|</span>
-                   <span class='no'>nclass_factor</span> <span class='kw'>==</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>())]
+      <span class='no'>nclass_factor</span> <span class='kw'>==</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>())]
 
     <span class='co'>## non-normal: shapiro test</span>
     <span class='no'>f</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>x</span>) {
