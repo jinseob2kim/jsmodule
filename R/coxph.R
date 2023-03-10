@@ -86,7 +86,6 @@ coxUI <- function(id) {
 #' @importFrom survival cluster coxph Surv
 
 coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, id.cluster = NULL, ties.coxph = "efron") {
-
   ## To remove NOTE.
   data.cox.step <- level <- val_label <- variable <- NULL
 

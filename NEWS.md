@@ -1,3 +1,32 @@
+# jsmodule 1.4.0
+
+## Fix :
+
+* update deprecated icon (`Plot` panel)
+
+## Update : 
+
+> feature applies in `jsBasicExtAddin` (shiny app)
+
+* Add description with callout
+  * `Data` , `Table 1` panel
+
+* modified some UI (with `style.css`)
+  * header color changed
+  * add zarathu & github page in header
+  * table 1's significant data changed
+  * `Data`'s table column has color (when vairable is category)
+
+* update DT function (`Data`)
+  * `Column visiblity` button added
+  * `Column Reorder` feature added
+  * may browse table with keyboard (`arrow` keys)
+
+## Refactor: 
+
+* `csvfileInput.R` Not use file's extension not name. (`csv.txt` will nor work)
+* `ggpairs.R` apply theme with less `if-else`
+
 # jsmodule 1.3.6
 
 ## Fix: 

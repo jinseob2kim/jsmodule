@@ -1,4 +1,3 @@
-
 #' @title FilePsInput: Shiny module UI for file upload for propensity score matching.
 #' @description Shiny module UI for file upload for propensity score matching.
 #' @param id id
@@ -131,7 +130,6 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
 #' @importFrom MatchIt matchit match.data
 
 FilePs <- function(input, output, session, nfactor.limit = 20) {
-
   ## To remove NOTE.
   ID.pscal2828 <- BinaryGroupRandom <- variable <- val_label <- NULL
 

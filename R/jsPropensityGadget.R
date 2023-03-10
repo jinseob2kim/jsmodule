@@ -1,4 +1,3 @@
-
 #' @title jsPropensityGadget: Shiny Gadget for propensity score analysis.
 #' @description Shiny Gadget including original/matching/IPTW data, Label info, Table 1, Cox model, Basic/kaplan-meier plot.
 #' @param data data

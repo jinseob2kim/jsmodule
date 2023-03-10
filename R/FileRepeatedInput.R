@@ -114,7 +114,6 @@ FileRepeatedInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dt
 
 
 FileRepeated <- function(input, output, session, nfactor.limit = 20) {
-
   ## To remove NOTE.
   val_label <- BinaryGroupRandom <- variable <- NULL
 

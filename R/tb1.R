@@ -1,4 +1,3 @@
-
 #' @title tb1moduleUI: table 1 module UI.
 #' @description Table 1 shiny module UI for descriptive statistics.
 #' @param id id
@@ -110,7 +109,6 @@ tb1moduleUI <- function(id) {
 
 
 tb1module <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, showAllLevels = T, argsExact = list(workspace = 2 * 10^7, simulate.p.value = T)) {
-
   ## To remove NOTE.
   variable <- NULL
 

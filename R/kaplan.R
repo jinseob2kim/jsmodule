@@ -231,7 +231,6 @@ optionUI <- function(id) {
 
 kaplanModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL,
                          timeby = NULL, range.x = NULL, range.y = NULL) {
-
   ## To remove NOTE.
   brewer.pal.info <- level <- val_label <- variable <- NULL
 
