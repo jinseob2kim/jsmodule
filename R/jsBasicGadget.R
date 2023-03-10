@@ -701,7 +701,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
   ui <- navbarPage(
     header = tagList(
-      includeCSS("www/style.css"),
+      includeCSS("inst/www/style.css"),
       tags$head(tags$link(rel = "shortcut icon", href = "www/favicon.ico"))
     ),
     # theme = bslib::bs_theme(bootswatch = 'solar'),
