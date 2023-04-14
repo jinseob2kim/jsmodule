@@ -1,3 +1,8 @@
+# jsmodule 1.4.1
+
+## Error fix: `jsBasicExtAddin`, `jsBasicGatget`
+
+
 # jsmodule 1.4.0
 
 ## Fix :
