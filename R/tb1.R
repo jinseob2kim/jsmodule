@@ -103,7 +103,7 @@ tb1moduleUI <- function(id) {
 #' @import shiny
 #' @importFrom data.table fread data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats fisher.test chisq.test shapiro.test oneway.test kruskal.test
+#' @importFrom stats fisher.test chisq.test shapiro.test oneway.test kruskal.test wilcox.test
 #' @importFrom jstable CreateTableOneJS svyCreateTableOneJS
 #' @importFrom methods is
 
@@ -269,6 +269,10 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
         # vars.fisher = sapply(setdiff(vlist()$factor_vars, input$group_vars), function(x){is(tryCatch(chisq.test(table(data()[[input$group_vars]], data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
         # vars.fisher = setdiff(vlist()$factor_vars, input$group_vars)[unlist(vars.fisher)]
 
+        testNN <- wilcox.test
+        if (length(setdiff(unique(data[[input$group_vars]]), NA)) > 2){
+          testNN <- kruskal.test
+        }
 
         res <- jstable::CreateTableOneJS(
           data = data,
@@ -276,7 +280,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
           testApprox = chisq.test, argsApprox = list(correct = TRUE),
           testExact = fisher.test, argsExact = argsExact,
           testNormal = oneway.test, argsNormal = list(var.equal = F),
-          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+          testNonNormal = testNN, argsNonNormal = list(NULL),
           showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
           catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, minMax = input$nonnormal_range
         )
@@ -289,13 +293,18 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
         # vars.fisher = sapply(setdiff(vlist()$factor_vars, c(input$group2_vars, input$group_vars)), function(x){is(tryCatch(chisq.test(table(vars.group, data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
         # vars.fisher = setdiff(vlist()$factor_vars, c(input$group2_vars, input$group_vars))[vars.fisher]
 
+        testNN <- wilcox.test
+        if ((length(setdiff(unique(data[[input$group2_vars]]), NA)) > 2) | (input$psub == F)){
+          testNN <- kruskal.test
+        }
+
         res <- jstable::CreateTableOneJS(
           data = data,
           vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
           testApprox = chisq.test, argsApprox = list(correct = TRUE),
           testExact = fisher.test, argsExact = argsExact,
           testNormal = oneway.test, argsNormal = list(var.equal = F),
-          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+          testNonNormal = testNN, argsNonNormal = list(NULL),
           showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
           catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub, minMax = input$nonnormal_range
         )
@@ -400,7 +409,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
 #' @import shiny
 #' @importFrom data.table fread data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats fisher.test chisq.test shapiro.test oneway.test kruskal.test
+#' @importFrom stats fisher.test chisq.test shapiro.test oneway.test kruskal.test wilcox.test
 #' @importFrom jstable CreateTableOneJS svyCreateTableOneJS
 #' @importFrom methods is
 
@@ -564,9 +573,10 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
       } else if ((input$group2_vars == "None") | (input$group2_vars == input$group_vars)) {
         vars.tb1 <- setdiff(vars, input$group_vars)
 
-        # vars.fisher = sapply(setdiff(vlist()$factor_vars, input$group_vars), function(x){is(tryCatch(chisq.test(table(data()[[input$group_vars]], data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
-        # vars.fisher = setdiff(vlist()$factor_vars, input$group_vars)[unlist(vars.fisher)]
-
+        testNN <- wilcox.test
+        if (length(setdiff(unique(data[[input$group_vars]]), NA)) > 2){
+          testNN <- kruskal.test
+        }
 
         res <- jstable::CreateTableOneJS(
           data = data(),
@@ -574,7 +584,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
           testApprox = chisq.test, argsApprox = list(correct = TRUE),
           testExact = fisher.test, argsExact = argsExact,
           testNormal = oneway.test, argsNormal = list(var.equal = F),
-          testNonNormal = kruskal.test, argsNonNormal = list(NULL),
+          testNonNormal = testNN, argsNonNormal = list(NULL),
           showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
           catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label(), minMax = input$nonnormal_range
         )
@@ -582,10 +592,11 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
         return(res)
       } else {
         vars.tb1 <- setdiff(vars, c(input$group2_vars, input$group_vars))
-        # vars.group = paste(data()[[input$group_vars]], data()[[input$group2_vars]], sep= ":")
 
-        # vars.fisher = sapply(setdiff(vlist()$factor_vars, c(input$group2_vars, input$group_vars)), function(x){is(tryCatch(chisq.test(table(vars.group, data()[[x]])),error=function(e) e, warning=function(w) w), "warning")})
-        # vars.fisher = setdiff(vlist()$factor_vars, c(input$group2_vars, input$group_vars))[vars.fisher]
+        testNN <- wilcox.test
+        if ((length(setdiff(unique(data[[input$group2_vars]]), NA)) > 2) | (input$psub == F)){
+          testNN <- kruskal.test
+        }
 
         res <- jstable::CreateTableOneJS(
           data = data(),

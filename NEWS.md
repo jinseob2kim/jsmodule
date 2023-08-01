@@ -1,3 +1,7 @@
+# jsmodule 1.4.2
+
+## Update: Change default non-normal 2 group comparison test to `wilcox.test`
+
 # jsmodule 1.4.1
 
 ## Error fix: `jsBasicExtAddin`, `jsBasicGatget`
