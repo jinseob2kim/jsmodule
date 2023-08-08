@@ -7,7 +7,7 @@ status](https://ci.appveyor.com/api/projects/status/github/jinseob2kim/jsmodule?
 action](https://github.com/jinseob2kim/jsmodule/workflows/R-CMD-check/badge.svg)](https://github.com/jinseob2kim/jsmodule/actions)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/jsmodule)](https://cran.r-project.org/package=jsmodule)
 [![CRAN\_Download\_Badge](https://cranlogs.r-pkg.org/badges/jsmodule)](https://CRAN.R-project.org/package=jsmodule)
-[![codecov](https://codecov.io/github/jinseob2kim/jsmodule/branch/master/graphs/badge.svg)](https://codecov.io/github/jinseob2kim/jsmodule)
+[![codecov](https://codecov.io/github/jinseob2kim/jsmodule/branch/master/graphs/badge.svg)]( https://app.codecov.io/github/jinseob2kim/jsmodule)
 [![GitHub
 issues](https://img.shields.io/github/issues/jinseob2kim/jsmodule.svg)](https://github.com/jinseob2kim/jsmodule/issues)
 [![GitHub
