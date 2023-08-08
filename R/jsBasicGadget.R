@@ -109,7 +109,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
           ),
           wellPanel(
             h5("Normal continuous variables  are summarized with Mean (SD) and t-test (2 groups) or ANOVA (> 2 groups)"),
-            h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+            h5("Non-normal continuous variables are summarized with median [IQR or min,max] and wilcox(2 groups)/kruskal-wallis(>3 groups) test"),
             h5("Categorical variables  are summarized with table")
           )
         )
@@ -802,7 +802,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           ),
           wellPanel(
             h5("Normal continuous variables  are summarized with Mean (SD) and t-test (2 groups) or ANOVA (> 2 groups)"),
-            h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+            h5("Non-normal continuous variables are summarized with median [IQR or min,max] and wilcox(2 groups)/kruskal-wallis(>3 groups) test"),
             h5("Categorical variables  are summarized with table")
           )
         )
