@@ -574,7 +574,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
         vars.tb1 <- setdiff(vars, input$group_vars)
 
         testNN <- wilcox.test
-        if (length(setdiff(unique(data[[input$group_vars]]), NA)) > 2){
+        if (length(setdiff(unique(data()[[input$group_vars]]), NA)) > 2){
           testNN <- kruskal.test
         }
 
@@ -594,7 +594,7 @@ tb1module2 <- function(input, output, session, data, data_label, data_varStruct 
         vars.tb1 <- setdiff(vars, c(input$group2_vars, input$group_vars))
 
         testNN <- wilcox.test
-        if ((length(setdiff(unique(data[[input$group2_vars]]), NA)) > 2) | (input$psub == F)){
+        if ((length(setdiff(unique(data()[[input$group2_vars]]), NA)) > 2) | (input$psub == F)){
           testNN <- kruskal.test
         }
 
