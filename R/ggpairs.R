@@ -313,7 +313,7 @@ ggpairsModule <- function(input, output, session, data, data_label, data_varStru
       return(p)
     }
 
-    eval(parse(text = paste0('p <- p + theme_', input$theme, '()')))
+    eval(parse(text = paste0("p <- p + theme_", input$theme, "()")))
     return(p)
   })
 
@@ -601,9 +601,8 @@ ggpairsModule2 <- function(input, output, session, data, data_label, data_varStr
       return(p)
     }
 
-    eval(parse(text = paste0('p <- p + theme_', input$theme, '()')))
+    eval(parse(text = paste0("p <- p + theme_", input$theme, "()")))
     return(p)
-
   })
 
   output$downloadControls <- renderUI({
