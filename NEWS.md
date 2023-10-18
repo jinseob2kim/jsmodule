@@ -1,3 +1,7 @@
+# jsmodule 1.4.3
+
+## Update `rocModule`: Add accucary/ppv/npv with threshold
+
 # jsmodule 1.4.2
 
 ## Update: Change default non-normal 2 group comparison test to `wilcox.test`
