@@ -582,8 +582,10 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
             mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
             return(pROC::roc(mm$y, mm$x[, 2]))
           })
-          res.cut <- pROC::coords(res.roc1[[1]], x = "best", input = "threshold", best.method = "youden",
-                                  ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"))
+          res.cut <- pROC::coords(res.roc1[[1]],
+            x = "best", input = "threshold", best.method = "youden",
+            ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv")
+          )
         } else {
           res.cut <- NULL
         }
@@ -638,8 +640,10 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
           mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x = T)
           return(pROC::roc(mm$y, mm$x[, 2]))
         })
-        res.cut <- pROC::coords(res.roc1[[1]], x = "best", input = "threshold", best.method = "youden",
-                                ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"))
+        res.cut <- pROC::coords(res.roc1[[1]],
+          x = "best", input = "threshold", best.method = "youden",
+          ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv")
+        )
       } else {
         res.cut <- NULL
       }
@@ -1049,8 +1053,10 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
             mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
             return(pROC::roc(mm$y, mm$x[, 2]))
           })
-          res.cut <- pROC::coords(res.roc1[[1]], x = "best", input = "threshold", best.method = "youden",
-                                  ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"))
+          res.cut <- pROC::coords(res.roc1[[1]],
+            x = "best", input = "threshold", best.method = "youden",
+            ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv")
+          )
         } else {
           res.cut <- NULL
         }
@@ -1105,8 +1111,10 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
           mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x = T)
           return(pROC::roc(mm$y, mm$x[, 2]))
         })
-        res.cut <- pROC::coords(res.roc1[[1]], x = "best", input = "threshold", best.method = "youden",
-                                ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"))
+        res.cut <- pROC::coords(res.roc1[[1]],
+          x = "best", input = "threshold", best.method = "youden",
+          ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv")
+        )
       } else {
         res.cut <- NULL
       }
