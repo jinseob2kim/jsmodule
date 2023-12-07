@@ -75,7 +75,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.4.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.4.4</span>
       </span>
     </div>
 
@@ -236,7 +236,7 @@
       <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span>(
         <span class='no'>varlist</span>,
         <span class='kw'>function</span>(<span class='no'>x</span>) {
-          <span class='no'>inter</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setops.html'>intersect</a></span>(<span class='no'>x</span>, <span class='no'>vars</span>)
+          <span class='no'>inter</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdatatable.gitlab.io/data.table/reference/setops.html'>intersect</a></span>(<span class='no'>x</span>, <span class='no'>vars</span>)
           <span class='kw'>if</span> (<span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>inter</span>) <span class='kw'>==</span> <span class='fl'>1</span>) {
             <span class='no'>inter</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='no'>inter</span>, <span class='st'>""</span>)
           }
@@ -246,10 +246,10 @@
     }
     <span class='no'>factor_vars</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>())[<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>()[, <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span>(<span class='no'>.SD</span>, <span class='no'>class</span>) <span class='kw'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"factor"</span>, <span class='st'>"character"</span>)]]
     <span class='no'>factor_list</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='mklist.html'>mklist</a></span>(<span class='fu'>data_varStruct</span>(), <span class='no'>factor_vars</span>)
-    <span class='no'>conti_vars</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setops.html'>setdiff</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>()), <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='no'>factor_vars</span>, <span class='st'>"pscore"</span>, <span class='st'>"iptw"</span>))
+    <span class='no'>conti_vars</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdatatable.gitlab.io/data.table/reference/setops.html'>setdiff</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>()), <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='no'>factor_vars</span>, <span class='st'>"pscore"</span>, <span class='st'>"iptw"</span>))
     <span class='no'>conti_list</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='mklist.html'>mklist</a></span>(<span class='fu'>data_varStruct</span>(), <span class='no'>conti_vars</span>)
     <span class='no'>nclass_factor</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/unlist.html'>unlist</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>()[, <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span>(<span class='no'>.SD</span>, <span class='kw'>function</span>(<span class='no'>x</span>) {
-      <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/duplicated.html'>unique</a></span>(<span class='no'>x</span>)[!<span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span>(<span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/duplicated.html'>unique</a></span>(<span class='no'>x</span>))])
+      <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='fu'><a href='https://rdatatable.gitlab.io/data.table/reference/duplicated.html'>unique</a></span>(<span class='no'>x</span>)[!<span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span>(<span class='fu'><a href='https://rdatatable.gitlab.io/data.table/reference/duplicated.html'>unique</a></span>(<span class='no'>x</span>))])
     }),
     <span class='kw'>.SDcols</span> <span class='kw'>=</span> <span class='no'>factor_vars</span>
     ])
@@ -278,7 +278,7 @@
       }
     }
 
-    <span class='no'>non_normal</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/fifelse.html'>ifelse</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>()) <span class='kw'>&lt;=</span> <span class='fl'>3</span> <span class='kw'>|</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>()) <span class='kw'>&gt;=</span> <span class='fl'>5000</span>,
+    <span class='no'>non_normal</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdatatable.gitlab.io/data.table/reference/fifelse.html'>ifelse</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>()) <span class='kw'>&lt;=</span> <span class='fl'>3</span> <span class='kw'>|</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>()) <span class='kw'>&gt;=</span> <span class='fl'>5000</span>,
       <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='no'>F</span>, <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>conti_vars</span>)),
       <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span>(<span class='no'>conti_vars</span>, <span class='kw'>function</span>(<span class='no'>x</span>) {
         <span class='fu'>f</span>(<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>()<span class='kw'>[[</span><span class='no'>x</span>]])
