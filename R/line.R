@@ -255,12 +255,11 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           linetype = linetype
         )
 
-        if (input$rev_y){
+        if (input$rev_y) {
           res.plot <- res.plot + ggplot2::scale_y_reverse()
         }
 
         return(res.plot)
-
       })
 
       output$downloadControls <- renderUI({
