@@ -47,6 +47,7 @@ lineUI <- function(id, label = "lineplot") {
     radioButtons(ns("options"), "Option", choices = c("Mean_SE", "Mean_SD", "Median_IQR"), selected = "Mean_SE", inline = T),
     checkboxInput(ns("linetype"), "Linetype"),
     checkboxInput(ns("jitter"), "Jitter"),
+    checkboxInput(ns("rev_y"), "Reverse Y-axis"),
     uiOutput(ns("subvar")),
     uiOutput(ns("subval"))
   )
@@ -96,7 +97,7 @@ lineUI <- function(id, label = "lineplot") {
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom ggpubr ggline
-#' @importFrom ggplot2 ggsave
+#' @importFrom ggplot2 ggsave scale_y_reverse
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
@@ -247,12 +248,19 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         }
 
 
-        ggpubr::ggline(data, input$x_line, input$y_line,
+        res.plot <- ggpubr::ggline(data, input$x_line, input$y_line,
           color = color, add = add, add.params = add.params, conf.int = input$lineci,
           xlab = label[variable == input$x_line, var_label][1],
           ylab = label[variable == input$y_line, var_label][1], na.rm = T,
           linetype = linetype
         )
+
+        if (input$rev_y){
+          res.plot <- res.plot + ggplot2::scale_y_reverse()
+        }
+
+        return(res.plot)
+
       })
 
       output$downloadControls <- renderUI({

@@ -1,3 +1,7 @@
+# jsmodule 1.4.4
+
+## Update: Add "reverse y-axis" option to lineplot
+
 # jsmodule 1.4.3
 
 ## Update `rocModule`: Add accucary/ppv/npv with threshold
