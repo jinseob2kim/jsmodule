@@ -980,6 +980,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           ),
           mainPanel(
             withLoader(plotOutput("plot_roc"), type = "html", loader = "loader6"),
+            tableOutput("cut_roc"),
             ggplotdownUI("roc"),
             withLoader(DTOutput("table_roc"), type = "html", loader = "loader6")
           )
@@ -1198,6 +1199,10 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     output$plot_roc <- renderPlot({
       print(out_roc()$plot)
+    })
+
+    output$cut_roc <- renderTable({
+      print(out_roc()$cut)
     })
 
     output$table_roc <- renderDT({
