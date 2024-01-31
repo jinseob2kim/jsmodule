@@ -13,7 +13,7 @@ Depends: R (>= 3.4.0)
 License: Apache License 2.0 
 Encoding: UTF-8
 RoxygenNote: 7.2.3
-Imports: utils, stats, data.table, shiny, readxl, DT, jstable, labelled, methods, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt(>= 3.0.0), survey, jskm(>= 0.4.4), survival, purrr, geepack, maxstat, survIDINRI, timeROC, shinyWidgets, pROC, Hmisc, see, readr, RColorBrewer, ggpubr, officer, rvg, epiDisplay
+Imports: utils, stats, data.table, shiny, readxl, DT, jstable, labelled, methods, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt(>= 3.0.0), survey, jskm(>= 0.4.4), survival, purrr, geepack, maxstat, survIDINRI, timeROC, shinyWidgets, pROC, Hmisc, see, readr, RColorBrewer, ggpubr, officer, rvg, epiDisplay, forestploter
 URL: https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
 Suggests: 
