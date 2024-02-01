@@ -99,7 +99,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
     id,
     function(input, output, session) {
 
-
+      label<-data_label
       level <- val_label <- variable <- NULL
 
       if (is.null(data_varStruct)) {
@@ -166,7 +166,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         var.day <- input$day
         var.time<-input$time
         #data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
-        data <- data[!(get(var.day) < var.time[1])]
+        data <- data[!(var.day < var.time[1])]
         data[[var.event]] <- ifelse(data[[var.day]] >= var.time[2] & data[[var.event]] == "1", 0, as.numeric(as.vector(data[[var.event]])))
         data[[var.day]] <- ifelse(data[[var.day]] >= var.time[2], var.time[2], data[[var.day]])
         data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
