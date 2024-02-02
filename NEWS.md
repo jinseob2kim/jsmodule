@@ -1,3 +1,9 @@
+# jsmodule 1.4.5
+
+## New module 
+
+* forestcox (`forestcoxUI`, `forestcoxServer`)
+
 # jsmodule 1.4.4
 
 ## Update: Add "reverse y-axis" option to lineplot
