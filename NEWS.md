@@ -1,6 +1,6 @@
 # jsmodule 1.4.5
 
-## New module 
+## New module (Thanks for [Yoonkyoung Jeon](https://github.com/cyk0315))
 
 * forestcox (`forestcoxUI`, `forestcoxServer`)
 
