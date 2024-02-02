@@ -5,6 +5,17 @@
 #' @return Shinymodule UI
 #' @details Shinymodule UI for forestcox
 #' @examples
+#'
+#' library(survival);library(dplyr);library(jstable);library(shiny)
+#' lung %>%
+#'   mutate(
+#'     status = as.integer(status == 1),
+#'     sex = factor(sex),
+#'     kk = factor(as.integer(pat.karno >= 70)),
+#'     kk1 = factor(as.integer(pat.karno >= 60))
+#'
+#'   ) -> lung
+#' out<-lung
 #' ui <- fluidPage(
 #'   sidebarLayout(
 #'     sidebarPanel(
@@ -20,11 +31,13 @@
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
 #'
-#'   outtable<-forestcoxServer('Forest',data=data,data_label=mk.lev(data) )
+#'   outtable<-forestcoxServer('Forest',data=data,data_label=mk.lev(out) )
 #'   output$tablesub<-renderDT({
 #'     outtable()
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' @rdname forestcoxUI
 #' @export
 
@@ -64,6 +77,17 @@ forestcoxUI<-function(id,label='forestplot'){
 #' @return Shiny module server for forestcox
 #' @details Shiny module server for forestcox
 #' @examples
+#'
+#' library(survival);library(dplyr);library(jstable);library(shiny)
+#' lung %>%
+#'   mutate(
+#'     status = as.integer(status == 1),
+#'     sex = factor(sex),
+#'     kk = factor(as.integer(pat.karno >= 70)),
+#'     kk1 = factor(as.integer(pat.karno >= 60))
+#'
+#'   ) -> lung
+#' out<-lung
 #' ui <- fluidPage(
 #'   sidebarLayout(
 #'     sidebarPanel(
@@ -79,11 +103,13 @@ forestcoxUI<-function(id,label='forestplot'){
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
 #'
-#'   outtable<-forestcoxServer('Forest',data=data,data_label=mk.lev(data) )
+#'   outtable<-forestcoxServer('Forest',data=data,data_label=mk.lev(out) )
 #'   output$tablesub<-renderDT({
 #'     outtable()
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' @seealso
 #'  \code{\link[forestploter]{forest}}
 #'  \code{\link[rvg]{dml}}
@@ -179,7 +205,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         #data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
         #tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs, data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
 
-        data<-setDT(data)
+        data<-data.table::setDT(data)
         lapply(vs,
                function(x){
                  cc <- data.table(t(c(x, NA, NA)))
