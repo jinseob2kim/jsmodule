@@ -30,8 +30,8 @@
 #'
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
-#'
-#'   outtable<-forestcoxServer('Forest',data=data,data_label=mk.lev(out) )
+#'  label<-reactive(mk.lev(out))
+#'  outtable<-forestcoxServer('Forest',data=data,data_label=label)
 #'   output$tablesub<-renderDT({
 #'     outtable()
 #'   })
@@ -102,8 +102,8 @@ forestcoxUI<-function(id,label='forestplot'){
 #'
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
-#'
-#'   outtable<-forestcoxServer('Forest',data=data,data_label=mk.lev(out) )
+#'  label<-reactive(mk.lev(out))
+#'  outtable<-forestcoxServer('Forest',data=data,data_label=label)
 #'   output$tablesub<-renderDT({
 #'     outtable()
 #'   })
@@ -125,7 +125,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
     id,
     function(input, output, session) {
 
-      label<-data_label
+
       level <- val_label <- variable <- NULL
 
       if (is.null(data_varStruct)) {
@@ -134,6 +134,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
 
       vlist <- reactive({
+        label<-data_label()
         data <- data.table(data(), stringsAsFactors = T)
 
         factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
@@ -171,11 +172,11 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         selectInput(session$ns('cov'), 'Addtional covariates', choices = vlist()$group_vars, selected = NULL, multiple = T)
       })
       output$day_tbsub<-renderUI({
-        selectInput(session$ns('day'), 'Day', choices = vlist()$select_vars, selected = vlist()$select_vars[1])
+        selectInput(session$ns('day'), 'Time', choices = vlist()$select_vars, selected = vlist()$select_vars[1])
       })
       output$time_tbsub<-renderUI({
         day <- input$day
-        sliderInput(session$ns('time'), 'Time', min = min(data()[[day]]) , max = max(data()[[day]]), value = c(min(data()[[day]]), max(data()[[day]])))
+        sliderInput(session$ns('time'), 'Select time range', min = min(data()[[day]]) , max = max(data()[[day]]), value = c(min(data()[[day]]), max(data()[[day]])))
       })
 
 
@@ -234,7 +235,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         tbsub <- cbind(Variable = tbsub[, 1], cn[, -1], tbsub[, c(8, 7, 4, 5, 6, 9, 10)])
 
         tbsub[-1, 1] <- unlist(lapply(vs, function(x){c(label[variable == x, var_label][1], paste0("     ", label[variable == x, val_label]))}))
-        colnames(tbsub)[1:6] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day,"KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
+        colnames(tbsub)[1:6] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
 
 
 
