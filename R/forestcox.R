@@ -134,7 +134,9 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
 
       vlist <- reactive({
-        label<-data_label()
+
+        label <- data.table(data_label(), stringsAsFactors = T)
+
         data <- data.table(data(), stringsAsFactors = T)
 
         factor_vars <- names(data)[data[, lapply(.SD, class) %in% c("factor", "character")]]
@@ -181,7 +183,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
 
       tbsub<-reactive({
-
+        label <- data_label()
         data<-data()
         #  req(input$dep)
         # req(input$day)
@@ -202,50 +204,64 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         form <- as.formula(paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = ""))
         vs <- input$subvar
 
-        tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
+        #tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
         #data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
-        #tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs, data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
-
+        tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs, data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
+        len<-nrow(label[variable==group.tbsub])
         data<-data.table::setDT(data)
-        lapply(vs,
-               function(x){
-                 cc <- data.table(t(c(x, NA, NA)))
+        if(!is.null(vs)){
+          lapply(vs,
+                 function(x){
+                   cc<-data.table(matrix(ncol=len+1))
+                   cc[[1]]<-x
 
-                 dd <- lapply(levels(data[[group.tbsub]]),
-                              function(y){
-                                ev <- data[!is.na(get(x)) & get(group.tbsub) == y, sum(as.numeric(as.vector(get(var.event)))), keyby = get(x)]
-                                nn <- data[!is.na(get(x)) & get(group.tbsub) == y, .N, keyby = get(x)]
-                                vv <- paste0(ev[, V1], "/", nn[, N], " (", round(ev[, V1]/ nn[, N] * 100, 1), "%)")
-                                data.table(ev[, 1], vv)
-                              })
-                 dd.bind <- cbind(dd[[1]], dd[[2]][, -1])
-                 names(cc) <- names(dd.bind)
-                 rbind(cc, dd.bind)
-               }) %>% rbindlist -> ll
+                   dd.bind<-' '
+                   for( y in levels(data[[group.tbsub]])){
+                          ev <- data[!is.na(get(x)) & get(group.tbsub) == y, sum(as.numeric(as.vector(get(var.event)))), keyby = get(x)]
+                          nn <- data[!is.na(get(x)) & get(group.tbsub) == y, .N, keyby = get(x)]
+                          vv<-data.table(get=ev[,get],paste0(ev[, V1], "/", nn[, N], " (", round(ev[, V1]/ nn[, N] * 100, 1), "%)"))
+                       ee<-merge(data.table(get=levels(ev[,get])),vv,all.x = TRUE)
+                              dd.bind<-cbind(dd.bind,ee[,V2])
+                   }
+                   names(cc) <- names(dd.bind)
+                   rbind(cc, dd.bind)
+                 }) %>% rbindlist -> ll
 
-        ev.ov <- data[, sum(as.numeric(as.vector(get(var.event)))), keyby = get(group.tbsub)][, V1]
-        nn.ov <- data[, .N, keyby = get(group.tbsub)][, N]
+          ev.ov <- data[, sum(as.numeric(as.vector(get(var.event)))), keyby = get(group.tbsub)][, V1]
+          nn.ov <- data[, .N, keyby = get(group.tbsub)][, N]
 
-        ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
-        names(ov) <- names(ll)
-        cn <- rbind(ov, ll)
+          ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
 
-
-        names(cn)[-1] <- label[variable == group.tbsub, val_label]
-        tbsub <- cbind(Variable = tbsub[, 1], cn[, -1], tbsub[, c(8, 7, 4, 5, 6, 9, 10)])
-
-        tbsub[-1, 1] <- unlist(lapply(vs, function(x){c(label[variable == x, var_label][1], paste0("     ", label[variable == x, val_label]))}))
-        colnames(tbsub)[1:6] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
+          names(ov) <- names(ll)
+          cn <- rbind(ov, ll)
 
 
+          names(cn)[-1] <- label[variable == group.tbsub, val_label]
+          tbsub <- cbind(Variable = paste0(tbsub[,1]," ",rownames(tbsub)), cn[, -1], tbsub[, c(label[variable == group.tbsub,level], names(tbsub)[4:6], 'P value','P for interaction')])
+
+          tbsub[-(len-1), 1] <- unlist(lapply(vs, function(x){c(label[variable == x, var_label][1], paste0("     ", label[variable == x, val_label]))}))
+          colnames(tbsub)[1:(2+2*len)] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
+
+        }else{
+          ev.ov <- data[, sum(as.numeric(as.vector(get(var.event)))), keyby = get(group.tbsub)][, V1]
+          nn.ov <- data[, .N, keyby = get(group.tbsub)][, N]
+
+          ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
+         cn<-ov
+           names(cn)[-1] <- label[variable == group.tbsub, val_label]
+          tbsub <- cbind(Variable = paste0(tbsub[,1]," ",rownames(tbsub)), cn[, -1], tbsub[, c(label[variable == group.tbsub,level], names(tbsub)[4:6], 'P value','P for interaction')])
+
+          colnames(tbsub)[1:(2+2*nrow(label[variable==group.tbsub]))] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
+
+        }
 
         return(tbsub)
 
       })
 
       res <- reactive({
-        datatable(tbsub(), caption = paste0(input$dep_tbsub, " subgroup analysis: ", input$data_tbsub), rownames = F, extensions= "Buttons",
-                  options = c(opt.tb1(paste0("tbsub_", input$data_tbsub)),
+        datatable(tbsub(), caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions= "Buttons",
+                  options = c(opt.tb1(paste0("tbsub_",input$dep)),
                               list(scrollX = TRUE, columnDefs = list(list(className = 'dt-right', targets = 0)))
                   ))
         # list({
@@ -274,14 +290,17 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                          }
 
                          data <- tbsub()
-                         data_est<-data$`Absolute difference(%)`
+                         data_est<-data$`HR`
+                         len<-ncol(data)
+                         ll<-nrow(label[variable==group.tbsub])
                          data[[6]]<-paste0(data[[6]], " (", data[[7]], "-", data[[8]], ")")
                          data$` ` <- paste(rep(" ", 20), collapse = " ")
-                         tm <- forest_theme(ci_Theight = 0.2)
-                         forestploter::forest(data[,c(c(1:6),11,c(9:10))],
-                                              lower=as.numeric(data$LCI),
-                                              upper=as.numeric(data$UCI),
-                                              ci_column =7,
+                         tm <- forestploter::forest_theme(ci_Theight = 0.2)
+                         selected_columns<-c(c(1:(2+2*ll)),len+1,(len-1):(len))
+                         forestploter::forest(data[,..selected_columns],
+                                              lower=as.numeric(data$Lower),
+                                              upper=as.numeric(data$Upper),
+                                              ci_column =3+2*ll,
                                               est=as.numeric(data_est),
                                               xlim=c(0, 5),
                                               theme=tm
