@@ -177,16 +177,17 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         group_list <- mklist(data_varStruct(), group_vars)
 
         except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data())]
-
+        group2_vars<-factor_vars[nclass_factor==2]
         return(list(
           factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list, conti_vars_positive = conti_vars_positive,
+          group2_vars=group2_vars,
           factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_vars = group_vars, group_list = group_list, except_vars = except_vars
         ))
       })
 
       output$group_tbsub<-renderUI({
         req(input$dep)
-        selectInput(session$ns('group'), 'Group', choices = c(vlist()$group_vars,vlist()$conti_vars), selected = setdiff(c(vlist()$group_vars,vlist()$conti_vars),input$dep)[1])
+        selectInput(session$ns('group'), 'Group', choices = c(vlist()$group2_vars,vlist()$conti_vars), selected = setdiff(c(vlist()$group2_vars,vlist()$conti_vars),input$dep)[1])
       })
       output$dep_tbsub<-renderUI({
         selectInput(session$ns('dep'), 'Outcome', choices = vlist()$factor_01vars, selected = vlist()$factor_01vars[1])

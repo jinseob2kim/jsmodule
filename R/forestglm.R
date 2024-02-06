@@ -141,7 +141,6 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
       vlist <- reactive({
 
         label <- data.table(data_label(), stringsAsFactors = T)
-
         data <- data.table(data(), stringsAsFactors = T)
 
         mklist <- function(varlist, vars) {
@@ -184,12 +183,12 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
 
         group_vars <- factor_vars[nclass_factor >= 2 & nclass_factor <= nfactor.limit & nclass_factor < nrow(data())]
         group_list <- mklist(data_varStruct(), group_vars)
-
+        group2_vars<-factor_vars[nclass_factor==2]
         except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data())]
 
         return(list(
           factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list, conti_vars_positive = conti_vars_positive,
-          factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_vars = group_vars, group_list = group_list, except_vars = except_vars
+          group2_vars= group2_vars,factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_vars = group_vars, group_list = group_list, except_vars = except_vars
         ))
       })
       dep<-reactive({
@@ -200,7 +199,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
       })
 
       output$group_tbsub<-renderUI({
-        selectInput(session$ns('group'), 'Group', choices = vlist()$group_vars, selected = vlist()$group_vars[1])
+        selectInput(session$ns('group'), 'Group', choices = vlist()$group2_vars, selected = vlist()$group2_vars[1])
       })
       output$dep_tbsub<-renderUI({
         req(input$group)
