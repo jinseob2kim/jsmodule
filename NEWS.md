@@ -3,6 +3,7 @@
 ## New module (Thanks for [Yoonkyoung Jeon](https://github.com/cyk0315))
 
 * forestcox (`forestcoxUI`, `forestcoxServer`)
+* forestglm (`forestglmUI`, `forestglmServer`)
 
 # jsmodule 1.4.4
 

@@ -1,25 +1,27 @@
-#' @title forestcoxUI:shiny module UI for forestcox
+#' @title forestglmUI:Shiny module UI for forestglm
 #' @description Shiny module UI for forestcox
 #' @param id id
 #' @param label label, Default: 'forestplot'
 #' @return Shinymodule UI
-#' @details Shinymodule UI for forestcox
+#' @details Shinymodule UI for forestglm
 #' @examples
+#' \dontrun{
+#' if(interactive()){
+#' library(survival)
+#' library(dplyr)
 #'
-#' library(survival);library(dplyr);library(jstable);library(shiny)
 #' lung %>%
 #'   mutate(
-#'     status = as.integer(status == 1),
+#'     status = factor(as.integer(status == 1)),
 #'     sex = factor(sex),
 #'     kk = factor(as.integer(pat.karno >= 70)),
 #'     kk1 = factor(as.integer(pat.karno >= 60))
-#'
 #'   ) -> lung
-#' out<-lung
+#' library(shiny);library(DT)
 #' ui <- fluidPage(
 #'   sidebarLayout(
 #'     sidebarPanel(
-#'       forestcoxUI('Forest')
+#'       forestglmUI('Forest')
 #'     ),
 #'     mainPanel(
 #'       DTOutput('tablesub')
@@ -27,30 +29,35 @@
 #'   )
 #' )
 #'
+#' out<-lung
 #'
+#' library(jstable);
+#' library(data.table)
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
-#'  label<-reactive(mk.lev(out))
-#'  outtable<-forestcoxServer('Forest',data=data,data_label=label)
+#'   label<-reactive(mk.lev(out))
+#'   outtable<-forestglmServer('Forest',data=data,data_label=label,family='gaussian')
 #'   output$tablesub<-renderDT({
 #'     outtable()
 #'   })
 #' }
 #'
 #' shinyApp(ui, server)
-#' @rdname forestcoxUI
+#'
+#'  }
+#' }
+#' @rdname forestglmUI
 #' @export
-
-forestcoxUI<-function(id,label='forestplot'){
+#'
+#'
+forestglmUI<-function(id,label='forestplot'){
   ns<-NS(id)
   tagList(
 
     uiOutput(ns('group_tbsub')),
     uiOutput(ns('dep_tbsub')),
-    uiOutput(ns('day_tbsub')),
     uiOutput(ns('subvar_tbsub')),
     uiOutput(ns('cov_tbsub')),
-    uiOutput(ns('time_tbsub')),
     downloadButton(ns('forest'), 'Download forest plot'),
     sliderInput(ns('width_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 15),
     sliderInput(ns('height_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 20),
@@ -61,31 +68,34 @@ forestcoxUI<-function(id,label='forestplot'){
 }
 
 
-#' @title forestcoxServer:shiny module server for forestcox
-#' @description Shiny module server for forestcox
+#' @title forestglmServer:shiny module server for forestglm
+#' @description Shiny module server for forestglm
 #' @param id id
 #' @param data Reactive data
 #' @param data_label Reactive data label
+#' @param family family, "gaussian" or "binomial"
 #' @param data_varStruct Reactive List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
-#' @return Shiny module server for forestcox
-#' @details Shiny module server for forestcox
+#' @return Shiny module server for forestglm
+#' @details Shiny module server for forestglm
 #' @examples
+#' \dontrun{
+#' if(interactive()){
+#' library(survival)
+#' library(dplyr)
 #'
-#' library(survival);library(dplyr);library(jstable);library(shiny)
 #' lung %>%
 #'   mutate(
-#'     status = as.integer(status == 1),
+#'     status = factor(as.integer(status == 1)),
 #'     sex = factor(sex),
 #'     kk = factor(as.integer(pat.karno >= 70)),
 #'     kk1 = factor(as.integer(pat.karno >= 60))
-#'
 #'   ) -> lung
-#' out<-lung
+#' library(shiny);library(DT)
 #' ui <- fluidPage(
 #'   sidebarLayout(
 #'     sidebarPanel(
-#'       forestcoxUI('Forest')
+#'       forestglmUI('Forest')
 #'     ),
 #'     mainPanel(
 #'       DTOutput('tablesub')
@@ -93,28 +103,35 @@ forestcoxUI<-function(id,label='forestplot'){
 #'   )
 #' )
 #'
+#' out<-lung
 #'
+#' library(jstable);
+#' library(data.table)
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
-#'  label<-reactive(mk.lev(out))
-#'  outtable<-forestcoxServer('Forest',data=data,data_label=label)
+#'   label<-reactive(mk.lev(out))
+#'   outtable<-forestglmServer('Forest',data=data,data_label=label,family='gaussian')
 #'   output$tablesub<-renderDT({
 #'     outtable()
 #'   })
 #' }
 #'
 #' shinyApp(ui, server)
+#'
+#'  }
+#' }
 #' @seealso
-#'  \code{\link[forestploter]{forest}}
+#'  \code{\link[data.table]{setDT}}
+#'  \code{\link[forestploter]{forest_theme}}, \code{\link[forestploter]{forest}}
 #'  \code{\link[rvg]{dml}}
 #'  \code{\link[officer]{read_pptx}}, \code{\link[officer]{add_slide}}, \code{\link[officer]{ph_with}}, \code{\link[officer]{ph_location}}
-#' @rdname forestcoxServer
+#' @rdname forestglmServer
 #' @export
-#' @importFrom forestploter forest
+#' @importFrom data.table setDT
+#' @importFrom forestploter forest_theme forest
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
-
-forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=10){
+forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.limit=10){
   moduleServer(
     id,
     function(input, output, session) {
@@ -181,12 +198,18 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
           factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_vars = group_vars, group_list = group_list, except_vars = except_vars
         ))
       })
+      dep<-reactive({
+        if(family=='binomial'){
+          return(vlist()$factor_01vars)
+        }
+        return(names(data()))
+      })
 
       output$group_tbsub<-renderUI({
-        selectInput(session$ns('group'), 'Group', choices = c(vlist()$group_vars,vlist()$conti_vars), selected = c(vlist()$group_vars,vlist()$conti_vars)[1])
+        selectInput(session$ns('group'), 'Group', choices = vlist()$group_vars, selected = vlist()$group_vars[1])
       })
       output$dep_tbsub<-renderUI({
-        selectInput(session$ns('dep'), 'Outcome', choices = vlist()$factor_01vars, selected = vlist()$factor_01vars[1])
+        selectInput(session$ns('dep'), 'Outcome', choices = dep(), selected = dep()[1])
       })
       output$subvar_tbsub<-renderUI({
         selectInput(session$ns('subvar'), 'Subgroup to include', choices =setdiff(vlist()$group_vars, c(input$group,input$dep)), selected = setdiff(vlist()$group_vars, c(input$group,input$dep)), multiple = T)
@@ -195,13 +218,8 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
       output$cov_tbsub<-renderUI({
         selectInput(session$ns('cov'), 'Addtional covariates', choices = vlist()$group_vars, selected = NULL, multiple = T)
       })
-      output$day_tbsub<-renderUI({
-        selectInput(session$ns('day'), 'Time', choices = vlist()$conti_vars_positive, selected = vlist()$conti_vars_positive[1])
-      })
-      output$time_tbsub<-renderUI({
-        day <- input$day
-        sliderInput(session$ns('time'), 'Select time range', min = min(data()[[day]],na.rm=TRUE) , max = max(data()[[day]],na.rm=TRUE), value = c(min(data()[[day]],na.rm=TRUE), max(data()[[day]],na.rm=TRUE)))
-      })
+
+
 
 
       tbsub<-reactive({
@@ -212,31 +230,38 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         # req(input$subvar)
         # req(input$cov)
         # req(input$group)
-
         group.tbsub<-input$group
         var.event <- input$dep
-        var.day <- input$day
-        var.time<-input$time
-        isgroup<-ifelse(group.tbsub %in% vlist()$group_vars,1,0)
 
-        #data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
-        data <- data[!(var.day < var.time[1])]
-        data[[var.event]] <- ifelse(data[[var.day]] >= var.time[2] & data[[var.event]] == "1", 0, as.numeric(as.vector(data[[var.event]])))
-        data[[var.day]] <- ifelse(data[[var.day]] >= var.time[2], var.time[2], data[[var.day]])
         data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
 
 
-        form <- as.formula(paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = ""))
+        form <- as.formula(paste( var.event, " ~ ", group.tbsub, sep = ""))
         vs <- input$subvar
-        tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=data,  time_eventrate = var.time[2] , line = F, decimal.hr = 3, decimal.percent = 1)
+
         #data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
-        tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs, data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
+        tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=data,family=family)
+#        tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs, data=data,family=family)
         len<-nrow(label[variable==group.tbsub])
         data<-data.table::setDT(data)
-        if(!isgroup){
-          tbsub<-setnames(tbsub,'Point Estimate','HR')
-          tbsub<-tbsub[,c(1,4:8)]
-          }else{
+        if(family=='gaussian'){
+          setnames(tbsub,'Point.Estimate','Beta')
+          meanvar<-rbind(data[, .(round(mean(get(var.event),na.rm=TRUE),2),round(var(get(var.event),na.rm=TRUE),2))],
+          lapply(vs,
+                function(x){
+                  cc<-data.table(matrix(ncol=2))
+                  for( y in levels(data[[x]])){
+                    ev <- data[!is.na(get(x)) & get(x) == y, .(round(mean(get(var.event),na.rm=TRUE),2),round(var(get(var.event),na.rm=TRUE),2))]
+                    cc<-rbind(cc,ev)
+                  }
+                  cc
+                })%>%rbindlist
+          )
+          names(meanvar)<-c('mean','var')
+          tbsub<-cbind(tbsub[,1],meanvar,tbsub[4:8])
+          return(tbsub)
+        }
+
         if(!is.null(vs)){
           lapply(vs,
                  function(x){
@@ -245,11 +270,11 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
                    dd.bind<-' '
                    for( y in levels(data[[group.tbsub]])){
-                          ev <- data[!is.na(get(x)) & get(group.tbsub) == y, sum(as.numeric(as.vector(get(var.event)))), keyby = get(x)]
-                          nn <- data[!is.na(get(x)) & get(group.tbsub) == y, .N, keyby = get(x)]
-                          vv<-data.table(get=ev[,get],paste0(ev[, V1], "/", nn[, N], " (", round(ev[, V1]/ nn[, N] * 100, 1), "%)"))
-                       ee<-merge(data.table(get=levels(ev[,get])),vv,all.x = TRUE)
-                              dd.bind<-cbind(dd.bind,ee[,V2])
+                     ev <- data[!is.na(get(x)) & get(group.tbsub) == y, sum(as.numeric(as.vector(get(var.event)))), keyby = get(x)]
+                     nn <- data[!is.na(get(x)) & get(group.tbsub) == y, .N, keyby = get(x)]
+                     vv<-data.table(get=ev[,get],paste0(ev[, V1], "/", nn[, N], " (", round(ev[, V1]/ nn[, N] * 100, 1), "%)"))
+                     ee<-merge(data.table(get=levels(ev[,get])),vv,all.x = TRUE)
+                     dd.bind<-cbind(dd.bind,ee[,V2])
                    }
                    names(cc) <- names(dd.bind)
                    rbind(cc, dd.bind)
@@ -265,24 +290,23 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
 
           names(cn)[-1] <- label[variable == group.tbsub, val_label]
-          tbsub <- cbind(Variable = paste0(tbsub[,1]," ",rownames(tbsub)), cn[, -1], tbsub[, c(label[variable == group.tbsub,level], names(tbsub)[4:6], 'P value','P for interaction')])
+          tbsub <- cbind(Variable = paste0(tbsub[,1]," ",rownames(tbsub)), cn[, -1], tbsub[, c( names(tbsub)[4:6], 'P value','P for interaction')])
 
           tbsub[-(len-1), 1] <- unlist(lapply(vs, function(x){c(label[variable == x, var_label][1], paste0("     ", label[variable == x, val_label]))}))
-          colnames(tbsub)[1:(2+2*len)] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
+          colnames(tbsub)[1:(1+len)] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]))
 
         }else{
           ev.ov <- data[, sum(as.numeric(as.vector(get(var.event)))), keyby = get(group.tbsub)][, V1]
           nn.ov <- data[, .N, keyby = get(group.tbsub)][, N]
 
           ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
-         cn<-ov
-           names(cn)[-1] <- label[variable == group.tbsub, val_label]
-          tbsub <- cbind(Variable = paste0(tbsub[,1]," ",rownames(tbsub)), cn[, -1], tbsub[, c(label[variable == group.tbsub,level], names(tbsub)[4:6], 'P value','P for interaction')])
+          cn<-ov
+          names(cn)[-1] <- label[variable == group.tbsub, val_label]
+          tbsub <- cbind(Variable = paste0(tbsub[,1]," ",rownames(tbsub)), cn[, -1], tbsub[, c( names(tbsub)[4:6], 'P value','P for interaction')])
 
-          colnames(tbsub)[1:(2+2*nrow(label[variable==group.tbsub]))] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
+          colnames(tbsub)[1:(1+nrow(label[variable==group.tbsub]))] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]))
 
-        }}
-
+        }
         return(tbsub)
 
       })
@@ -292,7 +316,6 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                   options = c(opt.tb1(paste0("tbsub_",input$dep)),
                               list(scrollX = TRUE, columnDefs = list(list(className = 'dt-right', targets = 0)))
                   ))
-
       })
 
 
@@ -311,21 +334,27 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                          }
 
                          data <- data.table::setDT(tbsub())
-                         len<-ncol(data)
+                         if(family=='gaussian'){
+                           r<-'Beta'
+                           ll<-2
+                         }else{
+                          r<-'OR'
+                          ll<-nrow(label[variable==group.tbsub])
+                          data[OR==0|Lower==0,':='(OR=NA,Lower=NA,Upper=NA)]
+                          data<-mutate(data,OR=round(log(as.numeric(OR)),2),
+                                       Lower=round(log(as.numeric(Lower)),2),Upper=round(log(as.numeric(Upper)),2))
+                         }
 
-                         ll<-ifelse(isgroup,nrow(label[variable==group.tbsub]),0)
-                        data[HR==0|Lower==0,':='(HR=NA,Lower=NA,Upper=NA)]
-                         data<-mutate(data,HR=round(log(as.numeric(HR)),2),
-                                      Lower=round(log(as.numeric(Lower)),2),Upper=round(log(as.numeric(Upper)),2))
-                         data_est<-data$`HR`
-                         data<-data%>%mutate(HR=paste0(HR, " (", Lower, "-", Upper, ")"))
+                         len<-ncol(data)
+                         data_est<-data[,get(r)]
+                         data<-data%>%mutate(!!r:=paste0(get(r), " (", Lower, "-", Upper, ")"))
                          data$` ` <- paste(rep(" ", 20), collapse = " ")
                          tm <- forestploter::forest_theme(ci_Theight = 0.2)
-                         selected_columns<-c(c(1:(2+2*ll)),len+1,(len-1):(len))
+                         selected_columns<-c(c(1:(2+ll)),len+1,(len-1):(len))
                          forestploter::forest(data[,..selected_columns],
                                               lower=as.numeric(data$Lower),
                                               upper=as.numeric(data$Upper),
-                                              ci_column =3+2*ll,
+                                              ci_column =3+ll,
                                               est=as.numeric(data_est),
                                               ref_line = 1,
                                               xlim=c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE)),
