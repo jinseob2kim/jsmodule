@@ -38,6 +38,7 @@
 #' }
 #'
 #' shinyApp(ui, server)
+#'
 #' @rdname forestcoxUI
 #' @export
 
@@ -104,6 +105,7 @@ forestcoxUI<-function(id,label='forestplot'){
 #' }
 #'
 #' shinyApp(ui, server)
+#'
 #' @seealso
 #'  \code{\link[forestploter]{forest}}
 #'  \code{\link[rvg]{dml}}
@@ -183,12 +185,15 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
       })
 
       output$group_tbsub<-renderUI({
-        selectInput(session$ns('group'), 'Group', choices = c(vlist()$group_vars,vlist()$conti_vars), selected = c(vlist()$group_vars,vlist()$conti_vars)[1])
+        req(input$dep)
+        selectInput(session$ns('group'), 'Group', choices = c(vlist()$group_vars,vlist()$conti_vars), selected = setdiff(c(vlist()$group_vars,vlist()$conti_vars),input$dep)[1])
       })
       output$dep_tbsub<-renderUI({
         selectInput(session$ns('dep'), 'Outcome', choices = vlist()$factor_01vars, selected = vlist()$factor_01vars[1])
       })
       output$subvar_tbsub<-renderUI({
+        req(input$dep)
+        req(input$group)
         selectInput(session$ns('subvar'), 'Subgroup to include', choices =setdiff(vlist()$group_vars, c(input$group,input$dep)), selected = setdiff(vlist()$group_vars, c(input$group,input$dep)), multiple = T)
 
       })
@@ -207,15 +212,15 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
       tbsub<-reactive({
         label <- data_label()
         data<-data()
-        #  req(input$dep)
-        # req(input$day)
-        # req(input$subvar)
-        # req(input$cov)
-        # req(input$group)
+         req(input$dep)
+         req(input$day)
+         req(input$subvar)
+         req(input$group)
 
         group.tbsub<-input$group
         var.event <- input$dep
         var.day <- input$day
+        req(input$time)
         var.time<-input$time
         isgroup<-ifelse(group.tbsub %in% vlist()$group_vars,1,0)
 
@@ -245,7 +250,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
                    dd.bind<-' '
                    for( y in levels(data[[group.tbsub]])){
-                          ev <- data[!is.na(get(x)) & get(group.tbsub) == y, sum(as.numeric(as.vector(get(var.event)))), keyby = get(x)]
+                          ev <- data[!is.na(get(x)) & get(group.tbsub) == y, sum(as.numeric(as.vector(get(var.event))),na.rm=TRUE), keyby = get(x)]
                           nn <- data[!is.na(get(x)) & get(group.tbsub) == y, .N, keyby = get(x)]
                           vv<-data.table(get=ev[,get],paste0(ev[, V1], "/", nn[, N], " (", round(ev[, V1]/ nn[, N] * 100, 1), "%)"))
                        ee<-merge(data.table(get=levels(ev[,get])),vv,all.x = TRUE)
@@ -255,7 +260,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                    rbind(cc, dd.bind)
                  }) %>% rbindlist -> ll
 
-          ev.ov <- data[, sum(as.numeric(as.vector(get(var.event)))), keyby = get(group.tbsub)][, V1]
+          ev.ov <- data[, sum(as.numeric(as.vector(get(var.event))),na.rm=TRUE), keyby = get(group.tbsub)][, V1]
           nn.ov <- data[, .N, keyby = get(group.tbsub)][, N]
 
           ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
@@ -271,7 +276,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
           colnames(tbsub)[1:(2+2*len)] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
 
         }else{
-          ev.ov <- data[, sum(as.numeric(as.vector(get(var.event)))), keyby = get(group.tbsub)][, V1]
+          ev.ov <- data[, sum(as.numeric(as.vector(get(var.event))),na.rm=TRUE), keyby = get(group.tbsub)][, V1]
           nn.ov <- data[, .N, keyby = get(group.tbsub)][, N]
 
           ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
