@@ -10,7 +10,8 @@ forestglmServer(
   data_label,
   family,
   data_varStruct = NULL,
-  nfactor.limit = 10
+  nfactor.limit = 10,
+  design.survey = NULL
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ forestglmServer(
 \item{data_varStruct}{Reactive List of variable structure, Default: NULL}
 
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
+
+\item{design.survey}{reactive survey data. default: NULL}
 }
 \value{
 Shiny module server for forestglm
@@ -38,8 +41,7 @@ Shiny module server for forestglm
 \examples{
 \dontrun{
 if(interactive()){
-library(survival)
-library(dplyr)
+library(survival);library(jstable);library(data.table);library(dplyr);library(shiny);library(DT)
 
 lung \%>\%
   mutate(
@@ -48,7 +50,7 @@ lung \%>\%
     kk = factor(as.integer(pat.karno >= 70)),
     kk1 = factor(as.integer(pat.karno >= 60))
   ) -> lung
-library(shiny);library(DT)
+
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
@@ -62,8 +64,6 @@ ui <- fluidPage(
 
 out<-lung
 
-library(jstable);
-library(data.table)
 server <- function(input, output, session) {
   data<-reactive(out)
   label<-reactive(mk.lev(out))
@@ -80,6 +80,7 @@ shinyApp(ui, server)
 }
 \seealso{
 \code{\link[data.table]{setDT}}
+ \code{\link[survey]{surveysummary}}, \code{\link[survey]{svytable}}
  \code{\link[forestploter]{forest_theme}}, \code{\link[forestploter]{forest}}
  \code{\link[rvg]{dml}}
  \code{\link[officer]{read_pptx}}, \code{\link[officer]{add_slide}}, \code{\link[officer]{ph_with}}, \code{\link[officer]{ph_location}}

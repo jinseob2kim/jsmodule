@@ -9,7 +9,8 @@ forestcoxServer(
   data,
   data_label,
   data_varStruct = NULL,
-  nfactor.limit = 10
+  nfactor.limit = 10,
+  design.survey = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ forestcoxServer(
 \item{data_varStruct}{Reactive List of variable structure, Default: NULL}
 
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
+
+\item{design.survey}{reactive survey data. default: NULL}
 }
 \value{
 Shiny module server for forestcox
@@ -66,6 +69,7 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+
 }
 \seealso{
 \code{\link[forestploter]{forest}}

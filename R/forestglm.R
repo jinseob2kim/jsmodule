@@ -65,6 +65,7 @@ forestglmUI<-function(id,label='forestplot'){
 }
 
 
+
 #' @title forestglmServer:shiny module server for forestglm
 #' @description Shiny module server for forestglm
 #' @param id id
@@ -73,6 +74,7 @@ forestglmUI<-function(id,label='forestplot'){
 #' @param family family, "gaussian" or "binomial"
 #' @param data_varStruct Reactive List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
+#' @param design.survey reactive survey data. default: NULL
 #' @return Shiny module server for forestglm
 #' @details Shiny module server for forestglm
 #' @examples
@@ -116,16 +118,18 @@ forestglmUI<-function(id,label='forestplot'){
 #' }
 #' @seealso
 #'  \code{\link[data.table]{setDT}}
+#'  \code{\link[survey]{surveysummary}}, \code{\link[survey]{svytable}}
 #'  \code{\link[forestploter]{forest_theme}}, \code{\link[forestploter]{forest}}
 #'  \code{\link[rvg]{dml}}
 #'  \code{\link[officer]{read_pptx}}, \code{\link[officer]{add_slide}}, \code{\link[officer]{ph_with}}, \code{\link[officer]{ph_location}}
 #' @rdname forestglmServer
 #' @export
 #' @importFrom data.table setDT
+#' @importFrom survey svymean svyvar svytable
 #' @importFrom forestploter forest_theme forest
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
-forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.limit=10){
+forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.limit=10,design.survey=NULL){
   moduleServer(
     id,
     function(input, output, session) {
@@ -160,7 +164,9 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
         factor_list <- mklist(data_varStruct(), factor_vars)
 
         conti_vars <- setdiff(names(data()), factor_vars)
-
+        if (!is.null(design.survey)) {
+          conti_vars <- setdiff(conti_vars, c(names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
+        }
         conti_vars_positive <- conti_vars[unlist(data[, lapply(.SD, function(x) {
           min(x, na.rm = T) >= 0
         }), .SDcols = conti_vars])]
@@ -173,10 +179,13 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
         class01_factor <- unlist(data[, lapply(.SD, function(x) {
           identical(levels(x), c("0", "1"))
         }), .SDcols = factor_vars])
-
+        isNA_factor <- unlist(data[, lapply(.SD, function(x) {
+          return (sum(is.na(x))!=0)
+        }) ])
         validate(
           need(length(class01_factor) >= 1, "No categorical variables coded as 0, 1 in data")
         )
+        isNA_vars<-names(data)[isNA_factor]
         factor_01vars <- factor_vars[class01_factor]
 
         factor_01_list <- mklist(data_varStruct(), factor_01vars)
@@ -185,25 +194,25 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
         group_list <- mklist(data_varStruct(), group_vars)
         group2_vars<-factor_vars[nclass_factor==2]
         except_vars <- factor_vars[nclass_factor > nfactor.limit | nclass_factor == 1 | nclass_factor == nrow(data())]
-
         return(list(
           factor_vars = factor_vars, factor_list = factor_list, conti_vars = conti_vars, conti_list = conti_list, conti_vars_positive = conti_vars_positive,
-          group2_vars= group2_vars,factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_vars = group_vars, group_list = group_list, except_vars = except_vars
+          isNA_vars=isNA_vars,group2_vars= group2_vars,factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_vars = group_vars, group_list = group_list, except_vars = except_vars
         ))
       })
       dep<-reactive({
         if(family=='binomial'){
-          return(vlist()$factor_01vars)
+          return(setdiff(vlist()$factor_01vars,vlist()$isNA_vars))
         }
-        return(names(data()))
+        return(setdiff(names(data()),vlist()$isNA_vars))
       })
 
       output$group_tbsub<-renderUI({
-        selectInput(session$ns('group'), 'Group', choices = vlist()$group2_vars, selected = vlist()$group2_vars[1])
+        req(input$dep)
+        selectInput(session$ns('group'), 'Group', choices = vlist()$group2_vars, selected = setdiff(vlist()$group2_vars,input$dep)[1])
       })
       output$dep_tbsub<-renderUI({
-        req(input$group)
-        selectInput(session$ns('dep'), 'Outcome', choices = dep(), selected = setdiff(dep(),input$group)[1])
+
+        selectInput(session$ns('dep'), 'Outcome', choices = dep(), selected = dep()[1])
       })
       output$subvar_tbsub<-renderUI({
         req(input$group)
@@ -220,36 +229,55 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
 
       tbsub<-reactive({
         label <- data_label()
-        data<-data()
-         req(input$dep)
-         req(input$group)
-
-        group.tbsub<-input$group
         var.event <- input$dep
+        group.tbsub<-input$group
+        if(is.null(design.survey)){
+          data<-data()
+          data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
+          coxdata<-data
+        }else{
+          data<-design.survey()$variables
+          data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
+          coxdata<-design.survey()
+          coxdata$variables<-data
+        }
 
-        data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
+
 
 
         form <- as.formula(paste( var.event, " ~ ", group.tbsub, sep = ""))
-        req(input$subvar)
         vs <- input$subvar
 
         #data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
-        tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=data,family=family)
-        #tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs, data=data,family=family)
+        tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=coxdata,family=family)
+        #tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs, data=coxdata,family=family)
         len<-nrow(label[variable==group.tbsub])
         data<-data.table::setDT(data)
         if(family=='gaussian'){
           setnames(tbsub,'Point.Estimate','Beta')
-          meanvar<-data[, .(round(mean(get(var.event),na.rm=TRUE),2),round(var(get(var.event),na.rm=TRUE),2))]%>%mutate(mean=paste(V1,'±',V2))
-          meanvar<-rbind(meanvar[,3],
+          if(is.null(design.survey)){
+            meanvar<-data[, .(round(mean(get(var.event),na.rm=TRUE),2),round(var(get(var.event),na.rm=TRUE),2))]%>%mutate(mean=paste(V1,'±',V2))
+            meanvar<-meanvar[,3]
+          }else{
+            ss<-paste('~',var.event)
+            meanvar<-data.table(mean=paste(round(ftable(survey::svymean(as.formula(ss),coxdata))[,1],2),'±',round(ftable(survey::svyvar(as.formula(ss),coxdata))[,1],2)))
+          }
+          meanvar<-rbind(meanvar,
           lapply(vs,
                 function(x){
                   cc<-data.table(mean=NA)
                   for( y in levels(data[[x]])){
+                    if(is.null(design.survey)){
                     ev <- data[!is.na(get(x)) & get(x) == y, .(round(mean(get(var.event),na.rm=TRUE),2),round(var(get(var.event),na.rm=TRUE),2))]%>%
                       mutate(mean=paste(V1,'±',V2))
                     cc<-rbind(cc,ev[,3])
+                    }else{
+                      sub<-subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y)
+                      ss<-paste('~',var.event)
+                      ev<-data.table(mean=paste(round(ftable(survey::svymean(as.formula(ss),sub))[,1],2),'±',round(ftable(survey::svyvar(as.formula(ss),sub))[,1],2)))
+                      cc<-rbind(cc,ev)
+
+                    }
                   }
                   cc
                 })%>%rbindlist
@@ -258,6 +286,15 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
           colnames(tbsub)[1]<-'Subgroup'
           return(tbsub)
         }
+        if(is.null(design.survey)){
+        ev.ov <- data[!is.na(get(group.tbsub)), sum(as.numeric(as.vector(get(var.event))),na.rm=TRUE), keyby = get(group.tbsub)][, V1]
+        nn.ov <- data[!is.na(get(group.tbsub)), .N, keyby = get(group.tbsub)][, N]
+        }else{
+          ev.ov <- round(survey::svytable(as.formula(paste0("~", var.event, "+", group.tbsub)), design = coxdata)[2, ], 1)
+          nn.ov <- round(survey::svytable(as.formula(paste0("~", group.tbsub)), design = coxdata), 1)
+
+        }
+        ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
 
         if(!is.null(vs)){
           lapply(vs,
@@ -266,21 +303,27 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                    cc[[1]]<-x
 
                    dd.bind<-' '
+                   getlev<-data.table(get=levels(data[[x]]))
                    for( y in levels(data[[group.tbsub]])){
+                     if(is.null(design.survey)){
                      ev <- data[!is.na(get(x)) & get(group.tbsub) == y, sum(as.numeric(as.vector(get(var.event))),na.rm=TRUE), keyby = get(x)]
                      nn <- data[!is.na(get(x)) & get(group.tbsub) == y, .N, keyby = get(x)]
                      vv<-data.table(get=ev[,get],paste0(ev[, V1], "/", nn[, N], " (", round(ev[, V1]/ nn[, N] * 100, 1), "%)"))
                      ee<-merge(data.table(get=levels(ev[,get])),vv,all.x = TRUE)
                      dd.bind<-cbind(dd.bind,ee[,V2])
+                     }else{
+                       svy<-survey::svytable(as.formula(paste0("~", var.event, "+", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y))
+                       ev <- round(svy[2, ], 1)
+                       nn <- round(survey::svytable(as.formula(paste0("~", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y)), 1)
+                       vv <- data.table(get=colnames(svy),paste0(ev, "/", nn, " (", round(ev/ nn * 100, 1), "%)"))
+                       ee<-merge(getlev,vv,all.x=TRUE)
+                       dd.bind<-cbind(dd.bind,ee[,V2])
+                     }
                    }
                    names(cc) <- names(dd.bind)
                    rbind(cc, dd.bind)
                  }) %>% rbindlist -> ll
 
-          ev.ov <- data[, sum(as.numeric(as.vector(get(var.event))),na.rm=TRUE), keyby = get(group.tbsub)][, V1]
-          nn.ov <- data[, .N, keyby = get(group.tbsub)][, N]
-
-          ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
 
           names(ov) <- names(ll)
           cn <- rbind(ov, ll)
@@ -293,10 +336,6 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
           colnames(tbsub)[1:(1+len)] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]))
 
         }else{
-          ev.ov <- data[, sum(as.numeric(as.vector(get(var.event))),na.rm=TRUE), keyby = get(group.tbsub)][, V1]
-          nn.ov <- data[, .N, keyby = get(group.tbsub)][, N]
-
-          ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
           cn<-ov
           names(cn)[-1] <- label[variable == group.tbsub, val_label]
           tbsub <- cbind(Variable = paste0(tbsub[,1]," ",rownames(tbsub)), cn[, -1], tbsub[, c( names(tbsub)[4:6], 'P value','P for interaction')])
@@ -331,6 +370,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                          }
 
                          data <- data.table::setDT(tbsub())
+                         group.tbsub<-input$group
                          if(family=='gaussian'){
                            r<-'Beta'
                            ll<-1

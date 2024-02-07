@@ -23,8 +23,7 @@ Shinymodule UI for forestglm
 \examples{
 \dontrun{
 if(interactive()){
-library(survival)
-library(dplyr)
+library(survival);library(jstable);library(data.table);library(dplyr);library(shiny);library(DT)
 
 lung \%>\%
   mutate(
@@ -33,7 +32,7 @@ lung \%>\%
     kk = factor(as.integer(pat.karno >= 70)),
     kk1 = factor(as.integer(pat.karno >= 60))
   ) -> lung
-library(shiny);library(DT)
+
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
@@ -47,8 +46,6 @@ ui <- fluidPage(
 
 out<-lung
 
-library(jstable);
-library(data.table)
 server <- function(input, output, session) {
   data<-reactive(out)
   label<-reactive(mk.lev(out))
