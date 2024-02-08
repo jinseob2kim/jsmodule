@@ -78,7 +78,7 @@ shinyApp(ui, server)
 \seealso{
 \code{\link[jstable]{TableSubgroupMultiGLM}}
  \code{\link[data.table]{setDT}}, \code{\link[data.table]{setattr}}
- \code{\link[stats]{cor}}
+ \code{\link[stats]{cor}}, \code{\link[stats]{coef}}
  \code{\link[survey]{surveysummary}}, \code{\link[survey]{svytable}}
  \code{\link[forestploter]{forest_theme}}, \code{\link[forestploter]{forest}}
  \code{\link[rvg]{dml}}
