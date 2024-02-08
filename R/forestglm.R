@@ -226,10 +226,10 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
       output$xlim_forest<-renderUI({
         req(tbsub)
         data<-tbsub()
-        value =c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE))
-        sliderInput(session$ns('xlim'), 'Select xlim range', min = value[1] , max = value[2], value =value)
+        numericInput(session$ns('xMax'), 'max beta(OR) for forestplot', value= max(as.numeric(data$Upper),na.rm=TRUE))
 
       })
+
 
 
 
@@ -349,7 +349,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
 
 
           names(cn)[-1] <- label[variable == group.tbsub, val_label]
-          tbsub <- cbind(Variable = paste0(tbsub[,1]," ",rownames(tbsub)), cn[, -1], tbsub[, c( names(tbsub)[4:6], 'P value','P for interaction')])
+          tbsub <- cbind(Variable = tbsub[,1], cn[, -1], tbsub[, c( names(tbsub)[4:6], 'P value','P for interaction')])
 
           tbsub[-(len-1), 1] <- unlist(lapply(vs, function(x){c(label[variable == x, var_label][1], paste0("     ", label[variable == x, val_label]))}))
           colnames(tbsub)[1:(1+len)] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]))
@@ -357,7 +357,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
         }else{
           cn<-ov
           names(cn)[-1] <- label[variable == group.tbsub, val_label]
-          tbsub <- cbind(Variable = paste0(tbsub[,1]," ",rownames(tbsub)), cn[, -1], tbsub[, c( names(tbsub)[4:6], 'P value','P for interaction')])
+          tbsub <- cbind(Variable = tbsub[,1], cn[, -1], tbsub[, c( names(tbsub)[4:6], 'P value','P for interaction')])
 
           colnames(tbsub)[1:(1+nrow(label[variable==group.tbsub]))] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]))
 
@@ -416,7 +416,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                                               ref_line = ifelse(family=='gaussian',0,1),
                                               x_trans=ifelse(family=='gaussian',"none","log"),
                                               ticks_digits=1,
-                                              xlim=x_lim,
+                                              xlim=c(ifelse(family=='gaussian',-input$xMax,1/input$xMax),input$xMax),
                                               theme=tm
                          )-> zz
                          my_vec_graph <- rvg::dml(code = print(zz))
