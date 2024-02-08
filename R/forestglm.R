@@ -5,14 +5,15 @@
 #' @return Shinymodule UI
 #' @details Shinymodule UI for forestglm
 #' @examples
-#' \dontrun{
-#' if(interactive()){
-#' library(survival);library(jstable);library(data.table);library(shiny);library(DT)
 #'
-#' lung$status<-factor(as.integer(lung$status == 1))
-#' lung$sex<-factor(lung$sex)
-#' lung$kk<-factor(as.integer(lung$pat.karno >= 70))
-#' lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
+#' library(shiny);library(DT)
+#'
+#' mtcars$vs<-factor(mtcars$vs)
+#' mtcars$am<-factor(mtcars$am)
+#' mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
+#' mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
+#'
+#' out<-mtcars
 #'
 #'
 #' ui <- fluidPage(
@@ -26,21 +27,19 @@
 #'   )
 #' )
 #'
-#' out<-lung
+#'
 #'
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
-#'   label<-reactive(mk.lev(out))
+#'   label<-reactive(jstable::mk.lev(out))
 #'   outtable<-forestglmServer('Forest',data=data,data_label=label,family='gaussian')
 #'   output$tablesub<-renderDT({
 #'     outtable()
 #'   })
 #' }
 #'
-#' shinyApp(ui, server)
 #'
-#'  }
-#' }
+#'
 #' @rdname forestglmUI
 #' @export
 #'
@@ -77,14 +76,14 @@ forestglmUI<-function(id,label='forestplot'){
 #' @return Shiny module server for forestglm
 #' @details Shiny module server for forestglm
 #' @examples
-#' \dontrun{
-#' if(interactive()){
-#' library(survival);library(jstable);library(data.table);library(shiny);library(DT)
 #'
-#' lung$status<-factor(as.integer(lung$status == 1))
-#' lung$sex<-factor(lung$sex)
-#' lung$kk<-factor(as.integer(lung$pat.karno >= 70))
-#' lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
+#'
+#' library(shiny);library(DT)
+#'
+#' mtcars$vs<-factor(mtcars$vs)
+#' mtcars$am<-factor(mtcars$am)
+#' mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
+#' mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
 #'
 #' ui <- fluidPage(
 #'   sidebarLayout(
@@ -97,24 +96,24 @@ forestglmUI<-function(id,label='forestplot'){
 #'   )
 #' )
 #'
-#' out<-lung
+#' out<-mtcars
 #'
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
-#'   label<-reactive(mk.lev(out))
+#'   label<-reactive(jstable::mk.lev(out))
 #'   outtable<-forestglmServer('Forest',data=data,data_label=label,family='gaussian')
 #'   output$tablesub<-renderDT({
 #'     outtable()
 #'   })
 #' }
 #'
-#' shinyApp(ui, server)
 #'
-#'  }
-#' }
+#'
+#'
+#'
 #' @seealso
 #'  \code{\link[jstable]{TableSubgroupMultiGLM}}
-#'  \code{\link[data.table]{setDT}}, \code{\link[data.table]{setattr}}
+#'   \code{\link[data.table]{data.table-package}},\code{\link[data.table]{setDT}}, \code{\link[data.table]{setattr}}
 #'  \code{\link[stats]{cor}}, \code{\link[stats]{coef}}
 #'  \code{\link[survey]{surveysummary}}, \code{\link[survey]{svytable}}
 #'  \code{\link[forestploter]{forest_theme}}, \code{\link[forestploter]{forest}}
@@ -123,7 +122,7 @@ forestglmUI<-function(id,label='forestplot'){
 #' @rdname forestglmServer
 #' @export
 #' @importFrom jstable TableSubgroupMultiGLM
-#' @importFrom data.table setDT setnames
+#' @importFrom data.table  data.table setDT setnames
 #' @importFrom stats var coef
 #' @importFrom survey svymean svyvar svytable
 #' @importFrom forestploter forest_theme forest
@@ -145,8 +144,8 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
 
       vlist <- reactive({
 
-        label <- data.table(data_label(), stringsAsFactors = T)
-        data <- data.table(data(), stringsAsFactors = T)
+        label <- data.table::data.table(data_label(), stringsAsFactors = T)
+        data <- data.table::data.table(data(), stringsAsFactors = T)
 
         mklist <- function(varlist, vars) {
           lapply(
@@ -279,12 +278,12 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
             meanvar<-meanvar[,.(mean=paste(V1,"\u00B1 ",V2))]
           }else{
             ss<-paste('~',var.event)
-            meanvar<-data.table(mean=paste(round(stats::coef(survey::svymean(as.formula(ss),coxdata)),2),"\u00B1 ",round(stats::coef(survey::svyvar(as.formula(ss),coxdata)),2)))
+            meanvar<-data.table::data.table(mean=paste(round(stats::coef(survey::svymean(as.formula(ss),coxdata)),2),"\u00B1 ",round(stats::coef(survey::svyvar(as.formula(ss),coxdata)),2)))
           }
           meanvar<-rbind(meanvar,
          rbindlist(lapply(vs,
                 function(x){
-                  cc<-data.table(mean=NA)
+                  cc<-data.table::data.table(mean=NA)
                   for( y in levels(data[[x]])){
                     if(is.null(design.survey)){
                     ev <- data[!is.na(get(x)) & get(x) == y, .(round(mean(get(var.event),na.rm=TRUE),2),round(stats::var(get(var.event),na.rm=TRUE),2))]
@@ -292,7 +291,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                     }else{
                       sub<-subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y)
                       ss<-paste('~',var.event)
-                      ev<-data.table(mean=paste(round(stats::coef(survey::svymean(as.formula(ss),sub)),2),"\u00B1 ",round(stats::coef(survey::svyvar(as.formula(ss),sub)),2)))
+                      ev<-data.table::data.table(mean=paste(round(stats::coef(survey::svymean(as.formula(ss),sub)),2),"\u00B1 ",round(stats::coef(survey::svyvar(as.formula(ss),sub)),2)))
                       cc<-rbind(cc,ev)
 
                     }
@@ -312,28 +311,28 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
           nn.ov <- round(survey::svytable(as.formula(paste0("~", group.tbsub)), design = coxdata), 2)
 
         }
-        ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 3), "%)"))))
+        ov <- data.table::data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 3), "%)"))))
 
         if(!is.null(vs)){
           rbindlist(lapply(vs,
                  function(x){
-                   cc<-data.table(matrix(ncol=len+1))
+                   cc<-data.table::data.table(matrix(ncol=len+1))
                    cc[[1]]<-x
 
                    dd.bind<-' '
-                   getlev<-data.table(get=levels(data[[x]]))
+                   getlev<-data.table::data.table(get=levels(data[[x]]))
                    for( y in levels(data[[group.tbsub]])){
                      if(is.null(design.survey)){
                      ev <- data[!is.na(get(x)) & get(group.tbsub) == y, sum(as.numeric(as.vector(get(var.event))),na.rm=TRUE), keyby = get(x)]
                      nn <- data[!is.na(get(x)) & get(group.tbsub) == y, .N, keyby = get(x)]
-                     vv<-data.table(get=ev[,get],paste0(ev[, V1], "/", nn[, N], " (", round(ev[, V1]/ nn[, N] * 100, 1), "%)"))
-                     ee<-merge(data.table(get=levels(ev[,get])),vv,all.x = TRUE)
+                     vv<-data.table::data.table(get=ev[,get],paste0(ev[, V1], "/", nn[, N], " (", round(ev[, V1]/ nn[, N] * 100, 1), "%)"))
+                     ee<-merge(data.table::data.table(get=levels(ev[,get])),vv,all.x = TRUE)
                      dd.bind<-cbind(dd.bind,ee[,V2])
                      }else{
                        svy<-survey::svytable(as.formula(paste0("~", var.event, "+", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y))
                        ev <- round(svy[2, ], 3)
                        nn <- round(survey::svytable(as.formula(paste0("~", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y)), 3)
-                       vv <- data.table(get=colnames(svy),paste0(ev, "/", nn, " (", round(ev/ nn * 100, 2), "%)"))
+                       vv <- data.table::data.table(get=colnames(svy),paste0(ev, "/", nn, " (", round(ev/ nn * 100, 2), "%)"))
                        ee<-merge(getlev,vv,all.x=TRUE)
                        dd.bind<-cbind(dd.bind,ee[,V2])
                      }

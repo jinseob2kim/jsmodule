@@ -6,14 +6,14 @@
 #' @details Shinymodule UI for forestcox
 #' @examples
 #'
-#' library(survival);library(jstable);library(shiny);library(DT)
+#' library(shiny);library(DT);
 #'
-#' lung$status<-factor(as.integer(lung$status == 1))
-#' lung$sex<-factor(lung$sex)
-#' lung$kk<-factor(as.integer(lung$pat.karno >= 70))
-#' lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
+#' mtcars$vs<-factor(mtcars$vs)
+#' mtcars$am<-factor(mtcars$am)
+#' mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
+#' mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
 #'
-#' out<-lung
+#' out<-mtcars
 #' ui <- fluidPage(
 #'   sidebarLayout(
 #'     sidebarPanel(
@@ -28,14 +28,13 @@
 #'
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
-#'  label<-reactive(mk.lev(out))
+#'  label<-reactive(jstable::mk.lev(out))
 #'  outtable<-forestcoxServer('Forest',data=data,data_label=label)
 #'   output$tablesub<-renderDT({
 #'     outtable()
 #'   })
 #' }
 #'
-#' shinyApp(ui, server)
 #'
 #' @rdname forestcoxUI
 #' @export
@@ -73,13 +72,14 @@ forestcoxUI<-function(id,label='forestplot'){
 #' @details Shiny module server for forestcox
 #' @examples
 #'
-#' library(survival);library(jstable);library(shiny);library(DT)
+#' library(shiny);library(DT);
 #'
-#' lung$status<-factor(as.integer(lung$status == 1))
-#' lung$sex<-factor(lung$sex)
-#' lung$kk<-factor(as.integer(lung$pat.karno >= 70))
-#' lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
-#' out<-lung
+#' mtcars$vs<-factor(mtcars$vs)
+#' mtcars$am<-factor(mtcars$am)
+#' mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
+#' mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
+#'
+#' out<-mtcars
 #' ui <- fluidPage(
 #'   sidebarLayout(
 #'     sidebarPanel(
@@ -94,14 +94,13 @@ forestcoxUI<-function(id,label='forestplot'){
 #'
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
-#'  label<-reactive(mk.lev(out))
+#'  label<-reactive(jstable::mk.lev(out))
 #'  outtable<-forestcoxServer('Forest',data=data,data_label=label)
 #'   output$tablesub<-renderDT({
 #'     outtable()
 #'   })
 #' }
 #'
-#' shinyApp(ui, server)
 #'
 #' @seealso
 #'  \code{\link[data.table]{data.table-package}}, \code{\link[data.table]{setDT}}, \code{\link[data.table]{setattr}}
@@ -277,29 +276,29 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
           nn.ov <- round(svytable(as.formula(paste0("~", group.tbsub)), design = coxdata), 2)
 
         }
-        ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 2), "%)"))))
+        ov <- data.table::data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 2), "%)"))))
 
         if(!is.null(vs)){
           rbindlist(lapply(vs,
                  function(x){
-                   cc<-data.table(matrix(ncol=len+1))
+                   cc<-data.table::data.table(matrix(ncol=len+1))
                    cc[[1]]<-x
 
                    dd.bind<-' '
-                   getlev<-data.table(get=levels(data[[x]]))
+                   getlev<-data.table::data.table(get=levels(data[[x]]))
                    for( y in levels(data[[group.tbsub]])){
 
                      if(is.null(design.survey)){
                      ev <- data[!is.na(get(x)) & get(group.tbsub) == y, sum(as.numeric(as.vector(get(var.event))),na.rm=TRUE), keyby = get(x)]
                      nn <- data[!is.na(get(x)) & get(group.tbsub) == y, .N, keyby = get(x)]
-                     vv<-data.table(get=ev[,get],paste0(ev[, V1], "/", nn[, N], " (", round(ev[, V1]/ nn[, N] * 100, 1), "%)"))
-                     ee<-merge(data.table(get=levels(ev[,get])),vv,all.x = TRUE)
+                     vv<-data.table::data.table(get=ev[,get],paste0(ev[, V1], "/", nn[, N], " (", round(ev[, V1]/ nn[, N] * 100, 1), "%)"))
+                     ee<-merge(data.table::data.table(get=levels(ev[,get])),vv,all.x = TRUE)
                      dd.bind<-cbind(dd.bind,ee[,V2])
                      }else{
                        svy<-svytable(as.formula(paste0("~", var.event, "+", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y))
                        ev <- round(svy[2, ], 2)
                        nn <- round(svytable(as.formula(paste0("~", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y)), 2)
-                       vv <- data.table(get=colnames(svy),paste0(ev, "/", nn, " (", round(ev/ nn * 100, 2), "%)"))
+                       vv <- data.table::data.table(get=colnames(svy),paste0(ev, "/", nn, " (", round(ev/ nn * 100, 2), "%)"))
                        ee<-merge(getlev,vv,all.x=TRUE)
                        dd.bind<-cbind(dd.bind,ee[,V2])
                      }

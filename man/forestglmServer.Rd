@@ -39,14 +39,14 @@ Shiny module server for forestglm
 Shiny module server for forestglm
 }
 \examples{
-\dontrun{
-if(interactive()){
-library(survival);library(jstable);library(data.table);library(shiny);library(DT)
 
-lung$status<-factor(as.integer(lung$status == 1))
-lung$sex<-factor(lung$sex)
-lung$kk<-factor(as.integer(lung$pat.karno >= 70))
-lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
+
+library(shiny);library(DT)
+
+mtcars$vs<-factor(mtcars$vs)
+mtcars$am<-factor(mtcars$am)
+mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
+mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
 
 ui <- fluidPage(
   sidebarLayout(
@@ -59,25 +59,25 @@ ui <- fluidPage(
   )
 )
 
-out<-lung
+out<-mtcars
 
 server <- function(input, output, session) {
   data<-reactive(out)
-  label<-reactive(mk.lev(out))
+  label<-reactive(jstable::mk.lev(out))
   outtable<-forestglmServer('Forest',data=data,data_label=label,family='gaussian')
   output$tablesub<-renderDT({
     outtable()
   })
 }
 
-shinyApp(ui, server)
 
- }
-}
+
+
+
 }
 \seealso{
 \code{\link[jstable]{TableSubgroupMultiGLM}}
- \code{\link[data.table]{setDT}}, \code{\link[data.table]{setattr}}
+  \code{\link[data.table]{data.table-package}},\code{\link[data.table]{setDT}}, \code{\link[data.table]{setattr}}
  \code{\link[stats]{cor}}, \code{\link[stats]{coef}}
  \code{\link[survey]{surveysummary}}, \code{\link[survey]{svytable}}
  \code{\link[forestploter]{forest_theme}}, \code{\link[forestploter]{forest}}

@@ -37,13 +37,14 @@ Shiny module server for forestcox
 }
 \examples{
 
-library(survival);library(jstable);library(shiny);library(DT)
+library(shiny);library(DT);
 
-lung$status<-factor(as.integer(lung$status == 1))
-lung$sex<-factor(lung$sex)
-lung$kk<-factor(as.integer(lung$pat.karno >= 70))
-lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
-out<-lung
+mtcars$vs<-factor(mtcars$vs)
+mtcars$am<-factor(mtcars$am)
+mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
+mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
+
+out<-mtcars
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
@@ -58,14 +59,13 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   data<-reactive(out)
- label<-reactive(mk.lev(out))
+ label<-reactive(jstable::mk.lev(out))
  outtable<-forestcoxServer('Forest',data=data,data_label=label)
   output$tablesub<-renderDT({
     outtable()
   })
 }
 
-shinyApp(ui, server)
 
 }
 \seealso{
