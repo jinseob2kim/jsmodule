@@ -6,7 +6,7 @@
 #' @details Shinymodule UI for forestcox
 #' @examples
 #'
-#' library(survival);library(dplyr);library(jstable);library(shiny)
+#' library(survival);library(dplyr);library(jstable);library(shiny);library(DT)
 #' lung %>%
 #'   mutate(
 #'     status = as.integer(status == 1),
@@ -75,7 +75,7 @@ forestcoxUI<-function(id,label='forestplot'){
 #' @details Shiny module server for forestcox
 #' @examples
 #'
-#' library(survival);library(dplyr);library(jstable);library(shiny)
+#' library(survival);library(dplyr);library(jstable);library(shiny);library(DT)
 #' lung %>%
 #'   mutate(
 #'     status = as.integer(status == 1),
