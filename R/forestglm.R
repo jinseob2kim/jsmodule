@@ -58,6 +58,7 @@ forestglmUI<-function(id,label='forestplot'){
     downloadButton(ns('forest'), 'Download forest plot'),
     sliderInput(ns('width_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 15),
     sliderInput(ns('height_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 20),
+    uiOutput(ns('xlim_forest')),
 
 
   )
@@ -221,6 +222,13 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
       })
       output$cov_tbsub<-renderUI({
         selectInput(session$ns('cov'), 'Addtional covariates', choices = vlist()$group_vars, selected = NULL, multiple = T)
+      })
+      output$xlim_forest<-renderUI({
+        req(tbsub)
+        data<-tbsub()
+        value =c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE))
+        sliderInput(session$ns('xlim'), 'Select xlim range', min = value[1] , max = value[2], value =value)
+
       })
 
 
@@ -390,14 +398,15 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                           r<-'OR'
                           ll<-nrow(data_label()[variable==group.tbsub])
                           data[OR==0|Lower==0,':='(OR=NA,Lower=NA,Upper=NA)]
-                          data<-mutate(data,OR=round(log(as.numeric(OR)),2),Lower=round(log(as.numeric(Lower)),2),Upper=round(log(as.numeric(Upper)),2))
-                         }
+                        }
 
                          len<-ncol(data)
                          data_est<-data[,get(r)]
-                         data<-data%>%mutate(!!r:=paste0(get(r), " (", Lower, "-", Upper, ")"))
+                         data[is.na(data)]<-' '
+                         data<-data%>%mutate(!!r:=ifelse(get(r)==' ',' ',paste0(get(r), " (", Lower, "-", Upper, ")")))
                          data$` ` <- paste(rep(" ", 20), collapse = " ")
                          tm <- forestploter::forest_theme(ci_Theight = 0.2)
+                         x_lim<-input$xlim
                          selected_columns<-c(c(1:(2+ll)),len+1,(len-1):(len))
                          forestploter::forest(data[,..selected_columns],
                                               lower=as.numeric(data$Lower),
@@ -405,9 +414,9 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                                               ci_column =3+ll,
                                               est=as.numeric(data_est),
                                               ref_line = 1,
-                                              #x_trans=ifelse(family=='gaussian',"none","log"),
+                                              x_trans=ifelse(family=='gaussian',"none","log"),
                                               ticks_digits=1,
-                                              # xlim=c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE)),
+                                              xlim=x_lim,
                                               theme=tm
                          )-> zz
                          my_vec_graph <- rvg::dml(code = print(zz))

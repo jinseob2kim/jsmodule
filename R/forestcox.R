@@ -55,7 +55,8 @@ forestcoxUI<-function(id,label='forestplot'){
     downloadButton(ns('forest'), 'Download forest plot'),
     sliderInput(ns('width_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 15),
     sliderInput(ns('height_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 20),
-    # uiOutput(ns('xlim_forest')),
+    uiOutput(ns('xlim_forest')),
+    uiOutput(ns('xlim_text')),
 
   )
 
@@ -211,14 +212,14 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         day <- input$day
         sliderInput(session$ns('time'), 'Select time range', min = min(data()[[day]],na.rm=TRUE) , max = max(data()[[day]],na.rm=TRUE), value = c(min(data()[[day]],na.rm=TRUE), max(data()[[day]],na.rm=TRUE)))
       })
-      # output$xlim_forest<-renderUI({
-      #   req(tbsub)
-      #   data<-tbsub()
-      #   data<-mutate(data,Lower=round(log(as.numeric(Lower)),2),Upper=round(log(as.numeric(Upper)),2))
-      #   value =c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE))
-      #   sliderInput(session$ns('xlim'), 'Select time range', min = value[1] , max = value[2], value =value)
-      #
-      # })
+      output$xlim_forest<-renderUI({
+        req(tbsub)
+        data<-tbsub()
+        value =c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE))
+        sliderInput(session$ns('xlim'), 'Select xlim range', min = value[1] , max = value[2], value =value)
+
+      })
+
 
 
       tbsub<-reactive({
@@ -260,7 +261,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
         tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=coxdata,  time_eventrate = var.time[2] , line = F, decimal.hr = 3, decimal.percent = 1)
         #data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
-        tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs, data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
+        #tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs, data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
         len<-nrow(label[variable==group.tbsub])
         data<-data.table::setDT(data)
         if(!isgroup){
@@ -361,14 +362,14 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
                          ll<-ifelse(group.tbsub %in% vlist()$group_vars,nrow(label[variable==group.tbsub]),0)
                          data[HR==0|Lower==0,':='(HR=NA,Lower=NA,Upper=NA)]
-                         data<-mutate(data,HR=round(log(as.numeric(HR)),2),
-                                    Lower=round(log(as.numeric(Lower)),2),Upper=round(log(as.numeric(Upper)),2))
                          data_est<-data$`HR`
-                         data<-data%>%mutate(HR=paste0(HR, " (", Lower, "-", Upper, ")"))
+                         data[is.na(data)]<-' '
+                         data<-data%>%mutate(HR=ifelse(HR==' ',' ',paste0(HR, " (", Lower, "-", Upper, ")")))
                          setnames(data,'HR','HR (95% CI)')
                          data$` ` <- paste(rep(" ", 20), collapse = " ")
                          tm <- forestploter::forest_theme(ci_Theight = 0.2)
                          selected_columns<-c(c(1:(2+2*ll)),len+1,(len-1):(len))
+                         x_lim<-input$xlim
                          forestploter::forest(data[,..selected_columns],
                                               lower=as.numeric(data$Lower),
                                               upper=as.numeric(data$Upper),
@@ -376,7 +377,8 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                                               est=as.numeric(data_est),
                                               ref_line = 1,
                                               ticks_digits=1,
-                                              # xlim=c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE)),
+                                              x_trans="log",
+                                              xlim=x_lim,
                                               theme=tm
                          )-> zz
                          my_vec_graph <- rvg::dml(code = print(zz))
