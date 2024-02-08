@@ -413,7 +413,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                                               upper=as.numeric(data$Upper),
                                               ci_column =3+ll,
                                               est=as.numeric(data_est),
-                                              ref_line = 1,
+                                              ref_line = ifelse(family=='gaussian',0,1),
                                               x_trans=ifelse(family=='gaussian',"none","log"),
                                               ticks_digits=1,
                                               xlim=x_lim,
