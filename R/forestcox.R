@@ -55,7 +55,7 @@ forestcoxUI<-function(id,label='forestplot'){
     downloadButton(ns('forest'), 'Download forest plot'),
     sliderInput(ns('width_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 15),
     sliderInput(ns('height_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 20),
-    uiOutput(ns('xlim_forest')),
+    # uiOutput(ns('xlim_forest')),
 
   )
 
@@ -190,15 +190,14 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
       output$group_tbsub<-renderUI({
         req(input$dep)
-        selectInput(session$ns('group'), 'Group', choices = c(vlist()$group2_vars,vlist()$conti_vars), selected = setdiff(c(vlist()$group2_vars,vlist()$conti_vars),input$dep)[1])
+        selectInput(session$ns('group'), 'Group', choices = c(vlist()$group2_vars,vlist()$conti_vars), selected = setdiff(c(vlist()$group2_vars,vlist()$conti_vars),c(input$dep,vlist()$factor_01vars[1]))[1])
       })
       output$dep_tbsub<-renderUI({
         selectInput(session$ns('dep'), 'Outcome', choices = vlist()$factor_01vars, selected = vlist()$factor_01vars[1])
       })
       output$subvar_tbsub<-renderUI({
         req(input$dep)
-        req(input$group)
-        selectInput(session$ns('subvar'), 'Subgroup to include', choices =setdiff(vlist()$group_vars, c(input$group,input$dep)), selected = setdiff(vlist()$group_vars, c(input$group,input$dep)), multiple = T)
+        selectInput(session$ns('subvar'), 'Subgroup to include', choices =setdiff(vlist()$group_vars, c(input$group,input$dep)), selected = NULL, multiple = T)
 
       })
       output$cov_tbsub<-renderUI({
@@ -208,14 +207,16 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         selectInput(session$ns('day'), 'Time', choices = vlist()$conti_vars_positive, selected = vlist()$conti_vars_positive[1])
       })
       output$time_tbsub<-renderUI({
+        req(input$day)
         day <- input$day
         sliderInput(session$ns('time'), 'Select time range', min = min(data()[[day]],na.rm=TRUE) , max = max(data()[[day]],na.rm=TRUE), value = c(min(data()[[day]],na.rm=TRUE), max(data()[[day]],na.rm=TRUE)))
       })
-      # output$time_tbsub<-renderUI({
-      #
+      # output$xlim_forest<-renderUI({
+      #   req(tbsub)
       #   data<-tbsub()
+      #   data<-mutate(data,Lower=round(log(as.numeric(Lower)),2),Upper=round(log(as.numeric(Upper)),2))
       #   value =c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE))
-      #   sliderInput(session$ns('time'), 'Select time range', min = value[1] , max = value[2], value =value)
+      #   sliderInput(session$ns('xlim'), 'Select time range', min = value[1] , max = value[2], value =value)
       #
       # })
 
@@ -231,7 +232,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
 
 
-
+        req(input$group,input$dep,input$day)
         group.tbsub<-input$group
         var.event <- input$dep
         var.day <- input$day
@@ -259,7 +260,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
         tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=coxdata,  time_eventrate = var.time[2] , line = F, decimal.hr = 3, decimal.percent = 1)
         #data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
-        #tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs, data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
+        tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs, data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
         len<-nrow(label[variable==group.tbsub])
         data<-data.table::setDT(data)
         if(!isgroup){
@@ -272,11 +273,11 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         nn.ov <- data[!is.na(get(group.tbsub)), .N, keyby = get(group.tbsub)][, N]
 
         }else{
-          ev.ov <- round(svytable(as.formula(paste0("~", var.event, "+", group.tbsub)), design = coxdata)[2, ], 1)
-          nn.ov <- round(svytable(as.formula(paste0("~", group.tbsub)), design = coxdata), 1)
+          ev.ov <- round(svytable(as.formula(paste0("~", var.event, "+", group.tbsub)), design = coxdata)[2, ], 2)
+          nn.ov <- round(svytable(as.formula(paste0("~", group.tbsub)), design = coxdata), 2)
 
         }
-        ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
+        ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 2), "%)"))))
 
         if(!is.null(vs)){
           lapply(vs,
@@ -296,9 +297,9 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                      dd.bind<-cbind(dd.bind,ee[,V2])
                      }else{
                        svy<-svytable(as.formula(paste0("~", var.event, "+", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y))
-                       ev <- round(svy[2, ], 1)
-                       nn <- round(svytable(as.formula(paste0("~", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y)), 1)
-                       vv <- data.table(get=colnames(svy),paste0(ev, "/", nn, " (", round(ev/ nn * 100, 1), "%)"))
+                       ev <- round(svy[2, ], 2)
+                       nn <- round(svytable(as.formula(paste0("~", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y)), 2)
+                       vv <- data.table(get=colnames(svy),paste0(ev, "/", nn, " (", round(ev/ nn * 100, 2), "%)"))
                        ee<-merge(getlev,vv,all.x=TRUE)
                        dd.bind<-cbind(dd.bind,ee[,V2])
                      }
@@ -353,16 +354,18 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                            incProgress(1/15)
                            Sys.sleep(0.01)
                          }
-
+                         group.tbsub<-input$group
+                         label<-data_label()
                          data <- data.table::setDT(tbsub())
                          len<-ncol(data)
 
                          ll<-ifelse(group.tbsub %in% vlist()$group_vars,nrow(label[variable==group.tbsub]),0)
                          data[HR==0|Lower==0,':='(HR=NA,Lower=NA,Upper=NA)]
                          data<-mutate(data,HR=round(log(as.numeric(HR)),2),
-                                      Lower=round(log(as.numeric(Lower)),2),Upper=round(log(as.numeric(Upper)),2))
+                                    Lower=round(log(as.numeric(Lower)),2),Upper=round(log(as.numeric(Upper)),2))
                          data_est<-data$`HR`
                          data<-data%>%mutate(HR=paste0(HR, " (", Lower, "-", Upper, ")"))
+                         setnames(data,'HR','HR (95% CI)')
                          data$` ` <- paste(rep(" ", 20), collapse = " ")
                          tm <- forestploter::forest_theme(ci_Theight = 0.2)
                          selected_columns<-c(c(1:(2+2*ll)),len+1,(len-1):(len))
@@ -372,7 +375,8 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                                               ci_column =3+2*ll,
                                               est=as.numeric(data_est),
                                               ref_line = 1,
-                                              xlim=c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE)),
+                                              ticks_digits=1,
+                                              # xlim=c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE)),
                                               theme=tm
                          )-> zz
                          my_vec_graph <- rvg::dml(code = print(zz))

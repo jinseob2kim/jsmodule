@@ -207,17 +207,16 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
       })
 
       output$group_tbsub<-renderUI({
-        req(input$dep)
-        selectInput(session$ns('group'), 'Group', choices = vlist()$group2_vars, selected = setdiff(vlist()$group2_vars,input$dep)[1])
+
+        selectInput(session$ns('group'), 'Group', choices = vlist()$group2_vars, selected = setdiff(vlist()$group2_vars,c(input$dep,dep()[1]))[1])
       })
       output$dep_tbsub<-renderUI({
 
         selectInput(session$ns('dep'), 'Outcome', choices = dep(), selected = dep()[1])
       })
       output$subvar_tbsub<-renderUI({
-        req(input$group)
-        req(input$dep)
-        selectInput(session$ns('subvar'), 'Subgroup to include', choices =setdiff(vlist()$group_vars, c(input$group,input$dep)), selected = setdiff(vlist()$group_vars, c(input$group,input$dep)), multiple = T)
+
+        selectInput(session$ns('subvar'), 'Subgroup to include', choices =setdiff(vlist()$group_vars, c(input$group,input$dep)), selected = NULL, multiple = T)
 
       })
       output$cov_tbsub<-renderUI({
@@ -229,8 +228,19 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
 
       tbsub<-reactive({
         label <- data_label()
+
+
+
+        req(input$dep)
         var.event <- input$dep
+
+        req(input$group)
         group.tbsub<-input$group
+
+        vs <- input$subvar
+
+
+
         if(is.null(design.survey)){
           data<-data()
           data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
@@ -246,9 +256,10 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
 
 
         form <- as.formula(paste( var.event, " ~ ", group.tbsub, sep = ""))
-        vs <- input$subvar
+
 
         #data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
+
         tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=coxdata,family=family)
         #tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs, data=coxdata,family=family)
         len<-nrow(label[variable==group.tbsub])
@@ -290,11 +301,11 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
         ev.ov <- data[!is.na(get(group.tbsub)), sum(as.numeric(as.vector(get(var.event))),na.rm=TRUE), keyby = get(group.tbsub)][, V1]
         nn.ov <- data[!is.na(get(group.tbsub)), .N, keyby = get(group.tbsub)][, N]
         }else{
-          ev.ov <- round(survey::svytable(as.formula(paste0("~", var.event, "+", group.tbsub)), design = coxdata)[2, ], 1)
-          nn.ov <- round(survey::svytable(as.formula(paste0("~", group.tbsub)), design = coxdata), 1)
+          ev.ov <- round(survey::svytable(as.formula(paste0("~", var.event, "+", group.tbsub)), design = coxdata)[2, ], 2)
+          nn.ov <- round(survey::svytable(as.formula(paste0("~", group.tbsub)), design = coxdata), 2)
 
         }
-        ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 1), "%)"))))
+        ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 3), "%)"))))
 
         if(!is.null(vs)){
           lapply(vs,
@@ -313,9 +324,9 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                      dd.bind<-cbind(dd.bind,ee[,V2])
                      }else{
                        svy<-survey::svytable(as.formula(paste0("~", var.event, "+", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y))
-                       ev <- round(svy[2, ], 1)
-                       nn <- round(survey::svytable(as.formula(paste0("~", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y)), 1)
-                       vv <- data.table(get=colnames(svy),paste0(ev, "/", nn, " (", round(ev/ nn * 100, 1), "%)"))
+                       ev <- round(svy[2, ], 3)
+                       nn <- round(survey::svytable(as.formula(paste0("~", x)), design = subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y)), 3)
+                       vv <- data.table(get=colnames(svy),paste0(ev, "/", nn, " (", round(ev/ nn * 100, 2), "%)"))
                        ee<-merge(getlev,vv,all.x=TRUE)
                        dd.bind<-cbind(dd.bind,ee[,V2])
                      }
@@ -374,12 +385,12 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                          if(family=='gaussian'){
                            r<-'Beta'
                            ll<-1
+                           data[Beta==0|Lower==0,':='(Beta=NA,Lower=NA,Upper=NA)]
                          }else{
                           r<-'OR'
                           ll<-nrow(data_label()[variable==group.tbsub])
                           data[OR==0|Lower==0,':='(OR=NA,Lower=NA,Upper=NA)]
-                          data<-mutate(data,OR=round(log(as.numeric(OR)),2),
-                                       Lower=round(log(as.numeric(Lower)),2),Upper=round(log(as.numeric(Upper)),2))
+                          data<-mutate(data,OR=round(log(as.numeric(OR)),2),Lower=round(log(as.numeric(Lower)),2),Upper=round(log(as.numeric(Upper)),2))
                          }
 
                          len<-ncol(data)
@@ -394,7 +405,9 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                                               ci_column =3+ll,
                                               est=as.numeric(data_est),
                                               ref_line = 1,
-                                              xlim=c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE)),
+                                              #x_trans=ifelse(family=='gaussian',"none","log"),
+                                              ticks_digits=1,
+                                              # xlim=c(min(as.numeric(data$Lower),na.rm=TRUE), max(as.numeric(data$Upper),na.rm=TRUE)),
                                               theme=tm
                          )-> zz
                          my_vec_graph <- rvg::dml(code = print(zz))
