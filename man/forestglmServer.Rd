@@ -41,15 +41,12 @@ Shiny module server for forestglm
 \examples{
 \dontrun{
 if(interactive()){
-library(survival);library(jstable);library(data.table);library(dplyr);library(shiny);library(DT)
+library(survival);library(jstable);library(data.table);library(shiny);library(DT)
 
-lung \%>\%
-  mutate(
-    status = factor(as.integer(status == 1)),
-    sex = factor(sex),
-    kk = factor(as.integer(pat.karno >= 70)),
-    kk1 = factor(as.integer(pat.karno >= 60))
-  ) -> lung
+lung$status<-factor(as.integer(lung$status == 1))
+lung$sex<-factor(lung$sex)
+lung$kk<-factor(as.integer(lung$pat.karno >= 70))
+lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
 
 ui <- fluidPage(
   sidebarLayout(
@@ -79,7 +76,9 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link[data.table]{setDT}}
+\code{\link[jstable]{TableSubgroupMultiGLM}}
+ \code{\link[data.table]{setDT}}, \code{\link[data.table]{setattr}}
+ \code{\link[stats]{cor}}
  \code{\link[survey]{surveysummary}}, \code{\link[survey]{svytable}}
  \code{\link[forestploter]{forest_theme}}, \code{\link[forestploter]{forest}}
  \code{\link[rvg]{dml}}

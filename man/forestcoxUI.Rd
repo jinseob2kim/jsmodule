@@ -22,15 +22,13 @@ Shinymodule UI for forestcox
 }
 \examples{
 
-library(survival);library(dplyr);library(jstable);library(shiny)
-lung \%>\%
-  mutate(
-    status = as.integer(status == 1),
-    sex = factor(sex),
-    kk = factor(as.integer(pat.karno >= 70)),
-    kk1 = factor(as.integer(pat.karno >= 60))
+library(survival);library(jstable);library(shiny);library(DT)
 
-  ) -> lung
+lung$status<-factor(as.integer(lung$status == 1))
+lung$sex<-factor(lung$sex)
+lung$kk<-factor(as.integer(lung$pat.karno >= 70))
+lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
+
 out<-lung
 ui <- fluidPage(
   sidebarLayout(

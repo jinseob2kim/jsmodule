@@ -7,15 +7,13 @@
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#' library(survival);library(jstable);library(data.table);library(dplyr);library(shiny);library(DT)
+#' library(survival);library(jstable);library(data.table);library(shiny);library(DT)
 #'
-#' lung %>%
-#'   mutate(
-#'     status = factor(as.integer(status == 1)),
-#'     sex = factor(sex),
-#'     kk = factor(as.integer(pat.karno >= 70)),
-#'     kk1 = factor(as.integer(pat.karno >= 60))
-#'   ) -> lung
+#' lung$status<-factor(as.integer(lung$status == 1))
+#' lung$sex<-factor(lung$sex)
+#' lung$kk<-factor(as.integer(lung$pat.karno >= 70))
+#' lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
+#'
 #'
 #' ui <- fluidPage(
 #'   sidebarLayout(
@@ -81,15 +79,12 @@ forestglmUI<-function(id,label='forestplot'){
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#' library(survival);library(jstable);library(data.table);library(dplyr);library(shiny);library(DT)
+#' library(survival);library(jstable);library(data.table);library(shiny);library(DT)
 #'
-#' lung %>%
-#'   mutate(
-#'     status = factor(as.integer(status == 1)),
-#'     sex = factor(sex),
-#'     kk = factor(as.integer(pat.karno >= 70)),
-#'     kk1 = factor(as.integer(pat.karno >= 60))
-#'   ) -> lung
+#' lung$status<-factor(as.integer(lung$status == 1))
+#' lung$sex<-factor(lung$sex)
+#' lung$kk<-factor(as.integer(lung$pat.karno >= 70))
+#' lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
 #'
 #' ui <- fluidPage(
 #'   sidebarLayout(
@@ -118,25 +113,30 @@ forestglmUI<-function(id,label='forestplot'){
 #'  }
 #' }
 #' @seealso
-#'  \code{\link[data.table]{setDT}}
+#'  \code{\link[jstable]{TableSubgroupMultiGLM}}
+#'  \code{\link[data.table]{setDT}}, \code{\link[data.table]{setattr}}
+#'  \code{\link[stats]{cor}}, \code{\link[stats]{coef}}
 #'  \code{\link[survey]{surveysummary}}, \code{\link[survey]{svytable}}
 #'  \code{\link[forestploter]{forest_theme}}, \code{\link[forestploter]{forest}}
 #'  \code{\link[rvg]{dml}}
 #'  \code{\link[officer]{read_pptx}}, \code{\link[officer]{add_slide}}, \code{\link[officer]{ph_with}}, \code{\link[officer]{ph_location}}
 #' @rdname forestglmServer
 #' @export
-#' @importFrom data.table setDT
+#' @importFrom jstable TableSubgroupMultiGLM
+#' @importFrom data.table setDT setnames
+#' @importFrom stats var coef
 #' @importFrom survey svymean svyvar svytable
 #' @importFrom forestploter forest_theme forest
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
+
 forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.limit=10,design.survey=NULL){
   moduleServer(
     id,
     function(input, output, session) {
 
 
-      level <- val_label <- variable <- NULL
+      .<-.N<-N <-V1<-V2<- Beta <- Lower <- OR <- Upper <- level <- val_label <- variable <- NULL
 
       if (is.null(data_varStruct)) {
         data_varStruct <- reactive(list(variable = names(data())))
@@ -268,38 +268,37 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
 
         #data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
 
-        tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=coxdata,family=family)
+        tbsub <-  jstable::TableSubgroupMultiGLM(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=coxdata,family=family)
         #tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs, data=coxdata,family=family)
         len<-nrow(label[variable==group.tbsub])
         data<-data.table::setDT(data)
         if(family=='gaussian'){
-          setnames(tbsub,'Point.Estimate','Beta')
+          data.table::setnames(tbsub,'Point.Estimate','Beta')
           if(is.null(design.survey)){
-            meanvar<-data[, .(round(mean(get(var.event),na.rm=TRUE),2),round(var(get(var.event),na.rm=TRUE),2))]%>%mutate(mean=paste(V1,'±',V2))
-            meanvar<-meanvar[,3]
+            meanvar<-data[, .(round(mean(get(var.event),na.rm=TRUE),2),round(stats::var(get(var.event),na.rm=TRUE),2))]
+            meanvar<-meanvar[,.(mean=paste(V1,"\u00B1 ",V2))]
           }else{
             ss<-paste('~',var.event)
-            meanvar<-data.table(mean=paste(round(ftable(survey::svymean(as.formula(ss),coxdata))[,1],2),'±',round(ftable(survey::svyvar(as.formula(ss),coxdata))[,1],2)))
+            meanvar<-data.table(mean=paste(round(stats::coef(survey::svymean(as.formula(ss),coxdata)),2),"\u00B1 ",round(stats::coef(survey::svyvar(as.formula(ss),coxdata)),2)))
           }
           meanvar<-rbind(meanvar,
-          lapply(vs,
+         rbindlist(lapply(vs,
                 function(x){
                   cc<-data.table(mean=NA)
                   for( y in levels(data[[x]])){
                     if(is.null(design.survey)){
-                    ev <- data[!is.na(get(x)) & get(x) == y, .(round(mean(get(var.event),na.rm=TRUE),2),round(var(get(var.event),na.rm=TRUE),2))]%>%
-                      mutate(mean=paste(V1,'±',V2))
-                    cc<-rbind(cc,ev[,3])
+                    ev <- data[!is.na(get(x)) & get(x) == y, .(round(mean(get(var.event),na.rm=TRUE),2),round(stats::var(get(var.event),na.rm=TRUE),2))]
+                    cc<-rbind(cc,ev[,.(mean=paste(V1,"\u00B1 ",V2)) ])
                     }else{
                       sub<-subset(coxdata, !is.na(get(x)) & get(group.tbsub) == y)
                       ss<-paste('~',var.event)
-                      ev<-data.table(mean=paste(round(ftable(survey::svymean(as.formula(ss),sub))[,1],2),'±',round(ftable(survey::svyvar(as.formula(ss),sub))[,1],2)))
+                      ev<-data.table(mean=paste(round(stats::coef(survey::svymean(as.formula(ss),sub)),2),"\u00B1 ",round(stats::coef(survey::svyvar(as.formula(ss),sub)),2)))
                       cc<-rbind(cc,ev)
 
                     }
                   }
                   cc
-                })%>%rbindlist
+                }))
           )
           tbsub<-cbind(tbsub[,1],meanvar,tbsub[4:8])
           colnames(tbsub)[1]<-'Subgroup'
@@ -316,7 +315,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
         ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 3), "%)"))))
 
         if(!is.null(vs)){
-          lapply(vs,
+          rbindlist(lapply(vs,
                  function(x){
                    cc<-data.table(matrix(ncol=len+1))
                    cc[[1]]<-x
@@ -341,7 +340,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                    }
                    names(cc) <- names(dd.bind)
                    rbind(cc, dd.bind)
-                 }) %>% rbindlist -> ll
+                 }))   -> ll
 
 
           names(ov) <- names(ll)
@@ -388,6 +387,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                            Sys.sleep(0.01)
                          }
 
+
                          data <- data.table::setDT(tbsub())
                          group.tbsub<-input$group
                          if(family=='gaussian'){
@@ -403,12 +403,12 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                          len<-ncol(data)
                          data_est<-data[,get(r)]
                          data[is.na(data)]<-' '
-                         data<-data%>%mutate(!!r:=ifelse(get(r)==' ',' ',paste0(get(r), " (", Lower, "-", Upper, ")")))
+                         data[[r]]<-ifelse(data[[r]]==' ',' ',paste0(data[[r]], " (", data$Lower, "-", data$Upper, ")"))
                          data$` ` <- paste(rep(" ", 20), collapse = " ")
                          tm <- forestploter::forest_theme(ci_Theight = 0.2)
                          x_lim<-input$xlim
                          selected_columns<-c(c(1:(2+ll)),len+1,(len-1):(len))
-                         forestploter::forest(data[,..selected_columns],
+                         forestploter::forest(data[,.SD, .SDcols = selected_columns],
                                               lower=as.numeric(data$Lower),
                                               upper=as.numeric(data$Upper),
                                               ci_column =3+ll,

@@ -37,15 +37,12 @@ Shiny module server for forestcox
 }
 \examples{
 
-library(survival);library(dplyr);library(jstable);library(shiny)
-lung \%>\%
-  mutate(
-    status = as.integer(status == 1),
-    sex = factor(sex),
-    kk = factor(as.integer(pat.karno >= 70)),
-    kk1 = factor(as.integer(pat.karno >= 60))
+library(survival);library(jstable);library(shiny);library(DT)
 
-  ) -> lung
+lung$status<-factor(as.integer(lung$status == 1))
+lung$sex<-factor(lung$sex)
+lung$kk<-factor(as.integer(lung$pat.karno >= 70))
+lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
 out<-lung
 ui <- fluidPage(
   sidebarLayout(
@@ -72,7 +69,9 @@ shinyApp(ui, server)
 
 }
 \seealso{
-\code{\link[forestploter]{forest}}
+\code{\link[data.table]{data.table-package}}, \code{\link[data.table]{setDT}}, \code{\link[data.table]{setattr}}
+ \code{\link[jstable]{TableSubgroupMultiCox}}
+ \code{\link[forestploter]{forest_theme}}, \code{\link[forestploter]{forest}}
  \code{\link[rvg]{dml}}
  \code{\link[officer]{read_pptx}}, \code{\link[officer]{add_slide}}, \code{\link[officer]{ph_with}}, \code{\link[officer]{ph_location}}
 }

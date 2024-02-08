@@ -6,15 +6,13 @@
 #' @details Shinymodule UI for forestcox
 #' @examples
 #'
-#' library(survival);library(dplyr);library(jstable);library(shiny);library(DT)
-#' lung %>%
-#'   mutate(
-#'     status = as.integer(status == 1),
-#'     sex = factor(sex),
-#'     kk = factor(as.integer(pat.karno >= 70)),
-#'     kk1 = factor(as.integer(pat.karno >= 60))
+#' library(survival);library(jstable);library(shiny);library(DT)
 #'
-#'   ) -> lung
+#' lung$status<-factor(as.integer(lung$status == 1))
+#' lung$sex<-factor(lung$sex)
+#' lung$kk<-factor(as.integer(lung$pat.karno >= 70))
+#' lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
+#'
 #' out<-lung
 #' ui <- fluidPage(
 #'   sidebarLayout(
@@ -75,15 +73,12 @@ forestcoxUI<-function(id,label='forestplot'){
 #' @details Shiny module server for forestcox
 #' @examples
 #'
-#' library(survival);library(dplyr);library(jstable);library(shiny);library(DT)
-#' lung %>%
-#'   mutate(
-#'     status = as.integer(status == 1),
-#'     sex = factor(sex),
-#'     kk = factor(as.integer(pat.karno >= 70)),
-#'     kk1 = factor(as.integer(pat.karno >= 60))
+#' library(survival);library(jstable);library(shiny);library(DT)
 #'
-#'   ) -> lung
+#' lung$status<-factor(as.integer(lung$status == 1))
+#' lung$sex<-factor(lung$sex)
+#' lung$kk<-factor(as.integer(lung$pat.karno >= 70))
+#' lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
 #' out<-lung
 #' ui <- fluidPage(
 #'   sidebarLayout(
@@ -109,12 +104,16 @@ forestcoxUI<-function(id,label='forestplot'){
 #' shinyApp(ui, server)
 #'
 #' @seealso
-#'  \code{\link[forestploter]{forest}}
+#'  \code{\link[data.table]{data.table-package}}, \code{\link[data.table]{setDT}}, \code{\link[data.table]{setattr}}
+#'  \code{\link[jstable]{TableSubgroupMultiCox}}
+#'  \code{\link[forestploter]{forest_theme}}, \code{\link[forestploter]{forest}}
 #'  \code{\link[rvg]{dml}}
 #'  \code{\link[officer]{read_pptx}}, \code{\link[officer]{add_slide}}, \code{\link[officer]{ph_with}}, \code{\link[officer]{ph_location}}
 #' @rdname forestcoxServer
 #' @export
-#' @importFrom forestploter forest
+#' @importFrom data.table data.table setDT setnames
+#' @importFrom jstable TableSubgroupMultiCox
+#' @importFrom forestploter forest_theme forest
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
@@ -124,7 +123,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
     function(input, output, session) {
 
 
-      level <- val_label <- variable <- NULL
+      N<-V1<-V2<-.N<-HR<-Lower<-Upper<-level <- val_label <- variable <- NULL
 
       if (is.null(data_varStruct)) {
         data_varStruct <- reactive(list(variable = names(data())))
@@ -133,9 +132,9 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
       vlist <- reactive({
 
-        label <- data.table(data_label(), stringsAsFactors = T)
+        label <- data.table::data.table(data_label(), stringsAsFactors = T)
 
-        data <- data.table(data(), stringsAsFactors = T)
+        data <- data.table::data.table(data(), stringsAsFactors = T)
 
         mklist <- function(varlist, vars) {
           lapply(
@@ -259,13 +258,13 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         form <- as.formula(paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = ""))
 
 
-        tbsub <-  TableSubgroupMultiCox(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=coxdata,  time_eventrate = var.time[2] , line = F, decimal.hr = 3, decimal.percent = 1)
+        tbsub <-  jstable::TableSubgroupMultiCox(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=coxdata,  time_eventrate = var.time[2] , line = F, decimal.hr = 3, decimal.percent = 1)
         #data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
         #tbsub <-  TableSubgroupMultiCox(form, var_subgroups = c('kk'),  data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
         len<-nrow(label[variable==group.tbsub])
         data<-data.table::setDT(data)
         if(!isgroup){
-          tbsub<-setnames(tbsub,'Point Estimate','HR')
+          tbsub<-data.table::setnames(tbsub,'Point Estimate','HR')
           tbsub<-tbsub[,c(1,4:8)]
           return(tbsub)
         }
@@ -281,7 +280,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         ov <- data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov/nn.ov * 100, 2), "%)"))))
 
         if(!is.null(vs)){
-          lapply(vs,
+          rbindlist(lapply(vs,
                  function(x){
                    cc<-data.table(matrix(ncol=len+1))
                    cc[[1]]<-x
@@ -307,7 +306,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                    }
                    names(cc) <- names(dd.bind)
                    rbind(cc, dd.bind)
-                 }) %>% rbindlist -> ll
+                 })) -> ll
 
 
           names(ov) <- names(ll)
@@ -364,13 +363,13 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                          data[HR==0|Lower==0,':='(HR=NA,Lower=NA,Upper=NA)]
                          data_est<-data$`HR`
                          data[is.na(data)]<-' '
-                         data<-data%>%mutate(HR=ifelse(HR==' ',' ',paste0(HR, " (", Lower, "-", Upper, ")")))
-                         setnames(data,'HR','HR (95% CI)')
+                         data$HR<-ifelse(data$HR==' ',' ',paste0(data$HR, " (", data$Lower, "-", data$Upper, ")"))
+                         data.table::setnames(data,'HR','HR (95% CI)')
                          data$` ` <- paste(rep(" ", 20), collapse = " ")
                          tm <- forestploter::forest_theme(ci_Theight = 0.2)
                          selected_columns<-c(c(1:(2+2*ll)),len+1,(len-1):(len))
                          x_lim<-input$xlim
-                         forestploter::forest(data[,..selected_columns],
+                         forestploter::forest(data[,.SD, .SDcols = selected_columns],
                                               lower=as.numeric(data$Lower),
                                               upper=as.numeric(data$Upper),
                                               ci_column =3+2*ll,

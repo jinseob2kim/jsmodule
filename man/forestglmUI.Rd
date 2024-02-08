@@ -23,15 +23,13 @@ Shinymodule UI for forestglm
 \examples{
 \dontrun{
 if(interactive()){
-library(survival);library(jstable);library(data.table);library(dplyr);library(shiny);library(DT)
+library(survival);library(jstable);library(data.table);library(shiny);library(DT)
 
-lung \%>\%
-  mutate(
-    status = factor(as.integer(status == 1)),
-    sex = factor(sex),
-    kk = factor(as.integer(pat.karno >= 70)),
-    kk1 = factor(as.integer(pat.karno >= 60))
-  ) -> lung
+lung$status<-factor(as.integer(lung$status == 1))
+lung$sex<-factor(lung$sex)
+lung$kk<-factor(as.integer(lung$pat.karno >= 70))
+lung$kk1<-factor(as.integer(lung$pat.karno >= 60))
+
 
 ui <- fluidPage(
   sidebarLayout(
