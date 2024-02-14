@@ -1,3 +1,10 @@
+# jsmodule 1.5.0
+
+## New module: Subgroup analysis with forestplot (Thanks for [Yoonkyoung Jeon](https://github.com/cyk0315))
+
+* forestcox (`forestcoxUI`, `forestcoxServer`)
+* forestglm (`forestglmUI`, `forestglmServer`)
+
 # jsmodule 1.4.4
 
 ## Update: Add "reverse y-axis" option to lineplot
