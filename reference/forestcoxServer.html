@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>jsRepeatedExtAddin: RStudio Addin for repeated measure analysis with external data. — jsRepeatedExtAddin • jsmodule</title>
+<title>forestcoxServer:shiny module server for forestcox — forestcoxServer • jsmodule</title>
 
 
 <!-- jquery -->
@@ -41,8 +41,8 @@
 
 
 
-<meta property="og:title" content="jsRepeatedExtAddin: RStudio Addin for repeated measure analysis with external data. — jsRepeatedExtAddin" />
-<meta property="og:description" content="RStudio Addin for repeated measure analysis with external csv/xlsx/sas7bdat/sav/dta file." />
+<meta property="og:title" content="forestcoxServer:shiny module server for forestcox — forestcoxServer" />
+<meta property="og:description" content="Shiny module server for forestcox" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -123,45 +123,96 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>jsRepeatedExtAddin: RStudio Addin for repeated measure analysis with external data.</h1>
-    <small class="dont-index">Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/R/jsRepeatedGadget.R'><code>R/jsRepeatedGadget.R</code></a></small>
-    <div class="hidden name"><code>jsRepeatedExtAddin.Rd</code></div>
+    <h1>forestcoxServer:shiny module server for forestcox</h1>
+    <small class="dont-index">Source: <a href='https://github.com/jinseob2kim/jsmodule/blob/master/R/forestcox.R'><code>R/forestcox.R</code></a></small>
+    <div class="hidden name"><code>forestcoxServer.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>RStudio Addin for repeated measure analysis with external csv/xlsx/sas7bdat/sav/dta file.</p>
+    <p>Shiny module server for forestcox</p>
     </div>
 
-    <pre class="usage"><span class='fu'>jsRepeatedExtAddin</span>(<span class='kw'>nfactor.limit</span> <span class='kw'>=</span> <span class='fl'>20</span>, <span class='kw'>max.filesize</span> <span class='kw'>=</span> <span class='fl'>2048</span>)</pre>
+    <pre class="usage"><span class='fu'>forestcoxServer</span>(
+  <span class='no'>id</span>,
+  <span class='no'>data</span>,
+  <span class='no'>data_label</span>,
+  <span class='kw'>data_varStruct</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>nfactor.limit</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>design.survey</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>nfactor.limit</th>
-      <td><p>nlevels limit for categorical variables, Default: 20</p></td>
+      <th>id</th>
+      <td><p>id</p></td>
     </tr>
     <tr>
-      <th>max.filesize</th>
-      <td><p>Maximum file size to upload (MB), Default: 2048 (2 GB)</p></td>
+      <th>data</th>
+      <td><p>Reactive data</p></td>
+    </tr>
+    <tr>
+      <th>data_label</th>
+      <td><p>Reactive data label</p></td>
+    </tr>
+    <tr>
+      <th>data_varStruct</th>
+      <td><p>Reactive List of variable structure, Default: NULL</p></td>
+    </tr>
+    <tr>
+      <th>nfactor.limit</th>
+      <td><p>nlevels limit in factor variable, Default: 10</p></td>
+    </tr>
+    <tr>
+      <th>design.survey</th>
+      <td><p>reactive survey data. default: NULL</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>RStudio Addin for repeated measure analysis with external data.</p>
+    <p>Shiny module server for forestcox</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>RStudio Addin for repeated measure analysis with external csv/xlsx/sas7bdat/sav/dta file.</p>
+    <p>Shiny module server for forestcox</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='https://rdatatable.gitlab.io/data.table/reference/fwrite.html'>fwrite</a></code>
- <code><a href='https://rdrr.io/pkg/survival/man/colon.html'>colon</a></code>
- <code><a href='https://rdrr.io/pkg/jstable/man/opt.tbreg.html'>opt.tbreg</a></code></p></div>
+    <div class='dont-index'><p><code><a href='https://rdatatable.gitlab.io/data.table/reference/data.table.html'>data.table-package</a></code>, <code><a href='https://rdatatable.gitlab.io/data.table/reference/setDT.html'>setDT</a></code>, <code><a href='https://rdatatable.gitlab.io/data.table/reference/setattr.html'>setattr</a></code>
+ <code><a href='https://rdrr.io/pkg/jstable/man/TableSubgroupMultiCox.html'>TableSubgroupMultiCox</a></code>
+ <code><a href='https://rdrr.io/pkg/forestploter/man/forest_theme.html'>forest_theme</a></code>, <code><a href='https://rdrr.io/pkg/forestploter/man/forest.html'>forest</a></code>
+ <code><a href='https://rdrr.io/pkg/rvg/man/dml.html'>dml</a></code>
+ <code><a href='https://davidgohel.github.io/officer/reference/read_pptx.html'>read_pptx</a></code>, <code><a href='https://davidgohel.github.io/officer/reference/add_slide.html'>add_slide</a></code>, <code><a href='https://davidgohel.github.io/officer/reference/ph_with.html'>ph_with</a></code>, <code><a href='https://davidgohel.github.io/officer/reference/ph_location.html'>ph_location</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fu'><a href='https://rdrr.io/r/base/interactive.html'>interactive</a></span>()) {
-  <span class='fu'>jsRepeatedExtAddin</span>()
+    <pre class="examples"><div class='input'>
+<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shiny</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>DT</span>);
+
+<span class='no'>mtcars</span>$<span class='no'>vs</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='no'>mtcars</span>$<span class='no'>vs</span>)
+<span class='no'>mtcars</span>$<span class='no'>am</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='no'>mtcars</span>$<span class='no'>am</span>)
+<span class='no'>mtcars</span>$<span class='no'>kk</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span>(<span class='no'>mtcars</span>$<span class='no'>disp</span><span class='kw'>&gt;=</span> <span class='fl'>150</span>))
+<span class='no'>mtcars</span>$<span class='no'>kk1</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span>(<span class='no'>mtcars</span>$<span class='no'>disp</span> <span class='kw'>&gt;=</span> <span class='fl'>200</span>))
+
+<span class='no'>out</span><span class='kw'>&lt;-</span><span class='no'>mtcars</span>
+<span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/fluidPage.html'>fluidPage</a></span>(
+  <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarLayout</a></span>(
+    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarPanel</a></span>(
+      <span class='fu'><a href='forestcoxUI.html'>forestcoxUI</a></span>(<span class='st'>'Forest'</span>)
+    ),
+    <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>mainPanel</a></span>(
+      <span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>DTOutput</a></span>(<span class='st'>'tablesub'</span>)
+    )
+  )
+)
+
+
+<span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
+  <span class='no'>data</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='no'>out</span>)
+ <span class='no'>label</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jstable/man/mk.lev.html'>mk.lev</a></span>(<span class='no'>out</span>))
+ <span class='no'>outtable</span><span class='kw'>&lt;-</span><span class='fu'>forestcoxServer</span>(<span class='st'>'Forest'</span>,<span class='kw'>data</span><span class='kw'>=</span><span class='no'>data</span>,<span class='kw'>data_label</span><span class='kw'>=</span><span class='no'>label</span>)
+  <span class='no'>output</span>$<span class='no'>tablesub</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>renderDT</a></span>({
+    <span class='fu'>outtable</span>()
+  })
 }</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

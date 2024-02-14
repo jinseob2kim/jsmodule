@@ -75,7 +75,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">jsmodule</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.4.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.5.0</span>
       </span>
     </div>
 
@@ -171,10 +171,12 @@
 <span class='no'>m3</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span>(<span class='no'>vs</span> ~ <span class='no'>am</span> + <span class='no'>gear</span> + <span class='no'>wt</span> + <span class='no'>mpg</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>mtcars</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='no'>binomial</span>)
 <span class='no'>roc1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/pROC/man/roc.html'>roc</a></span>(<span class='no'>m1</span>$<span class='no'>y</span>, <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>(<span class='no'>m1</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"response"</span>))</div><div class='output co'>#&gt; <span class='message'>Setting levels: control = 0, case = 1</span></div><div class='output co'>#&gt; <span class='message'>Setting direction: controls &lt; cases</span></div><div class='input'><span class='no'>roc2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/pROC/man/roc.html'>roc</a></span>(<span class='no'>m2</span>$<span class='no'>y</span>, <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>(<span class='no'>m2</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"response"</span>))</div><div class='output co'>#&gt; <span class='message'>Setting levels: control = 0, case = 1</span></div><div class='output co'>#&gt; <span class='message'>Setting direction: controls &lt; cases</span></div><div class='input'><span class='no'>roc3</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/pROC/man/roc.html'>roc</a></span>(<span class='no'>m3</span>$<span class='no'>y</span>, <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>(<span class='no'>m3</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"response"</span>))</div><div class='output co'>#&gt; <span class='message'>Setting levels: control = 0, case = 1</span></div><div class='output co'>#&gt; <span class='message'>Setting direction: controls &lt; cases</span></div><div class='input'><span class='no'>list.roc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='no'>roc1</span>, <span class='no'>roc2</span>, <span class='no'>roc3</span>)
 <span class='fu'>ROC_table</span>(<span class='no'>list.roc</span>)</div><div class='output co'>#&gt;    Prediction Model   AUC      95% CI P-value for AUC Difference   IDI
+#&gt;              &lt;char&gt; &lt;num&gt;      &lt;char&gt;                      &lt;num&gt; &lt;num&gt;
 #&gt; 1:          Model 1 0.635 0.437-0.833                         NA    NA
 #&gt; 2:          Model 2 0.929     0.836-1                      0.004 0.532
 #&gt; 3:          Model 3 0.944      0.87-1                      0.360 0.039
 #&gt;          95% CI P-value for IDI continuous NRI      95% CI P-value for NRI
+#&gt;          &lt;char&gt;          &lt;char&gt;          &lt;num&gt;      &lt;char&gt;          &lt;char&gt;
 #&gt; 1:         &lt;NA&gt;            &lt;NA&gt;             NA        &lt;NA&gt;            &lt;NA&gt;
 #&gt; 2:  0.356-0.709         &lt; 0.001          1.413 0.943-1.882         &lt; 0.001
 #&gt; 3: -0.024-0.102           0.223          0.540 -0.12-1.199           0.109</div></pre>
@@ -195,7 +197,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by <a href='https://github.com/jinseob2kim'>Jinseob Kim</a>, <a href='https://www.zarathu.com'><img src="https://raw.githubusercontent.com/zarathucorp/zarathu/master/Color%20logo%20-%20no%20background.png" height="24" /></a>, Hyunki Lee, Changwoo Lim, Jinhwan Kim.</p>
+  <p>Developed by <a href='https://github.com/jinseob2kim'>Jinseob Kim</a>, <a href='https://www.zarathu.com'><img src="https://raw.githubusercontent.com/zarathucorp/zarathu/master/Color%20logo%20-%20no%20background.png" height="24" /></a>, Hyunki Lee, Changwoo Lim, Jinhwan Kim, Yoonkyoung Jeon.</p>
 </div>
 
 <div class="pkgdown">
