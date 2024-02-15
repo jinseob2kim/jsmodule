@@ -270,6 +270,57 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
           )
         )
       )
+    ),
+    navbarMenu(
+      title = "Subgroup analysis",
+      icon = icon("chart-bar"),
+      tabPanel(
+        title = "subgroup cox",
+        sidebarLayout(
+          sidebarPanel(
+            forestcoxUI('Forest')
+          ),
+          mainPanel(
+            withLoader(
+              DTOutput('tablesub'),
+              type = "html",
+              loader = "loader6"
+            )
+
+          )
+        )
+      ),
+      tabPanel(
+        title = "subgroup regression",
+        sidebarLayout(
+          sidebarPanel(
+            forestglmUI('Forest_glm')
+          ),
+          mainPanel(
+            withLoader(
+              DTOutput('tablesub_glm'),
+              type = "html",
+              loader = "loader6"
+            )
+          )
+        )
+      ),
+      tabPanel(
+        title = "subgroup logistic regression",
+        sidebarLayout(
+          sidebarPanel(
+            forestglmUI('Forest_glmbi')
+          ),
+          mainPanel(
+            withLoader(
+              DTOutput('tablesub_glmbi'),
+              type = "html",
+              loader = "loader6"
+            )
+
+          )
+        )
+      )
     )
   )
 
@@ -655,6 +706,19 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       caption.placement = "top"
     )
 
+    outtable<-forestcoxServer('Forest',data=data,data_label=data.label)
+    output$tablesub<-renderDT({
+      outtable()
+    })
+    outtable_glm<-forestglmServer('Forest_glm',data=data,data_label=data.label,family='gaussian')
+    output$tablesub_glm<-renderDT({
+      outtable_glm()
+    })
+
+    outtable_glmbi<-forestglmServer('Forest_glmbi',data=data,data_label=data.label,family='binomial')
+    output$tablesub_glmbi<-renderDT({
+      outtable_glmbi()
+    })
     session$onSessionEnded(function() {
       stopApp()
     })
@@ -1000,6 +1064,57 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           )
         )
       ),
+    ),
+    navbarMenu(
+      title = "Subgroup analysis",
+      icon = icon("chart-bar"),
+      tabPanel(
+        title = "subgroup cox",
+        sidebarLayout(
+          sidebarPanel(
+            forestcoxUI('Forest')
+          ),
+          mainPanel(
+            withLoader(
+              DTOutput('tablesub'),
+              type = "html",
+              loader = "loader6"
+            )
+
+          )
+        )
+      ),
+      tabPanel(
+        title = "subgroup regression",
+        sidebarLayout(
+          sidebarPanel(
+            forestglmUI('Forest_glm')
+          ),
+          mainPanel(
+            withLoader(
+              DTOutput('tablesub_glm'),
+              type = "html",
+              loader = "loader6"
+            )
+          )
+        )
+      ),
+      tabPanel(
+        title = "subgroup logistic regression",
+        sidebarLayout(
+          sidebarPanel(
+            forestglmUI('Forest_glmbi')
+          ),
+          mainPanel(
+            withLoader(
+              DTOutput('tablesub_glmbi'),
+              type = "html",
+              loader = "loader6"
+            )
+
+          )
+        )
+      )
     )
   )
 
@@ -1235,7 +1350,19 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       caption = "Best cutoff",
       caption.placement = "top"
     )
+    outtable<-forestcoxServer('Forest',data=data,data_label=data.label)
+    output$tablesub<-renderDT({
+      outtable()
+    })
+    outtable_glm<-forestglmServer('Forest_glm',data=data,data_label=data.label,family='gaussian')
+    output$tablesub_glm<-renderDT({
+      outtable_glm()
+    })
 
+    outtable_glmbi<-forestglmServer('Forest_glmbi',data=data,data_label=data.label,family='binomial')
+    output$tablesub_glmbi<-renderDT({
+      outtable_glmbi()
+    })
     session$onSessionEnded(function() {
       stopApp()
     })
