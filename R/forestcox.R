@@ -13,6 +13,13 @@
 #' mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
 #' mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
 #'
+#' library(shiny);library(DT);
+#'
+#' mtcars$vs<-factor(mtcars$vs)
+#' mtcars$am<-factor(mtcars$am)
+#' mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
+#' mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
+#'
 #' out<-mtcars
 #' ui <- fluidPage(
 #'   sidebarLayout(
@@ -20,20 +27,36 @@
 #'       forestcoxUI('Forest')
 #'     ),
 #'     mainPanel(
-#'       DTOutput('tablesub')
-#'     )
+#'      tabsetPanel(
+#'         type = "pills",
+#'         tabPanel(
+#'           title = "Data",
+#'           DTOutput("tablesub")
+#'
+#'         ),
+#'         tabPanel(
+#'           title = "figure",
+#'           plotOutput("forestplot", width = "100%"),
+#'           ggplotdownUI("Forest")
+#'         )
+#'       ) )
 #'   )
 #' )
 #'
 #'
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
-#'  label<-reactive(jstable::mk.lev(out))
-#'  outtable<-forestcoxServer('Forest',data=data,data_label=label)
+#'   label<-reactive(jstable::mk.lev(out))
+#'   outtable<-forestcoxServer('Forest',data=data,data_label=label)
 #'   output$tablesub<-renderDT({
-#'     outtable()
+#'     outtable()[[1]]
+#'   })
+#'   output$forestplot<-renderPlot({
+#'     outtable()[[2]]
 #'   })
 #' }
+#'
+#'
 #'
 #'
 #' @rdname forestcoxUI
@@ -49,15 +72,13 @@ forestcoxUI<-function(id,label='forestplot'){
     uiOutput(ns('subvar_tbsub')),
     uiOutput(ns('cov_tbsub')),
     uiOutput(ns('time_tbsub')),
-    downloadButton(ns('forest'), 'Download forest plot'),
-    sliderInput(ns('width_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 15),
-    sliderInput(ns('height_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 20),
-    uiOutput(ns('xlim_forest')),
-    uiOutput(ns('xlim_text')),
+
+
 
   )
 
 }
+
 
 
 #' @title forestcoxServer:shiny module server for forestcox
@@ -79,6 +100,13 @@ forestcoxUI<-function(id,label='forestplot'){
 #' mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
 #' mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
 #'
+#' library(shiny);library(DT);
+#'
+#' mtcars$vs<-factor(mtcars$vs)
+#' mtcars$am<-factor(mtcars$am)
+#' mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
+#' mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
+#'
 #' out<-mtcars
 #' ui <- fluidPage(
 #'   sidebarLayout(
@@ -86,20 +114,35 @@ forestcoxUI<-function(id,label='forestplot'){
 #'       forestcoxUI('Forest')
 #'     ),
 #'     mainPanel(
-#'       DTOutput('tablesub')
-#'     )
+#'      tabsetPanel(
+#'         type = "pills",
+#'         tabPanel(
+#'           title = "Data",
+#'           DTOutput("tablesub"),
+#'
+#'         ),
+#'         tabPanel(
+#'           title = "figure",
+#'           plotOutput("forestplot", width = "100%"),
+#'           ggplotdownUI("Forest")
+#'         )
+#'       ) )
 #'   )
 #' )
 #'
 #'
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
-#'  label<-reactive(jstable::mk.lev(out))
-#'  outtable<-forestcoxServer('Forest',data=data,data_label=label)
+#'   label<-reactive(jstable::mk.lev(out))
+#'   outtable<-forestcoxServer('Forest',data=data,data_label=label)
 #'   output$tablesub<-renderDT({
-#'     outtable()
+#'     outtable()[[1]]
+#'   })
+#'   output$forestplot<-renderPlot({a
+#'     outtable()[[2]]
 #'   })
 #' }
+#'
 #'
 #'
 #' @seealso
@@ -214,7 +257,8 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
       output$xlim_forest<-renderUI({
         req(tbsub)
         data<-tbsub()
-        numericInput(session$ns('xMax'), 'max HR for forestplot', value= max(as.numeric(data$Upper),na.rm=TRUE))
+
+        numericInput(session$ns('xMax'), 'max HR for forestplot', value= round(max(as.numeric(data$Upper[data$Upper!='Inf']),na.rm=TRUE),2))
 
       })
 
@@ -259,7 +303,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
         tbsub <-  jstable::TableSubgroupMultiCox(form, var_subgroups = vs,var_cov = setdiff(input$cov, vs), data=coxdata,  time_eventrate = var.time[2] , line = F, decimal.hr = 3, decimal.percent = 1)
         #data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
-        #tbsub <-  TableSubgroupMultiCox(form, var_subgroups = c('kk'),  data=data, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
+        #tbsub<-TableSubgroupMultiCox(as.formula('Surv(mpg,vs)~am'), var_subgroups = 'kk',  data=out, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
         len<-nrow(label[variable==group.tbsub])
         data<-data.table::setDT(data)
         if(!isgroup){
@@ -316,14 +360,14 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
           tbsub <- cbind(Variable = tbsub[,1], cn[, -1], tbsub[, c(label[variable == group.tbsub,level], names(tbsub)[4:6], 'P value','P for interaction')])
 
         tbsub[-(len-1), 1] <- unlist(lapply(vs, function(x){c(label[variable == x, var_label][1], paste0("     ", label[variable == x, val_label]))}))
-          colnames(tbsub)[1:(2+2*len)] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
+          colnames(tbsub)[1:(2+2*len)] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day,'\n'," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
 
         }else{
          cn<-ov
           names(cn)[-1] <- label[variable == group.tbsub, val_label]
           tbsub <- cbind(Variable = tbsub[,1], cn[, -1], tbsub[, c(label[variable == group.tbsub,level], names(tbsub)[4:6], 'P value','P for interaction')])
 
-          colnames(tbsub)[1:(2+2*nrow(label[variable==group.tbsub]))] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
+          colnames(tbsub)[1:(2+2*nrow(label[variable==group.tbsub]))] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0( var.time[2],"-",input$day,'\n'," KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
 
         }
 
@@ -331,16 +375,78 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
 
       })
 
+
+      figure<-reactive({
+        group.tbsub<-input$group
+        label<-data_label()
+        data <- data.table::setDT(tbsub())
+        len<-ncol(data)
+
+        ll<-ifelse(group.tbsub %in% vlist()$group_vars,nrow(label[variable==group.tbsub]),0)
+        data[HR==0|Lower==0,':='(HR=NA,Lower=NA,Upper=NA)]
+        data_est<-data$`HR`
+        data[is.na(data)]<-' '
+        data$HR<-ifelse(data$HR==' ',' ',paste0(data$HR, " (", data$Lower, "-", data$Upper, ")"))
+        data.table::setnames(data,'HR','HR (95% CI)')
+        data$` ` <- paste(rep(" ", 20), collapse = " ")
+        tm <- forestploter::forest_theme(base_size =input$font,ci_Theight = 0.2)
+        selected_columns<-c(c(1:(2+2*ll)),len+1,(len-1):(len))
+        xlim<-c(1/input$xMax,input$xMax)
+        xlim<-round(xlim[order(xlim)],2)
+        if(is.null(input$xMax) || any(is.na(xlim))){
+          xlim<-c(0,1)
+        }
+
+        forestploter::forest(data[,.SD, .SDcols = selected_columns],
+                             lower=as.numeric(data$Lower),
+                             upper=as.numeric(data$Upper),
+                             ci_column =3+2*ll,
+                             est=as.numeric(data_est),
+                             ref_line = 1,
+                             ticks_digits=1,
+                             x_trans="log",
+                             xlim=xlim,
+                             arrow_lab = c(input$arrow_left, input$arrow_right),
+                             theme=tm
+        )->zz
+        return(zz[,2:(dim(zz)[2]-1)])
+      })
       res <- reactive({
-        datatable(tbsub(), caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions= "Buttons",
-                  options = c(opt.tb1(paste0("tbsub_",input$dep)),
-                              list(scrollX = TRUE, columnDefs = list(list(className = 'dt-right', targets = 0)))
-                  ))
+
+        list(
+          datatable(tbsub(), caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions= "Buttons",
+                    options = c(opt.tb1(paste0("tbsub_",input$dep)),
+                                list(scrollX = TRUE, columnDefs = list(list(className = 'dt-right', targets = 0)))
+                    )),
+         figure())
 
       })
-
-
-      output$forest <- downloadHandler(
+      output$downloadControls <- renderUI({
+        tagList(
+          fluidRow(
+          column(
+            3,
+            uiOutput(session$ns('xlim_forest'))
+          ),       column(3,
+                          numericInput(session$ns('font'), 'font-size', value= 12)),
+          column(3,
+                 textInput(session$ns('arrow_left'), 'arrow left', value= 'Better')),
+          column(3,
+                 textInput(session$ns('arrow_right'), 'arrow right', value= 'Worse'))
+          ),
+          fluidRow(
+            column(
+              5,
+              sliderInput(session$ns('width_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 16)
+            ),
+            column(
+              5,
+              sliderInput(session$ns('height_forest'), 'Plot height(inch)', min = 1 , max = 30, value = 3)
+            )
+          )
+        )
+      })
+      output$downloadButton <- downloadHandler(
         filename =  function() {
           paste(input$dep,"_forestplot.pptx", sep="")
 
@@ -353,33 +459,8 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                            incProgress(1/15)
                            Sys.sleep(0.01)
                          }
-                         group.tbsub<-input$group
-                         label<-data_label()
-                         data <- data.table::setDT(tbsub())
-                         len<-ncol(data)
-
-                         ll<-ifelse(group.tbsub %in% vlist()$group_vars,nrow(label[variable==group.tbsub]),0)
-                         data[HR==0|Lower==0,':='(HR=NA,Lower=NA,Upper=NA)]
-                         data_est<-data$`HR`
-                         data[is.na(data)]<-' '
-                         data$HR<-ifelse(data$HR==' ',' ',paste0(data$HR, " (", data$Lower, "-", data$Upper, ")"))
-                         data.table::setnames(data,'HR','HR (95% CI)')
-                         data$` ` <- paste(rep(" ", 20), collapse = " ")
-                         tm <- forestploter::forest_theme(ci_Theight = 0.2)
-                         selected_columns<-c(c(1:(2+2*ll)),len+1,(len-1):(len))
-                         x_lim<-input$xlim
-                         forestploter::forest(data[,.SD, .SDcols = selected_columns],
-                                              lower=as.numeric(data$Lower),
-                                              upper=as.numeric(data$Upper),
-                                              ci_column =3+2*ll,
-                                              est=as.numeric(data_est),
-                                              ref_line = 1,
-                                              ticks_digits=1,
-                                              x_trans="log",
-                                              xlim=c(1/input$xMax,input$xMax),
-                                              theme=tm
-                         )-> zz
-                         my_vec_graph <- rvg::dml(code = print(zz))
+                        zz<-figure()
+                         my_vec_graph <- rvg::dml(code = print(zz,autofit=TRUE))
 
                          doc <- officer::read_pptx()
                          doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")

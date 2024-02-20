@@ -5,16 +5,11 @@
 #' @return Shinymodule UI
 #' @details Shinymodule UI for forestglm
 #' @examples
-#'
-#' library(shiny);library(DT)
-#'
+#' library(shiny);library(DT);
 #' mtcars$vs<-factor(mtcars$vs)
 #' mtcars$am<-factor(mtcars$am)
 #' mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
 #' mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
-#'
-#' out<-mtcars
-#'
 #'
 #' ui <- fluidPage(
 #'   sidebarLayout(
@@ -22,19 +17,33 @@
 #'       forestglmUI('Forest')
 #'     ),
 #'     mainPanel(
-#'       DTOutput('tablesub')
+#'       tabsetPanel(
+#'         type = "pills",
+#'         tabPanel(
+#'           title = "Data",
+#'           DTOutput("tablesub"),
+#'         ),
+#'         tabPanel(
+#'           title = "figure",
+#'           plotOutput("forestplot", width = "100%"),
+#'           ggplotdownUI("Forest")
+#'         )
+#'       )
 #'     )
 #'   )
 #' )
 #'
-#'
+#' out<-mtcars
 #'
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
 #'   label<-reactive(jstable::mk.lev(out))
-#'   outtable<-forestglmServer('Forest',data=data,data_label=label,family='gaussian')
+#'   outtable<-forestglmServer('Forest',data=data,data_label=label,family='binomial')
 #'   output$tablesub<-renderDT({
-#'     outtable()
+#'     outtable()[[1]]
+#'   })
+#'   output$forestplot<-renderPlot({
+#'     outtable()[[2]]
 #'   })
 #' }
 #'
@@ -47,17 +56,10 @@
 forestglmUI<-function(id,label='forestplot'){
   ns<-NS(id)
   tagList(
-
     uiOutput(ns('group_tbsub')),
     uiOutput(ns('dep_tbsub')),
     uiOutput(ns('subvar_tbsub')),
     uiOutput(ns('cov_tbsub')),
-    downloadButton(ns('forest'), 'Download forest plot'),
-    sliderInput(ns('width_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 15),
-    sliderInput(ns('height_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 20),
-    uiOutput(ns('xlim_forest')),
-
-
   )
 
 }
@@ -76,10 +78,7 @@ forestglmUI<-function(id,label='forestplot'){
 #' @return Shiny module server for forestglm
 #' @details Shiny module server for forestglm
 #' @examples
-#'
-#'
-#' library(shiny);library(DT)
-#'
+#' library(shiny);library(DT);
 #' mtcars$vs<-factor(mtcars$vs)
 #' mtcars$am<-factor(mtcars$am)
 #' mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
@@ -91,7 +90,18 @@ forestglmUI<-function(id,label='forestplot'){
 #'       forestglmUI('Forest')
 #'     ),
 #'     mainPanel(
-#'       DTOutput('tablesub')
+#'       tabsetPanel(
+#'         type = "pills",
+#'         tabPanel(
+#'           title = "Data",
+#'           DTOutput("tablesub"),
+#'         ),
+#'         tabPanel(
+#'           title = "figure",
+#'           plotOutput("forestplot", width = "100%"),
+#'           ggplotdownUI("Forest")
+#'         )
+#'       )
 #'     )
 #'   )
 #' )
@@ -101,15 +111,14 @@ forestglmUI<-function(id,label='forestplot'){
 #' server <- function(input, output, session) {
 #'   data<-reactive(out)
 #'   label<-reactive(jstable::mk.lev(out))
-#'   outtable<-forestglmServer('Forest',data=data,data_label=label,family='gaussian')
+#'   outtable<-forestglmServer('Forest',data=data,data_label=label,family='binomial')
 #'   output$tablesub<-renderDT({
-#'     outtable()
+#'     outtable()[[1]]
+#'   })
+#'   output$forestplot<-renderPlot({
+#'     outtable()[[2]]
 #'   })
 #' }
-#'
-#'
-#'
-#'
 #'
 #' @seealso
 #'  \code{\link[jstable]{TableSubgroupMultiGLM}}
@@ -365,14 +374,83 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
       })
 
       res <- reactive({
+        list(
         datatable(tbsub(), caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions= "Buttons",
                   options = c(opt.tb1(paste0("tbsub_",input$dep)),
                               list(scrollX = TRUE, columnDefs = list(list(className = 'dt-right', targets = 0)))
-                  ))
+                  )),
+        figure())
       })
 
+      output$downloadControls <- renderUI({
+        tagList(
+          fluidRow(
+            column(
+              3,
+              uiOutput(session$ns('xlim_forest'))
+            ),
+            column(3,
+                   numericInput(session$ns('font'), 'font-size', value= 12)),
+            column(3,
+                   textInput(session$ns('arrow_left'), 'arrow left', value= 'Better')),
+            column(3,
+                   textInput(session$ns('arrow_right'), 'arrow right', value= 'Worse'))
+          ),
+          fluidRow(
+            column(
+              5,
+              sliderInput(session$ns('width_forest'), 'Plot width(inch)', min = 1 , max = 30, value = 15)
+            ),
+            column(
+              5,
+              sliderInput(session$ns('height_forest'), 'Plot height(inch)', min = 1 , max = 30, value = 3)
+            )
+          )
+        )
+      })
+      figure<-reactive({
+        data <- data.table::setDT(tbsub())
+        group.tbsub<-input$group
+        if(family=='gaussian'){
+          r<-'Beta'
+          ll<-1
+          data[Beta==0|Lower==0,':='(Beta=NA,Lower=NA,Upper=NA)]
+        }else{
+          r<-'OR'
+          ll<-nrow(data_label()[variable==group.tbsub])
+          data[OR==0|Lower==0,':='(OR=NA,Lower=NA,Upper=NA)]
+        }
 
-      output$forest <- downloadHandler(
+        len<-ncol(data)
+        data_est<-data[,get(r)]
+        data[is.na(data)]<-' '
+        data[[r]]<-ifelse(data[[r]]==' ',' ',paste0(data[[r]], " (", data$Lower, "-", data$Upper, ")"))
+        data$` ` <- paste(rep(" ", 20), collapse = " ")
+        tm <- forestploter::forest_theme(base_size =input$font,
+                                         ci_Theight = 0.2)
+        xlim<-c(ifelse(family=='gaussian',(-1)*input$xMax,1/input$xMax),input$xMax)
+        xlim<-round(xlim[order(xlim)],2)
+        if(is.null(input$xMax) || any(is.na(xlim))){
+          xlim<-c(0,1)
+        }
+        selected_columns<-c(c(1:(2+ll)),len+1,(len-1):(len))
+        forestploter::forest(data[,.SD, .SDcols = selected_columns],
+                             lower=as.numeric(data$Lower),
+                             upper=as.numeric(data$Upper),
+                             ci_column =3+ll,
+                             est=as.numeric(data_est),
+                             ref_line = ifelse(family=='gaussian',0,1),
+                             x_trans=ifelse(family=='gaussian',"none","log"),
+                             ticks_digits=1,
+                             xlim=xlim,
+                             arrow_lab = c(input$arrow_left, input$arrow_right),
+                             theme=tm
+        )-> zz
+
+        return(zz[,2:(dim(zz)[2]-1)])
+      })
+
+      output$downloadButton <- downloadHandler(
         filename =  function() {
           paste(input$dep,"_forestplot.pptx", sep="")
 
@@ -385,47 +463,11 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                            incProgress(1/15)
                            Sys.sleep(0.01)
                          }
-
-
-                         data <- data.table::setDT(tbsub())
-                         group.tbsub<-input$group
-                         if(family=='gaussian'){
-                           r<-'Beta'
-                           ll<-1
-                           data[Beta==0|Lower==0,':='(Beta=NA,Lower=NA,Upper=NA)]
-                         }else{
-                          r<-'OR'
-                          ll<-nrow(data_label()[variable==group.tbsub])
-                          data[OR==0|Lower==0,':='(OR=NA,Lower=NA,Upper=NA)]
-                        }
-
-                         len<-ncol(data)
-                         data_est<-data[,get(r)]
-                         data[is.na(data)]<-' '
-                         data[[r]]<-ifelse(data[[r]]==' ',' ',paste0(data[[r]], " (", data$Lower, "-", data$Upper, ")"))
-                         data$` ` <- paste(rep(" ", 20), collapse = " ")
-                         tm <- forestploter::forest_theme(ci_Theight = 0.2)
-                         x_lim<-input$xlim
-                         selected_columns<-c(c(1:(2+ll)),len+1,(len-1):(len))
-                         forestploter::forest(data[,.SD, .SDcols = selected_columns],
-                                              lower=as.numeric(data$Lower),
-                                              upper=as.numeric(data$Upper),
-                                              ci_column =3+ll,
-                                              est=as.numeric(data_est),
-                                              ref_line = ifelse(family=='gaussian',0,1),
-                                              x_trans=ifelse(family=='gaussian',"none","log"),
-                                              ticks_digits=1,
-                                              xlim=c(ifelse(family=='gaussian',-input$xMax,1/input$xMax),input$xMax),
-                                              theme=tm
-                         )-> zz
-                         my_vec_graph <- rvg::dml(code = print(zz))
-
+                         my_vec_graph <- rvg::dml(code = print(figure(),autofit=TRUE))
                          doc <- officer::read_pptx()
                          doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
                          doc <- officer::ph_with(doc, my_vec_graph, location = officer::ph_location(width = input$width_forest, height = input$height_forest, top = 0, left = 0))
                          print(doc, target = file)
-
-
                        })
 
         }

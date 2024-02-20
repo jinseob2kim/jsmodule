@@ -1,6 +1,7 @@
 # jsmodule 1.5.1
 
 ## Update: Add Subgroupanalysis to jsBasicGadget
+## Update: Add figure in subgroup analysis with forestplot
 
 # jsmodule 1.5.0
 
