@@ -446,8 +446,11 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                              arrow_lab = c(input$arrow_left, input$arrow_right),
                              theme=tm
         )-> zz
-
-        return(zz[,2:(dim(zz)[2]-1)])
+        l<-dim(zz)
+        h<-zz$height[(l[1]-2):(l[1]-1)]
+        zz<-print(zz[,2:(l[2]-1)],autofit=TRUE)
+        zz$heights[(l[1]-2):(l[1]-1)]<-h
+        return(zz)
       })
 
       output$downloadButton <- downloadHandler(
@@ -463,7 +466,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                            incProgress(1/15)
                            Sys.sleep(0.01)
                          }
-                         my_vec_graph <- rvg::dml(code = print(figure(),autofit=TRUE))
+                         my_vec_graph <- rvg::dml(code = print(figure()))
                          doc <- officer::read_pptx()
                          doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
                          doc <- officer::ph_with(doc, my_vec_graph, location = officer::ph_location(width = input$width_forest, height = input$height_forest, top = 0, left = 0))

@@ -6,7 +6,7 @@
 #' @details Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plot
 #' @examples
 #' if (interactive()) {
-#'   jsBasicGadjet(mtcars)
+#'   jsBasicGadget(mtcars)
 #' }
 #' @rdname jsBasicGadget
 #' @export
@@ -281,10 +281,23 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
             forestcoxUI("Forest")
           ),
           mainPanel(
-            withLoader(
-              DTOutput("tablesub"),
-              type = "html",
-              loader = "loader6"
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput('tablesub'),
+                  type = "html",
+                  loader = "loader6"
+                )
+
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot", width = "100%"),
+                ggplotdownUI("Forest")
+              )
+
             )
           )
         )
@@ -296,10 +309,24 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
             forestglmUI("Forest_glm")
           ),
           mainPanel(
-            withLoader(
-              DTOutput("tablesub_glm"),
-              type = "html",
-              loader = "loader6"
+
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput('tablesub_glm'),
+                  type = "html",
+                  loader = "loader6"
+                )
+
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot_glm", width = "100%"),
+                ggplotdownUI("Forest_glm")
+              )
+
             )
           )
         )
@@ -311,10 +338,23 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
             forestglmUI("Forest_glmbi")
           ),
           mainPanel(
-            withLoader(
-              DTOutput("tablesub_glmbi"),
-              type = "html",
-              loader = "loader6"
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput('tablesub_glmbi'),
+                  type = "html",
+                  loader = "loader6"
+                )
+
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot_glmbi", width = "100%"),
+                ggplotdownUI("Forest_glmbi")
+              )
+
             )
           )
         )
@@ -704,18 +744,28 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       caption.placement = "top"
     )
 
-    outtable <- forestcoxServer("Forest", data = data, data_label = data.label)
-    output$tablesub <- renderDT({
-      outtable()
-    })
-    outtable_glm <- forestglmServer("Forest_glm", data = data, data_label = data.label, family = "gaussian")
-    output$tablesub_glm <- renderDT({
-      outtable_glm()
-    })
 
-    outtable_glmbi <- forestglmServer("Forest_glmbi", data = data, data_label = data.label, family = "binomial")
-    output$tablesub_glmbi <- renderDT({
-      outtable_glmbi()
+    outtable<-forestcoxServer('Forest',data=data,data_label=data.label)
+    output$tablesub<-renderDT({
+      outtable()[[1]]
+    })
+    output$forestplot<-renderPlot({
+      outtable()[[2]]
+    })
+    outtable_glm<-forestglmServer('Forest_glm',data=data,data_label=data.label,family='gaussian')
+    output$tablesub_glm<-renderDT({
+      outtable_glm()[[1]]
+    })
+    output$forestplot_glm<-renderPlot({
+      outtable_glm()[[2]]
+    })
+    outtable_glmbi<-forestglmServer('Forest_glmbi',data=data,data_label=data.label,family='binomial')
+    output$tablesub_glmbi<-renderDT({
+      outtable_glmbi()[[1]]
+    })
+    output$forestplot_glmbi<-renderPlot({
+      outtable_glmbi()[[2]]
+
     })
     session$onSessionEnded(function() {
       stopApp()
@@ -1073,10 +1123,23 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             forestcoxUI("Forest")
           ),
           mainPanel(
-            withLoader(
-              DTOutput("tablesub"),
-              type = "html",
-              loader = "loader6"
+
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput('tablesub'),
+                  type = "html",
+                  loader = "loader6"
+                )
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot", width = "100%"),
+                ggplotdownUI("Forest")
+              )
+
             )
           )
         )
@@ -1088,10 +1151,22 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             forestglmUI("Forest_glm")
           ),
           mainPanel(
-            withLoader(
-              DTOutput("tablesub_glm"),
-              type = "html",
-              loader = "loader6"
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput('tablesub_glm'),
+                  type = "html",
+                  loader = "loader6"
+                )
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot_glm", width = "100%"),
+                ggplotdownUI("Forest_glm")
+              )
+
             )
           )
         )
@@ -1103,10 +1178,22 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             forestglmUI("Forest_glmbi")
           ),
           mainPanel(
-            withLoader(
-              DTOutput("tablesub_glmbi"),
-              type = "html",
-              loader = "loader6"
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput('tablesub_glmbi'),
+                  type = "html",
+                  loader = "loader6"
+                )
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot_glmbi", width = "100%"),
+                ggplotdownUI("Forest_glmbi")
+              )
+
             )
           )
         )
@@ -1346,18 +1433,28 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       caption = "Best cutoff",
       caption.placement = "top"
     )
-    outtable <- forestcoxServer("Forest", data = data, data_label = data.label)
-    output$tablesub <- renderDT({
-      outtable()
-    })
-    outtable_glm <- forestglmServer("Forest_glm", data = data, data_label = data.label, family = "gaussian")
-    output$tablesub_glm <- renderDT({
-      outtable_glm()
-    })
+    outtable<-forestcoxServer('Forest',data=data,data_label=data.label)
 
-    outtable_glmbi <- forestglmServer("Forest_glmbi", data = data, data_label = data.label, family = "binomial")
-    output$tablesub_glmbi <- renderDT({
-      outtable_glmbi()
+    output$tablesub<-renderDT({
+      outtable()[[1]]
+    })
+      output$forestplot<-renderPlot({
+        outtable()[[2]]
+      })
+    outtable_glm<-forestglmServer('Forest_glm',data=data,data_label=data.label,family='gaussian')
+    output$tablesub_glm<-renderDT({
+      outtable_glm()[[1]]
+    })
+    output$forestplot_glm<-renderPlot({
+      outtable_glm()[[2]]
+    })
+    outtable_glmbi<-forestglmServer('Forest_glmbi',data=data,data_label=data.label,family='binomial')
+    output$tablesub_glmbi<-renderDT({
+      outtable_glmbi()[[1]]
+    })
+    output$forestplot_glmbi<-renderPlot({
+      outtable_glmbi()[[2]]
+
     })
     session$onSessionEnded(function() {
       stopApp()

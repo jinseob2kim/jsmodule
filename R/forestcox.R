@@ -410,7 +410,12 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                              arrow_lab = c(input$arrow_left, input$arrow_right),
                              theme=tm
         )->zz
-        return(zz[,2:(dim(zz)[2]-1)])
+
+       l<-dim(zz)
+        h<-zz$height[(l[1]-2):(l[1]-1)]
+        zz<-print(zz[,2:(l[2]-1)],autofit=TRUE)
+        zz$heights[(l[1]-2):(l[1]-1)]<-h
+        return(zz)
       })
       res <- reactive({
 
@@ -461,7 +466,7 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
                            Sys.sleep(0.01)
                          }
                         zz<-figure()
-                         my_vec_graph <- rvg::dml(code = print(zz,autofit=TRUE))
+                         my_vec_graph <- rvg::dml(code = print(zz))
 
                          doc <- officer::read_pptx()
                          doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
