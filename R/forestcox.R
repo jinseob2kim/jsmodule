@@ -394,8 +394,9 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
         xlim<-c(1/input$xMax,input$xMax)
         xlim<-round(xlim[order(xlim)],2)
         if(is.null(input$xMax) || any(is.na(xlim))){
-          xlim<-c(0,1)
+          xlim<-c(0,2)
         }
+
 
         forestploter::forest(data[,.SD, .SDcols = selected_columns],
                              lower=as.numeric(data$Lower),
