@@ -431,7 +431,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
         xlim<-c(ifelse(family=='gaussian',(-1)*input$xMax,1/input$xMax),input$xMax)
         xlim<-round(xlim[order(xlim)],2)
         if(is.null(input$xMax) || any(is.na(xlim))){
-          xlim<-c(0,1)
+          xlim<-c(0,2)
         }
         selected_columns<-c(c(1:(2+ll)),len+1,(len-1):(len))
         forestploter::forest(data[,.SD, .SDcols = selected_columns],
