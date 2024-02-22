@@ -278,7 +278,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
         title = "subgroup cox",
         sidebarLayout(
           sidebarPanel(
-            forestcoxUI('Forest')
+            forestcoxUI("Forest")
           ),
           mainPanel(
             tabsetPanel(
@@ -297,6 +297,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                 plotOutput("forestplot", width = "100%"),
                 ggplotdownUI("Forest")
               )
+
             )
           )
         )
@@ -305,9 +306,10 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
         title = "subgroup regression",
         sidebarLayout(
           sidebarPanel(
-            forestglmUI('Forest_glm')
+            forestglmUI("Forest_glm")
           ),
           mainPanel(
+
             tabsetPanel(
               type = "pills",
               tabPanel(
@@ -324,6 +326,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                 plotOutput("forestplot_glm", width = "100%"),
                 ggplotdownUI("Forest_glm")
               )
+
             )
           )
         )
@@ -332,7 +335,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
         title = "subgroup logistic regression",
         sidebarLayout(
           sidebarPanel(
-            forestglmUI('Forest_glmbi')
+            forestglmUI("Forest_glmbi")
           ),
           mainPanel(
             tabsetPanel(
@@ -351,6 +354,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
                 plotOutput("forestplot_glmbi", width = "100%"),
                 ggplotdownUI("Forest_glmbi")
               )
+
             )
           )
         )
@@ -740,6 +744,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       caption.placement = "top"
     )
 
+
     outtable<-forestcoxServer('Forest',data=data,data_label=data.label)
     output$tablesub<-renderDT({
       outtable()[[1]]
@@ -760,6 +765,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
     })
     output$forestplot_glmbi<-renderPlot({
       outtable_glmbi()[[2]]
+
     })
     session$onSessionEnded(function() {
       stopApp()
@@ -1114,9 +1120,10 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         title = "subgroup cox",
         sidebarLayout(
           sidebarPanel(
-            forestcoxUI('Forest')
+            forestcoxUI("Forest")
           ),
           mainPanel(
+
             tabsetPanel(
               type = "pills",
               tabPanel(
@@ -1132,6 +1139,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
                 plotOutput("forestplot", width = "100%"),
                 ggplotdownUI("Forest")
               )
+
             )
           )
         )
@@ -1140,7 +1148,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         title = "subgroup regression",
         sidebarLayout(
           sidebarPanel(
-            forestglmUI('Forest_glm')
+            forestglmUI("Forest_glm")
           ),
           mainPanel(
             tabsetPanel(
@@ -1158,6 +1166,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
                 plotOutput("forestplot_glm", width = "100%"),
                 ggplotdownUI("Forest_glm")
               )
+
             )
           )
         )
@@ -1166,7 +1175,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         title = "subgroup logistic regression",
         sidebarLayout(
           sidebarPanel(
-            forestglmUI('Forest_glmbi')
+            forestglmUI("Forest_glmbi")
           ),
           mainPanel(
             tabsetPanel(
@@ -1184,8 +1193,8 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
                 plotOutput("forestplot_glmbi", width = "100%"),
                 ggplotdownUI("Forest_glmbi")
               )
-            )
 
+            )
           )
         )
       )
@@ -1445,6 +1454,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     })
     output$forestplot_glmbi<-renderPlot({
       outtable_glmbi()[[2]]
+
     })
     session$onSessionEnded(function() {
       stopApp()
