@@ -234,7 +234,8 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
       output$xlim_forest<-renderUI({
         req(tbsub)
         data<-tbsub()
-        numericInput(session$ns('xMax'), 'max beta(OR) for forestplot', value= max(as.numeric(data$Upper),na.rm=TRUE))
+        data<-ifelse(family=='binomial',data[!(OR==0|Lower==0)]$Upper,data[!(Beta==0|Lower==0)]$Upper)
+        numericInput(session$ns('xMax'), 'max beta(OR) for forestplot', value= max(as.numeric(data[data!='Inf']),na.rm=TRUE))
 
       })
 
@@ -369,11 +370,13 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
           colnames(tbsub)[1:(1+nrow(label[variable==group.tbsub]))] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]))
 
         }
+
         return(tbsub)
 
       })
 
       res <- reactive({
+
         list(
         datatable(tbsub(), caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions= "Buttons",
                   options = c(opt.tb1(paste0("tbsub_",input$dep)),
@@ -446,6 +449,7 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
                              arrow_lab = c(input$arrow_left, input$arrow_right),
                              theme=tm
         )-> zz
+
         l<-dim(zz)
         h<-zz$height[(l[1]-2):(l[1]-1)]
         zz<-print(zz[,2:(l[2]-1)],autofit=TRUE)

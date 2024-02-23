@@ -257,8 +257,8 @@ forestcoxServer<-function(id,data,data_label,data_varStruct=NULL,nfactor.limit=1
       output$xlim_forest<-renderUI({
         req(tbsub)
         data<-tbsub()
-
-        numericInput(session$ns('xMax'), 'max HR for forestplot', value= round(max(as.numeric(data$Upper[data$Upper!='Inf']),na.rm=TRUE),2))
+        data<-data[!(HR==0|Lower==0)]$Upper
+        numericInput(session$ns('xMax'), 'max HR for forestplot', value= round(max(as.numeric(data[data!='Inf']),na.rm=TRUE),2))
 
       })
 
