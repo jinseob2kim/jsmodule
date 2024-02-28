@@ -2,6 +2,7 @@
 
 ## Update: Add Subgroupanalysis to jsBasicGadget
 ## Update: Add figure in subgroup analysis with forestplot
+## Update: Add family 'poisson' in forestglm
 
 # jsmodule 1.5.0
 

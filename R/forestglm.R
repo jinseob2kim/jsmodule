@@ -71,7 +71,7 @@ forestglmUI<-function(id,label='forestplot'){
 #' @param id id
 #' @param data Reactive data
 #' @param data_label Reactive data label
-#' @param family family, "gaussian" or "binomial"
+#' @param family family, "gaussian" or "binomial" or 'poisson' or 'quasipoisson'
 #' @param data_varStruct Reactive List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
@@ -234,8 +234,8 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
       output$xlim_forest<-renderUI({
         req(tbsub)
         data<-tbsub()
-        data<-ifelse(family=='binomial',data[!(OR==0|Lower==0)]$Upper,data[!(Beta==0|Lower==0)]$Upper)
-        numericInput(session$ns('xMax'), 'max beta(OR) for forestplot', value= max(as.numeric(data[data!='Inf']),na.rm=TRUE))
+        data<-ifelse(family=='binomial',data[!(OR==0|Lower==0)]$Upper,ifelse(family=='gaussian',data[!(Beta==0|Lower==0)]$Upper,data[!(RR==0|Lower==0)]$Upper))
+        numericInput(session$ns('xMax'), 'max beta(OR,RR) for forestplot', value= max(as.numeric(data[data!='Inf']),na.rm=TRUE))
 
       })
 
@@ -281,8 +281,9 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
         #tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs, data=coxdata,family=family)
         len<-nrow(label[variable==group.tbsub])
         data<-data.table::setDT(data)
-        if(family=='gaussian'){
-          data.table::setnames(tbsub,'Point.Estimate','Beta')
+        if(family!='binomial'){
+          if(family=='gaussian')
+            data.table::setnames(tbsub,'Point.Estimate','Beta')
           if(is.null(design.survey)){
             meanvar<-data[, .(round(mean(get(var.event),na.rm=TRUE),2),round(stats::var(get(var.event),na.rm=TRUE),2))]
             meanvar<-meanvar[,.(mean=paste(V1,"\u00B1 ",V2))]
@@ -414,8 +415,13 @@ forestglmServer<-function(id,data,data_label,family,data_varStruct=NULL,nfactor.
       figure<-reactive({
         data <- data.table::setDT(tbsub())
         group.tbsub<-input$group
-        if(family=='gaussian'){
-          r<-'Beta'
+        if(family!='binomial'){
+          if(family=='gaussian'){
+            r<-'Beta'
+          }else{
+            r<-'RR'
+          }
+
           ll<-1
           data[Beta==0|Lower==0,':='(Beta=NA,Lower=NA,Upper=NA)]
         }else{
