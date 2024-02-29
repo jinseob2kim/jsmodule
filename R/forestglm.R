@@ -141,7 +141,7 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
   moduleServer(
     id,
     function(input, output, session) {
-      . <- .N <- N <- V1 <- V2 <- Beta <- Lower <- OR <- Upper <- level <- val_label <- variable <- NULL
+      RR <- . <- .N <- N <- V1 <- V2 <- Beta <- Lower <- OR <- Upper <- level <- val_label <- variable <- NULL
 
       if (is.null(data_varStruct)) {
         data_varStruct <- reactive(list(variable = names(data())))

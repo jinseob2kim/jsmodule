@@ -21,7 +21,7 @@ forestglmServer(
 
 \item{data_label}{Reactive data label}
 
-\item{family}{family, "gaussian" or "binomial"}
+\item{family}{family, "gaussian" or "binomial" or 'poisson' or 'quasipoisson'}
 
 \item{data_varStruct}{Reactive List of variable structure, Default: NULL}
 
@@ -39,16 +39,17 @@ Shiny module server for forestglm
 Shiny module server for forestglm
 }
 \examples{
-library(shiny);library(DT);
-mtcars$vs<-factor(mtcars$vs)
-mtcars$am<-factor(mtcars$am)
-mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
-mtcars$kk1<-factor(as.integer(mtcars$disp >= 200))
+library(shiny)
+library(DT)
+mtcars$vs <- factor(mtcars$vs)
+mtcars$am <- factor(mtcars$am)
+mtcars$kk <- factor(as.integer(mtcars$disp >= 150))
+mtcars$kk1 <- factor(as.integer(mtcars$disp >= 200))
 
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
-      forestglmUI('Forest')
+      forestglmUI("Forest")
     ),
     mainPanel(
       tabsetPanel(
@@ -67,16 +68,16 @@ ui <- fluidPage(
   )
 )
 
-out<-mtcars
+out <- mtcars
 
 server <- function(input, output, session) {
-  data<-reactive(out)
-  label<-reactive(jstable::mk.lev(out))
-  outtable<-forestglmServer('Forest',data=data,data_label=label,family='binomial')
-  output$tablesub<-renderDT({
+  data <- reactive(out)
+  label <- reactive(jstable::mk.lev(out))
+  outtable <- forestglmServer("Forest", data = data, data_label = label, family = "binomial")
+  output$tablesub <- renderDT({
     outtable()[[1]]
   })
-  output$forestplot<-renderPlot({
+  output$forestplot <- renderPlot({
     outtable()[[2]]
   })
 }
