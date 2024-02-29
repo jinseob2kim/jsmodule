@@ -187,19 +187,16 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           )
         })
       })
-      output$size<-renderUI({
+      output$size <- renderUI({
         tagList(
           fluidRow(
-            column(6,numericInput(session$ns('size'), 'Line size', value= 0.5)),
-            column(6,numericInput(session$ns('pointsize'), 'Point size', value= 0.5))
-
+            column(6, numericInput(session$ns("size"), "Line size", value = 0.5)),
+            column(6, numericInput(session$ns("pointsize"), "Point size", value = 0.5))
           )
-
         )
-      }
-      )
-      output$position.dodge<-renderUI({
-        sliderInput(session$ns('positiondodge'),'Position dodge',min=0 ,max=1 ,value=0)
+      })
+      output$position.dodge <- renderUI({
+        sliderInput(session$ns("positiondodge"), "Position dodge", min = 0, max = 1, value = 0)
       })
 
       output$subval <- renderUI({
@@ -267,8 +264,8 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           color = color, add = add, add.params = add.params, conf.int = input$lineci,
           xlab = label[variable == input$x_line, var_label][1],
           ylab = label[variable == input$y_line, var_label][1], na.rm = T,
-          position=position_dodge(input$positiondodge),
-          size=input$size,
+          position = position_dodge(input$positiondodge),
+          size = input$size,
           point.size = input$pointsize,
           linetype = linetype
         )
