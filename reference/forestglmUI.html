@@ -155,16 +155,17 @@
     <p>Shinymodule UI for forestglm</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shiny</span>);<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>DT</span>);
-<span class='no'>mtcars</span>$<span class='no'>vs</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='no'>mtcars</span>$<span class='no'>vs</span>)
-<span class='no'>mtcars</span>$<span class='no'>am</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='no'>mtcars</span>$<span class='no'>am</span>)
-<span class='no'>mtcars</span>$<span class='no'>kk</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span>(<span class='no'>mtcars</span>$<span class='no'>disp</span><span class='kw'>&gt;=</span> <span class='fl'>150</span>))
-<span class='no'>mtcars</span>$<span class='no'>kk1</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span>(<span class='no'>mtcars</span>$<span class='no'>disp</span> <span class='kw'>&gt;=</span> <span class='fl'>200</span>))
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shiny</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>DT</span>)
+<span class='no'>mtcars</span>$<span class='no'>vs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='no'>mtcars</span>$<span class='no'>vs</span>)
+<span class='no'>mtcars</span>$<span class='no'>am</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='no'>mtcars</span>$<span class='no'>am</span>)
+<span class='no'>mtcars</span>$<span class='no'>kk</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span>(<span class='no'>mtcars</span>$<span class='no'>disp</span> <span class='kw'>&gt;=</span> <span class='fl'>150</span>))
+<span class='no'>mtcars</span>$<span class='no'>kk1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span>(<span class='no'>mtcars</span>$<span class='no'>disp</span> <span class='kw'>&gt;=</span> <span class='fl'>200</span>))
 
 <span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/fluidPage.html'>fluidPage</a></span>(
   <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarLayout</a></span>(
     <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>sidebarPanel</a></span>(
-      <span class='fu'>forestglmUI</span>(<span class='st'>'Forest'</span>)
+      <span class='fu'>forestglmUI</span>(<span class='st'>"Forest"</span>)
     ),
     <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sidebarLayout.html'>mainPanel</a></span>(
       <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/tabsetPanel.html'>tabsetPanel</a></span>(
@@ -183,16 +184,16 @@
   )
 )
 
-<span class='no'>out</span><span class='kw'>&lt;-</span><span class='no'>mtcars</span>
+<span class='no'>out</span> <span class='kw'>&lt;-</span> <span class='no'>mtcars</span>
 
 <span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
-  <span class='no'>data</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='no'>out</span>)
-  <span class='no'>label</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jstable/man/mk.lev.html'>mk.lev</a></span>(<span class='no'>out</span>))
-  <span class='no'>outtable</span><span class='kw'>&lt;-</span><span class='fu'><a href='forestglmServer.html'>forestglmServer</a></span>(<span class='st'>'Forest'</span>,<span class='kw'>data</span><span class='kw'>=</span><span class='no'>data</span>,<span class='kw'>data_label</span><span class='kw'>=</span><span class='no'>label</span>,<span class='kw'>family</span><span class='kw'>=</span><span class='st'>'binomial'</span>)
-  <span class='no'>output</span>$<span class='no'>tablesub</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>renderDT</a></span>({
+  <span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='no'>out</span>)
+  <span class='no'>label</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/reactive.html'>reactive</a></span>(<span class='kw pkg'>jstable</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/jstable/man/mk.lev.html'>mk.lev</a></span>(<span class='no'>out</span>))
+  <span class='no'>outtable</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='forestglmServer.html'>forestglmServer</a></span>(<span class='st'>"Forest"</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>, <span class='kw'>data_label</span> <span class='kw'>=</span> <span class='no'>label</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='st'>"binomial"</span>)
+  <span class='no'>output</span>$<span class='no'>tablesub</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/DT/man/dataTableOutput.html'>renderDT</a></span>({
     <span class='fu'>outtable</span>()<span class='kw'>[[</span><span class='fl'>1</span>]]
   })
-  <span class='no'>output</span>$<span class='no'>forestplot</span><span class='kw'>&lt;-</span><span class='fu'><a href='https://rdrr.io/pkg/shiny/man/renderPlot.html'>renderPlot</a></span>({
+  <span class='no'>output</span>$<span class='no'>forestplot</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/renderPlot.html'>renderPlot</a></span>({
     <span class='fu'>outtable</span>()<span class='kw'>[[</span><span class='fl'>2</span>]]
   })
 }</div></pre>
