@@ -49,7 +49,9 @@ lineUI <- function(id, label = "lineplot") {
     checkboxInput(ns("jitter"), "Jitter"),
     checkboxInput(ns("rev_y"), "Reverse Y-axis"),
     uiOutput(ns("subvar")),
-    uiOutput(ns("subval"))
+    uiOutput(ns("subval")),
+    uiOutput(ns("size")),
+    uiOutput(ns("pointsize"))
   )
 }
 
@@ -185,7 +187,17 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           )
         })
       })
+      output$size<-renderUI({
+        tagList(
+          fluidRow(
+            column(6,numericInput(session$ns('size'), 'line size', value= 0.5)),
+            column(6,numericInput(session$ns('pointsize'), 'point size', value= 0.5))
 
+          )
+
+        )
+      }
+      )
 
       output$subval <- renderUI({
         req(input$subcheck == T)
@@ -252,6 +264,9 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           color = color, add = add, add.params = add.params, conf.int = input$lineci,
           xlab = label[variable == input$x_line, var_label][1],
           ylab = label[variable == input$y_line, var_label][1], na.rm = T,
+          position=position_dodge(0.5),
+          size=input$size,
+          point.size = input$pointsize,
           linetype = linetype
         )
 
