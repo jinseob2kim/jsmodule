@@ -1,6 +1,9 @@
 # jsmodule 1.5.1
 
 ## Update: Add Subgroupanalysis to jsBasicGadget
+## Update: Add figure in subgroup analysis with forestplot
+## Update: Add family 'poisson' in forestglm
+## Update: Add "line size" "point size" to lineplot
 
 # jsmodule 1.5.0
 

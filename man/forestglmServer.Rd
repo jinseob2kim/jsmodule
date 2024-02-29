@@ -39,10 +39,7 @@ Shiny module server for forestglm
 Shiny module server for forestglm
 }
 \examples{
-
-
-library(shiny);library(DT)
-
+library(shiny);library(DT);
 mtcars$vs<-factor(mtcars$vs)
 mtcars$am<-factor(mtcars$am)
 mtcars$kk<-factor(as.integer(mtcars$disp>= 150))
@@ -54,7 +51,18 @@ ui <- fluidPage(
       forestglmUI('Forest')
     ),
     mainPanel(
-      DTOutput('tablesub')
+      tabsetPanel(
+        type = "pills",
+        tabPanel(
+          title = "Data",
+          DTOutput("tablesub"),
+        ),
+        tabPanel(
+          title = "figure",
+          plotOutput("forestplot", width = "100\%"),
+          ggplotdownUI("Forest")
+        )
+      )
     )
   )
 )
@@ -64,15 +72,14 @@ out<-mtcars
 server <- function(input, output, session) {
   data<-reactive(out)
   label<-reactive(jstable::mk.lev(out))
-  outtable<-forestglmServer('Forest',data=data,data_label=label,family='gaussian')
+  outtable<-forestglmServer('Forest',data=data,data_label=label,family='binomial')
   output$tablesub<-renderDT({
-    outtable()
+    outtable()[[1]]
+  })
+  output$forestplot<-renderPlot({
+    outtable()[[2]]
   })
 }
-
-
-
-
 
 }
 \seealso{
