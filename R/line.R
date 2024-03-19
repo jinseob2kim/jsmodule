@@ -14,6 +14,7 @@
 #'       lineUI("line")
 #'     ),
 #'     mainPanel(
+#'       optionUI("line"),
 #'       plotOutput("line_plot"),
 #'       ggplotdownUI("line")
 #'     )
@@ -88,6 +89,7 @@ optionUI <- function(id) {
 #'       lineUI("line")
 #'     ),
 #'     mainPanel(
+#'       optionUI("line"),
 #'       plotOutput("line_plot"),
 #'       ggplotdownUI("line")
 #'     )
@@ -111,10 +113,12 @@ optionUI <- function(id) {
 #' @export
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
-#' @importFrom ggpubr ggline
+#' @importFrom ggpubr ggline stat_compare_means geom_pwc
 #' @importFrom ggplot2 ggsave scale_y_reverse
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
+#' @importFrom scales label_pvalue
+#' @importFrom shinyWidgets dropdownButton tooltipOptions
 
 
 
@@ -203,7 +207,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
             selected = "strataFalse",
             tabPanel(
               "strataTrue",
-              checkboxInput(session$ns("isStrata"), "P value?"),
+              checkboxInput(session$ns("isStrata"), "P value"),
             ),
             tabPanel(
               "strataFalse",
@@ -415,7 +419,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
 
         if (input$isStrata & input$strata != "None") {
           res.plot <- res.plot +
-            stat_compare_means(
+            ggpubr::stat_compare_means(
               method = spval.name,
               size = pval.font.size,
               aes(

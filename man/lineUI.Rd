@@ -30,6 +30,7 @@ ui <- fluidPage(
       lineUI("line")
     ),
     mainPanel(
+      optionUI("line"),
       plotOutput("line_plot"),
       ggplotdownUI("line")
     )

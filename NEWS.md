@@ -1,3 +1,8 @@
+# jsmodule 1.5.2
+
+## Update: Add P value option to barplot, boxplot and lineplot
+## Update: Add dropdown button for graphical option to barplot, boxplot and lineplot
+
 # jsmodule 1.5.1
 
 ## Update: Add Subgroupanalysis to jsBasicGadget

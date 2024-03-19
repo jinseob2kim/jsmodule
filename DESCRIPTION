@@ -1,20 +1,21 @@
 Package: jsmodule
 Title: 'RStudio' Addins and 'Shiny' Modules for Medical Research
-Version: 1.5.1
-Date: 2024-02-29
+Version: 1.5.2
+Date: 2024-03-19
 Authors@R: c(person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c("aut", "cre"),  comment = c(ORCID = "0000-0002-9403-605X")),
              person("Zarathu", role = c("cph", "fnd")),
              person("Hyunki", "Lee", email = "leevenstar@snu.ac.kr", role = c("aut")),
              person("Changwoo", "Lim", email = "limcw@zarathu.com", role = c("aut")),
              person("Jinhwan", "Kim", email = "jinhwan@zarathu.com", role = c("aut")),
-             person("Yoonkyoung", "Jeon", email = "rachel200357@gmail.com", role = c("aut"))
+             person("Yoonkyoung", "Jeon", email = "rachel200357@gmail.com", role = c("aut")),
+             person("Jaewoong", "Heo", email = "koolerjaebee@gmail.com", role = c("aut"))
              )
 Description: 'RStudio' addins and 'Shiny' modules for descriptive statistics, regression and survival analysis.
 Depends: R (>= 3.4.0)
 License: Apache License 2.0 
 Encoding: UTF-8
 RoxygenNote: 7.3.1
-Imports: utils, stats, data.table, shiny, readxl, DT, jstable, labelled, methods, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt(>= 3.0.0), survey, jskm(>= 0.4.4), survival, purrr, geepack, maxstat, survIDINRI, timeROC, shinyWidgets, pROC, Hmisc, see, readr, RColorBrewer, ggpubr, officer, rvg, epiDisplay, forestploter
+Imports: utils, stats, data.table, shiny, readxl, DT, jstable, labelled, methods, GGally, ggplot2, haven, rstudioapi, shinycustomloader, MatchIt(>= 3.0.0), survey, jskm(>= 0.4.4), survival, purrr, geepack, maxstat, survIDINRI, timeROC, shinyWidgets, pROC, Hmisc, see, readr, RColorBrewer, ggpubr, officer, rvg, epiDisplay, forestploter, scales
 URL: https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
 Suggests: 

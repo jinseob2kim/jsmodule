@@ -14,6 +14,7 @@
 #'       boxUI("box")
 #'     ),
 #'     mainPanel(
+#'       optionUI("box"),
 #'       plotOutput("box_plot"),
 #'       ggplotdownUI("box")
 #'     )
@@ -85,6 +86,7 @@ optionUI <- function(id) {
 #'       boxUI("box")
 #'     ),
 #'     mainPanel(
+#'       optionUI("box"),
 #'       plotOutput("box_plot"),
 #'       ggplotdownUI("box")
 #'     )
@@ -108,10 +110,12 @@ optionUI <- function(id) {
 #' @export
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
-#' @importFrom ggpubr ggboxplot
+#' @importFrom ggpubr ggboxplot stat_compare_means geom_pwc
 #' @importFrom ggplot2 ggsave
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
+#' @importFrom scales label_pvalue
+#' @importFrom shinyWidgets dropdownButton tooltipOptions
 
 
 
@@ -201,7 +205,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
             ),
             tabPanel(
               "strataFalse",
-              checkboxInput(session$ns("isPvalue"), "P value?"),
+              checkboxInput(session$ns("isPvalue"), "P value"),
             )
           ),
           tabsetPanel(
@@ -232,7 +236,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
             ),
             tabPanel(
               "over_three",
-              checkboxInput(session$ns("isPair"), "Pair sample P value?"),
+              checkboxInput(session$ns("isPair"), "Pairwise P value"),
             )
           ),
           tabsetPanel(
@@ -259,7 +263,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
             selected = "strataFalse",
             tabPanel(
               "strataTrue",
-              checkboxInput(session$ns("isStrata"), "Pair sample P value?"),
+              checkboxInput(session$ns("isStrata"), "Pairwise P value"),
             ),
             tabPanel(
               "strataFalse",
@@ -303,7 +307,6 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
           }
           return(res$message)
         }, error = function(e) {
-          print(str(e))
           return(e$message)
         })
 
@@ -488,7 +491,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 
         if (input$isPvalue & input$strata == "None") {
           res.plot <- res.plot +
-            stat_compare_means(
+            ggpubr::stat_compare_means(
               method = pval.name,
               size = pval.font.size[1],
               label.x.npc = pval.coord[1],
@@ -501,7 +504,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 
         if (input$isPair & vlist()$nclass_factor[input$x_box] > 2 & input$strata == "None") {
           res.plot <- res.plot +
-            geom_pwc(
+            ggpubr::geom_pwc(
               method = ppval.name,
               size = pval.font.size[3],
               label.size = pval.font.size[2],
@@ -511,7 +514,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 
         if (input$isStrata & input$strata != "None") {
           res.plot <- res.plot +
-            geom_pwc(
+            ggpubr::geom_pwc(
               method = spval.name,
               size = pval.font.size[3],
               label.size = pval.font.size[2],
