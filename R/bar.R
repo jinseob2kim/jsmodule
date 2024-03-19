@@ -188,14 +188,14 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         tglist <- tagList()
 
         if (vlist()$nclass_factor[input$x_bar] < 3) {
-          pval.choices <-  c("T-test"="t.test", "Wilcoxon"="wilcox.test")
+          pval.choices <- c("T-test" = "t.test", "Wilcoxon" = "wilcox.test")
         } else {
-          pval.choices <- c("ANOVA"="anova", "Kruskal-Wallis"="kruskal.test")
+          pval.choices <- c("ANOVA" = "anova", "Kruskal-Wallis" = "kruskal.test")
         }
 
         tglist <- tagAppendChildren(
           tglist,
-          div("P value Option") %>% strong,
+          div("P value Option") %>% strong(),
           tabsetPanel(
             id = session$ns("side_tabset_pval"),
             type = "hidden",
@@ -250,7 +250,7 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
                 session$ns("p_pvalue"),
                 label = NULL,
                 inline = TRUE,
-                choices = c("T-test"="t_test", "Wilcoxon"="wilcox_test")
+                choices = c("T-test" = "t_test", "Wilcoxon" = "wilcox_test")
               ),
             ),
             tabPanel(
@@ -281,7 +281,7 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
                 session$ns("s_pvalue"),
                 label = NULL,
                 inline = TRUE,
-                choices = c("T-test"="t_test", "Wilcoxon"="wilcox_test")
+                choices = c("T-test" = "t_test", "Wilcoxon" = "wilcox_test")
               )
             ),
             tabPanel(
@@ -297,21 +297,25 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 
       # Error message popup
       barInputError <- reactive({
-        msg <- tryCatch({
-          print(barInput() %>% suppressWarnings)
-        }, warning = function(e) {
-          res <- e
-          temp <- e
-          while(!is.null(temp$message)) {
-            res <- temp
-            temp <- temp$parent
+        msg <- tryCatch(
+          {
+            print(barInput() %>% suppressWarnings())
+          },
+          warning = function(e) {
+            res <- e
+            temp <- e
+            while (!is.null(temp$message)) {
+              res <- temp
+              temp <- temp$parent
+            }
+            return(res$message)
+          },
+          error = function(e) {
+            return(e$message)
           }
-          return(res$message)
-        }, error = function(e) {
-          return(e$message)
-        })
+        )
 
-        ifelse (!is.ggplot(msg), msg, "Success")
+        ifelse(!is.ggplot(msg), msg, "Success")
       })
 
 
@@ -480,11 +484,11 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         }
 
         if (is.null(input$pvalfont)) {
-          pval.font.size <-  c(4, 4, 0.4)
-          pval.coord <-  c(0.5, 1)
+          pval.font.size <- c(4, 4, 0.4)
+          pval.coord <- c(0.5, 1)
         } else {
-          pval.font.size = c(input$pvalfont, input$p_pvalfont, input$p_pvalfont / 10)
-          pval.coord = c(input$pvalx, input$pvaly)
+          pval.font.size <- c(input$pvalfont, input$p_pvalfont, input$p_pvalfont / 10)
+          pval.coord <- c(input$pvalx, input$pvaly)
         }
 
         pval.name <- input$pvalue
@@ -603,14 +607,18 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         tagList(
           h3("P-value position"),
           sliderInput(session$ns("pvalfont"), "P-value font size",
-                      min = 1, max = 10, value = 4),
+            min = 1, max = 10, value = 4
+          ),
           sliderInput(session$ns("pvalx"), "x-axis",
-                      min = 0, max = 1, value = 0.5),
+            min = 0, max = 1, value = 0.5
+          ),
           sliderInput(session$ns("pvaly"), "y-axis",
-                      min = 0, max = 1, value = 1),
+            min = 0, max = 1, value = 1
+          ),
           h3("Pair P-value position"),
           sliderInput(session$ns("p_pvalfont"), "P-value font size",
-                      min = 1, max = 10, value = 4),
+            min = 1, max = 10, value = 4
+          ),
           actionButton(session$ns("pval_reset"), "reset"),
         )
       })

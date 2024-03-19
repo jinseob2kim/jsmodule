@@ -190,17 +190,17 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         tglist <- tagList()
         if (input$strata != "None") {
           if (vlist()$nclass_factor[input$strata] < 3) {
-            pval.choices <-  c("T-test"="t.test", "Wilcoxon"="wilcox.test")
+            pval.choices <- c("T-test" = "t.test", "Wilcoxon" = "wilcox.test")
           } else {
-            pval.choices <- c("ANOVA"="anova", "Kruskal-Wallis"="kruskal.test")
+            pval.choices <- c("ANOVA" = "anova", "Kruskal-Wallis" = "kruskal.test")
           }
         } else {
-          pval.choices <- c("ANOVA"="anova", "Kruskal-Wallis"="kruskal.test")
+          pval.choices <- c("ANOVA" = "anova", "Kruskal-Wallis" = "kruskal.test")
         }
 
         tglist <- tagAppendChildren(
           tglist,
-          div("P value Option") %>% strong,
+          div("P value Option") %>% strong(),
           tabsetPanel(
             id = session$ns("side_tabset_isstrata"),
             type = "hidden",
@@ -239,21 +239,25 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
 
 
       lineInputError <- reactive({
-        msg <- tryCatch({
-          print(lineInput() %>% suppressWarnings)
-        }, warning = function(e) {
-          res <- e
-          temp <- e
-          while(!is.null(temp$message)) {
-            res <- temp
-            temp <- temp$parent
+        msg <- tryCatch(
+          {
+            print(lineInput() %>% suppressWarnings())
+          },
+          warning = function(e) {
+            res <- e
+            temp <- e
+            while (!is.null(temp$message)) {
+              res <- temp
+              temp <- temp$parent
+            }
+            return(res$message)
+          },
+          error = function(e) {
+            return(e$message)
           }
-          return(res$message)
-        }, error = function(e) {
-          return(e$message)
-        })
+        )
 
-        ifelse (!is.ggplot(msg), msg, "Success")
+        ifelse(!is.ggplot(msg), msg, "Success")
       })
 
 
@@ -396,9 +400,9 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         }
 
         if (is.null(input$pvalfont)) {
-          pval.font.size <-  4
+          pval.font.size <- 4
         } else {
-          pval.font.size = input$pvalfont
+          pval.font.size <- input$pvalfont
         }
         spval.name <- input$s_pvalue
 
@@ -503,7 +507,8 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           sliderInput(session$ns("positiondodge"), "Position dodge", min = 0, max = 1, value = 0),
           h3("P-value position"),
           sliderInput(session$ns("pvalfont"), "P-value font size",
-                      min = 1, max = 10, value = 4),
+            min = 1, max = 10, value = 4
+          ),
           actionButton(session$ns("pval_reset"), "reset")
         )
       })
