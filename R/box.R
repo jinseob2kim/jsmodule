@@ -47,8 +47,21 @@ boxUI <- function(id, label = "boxplot") {
     checkboxInput(ns("errorbar"), "Errorbar"),
     checkboxInput(ns("jitter"), "Points"),
     checkboxInput(ns("fillcolor"), "Fill"),
+    uiOutput(ns("pvalue")),
     uiOutput(ns("subvar")),
     uiOutput(ns("subval"))
+  )
+}
+
+
+optionUI <- function(id) {
+  # Create a namespace function using the provided id
+  ns <- NS(id)
+
+  shinyWidgets::dropdownButton(
+    uiOutput(ns("option_box")),
+    circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
+    tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
   )
 }
 
@@ -164,6 +177,140 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
       })
 
 
+      output$pvalue <- renderUI({
+        req(!is.null(input$x_box))
+
+        tglist <- tagList()
+
+        if (vlist()$nclass_factor[input$x_box] < 3) {
+          pval.choices <-  c("T-test"="t.test", "Wilcoxon"="wilcox.test")
+        } else {
+          pval.choices <- c("ANOVA"="anova", "Kruskal-Wallis"="kruskal.test")
+        }
+
+        tglist <- tagAppendChildren(
+          tglist,
+          div("P value Option") %>% strong,
+          tabsetPanel(
+            id = session$ns("side_tabset_pval"),
+            type = "hidden",
+            selected = "strataFalse",
+            tabPanel(
+              "strataTrue",
+              NULL
+            ),
+            tabPanel(
+              "strataFalse",
+              checkboxInput(session$ns("isPvalue"), "P value?"),
+            )
+          ),
+          tabsetPanel(
+            id = session$ns("side_tabset_pvalradio"),
+            type = "hidden",
+            selected = "isPvalueFalse",
+            tabPanel(
+              "isPvalueTrue",
+              radioButtons(
+                session$ns("pvalue"),
+                label = NULL,
+                inline = TRUE,
+                choices = pval.choices
+              ),
+            ),
+            tabPanel(
+              "isPvalueFalse",
+              NULL
+            )
+          ),
+          tabsetPanel(
+            id = session$ns("side_tabset_ppval"),
+            type = "hidden",
+            selected = "under_three",
+            tabPanel(
+              "under_three",
+              NULL
+            ),
+            tabPanel(
+              "over_three",
+              checkboxInput(session$ns("isPair"), "Pair sample P value?"),
+            )
+          ),
+          tabsetPanel(
+            id = session$ns("side_tabset_ppvalradio"),
+            type = "hidden",
+            selected = "isPairFalse",
+            tabPanel(
+              "isPairTrue",
+              radioButtons(
+                session$ns("p_pvalue"),
+                label = NULL,
+                inline = TRUE,
+                choices = c("T-test"="t_test", "Wilcoxon"="wilcox_test")
+              ),
+            ),
+            tabPanel(
+              "isPairFalse",
+              NULL
+            )
+          ),
+          tabsetPanel(
+            id = session$ns("side_tabset_isstrata"),
+            type = "hidden",
+            selected = "strataFalse",
+            tabPanel(
+              "strataTrue",
+              checkboxInput(session$ns("isStrata"), "Pair sample P value?"),
+            ),
+            tabPanel(
+              "strataFalse",
+              NULL
+            )
+          ),
+          tabsetPanel(
+            id = session$ns("side_tabset_spvalradio"),
+            type = "hidden",
+            selected = "isStrataFalse",
+            tabPanel(
+              "isStrataTrue",
+              radioButtons(
+                session$ns("s_pvalue"),
+                label = NULL,
+                inline = TRUE,
+                choices = c("T-test"="t_test", "Wilcoxon"="wilcox_test")
+              )
+            ),
+            tabPanel(
+              "isStrataFalse",
+              NULL
+            )
+          )
+        )
+
+        return(tglist)
+      })
+
+
+      # Error message popup
+      boxInputError <- reactive({
+        msg <- tryCatch({
+          print(boxInput() %>% suppressWarnings)
+        }, warning = function(e) {
+          res <- e
+          temp <- e
+          while(!is.null(temp$message)) {
+            res <- temp
+            temp <- temp$parent
+          }
+          return(res$message)
+        }, error = function(e) {
+          print(str(e))
+          return(e$message)
+        })
+
+        ifelse (!is.ggplot(msg), msg, "Success")
+      })
+
+
       observeEvent(input$subcheck, {
         output$subvar <- renderUI({
           req(input$subcheck == T)
@@ -183,6 +330,93 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
             )
           )
         })
+      })
+
+
+      observeEvent(input$x_box, {
+        msg <- boxInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+
+        nclass.factor <- vlist()$nclass_factor[input$x_box]
+        if (nclass.factor > 2 & input$strata == "None") {
+          tabset.selected <- "over_three"
+        } else {
+          tabset.selected <- "under_three"
+        }
+        updateTabsetPanel(session, "side_tabset_ppval", selected = tabset.selected)
+      })
+
+
+      observeEvent(input$strata, {
+        msg <- boxInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+
+        updateTabsetPanel(session, "side_tabset_ppval", selected = "under_three")
+        updateCheckboxInput(session, "isPvalue", value = FALSE)
+        updateCheckboxInput(session, "isPair", value = FALSE)
+        updateCheckboxInput(session, "isStrata", value = FALSE)
+
+        nclass.factor <- vlist()$nclass_factor[input$x_box]
+        if (input$strata != "None") {
+          tabset.selected.strata <- "strataTrue"
+          tabset.selected.nclass <- "under_three"
+        } else if (nclass.factor > 2) {
+          tabset.selected.strata <- "strataFalse"
+          tabset.selected.nclass <- "over_three"
+        } else {
+          tabset.selected.strata <- "strataFalse"
+          tabset.selected.nclass <- "under_three"
+        }
+        updateTabsetPanel(session, "side_tabset_pval", selected = tabset.selected.strata)
+        updateTabsetPanel(session, "side_tabset_isstrata", selected = tabset.selected.strata)
+        updateTabsetPanel(session, "side_tabset_ppval", selected = tabset.selected.nclass)
+      })
+
+
+      observeEvent(input$isPvalue, {
+        msg <- boxInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+        updateTabsetPanel(session, "side_tabset_pvalradio", selected = ifelse(input$isPvalue, "isPvalueTrue", "isPvalueFalse"))
+      })
+
+
+      observeEvent(input$isPair, {
+        msg <- boxInputError()
+        if (!is.ggplot(msg)) showNotification(msg, type = "warning")
+        updateTabsetPanel(session, "side_tabset_ppvalradio", selected = ifelse(input$isPair, "isPairTrue", "isPairFalse"))
+      })
+
+
+      observeEvent(input$isStrata, {
+        msg <- boxInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+        updateTabsetPanel(session, "side_tabset_spvalradio", selected = ifelse(input$isStrata, "isStrataTrue", "isStrataFalse"))
+      })
+
+
+      observeEvent(input$pvalue, {
+        msg <- boxInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+      })
+
+
+      observeEvent(input$p_pvalue, {
+        msg <- boxInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+      })
+
+
+      observeEvent(input$s_pvalue, {
+        msg <- boxInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+      })
+
+
+      observeEvent(input$pval_reset, {
+        updateSliderInput(session, "pvalfont", value = 4)
+        updateSliderInput(session, "pvalx", value = 0.5)
+        updateSliderInput(session, "pvaly", value = 1)
+        updateSliderInput(session, "p_pvalfont", value = 4)
       })
 
 
@@ -210,7 +444,11 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
       })
 
       boxInput <- reactive({
-        req(c(input$x_box, input$y_box, input$strata))
+        req(c(input$x_box, input$y_box, input$strata, input$strata, input$pvalue, input$pvalx, input$pvaly, input$pvalfont, input$p_pvalue, input$p_pvalfont, input$s_pvalue))
+        req(input$isPvalue != "None")
+        req(input$isPair != "None")
+        req(input$isStrata != "None")
+
         data <- data.table(data())
         label <- data_label()
         color <- ifelse(input$strata == "None", input$x_box, input$strata)
@@ -230,13 +468,59 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         if (input$fillcolor) {
           fillcolor <- "gray"
         }
+        if (is.null(input$pvalfont)) {
+          pval.font.size <-  c(4, 4, 0.4)
+          pval.coord <-  c(0.5, 1)
+        } else {
+          pval.font.size = c(input$pvalfont, input$p_pvalfont, input$p_pvalfont / 10)
+          pval.coord = c(input$pvalx, input$pvaly)
+        }
+        pval.name <- input$pvalue
+        ppval.name <- input$p_pvalue
+        spval.name <- input$s_pvalue
 
-        ggpubr::ggboxplot(data, input$x_box, input$y_box,
+        res.plot <- ggpubr::ggboxplot(data, input$x_box, input$y_box,
           color = color, add = add, add.params = add.params, conf.int = input$lineci,
           xlab = label[variable == input$x_box, var_label][1],
           ylab = label[variable == input$y_box, var_label][1], na.rm = T, fill = fillcolor, error.plot = "errorbar",
           bxp.errorbar = input$errorbar
         )
+
+        if (input$isPvalue & input$strata == "None") {
+          res.plot <- res.plot +
+            stat_compare_means(
+              method = pval.name,
+              size = pval.font.size[1],
+              label.x.npc = pval.coord[1],
+              label.y.npc = pval.coord[2],
+              aes(
+                label = scales::label_pvalue(add_p = TRUE)(after_stat(p))
+              ),
+            )
+        }
+
+        if (input$isPair & vlist()$nclass_factor[input$x_box] > 2 & input$strata == "None") {
+          res.plot <- res.plot +
+            geom_pwc(
+              method = ppval.name,
+              size = pval.font.size[3],
+              label.size = pval.font.size[2],
+              aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p))),
+            )
+        }
+
+        if (input$isStrata & input$strata != "None") {
+          res.plot <- res.plot +
+            geom_pwc(
+              method = spval.name,
+              size = pval.font.size[3],
+              label.size = pval.font.size[2],
+              # aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p)))
+              aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p)), group = !!sym(input$strata))
+            )
+        }
+
+        return(res.plot)
       })
 
       output$downloadControls <- renderUI({
@@ -293,6 +577,31 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
           )
         }
       )
+
+
+      # option dropdown menu
+      output$option_box <- renderUI({
+        nclass.factor <- vlist()$nclass_factor[input$x_box]
+        if (nclass.factor > 2 & input$strata == "None") {
+          tabset.selected <- "over_three"
+        } else {
+          tabset.selected <- "under_three"
+        }
+
+        tagList(
+          h3("P-value position"),
+          sliderInput(session$ns("pvalfont"), "P-value font size",
+                      min = 1, max = 10, value = 4),
+          sliderInput(session$ns("pvalx"), "x-axis",
+                      min = 0, max = 1, value = 0.5),
+          sliderInput(session$ns("pvaly"), "y-axis",
+                      min = 0, max = 1, value = 1),
+          h3("Pair P-value position"),
+          sliderInput(session$ns("p_pvalfont"), "P-value font size",
+                      min = 1, max = 10, value = 4),
+          actionButton(session$ns("pval_reset"), "reset"),
+        )
+      })
 
       return(boxInput)
     }
