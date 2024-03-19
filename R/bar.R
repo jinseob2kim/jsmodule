@@ -14,6 +14,7 @@
 #'       barUI("bar")
 #'     ),
 #'     mainPanel(
+#'       optionUI("bar"),
 #'       plotOutput("bar_plot"),
 #'       ggplotdownUI("bar")
 #'     )
@@ -48,8 +49,21 @@ barUI <- function(id, label = "barplot") {
     checkboxInput(ns("fill"), "Fill"),
     checkboxInput(ns("mean"), "Mean_SE"),
     checkboxInput(ns("jitter"), "Jitter"),
+    uiOutput(ns("pvalue")),
     uiOutput(ns("subvar")),
     uiOutput(ns("subval"))
+  )
+}
+
+
+optionUI <- function(id) {
+  # Create a namespace function using the provided id
+  ns <- NS(id)
+
+  shinyWidgets::dropdownButton(
+    uiOutput(ns("option_bar")),
+    circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
+    tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
   )
 }
 
@@ -73,6 +87,7 @@ barUI <- function(id, label = "barplot") {
 #'       barUI("bar")
 #'     ),
 #'     mainPanel(
+#'       optionUI("bar"),
 #'       plotOutput("bar_plot"),
 #'       ggplotdownUI("bar")
 #'     )
@@ -96,10 +111,12 @@ barUI <- function(id, label = "barplot") {
 #' @export
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
-#' @importFrom ggpubr ggbarplot
+#' @importFrom ggpubr ggbarplot stat_compare_means geom_pwc
 #' @importFrom ggplot2 ggsave
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
+#' @importFrom scales label_pvalue
+#' @importFrom shinyWidgets dropdownButton tooltipOptions
 
 
 
@@ -165,6 +182,139 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
       })
 
 
+      output$pvalue <- renderUI({
+        req(!is.null(input$x_bar))
+
+        tglist <- tagList()
+
+        if (vlist()$nclass_factor[input$x_bar] < 3) {
+          pval.choices <-  c("T-test"="t.test", "Wilcoxon"="wilcox.test")
+        } else {
+          pval.choices <- c("ANOVA"="anova", "Kruskal-Wallis"="kruskal.test")
+        }
+
+        tglist <- tagAppendChildren(
+          tglist,
+          div("P value Option") %>% strong,
+          tabsetPanel(
+            id = session$ns("side_tabset_pval"),
+            type = "hidden",
+            selected = "strataFalse",
+            tabPanel(
+              "strataTrue",
+              NULL
+            ),
+            tabPanel(
+              "strataFalse",
+              checkboxInput(session$ns("isPvalue"), "P value"),
+            )
+          ),
+          tabsetPanel(
+            id = session$ns("side_tabset_pvalradio"),
+            type = "hidden",
+            selected = "isPvalueFalse",
+            tabPanel(
+              "isPvalueTrue",
+              radioButtons(
+                session$ns("pvalue"),
+                label = NULL,
+                inline = TRUE,
+                choices = pval.choices
+              ),
+            ),
+            tabPanel(
+              "isPvalueFalse",
+              NULL
+            )
+          ),
+          tabsetPanel(
+            id = session$ns("side_tabset_ppval"),
+            type = "hidden",
+            selected = "under_three",
+            tabPanel(
+              "under_three",
+              NULL
+            ),
+            tabPanel(
+              "over_three",
+              checkboxInput(session$ns("isPair"), "Pairwise P value"),
+            )
+          ),
+          tabsetPanel(
+            id = session$ns("side_tabset_ppvalradio"),
+            type = "hidden",
+            selected = "isPairFalse",
+            tabPanel(
+              "isPairTrue",
+              radioButtons(
+                session$ns("p_pvalue"),
+                label = NULL,
+                inline = TRUE,
+                choices = c("T-test"="t_test", "Wilcoxon"="wilcox_test")
+              ),
+            ),
+            tabPanel(
+              "isPairFalse",
+              NULL
+            )
+          ),
+          tabsetPanel(
+            id = session$ns("side_tabset_isstrata"),
+            type = "hidden",
+            selected = "strataFalse",
+            tabPanel(
+              "strataTrue",
+              checkboxInput(session$ns("isStrata"), "Pairwise P value"),
+            ),
+            tabPanel(
+              "strataFalse",
+              NULL
+            )
+          ),
+          tabsetPanel(
+            id = session$ns("side_tabset_spvalradio"),
+            type = "hidden",
+            selected = "isStrataFalse",
+            tabPanel(
+              "isStrataTrue",
+              radioButtons(
+                session$ns("s_pvalue"),
+                label = NULL,
+                inline = TRUE,
+                choices = c("T-test"="t_test", "Wilcoxon"="wilcox_test")
+              )
+            ),
+            tabPanel(
+              "isStrataFalse",
+              NULL
+            )
+          )
+        )
+
+        return(tglist)
+      })
+
+
+      # Error message popup
+      barInputError <- reactive({
+        msg <- tryCatch({
+          print(barInput() %>% suppressWarnings)
+        }, warning = function(e) {
+          res <- e
+          temp <- e
+          while(!is.null(temp$message)) {
+            res <- temp
+            temp <- temp$parent
+          }
+          return(res$message)
+        }, error = function(e) {
+          return(e$message)
+        })
+
+        ifelse (!is.ggplot(msg), msg, "Success")
+      })
+
+
       observeEvent(input$subcheck, {
         output$subvar <- renderUI({
           req(input$subcheck == T)
@@ -184,6 +334,94 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
             )
           )
         })
+      })
+
+
+      observeEvent(input$x_bar, {
+        msg <- barInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+
+        nclass.factor <- vlist()$nclass_factor[input$x_bar]
+        if (nclass.factor > 2 & input$strata == "None") {
+          tabset.selected <- "over_three"
+        } else {
+          tabset.selected <- "under_three"
+        }
+        updateTabsetPanel(session, "side_tabset_ppval", selected = tabset.selected)
+      })
+
+
+      observeEvent(input$strata, {
+        msg <- barInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+
+        updateTabsetPanel(session, "side_tabset_ppval", selected = "under_three")
+        updateCheckboxInput(session, "isPvalue", value = FALSE)
+        updateCheckboxInput(session, "isPair", value = FALSE)
+        updateCheckboxInput(session, "isStrata", value = FALSE)
+
+        nclass.factor <- vlist()$nclass_factor[input$x_bar]
+        if (input$strata != "None") {
+          tabset.selected.strata <- "strataTrue"
+          tabset.selected.nclass <- "under_three"
+        } else if (nclass.factor > 2) {
+          tabset.selected.strata <- "strataFalse"
+          tabset.selected.nclass <- "over_three"
+        } else {
+          tabset.selected.strata <- "strataFalse"
+          tabset.selected.nclass <- "under_three"
+        }
+        updateTabsetPanel(session, "side_tabset_pval", selected = tabset.selected.strata)
+        updateTabsetPanel(session, "side_tabset_isstrata", selected = tabset.selected.strata)
+        updateTabsetPanel(session, "side_tabset_ppval", selected = tabset.selected.nclass)
+      })
+
+
+      observeEvent(input$isPvalue, {
+        msg <- barInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+        updateTabsetPanel(session, "side_tabset_pvalradio", selected = ifelse(input$isPvalue, "isPvalueTrue", "isPvalueFalse"))
+      })
+
+
+      observeEvent(input$isPair, {
+        msg <- barInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+        updateTabsetPanel(session, "side_tabset_ppvalradio", selected = ifelse(input$isPair, "isPairTrue", "isPairFalse"))
+      })
+
+
+      observeEvent(input$isStrata, {
+        msg <- barInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+        updateTabsetPanel(session, "side_tabset_spvalradio", selected = ifelse(input$isStrata, "isStrataTrue", "isStrataFalse"))
+      })
+
+
+      observeEvent(input$pvalue, {
+        msg <- barInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+      })
+
+
+      observeEvent(input$p_pvalue, {
+        msg <- barInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+      })
+
+
+      observeEvent(input$s_pvalue, {
+        msg <- barInputError()
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
+      })
+
+
+      # Reset button
+      observeEvent(input$pval_reset, {
+        updateSliderInput(session, "pvalfont", value = 4)
+        updateSliderInput(session, "pvalx", value = 0.5)
+        updateSliderInput(session, "pvaly", value = 1)
+        updateSliderInput(session, "p_pvalfont", value = 4)
       })
 
 
@@ -211,7 +449,11 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
       })
 
       barInput <- reactive({
-        req(c(input$x_bar, input$y_bar, input$strata))
+        req(c(input$x_bar, input$y_bar, input$strata, input$pvalue, input$pvalx, input$pvaly, input$pvalfont, input$p_pvalue, input$p_pvalfont, input$s_pvalue))
+        req(input$isPair != "None")
+        req(input$isPvalue != "None")
+        req(input$isStrata != "None")
+
         data <- data.table(data())
         label <- data_label()
         color <- ifelse(input$strata == "None", "black", input$strata)
@@ -237,14 +479,60 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
           add <- c("jitter", "mean_se")
         }
 
+        if (is.null(input$pvalfont)) {
+          pval.font.size <-  c(4, 4, 0.4)
+          pval.coord <-  c(0.5, 1)
+        } else {
+          pval.font.size = c(input$pvalfont, input$p_pvalfont, input$p_pvalfont / 10)
+          pval.coord = c(input$pvalx, input$pvaly)
+        }
+
+        pval.name <- input$pvalue
+        ppval.name <- input$p_pvalue
+        spval.name <- input$s_pvalue
 
 
-        ggpubr::ggbarplot(data, input$x_bar, input$y_bar,
+        res.plot <- ggpubr::ggbarplot(data, input$x_bar, input$y_bar,
           color = color, add = add, add.params = add.params, conf.int = input$lineci,
           xlab = label[variable == input$x_bar, var_label][1],
           ylab = label[variable == input$y_bar, var_label][1], na.rm = T,
           position = position_dodge(), fill = fill,
         )
+
+        if (input$isPvalue & input$strata == "None") {
+          res.plot <- res.plot +
+            ggpubr::stat_compare_means(
+              method = pval.name,
+              size = pval.font.size[1],
+              label.x.npc = pval.coord[1],
+              label.y.npc = pval.coord[2],
+              aes(
+                label = scales::label_pvalue(add_p = TRUE)(after_stat(p))
+              ),
+            )
+        }
+
+        if (input$isPair & vlist()$nclass_factor[input$x_bar] > 2 & input$strata == "None") {
+          res.plot <- res.plot +
+            ggpubr::geom_pwc(
+              method = ppval.name,
+              size = pval.font.size[3],
+              label.size = pval.font.size[2],
+              aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p))),
+            )
+        }
+
+        if (input$isStrata & input$strata != "None") {
+          res.plot <- res.plot +
+            ggpubr::geom_pwc(
+              method = spval.name,
+              size = pval.font.size[3],
+              label.size = pval.font.size[2],
+              aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p)), group = !!sym(input$strata))
+            )
+        }
+
+        return(res.plot)
       })
 
       output$downloadControls <- renderUI({
@@ -301,6 +589,31 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
           )
         }
       )
+
+
+      # option dropdown menu
+      output$option_bar <- renderUI({
+        nclass.factor <- vlist()$nclass_factor[input$x_bar]
+        if (nclass.factor > 2 & input$strata == "None") {
+          tabset.selected <- "over_three"
+        } else {
+          tabset.selected <- "under_three"
+        }
+
+        tagList(
+          h3("P-value position"),
+          sliderInput(session$ns("pvalfont"), "P-value font size",
+                      min = 1, max = 10, value = 4),
+          sliderInput(session$ns("pvalx"), "x-axis",
+                      min = 0, max = 1, value = 0.5),
+          sliderInput(session$ns("pvaly"), "y-axis",
+                      min = 0, max = 1, value = 1),
+          h3("Pair P-value position"),
+          sliderInput(session$ns("p_pvalfont"), "P-value font size",
+                      min = 1, max = 10, value = 4),
+          actionButton(session$ns("pval_reset"), "reset"),
+        )
+      })
 
       return(barInput)
     }

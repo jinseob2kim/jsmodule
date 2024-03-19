@@ -36,6 +36,7 @@ ui <- fluidPage(
       boxUI("box")
     ),
     mainPanel(
+      optionUI("box"),
       plotOutput("box_plot"),
       ggplotdownUI("box")
     )
