@@ -56,16 +56,16 @@ barUI <- function(id, label = "barplot") {
 }
 
 
-optionUI <- function(id) {
-  # Create a namespace function using the provided id
-  ns <- NS(id)
-
-  shinyWidgets::dropdownButton(
-    uiOutput(ns("option_bar")),
-    circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
-    tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
-  )
-}
+# optionUI <- function(id) {
+#   # Create a namespace function using the provided id
+#   ns <- NS(id)
+#
+#   shinyWidgets::dropdownButton(
+#     uiOutput(ns("option_bar")),
+#     circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
+#     tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
+#   )
+# }
 
 
 #' @title barServer: shiny module server for barplot.
@@ -592,14 +592,7 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 
 
       # option dropdown menu
-      output$option_bar <- renderUI({
-        nclass.factor <- vlist()$nclass_factor[input$x_bar]
-        if (nclass.factor > 2 & input$strata == "None") {
-          tabset.selected <- "over_three"
-        } else {
-          tabset.selected <- "under_three"
-        }
-
+      output$option_kaplan <- renderUI({
         tagList(
           h3("P-value position"),
           sliderInput(session$ns("pvalfont"), "P-value font size",
