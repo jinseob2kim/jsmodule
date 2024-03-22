@@ -55,16 +55,16 @@ boxUI <- function(id, label = "boxplot") {
 }
 
 
-optionUI <- function(id) {
-  # Create a namespace function using the provided id
-  ns <- NS(id)
-
-  shinyWidgets::dropdownButton(
-    uiOutput(ns("option_box")),
-    circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
-    tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
-  )
-}
+# optionUI <- function(id) {
+#   # Create a namespace function using the provided id
+#   ns <- NS(id)
+#
+#   shinyWidgets::dropdownButton(
+#     uiOutput(ns("option_box")),
+#     circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
+#     tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
+#   )
+# }
 
 
 #' @title boxServer: shiny module server for boxplot.
@@ -389,7 +389,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 
       observeEvent(input$isPair, {
         msg <- boxInputError()
-        if (!is.ggplot(msg)) showNotification(msg, type = "warning")
+        if (msg != "" & msg != "Success") showNotification(msg, type = "warning")
         updateTabsetPanel(session, "side_tabset_ppvalradio", selected = ifelse(input$isPair, "isPairTrue", "isPairFalse"))
       })
 
@@ -587,14 +587,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 
 
       # option dropdown menu
-      output$option_box <- renderUI({
-        nclass.factor <- vlist()$nclass_factor[input$x_box]
-        if (nclass.factor > 2 & input$strata == "None") {
-          tabset.selected <- "over_three"
-        } else {
-          tabset.selected <- "under_three"
-        }
-
+      output$option_kaplan <- renderUI({
         tagList(
           h3("P-value position"),
           sliderInput(session$ns("pvalfont"), "P-value font size",

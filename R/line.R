@@ -58,16 +58,16 @@ lineUI <- function(id, label = "lineplot") {
 }
 
 
-optionUI <- function(id) {
-  # Create a namespace function using the provided id
-  ns <- NS(id)
-
-  shinyWidgets::dropdownButton(
-    uiOutput(ns("option_line")),
-    circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
-    tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
-  )
-}
+# optionUI <- function(id) {
+#   # Create a namespace function using the provided id
+#   ns <- NS(id)
+#
+#   shinyWidgets::dropdownButton(
+#     uiOutput(ns("option_line")),
+#     circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
+#     tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
+#   )
+# }
 
 
 #' @title lineServer: shiny module server for lineplot.
@@ -318,9 +318,9 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
 
 
       observeEvent(input$pval_reset, {
+        updateSliderInput(session, "positiondodge", value = 0)
         updateNumericInput(session, "size", value = 0.5)
         updateNumericInput(session, "pointsize", value = 0.5)
-        updateSliderInput(session, "positiondodge", value = 0)
         updateSliderInput(session, "pvalfont", value = 4)
       })
 
@@ -400,20 +400,25 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         }
 
         if (is.null(input$pvalfont)) {
-          pval.font.size <- 4
+          line.position.dodge <- 0
+          line.size <- 0.5
+          line.point.size <- 0.5
+          pval.font.size <-  4
         } else {
-          pval.font.size <- input$pvalfont
+          line.position.dodge <- input$positiondodge
+          line.size <- input$size
+          line.point.size <- input$pointsize
+          pval.font.size = input$pvalfont
         }
-        spval.name <- input$s_pvalue
 
 
         res.plot <- ggpubr::ggline(data, input$x_line, input$y_line,
           color = color, add = add, add.params = add.params, conf.int = input$lineci,
           xlab = label[variable == input$x_line, var_label][1],
           ylab = label[variable == input$y_line, var_label][1], na.rm = T,
-          position = position_dodge(input$positiondodge),
-          size = input$size,
-          point.size = input$pointsize,
+          position = position_dodge(line.position.dodge),
+          size = line.size,
+          point.size = line.point.size,
           linetype = linetype
         )
 
@@ -424,17 +429,13 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         if (input$isStrata & input$strata != "None") {
           res.plot <- res.plot +
             ggpubr::stat_compare_means(
-              method = spval.name,
+              method = input$s_pvalue,
               size = pval.font.size,
               aes(
                 label = scales::label_pvalue(add_p = TRUE)(after_stat(p)),
                 group = !!sym(input$strata)
               ),
             )
-        }
-
-        if (input$rev_y) {
-          res.plot <- res.plot + ggplot2::scale_y_reverse()
         }
 
         return(res.plot)
@@ -497,7 +498,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
 
 
       # option dropdown menu
-      output$option_line <- renderUI({
+      output$option_kaplan <- renderUI({
         tagList(
           h3("Line setting"),
           fluidRow(

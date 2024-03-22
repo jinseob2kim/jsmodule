@@ -78,7 +78,7 @@ ui <- navbarPage(
     )
   ),
   navbarMenu("Plot",
-    icon = icon("bar-chart-o"),
+    icon = icon("chart-column"),
     tabPanel(
       "Scatter plot",
       sidebarLayout(
@@ -98,8 +98,48 @@ ui <- navbarPage(
           kaplanUI("kaplan")
         ),
         mainPanel(
+          optionUI("kaplan"),
           withLoader(plotOutput("kaplan_plot"), type = "html", loader = "loader6"),
           ggplotdownUI("kaplan")
+        )
+      )
+    ),
+    tabPanel(
+      "Box plot",
+      sidebarLayout(
+        sidebarPanel(
+          boxUI("box")
+        ),
+        mainPanel(
+          optionUI("box"),
+          withLoader(plotOutput("box_plot"), type = "html", loader = "loader6"),
+          ggplotdownUI("box")
+        )
+      )
+    ),
+    tabPanel(
+      "Bar plot",
+      sidebarLayout(
+        sidebarPanel(
+          barUI("bar")
+        ),
+        mainPanel(
+          optionUI("bar"),
+          withLoader(plotOutput("bar_plot"), type = "html", loader = "loader6"),
+          ggplotdownUI("bar")
+        )
+      )
+    ),
+    tabPanel(
+      "Line plot",
+      sidebarLayout(
+        sidebarPanel(
+          lineUI("line")
+        ),
+        mainPanel(
+          optionUI("line"),
+          withLoader(plotOutput("line_plot"), type = "html", loader = "loader6"),
+          ggplotdownUI("line")
         )
       )
     )
@@ -297,6 +337,24 @@ server <- function(input, output, session) {
 
   output$kaplan_plot <- renderPlot({
     print(out_kaplan())
+  })
+
+  out_box <- boxServer("box", data = data, data_label = data.label, data_varStruct = NULL)
+
+  output$box_plot <- renderPlot({
+    print(out_box())
+  })
+
+  out_bar <- barServer("bar", data = data, data_label = data.label, data_varStruct = NULL)
+
+  output$bar_plot <- renderPlot({
+    print(out_bar())
+  })
+
+  out_line <- lineServer("line", data = data, data_label = data.label, data_varStruct = NULL)
+
+  output$line_plot <- renderPlot({
+    print(out_line())
   })
 }
 
