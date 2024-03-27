@@ -403,12 +403,12 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           line.position.dodge <- 0
           line.size <- 0.5
           line.point.size <- 0.5
-          pval.font.size <-  4
+          pval.font.size <- 4
         } else {
           line.position.dodge <- input$positiondodge
           line.size <- input$size
           line.point.size <- input$pointsize
-          pval.font.size = input$pvalfont
+          pval.font.size <- input$pvalfont
         }
 
 
