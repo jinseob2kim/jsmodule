@@ -198,6 +198,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
             boxUI("box")
           ),
           mainPanel(
+            optionUI("box"),
             withLoader(plotOutput("box_plot"), type = "html", loader = "loader6"),
             ggplotdownUI("box")
           )
@@ -210,6 +211,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
             barUI("bar")
           ),
           mainPanel(
+            optionUI("bar"),
             withLoader(plotOutput("bar_plot"), type = "html", loader = "loader6"),
             ggplotdownUI("bar")
           )
@@ -222,6 +224,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
             lineUI("line")
           ),
           mainPanel(
+            optionUI("line"),
             withLoader(plotOutput("line_plot"), type = "html", loader = "loader6"),
             ggplotdownUI("line")
           )
@@ -1025,6 +1028,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             boxUI("box")
           ),
           mainPanel(
+            optionUI("box"),
             withLoader(
               plotOutput("box_plot"),
               type = "html",
@@ -1041,6 +1045,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             barUI("bar")
           ),
           mainPanel(
+            optionUI("bar"),
             withLoader(plotOutput("bar_plot"), type = "html", loader = "loader6"),
             ggplotdownUI("bar")
           )
@@ -1053,6 +1058,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             lineUI("line")
           ),
           mainPanel(
+            optionUI("line"),
             withLoader(plotOutput("line_plot"), type = "html", loader = "loader6"),
             ggplotdownUI("line")
           )
