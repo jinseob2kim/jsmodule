@@ -1,3 +1,7 @@
+# jsmodule 1.5.3
+
+## Bugfix: dropdown button & p value options: barplot, boxplot and lineplot
+
 # jsmodule 1.5.2
 
 ## Update: Add P value option to barplot, boxplot and lineplot
