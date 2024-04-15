@@ -475,13 +475,8 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         if (input$fillcolor) {
           fillcolor <- "gray"
         }
-        if (is.null(input$pvalfont)) {
-          pval.font.size <- c(4, 4, 0.4)
-          pval.coord <- c(0.5, 1)
-        } else {
-          pval.font.size <- c(input$pvalfont, input$p_pvalfont, input$p_pvalfont / 10)
-          pval.coord <- c(input$pvalx, input$pvaly)
-        }
+        pval.font.size <- c(input$pvalfont, input$p_pvalfont, input$p_pvalfont / 10)
+        pval.coord <- c(input$pvalx, input$pvaly)
         pval.name <- input$pvalue
         ppval.name <- input$p_pvalue
         spval.name <- input$s_pvalue
@@ -606,6 +601,9 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
           actionButton(session$ns("pval_reset"), "reset"),
         )
       })
+
+      # Dropdown button default option
+      outputOptions(x = output, name = "option_kaplan", suspendWhenHidden = FALSE)
 
       return(boxInput)
     }
