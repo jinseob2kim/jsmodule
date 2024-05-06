@@ -190,7 +190,6 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
     name.new <- names(out)
     ref <- list(name.old = name.old, name.new = name.new)
 
-
     numstart.vnum <- suppressWarnings(sapply(names(out), function(x) {
       !is.na(as.numeric(substr(x, 1, 1)))
     }))
@@ -201,14 +200,20 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
       out[, (factor_vars) := lapply(.SD, as.factor), .SDcols = factor_vars]
     }
     conti_vars <- setdiff(names(out), factor_vars)
+
+    # all category variables
     nclass <- unlist(out[, lapply(.SD, function(x) {
       length(unique(x)[!is.na(unique(x))])
     }), .SDcols = conti_vars])
+
     # except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
+    # Default selected category variables
     add_vars <- names(nclass)[nclass >= 2 & nclass <= 5]
+
     # factor_vars_ini <- union(factor_vars, add_vars)
     return(list(
       data = out,
+      data.old = out.old,
       factor_original = factor_vars,
       conti_original = conti_vars,
       factor_adds_list = names(nclass)[nclass <= nfactor.limit],
@@ -371,14 +376,27 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
 
   outdata <- reactive({
     out <- data()$data
+
     out[, (data()$conti_original) := lapply(.SD, function(x) {
       as.numeric(as.vector(x))
     }), .SDcols = data()$conti_original]
+
     if (length(input$factor_vname) > 0) {
       out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols = input$factor_vname]
     }
 
     ref <- data()$ref
+
+    if (tools::file_ext(input$file$name) == "sav") {
+      out.old <- data()$data.old
+
+      for (i in 1:length(colnames(out.old))) {
+        spss.labels <- attr(out.old[[i]], "labels")
+        if (!is.null(spss.labels)) {
+          out[[i]] <- haven::as_factor(out.old[[i]], levels = "labels")
+        }
+      }
+    }
     out.label <- mk.lev(out)
 
     if (!is.null(input$check_binary)) {
