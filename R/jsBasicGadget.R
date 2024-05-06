@@ -45,8 +45,6 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 
   data.list <- list(data = out, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars)
 
-
-
   ui <- navbarPage(
     header = tagList(
       includeCSS(system.file("www", "style.css", package = "jsmodule")),
@@ -376,7 +374,6 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
         checkboxInput("check_ref", "Change reference of categorical variables")
       })
 
-
       output$subset_check <- renderUI({
         checkboxInput("check_subset", "Subset data")
       })
@@ -478,7 +475,6 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       })
     })
 
-
     data.info <- reactive({
       out <- data.table::data.table(data.list$data)
       out[, (data.list$conti_original) := lapply(.SD, function(x) {
@@ -488,6 +484,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
         out[, (input$factor_vname) := lapply(.SD, as.factor), .SDcols = input$factor_vname]
       }
       out.label <- mk.lev(out)
+
       # out.label[, var_label := ref[out.label$variable, name.old]]
 
       req(!is.null(input$check_binary))
@@ -534,7 +531,6 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
           }
         }
       }
-
 
       if (!is.null(input$check_subset)) {
         if (input$check_subset) {
@@ -586,16 +582,12 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       )
     })
 
-
     output$data_label <- renderDT({
       datatable(data.label(),
         rownames = F, editable = F, extensions = "Buttons", caption = "Label of data",
         options = c(jstable::opt.data("label"), list(scrollX = TRUE))
       )
     })
-
-
-
 
     out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, showAllLevels = T)
 
@@ -661,7 +653,6 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
-
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$ggpairs_plot <- renderPlot({
@@ -718,7 +709,6 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       )
     })
 
-
     out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$plot_timeroc <- renderPlot({
@@ -739,7 +729,6 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
       caption = "Best cutoff",
       caption.placement = "top"
     )
-
 
     outtable <- forestcoxServer("Forest", data = data, data_label = data.label)
     output$tablesub <- renderDT({
@@ -767,17 +756,11 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
     })
   }
 
-
-
-
-
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
   # viewer <- paneViewer()
   runGadget(ui, server, viewer = viewer)
 }
-
-
 
 #' @title jsBasicAddin: Rstudio addin of jsBasicGadget
 #' @description Rstudio addin of jsBasicGadget
@@ -793,7 +776,6 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 #' @export
 #' @importFrom rstudioapi getActiveDocumentContext
 
-
 jsBasicAddin <- function() {
   context <- rstudioapi::getActiveDocumentContext()
   # Set the default data to use based on the selection.
@@ -802,7 +784,6 @@ jsBasicAddin <- function() {
   # viewer <- dialogViewer("Subset", width = 1000, height = 800)
   jsBasicGadget(data)
 }
-
 
 #' @title jsBasicExtAddin: RStudio Addin for basic data analysis with external data.
 #' @description RStudio Addin for basic data analysis with external csv/xlsx/sas7bdat/sav/dta file.
@@ -869,7 +850,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             tabPanel(
               title = "Data",
               style = "margin-top:1em;",
-              markdown("> Category data is shown with <span style='background: #337ab7; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>**Blue**</span>."),
+              # markdown("> Category data is shown with <span style='background: #337ab7; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>**Blue**</span>."),
               withLoader(
                 DTOutput("data"),
                 type = "html",
@@ -1221,7 +1202,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       PRdata <- data()
       dl <- data.label()
 
-      nv <- dl$variable[which(dl$class %in% c("factor", "character"))]
+      nv <- unique(dl$variable[which(dl$class %in% c("factor", "character"))])
 
       v <- sapply(colnames(PRdata), function(i) {
         if (i %in% nv) {
@@ -1230,17 +1211,15 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         return(i)
       }, simplify = TRUE, USE.NAMES = FALSE)
 
-      colnames(PRdata) <- unlist(v)
-
       datatable(
         data = PRdata, # column name change
         # data = data(),
         rownames = F,
+        colnames = unlist(v),
         editable = F,
         extensions = c("Buttons", "ColReorder", "KeyTable"),
         # filter = 'top', # critical issue with scrollX
         escape = FALSE,
-
         # caption = "Data",
         options =
         # opt.data("data"),
@@ -1330,7 +1309,6 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#fed9cc"))
     })
 
-
     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
 
     output$coxtable <- renderDT({
@@ -1380,7 +1358,6 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       print(out_line())
     })
 
-
     out_kaplan <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$kaplan_plot <- renderPlot({
@@ -1404,8 +1381,6 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
       )
     })
-
-
 
     out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
