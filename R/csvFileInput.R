@@ -390,29 +390,7 @@ csvFile <- function(input, output, session, nfactor.limit = 20) {
     out.label <- mk.lev(out)
 
     if (tools::file_ext(input$file$name) == "sav") {
-      out.old <- data()$data.old
-
-      for (i in 1:length(colnames(out.old))) {
-        spss.labels <- attr(out.old[[i]], "labels")
-        if (!is.null(spss.labels)) {
-          index <- which(out.label$variable == colnames(out.old)[i], arr.ind = T)
-          cnt <- length(unname(spss.labels))
-
-          out.part <- data.table(
-            variable = rep(colnames(out.old)[i], cnt),
-            class = rep("factor", cnt),
-            level = unname(spss.labels),
-            var_label = rep(colnames(out.old)[i], cnt),
-            val_label = names(spss.labels)
-          )
-
-          out.label <- rbind(
-            out.label[c(1:(min(index) - 1)), ],
-            out.part,
-            out.label[c((max(index) + 1):nrow(out.label)), ]
-          )
-        }
-      }
+      out.label <- mk.lev2(data()$data.old, out.label)
     }
 
     if (!is.null(input$check_binary)) {

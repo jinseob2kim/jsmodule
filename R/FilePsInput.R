@@ -401,6 +401,10 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     ref <- data.info()$ref
     out.label <- mk.lev(out)
 
+    if (tools::file_ext(input$file$name) == "sav") {
+      out.label <- mk.lev2(data()$data.old, out.label)
+    }
+
     if (!is.null(input$check_binary)) {
       if (input$check_binary) {
         validate(

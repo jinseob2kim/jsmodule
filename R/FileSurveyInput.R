@@ -410,6 +410,9 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
     out.label <- mk.lev(out)
     # out.label[, var_label := ref[out.label$variable, name.old]]
 
+    if (tools::file_ext(input$file$name) == "sav") {
+      out.label <- mk.lev2(data()$data.old, out.label)
+    }
 
     if (!is.null(input$check_binary) & input$check_binary) {
       validate(
