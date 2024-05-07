@@ -1,37 +1,44 @@
 # jsmodule 1.5.3
 
-## Bugfix: dropdown button & p value options: barplot, boxplot and lineplot
+## Bugfix: 
+- dropdown button & p value options: barplot, boxplot and lineplot
 
 # jsmodule 1.5.2
 
-## Update: Add P value option to barplot, boxplot and lineplot
-## Update: Add dropdown button for graphical option to barplot, boxplot and lineplot
+## Update: 
+- Add P value option to barplot, boxplot and lineplot
+- Add dropdown button for graphical option to barplot, boxplot and lineplot
 
 # jsmodule 1.5.1
 
-## Update: Add Subgroupanalysis to jsBasicGadget
-## Update: Add figure in subgroup analysis with forestplot
-## Update: Add family 'poisson' in forestglm
-## Update: Add "line size" "point size" to lineplot
+## Update: 
+- Add Subgroupanalysis to jsBasicGadget
+- Add figure in subgroup analysis with forestplot
+- Add family 'poisson' in forestglm
+- Add "line size" "point size" to lineplot
 
 # jsmodule 1.5.0
 
-## New module: Subgroup analysis with forestplot (Thanks for [Yoonkyoung Jeon](https://github.com/cyk0315))
+## New module: 
+- Subgroup analysis with forestplot (Thanks for [Yoonkyoung Jeon](https://github.com/cyk0315))
 
 * forestcox (`forestcoxUI`, `forestcoxServer`)
 * forestglm (`forestglmUI`, `forestglmServer`)
 
 # jsmodule 1.4.4
 
-## Update: Add "reverse y-axis" option to lineplot
+## Update: 
+- Add "reverse y-axis" option to lineplot
 
 # jsmodule 1.4.3
 
-## Update `rocModule`: Add accucary/ppv/npv with threshold
+## Update 
+- `rocModule`: Add accucary/ppv/npv with threshold
 
 # jsmodule 1.4.2
 
-## Update: Change default non-normal 2 group comparison test to `wilcox.test`
+## Update: 
+- Change default non-normal 2 group comparison test to `wilcox.test`
 
 # jsmodule 1.4.1
 
@@ -91,13 +98,11 @@
 
 * Add **"Show 1-specificity"** option
 
-
 # jsmodule 1.3.3
 
 ## New module (Thanks for [Changwoo Lim](https://github.com/leevenstar))
 
 * Histogram(`histogramUI`, `histogramServer`)
-
 
 # jsmodule 1.3.2
 
@@ -115,13 +120,11 @@
 
 * Fix cutoff label of Kaplan-meier plot when continuous independent variable
 
-
 # jsmodule 1.3.0
 
 ## New module (Thanks for [Hyunki Lee](https://github.com/leevenstar))
 
 * Boxplot(`boxUI`, `boxServer`), Lineplot(`LineUI`, `LineServer`), Barplot(`BarUI`, `BarServer`)
-
 
 # jsmodule 1.2.0
 
