@@ -1,3 +1,8 @@
+# jsmodule 1.5.4
+
+## Update
+- Apply SPSS label info (Thanks for [Jinhwan Kim](https://github.com/jhk0530))
+
 # jsmodule 1.5.3
 
 ## Bugfix: 
