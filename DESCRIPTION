@@ -16,13 +16,40 @@ License: Apache License 2.0
 Encoding: UTF-8
 RoxygenNote: 7.3.1
 Imports: 
-  data.table, DT, epiDisplay, forestploter, geepack, 
-  GGally, ggplot2, ggpubr, haven, Hmisc, 
-  jskm(>= 0.4.4), jstable, labelled, MatchIt(>= 3.0.0), maxstat, 
-  methods, officer, pROC, purrr, RColorBrewer, 
-  readr, readxl, rstudioapi, rvg, scales,
-  see, shiny, shinycustomloader, shinyWidgets, stats, 
-  survey, survIDINRI, survival, timeROC, utils
+  data.table, 
+  DT, 
+  epiDisplay, 
+  forestploter, 
+  geepack, 
+  GGally, 
+  ggplot2, 
+  ggpubr, 
+  haven, Hmisc, 
+  jskm(>= 0.4.4), 
+  jstable, 
+  labelled, 
+  MatchIt(>= 3.0.0),
+  maxstat, 
+  methods, 
+  officer, 
+  pROC, 
+  purrr, 
+  RColorBrewer, 
+  readr, 
+  readxl, 
+  rstudioapi, 
+  rvg, 
+  scales,
+  see, 
+  shiny, 
+  shinycustomloader, 
+  shinyWidgets, 
+  stats, 
+  survey, 
+  survIDINRI, 
+  survival, 
+  timeROC, 
+  utils
 URL: https://jinseob2kim.github.io/jsmodule/, https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
 Suggests: 
