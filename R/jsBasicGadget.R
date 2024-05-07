@@ -1196,7 +1196,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     data <- reactive(data.info()$data)
     data.label <- reactive(data.info()$label)
 
-    data.label
+    # data.label
 
     output$data <- renderDT({
       PRdata <- data()
