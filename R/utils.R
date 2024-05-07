@@ -5,9 +5,7 @@
 #' @return out.label data labels updated
 #' @importFrom data.table data.table
 mk.lev2 <- function(out.old, out.label) {
-
   for (i in 1:length(colnames(out.old))) {
-
     spss.labels <- attr(out.old[[i]], "labels")
     if (!is.null(spss.labels)) {
       index <- which(out.label$variable == colnames(out.old)[i], arr.ind = T)
@@ -23,19 +21,18 @@ mk.lev2 <- function(out.old, out.label) {
       )
 
       ## label exist, data not exist
-      if(max(index)+1 <= nrow(out.label)){
+      if (max(index) + 1 <= nrow(out.label)) {
         out.label <- rbind(
           out.label[c(1:(min(index) - 1)), ],
           out.part,
           out.label[c((max(index) + 1):nrow(out.label)), ]
         )
-      } else{
+      } else {
         out.label <- rbind(
           out.label[c(1:(min(index) - 1)), ],
           out.part
         )
       }
-
     }
   }
 
