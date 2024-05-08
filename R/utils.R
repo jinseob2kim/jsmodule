@@ -7,13 +7,19 @@
 #' @importFrom DT  %>%
 mk.lev2 <- function(out.old, out.label) {
   . <- variable <- val_label <- level <- NULL
-  label.value <- sapply(out.old, function(x) attr(x, "labels")) %>% .[!sapply(., is.null)] %>% sapply(function(x){dd <- names(x);names(dd) <- x;return(dd)})
+  label.value <- sapply(out.old, function(x) attr(x, "labels")) %>%
+    .[!sapply(., is.null)] %>%
+    sapply(function(x) {
+      dd <- names(x)
+      names(dd) <- x
+      return(dd)
+    })
   label.variable <- sapply(out.old, function(x) attr(x, "label")) %>% .[!sapply(., is.null)]
 
-  for (v in names(label.variable)){
+  for (v in names(label.variable)) {
     out.label[variable == v, var_label := label.variable[v]]
   }
-  for (v in names(label.value)){
+  for (v in names(label.value)) {
     out.label[variable == v, val_label := label.value[[v]][level]]
   }
 
