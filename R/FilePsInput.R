@@ -486,10 +486,13 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
       }
     }
 
-    for (vn in ref[["name.new"]]) {
-      w <- which(ref[["name.new"]] == vn)
-      out.label[variable == vn, var_label := ref[["name.old"]][w]]
+    if (tools::file_ext(input$file$name) != "sav") {
+      for (vn in ref[["name.new"]]) {
+        w <- which(ref[["name.new"]] == vn)
+        out.label[variable == vn, var_label := ref[["name.old"]][w]]
+      }
     }
+
     out.label <- rbind(out.label, data.table(variable = "pscore", class = "numeric", level = NA, var_label = "pscore", val_label = NA))
 
     return(list(data = out, label = out.label, data_varStruct = list(variable = names(out)), except_vars = data.info()$except_vars))

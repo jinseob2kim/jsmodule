@@ -502,9 +502,11 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
       }
     }
 
-    for (vn in ref[["name.new"]]) {
-      w <- which(ref[["name.new"]] == vn)
-      out.label[variable == vn, var_label := ref[["name.old"]][w]]
+    if (tools::file_ext(input$file$name) != "sav") {
+      for (vn in ref[["name.new"]]) {
+        w <- which(ref[["name.new"]] == vn)
+        out.label[variable == vn, var_label := ref[["name.old"]][w]]
+      }
     }
 
 
