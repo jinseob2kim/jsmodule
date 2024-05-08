@@ -3,38 +3,19 @@
 #' @param out.old raw data
 #' @param out.label pre-defined label data
 #' @return out.label data labels updated
-#' @importFrom data.table data.table
+#' @importFrom data.table data.table :=
+#' @importFrom DT  %>%
 mk.lev2 <- function(out.old, out.label) {
-  for (i in 1:length(colnames(out.old))) {
-    spss.labels <- attr(out.old[[i]], "labels")
-    if (!is.null(spss.labels)) {
-      index <- which(out.label$variable == colnames(out.old)[i], arr.ind = T)
+  . <- variable <- val_label <- level <- NULL
+  label.value <- sapply(out.old, function(x) attr(x, "labels")) %>% .[!sapply(., is.null)] %>% sapply(function(x){dd <- names(x);names(dd) <- x;return(dd)})
+  label.variable <- sapply(out.old, function(x) attr(x, "label")) %>% .[!sapply(., is.null)]
 
-      cnt <- length(unname(spss.labels))
-
-      out.part <- data.table(
-        variable = rep(colnames(out.old)[i], cnt),
-        class = rep("factor", cnt),
-        level = unname(spss.labels),
-        var_label = rep(colnames(out.old)[i], cnt),
-        val_label = names(spss.labels)
-      )
-
-      ## label exist, data not exist
-      if (max(index) + 1 <= nrow(out.label)) {
-        out.label <- rbind(
-          out.label[c(1:(min(index) - 1)), ],
-          out.part,
-          out.label[c((max(index) + 1):nrow(out.label)), ]
-        )
-      } else {
-        out.label <- rbind(
-          out.label[c(1:(min(index) - 1)), ],
-          out.part
-        )
-      }
-    }
+  for (v in names(label.variable)){
+    out.label[variable == v, var_label := label.variable[v]]
+  }
+  for (v in names(label.value)){
+    out.label[variable == v, val_label := label.value[[v]][level]]
   }
 
-  return(out.label)
+  return(out.label[])
 }
