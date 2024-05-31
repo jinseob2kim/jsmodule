@@ -47,8 +47,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
 
   data.list <- list(data = out, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars)
 
-
-
   ui <- navbarPage(
     "Survey data analysis",
     tabPanel("Data",
@@ -315,9 +313,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       })
     })
 
-
-
-
     observeEvent(input$check_subset, {
       output$subset_var <- renderUI({
         req(input$check_subset == T)
@@ -360,7 +355,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
         outUI
       })
     })
-
 
     data.info <- reactive({
       req(!is.null(input$check_binary))
@@ -446,8 +440,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
         }
       }
 
-
-
       if (!is.null(input$check_subset)) {
         if (input$check_subset) {
           validate(
@@ -499,7 +491,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
         }
       )
 
-
       return(list(data = out, label = out.label, survey = surveydata))
     })
 
@@ -513,7 +504,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
         options = c(jstable::opt.data("data"), list(scrollX = TRUE))
       )
     })
-
 
     output$data_label <- renderDT({
       datatable(data.label(),
@@ -539,9 +529,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       }
       return(out.tb1)
     })
-
-
-
 
     out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey, showAllLevels = T)
 
@@ -603,7 +590,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
-
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$ggpairs_plot <- renderPlot({
@@ -615,7 +601,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
     output$kaplan_plot <- renderPlot({
       print(out_kaplan())
     })
-
 
     out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
@@ -630,8 +615,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
         options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
       )
     })
-
-
 
     out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
@@ -651,14 +634,10 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
     })
   }
 
-
-
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
   runGadget(ui, server, viewer = viewer)
 }
-
-
 
 #' @title jsSurveyAddin: Rstudio addin of jsSurveyGadget
 #' @description Rstudio addin of jsSurveyGadget
@@ -674,7 +653,6 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
 #' @export
 #' @importFrom rstudioapi getActiveDocumentContext
 
-
 jsSurveyAddin <- function() {
   context <- rstudioapi::getActiveDocumentContext()
   # Set the default data to use based on the selection.
@@ -683,9 +661,6 @@ jsSurveyAddin <- function() {
   # viewer <- dialogViewer("Subset", width = 1000, height = 800)
   jsSurveyGadget(data, nfactor.limit = 20)
 }
-
-
-
 
 #' @title jsSurveyExtAddin: RStudio Addin for survey data analysis with external data.
 #' @description RStudio Addin for survey data analysis with external csv/xlsx/sas7bdat/sav/dta file.
@@ -708,8 +683,10 @@ jsSurveyAddin <- function() {
 #' @importFrom shinycustomloader withLoader
 #' @importFrom jstable opt.data opt.tb1 opt.tbreg
 #' @importFrom utils data
-#' @import shiny
+#' @importFrom shinyjs useShinyjs click
+#' @import flextable
 
+#' @import shiny
 
 jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
   data.example <- utils::data("nhanes", package = "survey")
@@ -717,6 +694,10 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
   ui <- navbarPage(
     "Survey data analysis",
+    header = tagList(
+      shinyjs::useShinyjs()
+    ),
+    inverse = TRUE,
     tabPanel("Data",
       icon = icon("table"),
       sidebarLayout(
@@ -745,6 +726,8 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             type = "pills",
             tabPanel(
               "Unweighted",
+              downloadButton(outputId = "dl.untable1", style = "display:none;"),
+              actionButton("dl.untable1.clk", NULL, style = "display:none;"),
               withLoader(DTOutput("untable1"), type = "html", loader = "loader6"),
               wellPanel(
                 h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
@@ -754,6 +737,8 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             ),
             tabPanel(
               "Weighted",
+              downloadButton(outputId = "dl.table1", style = "display:none;"),
+              actionButton("dl.table1.clk", NULL, style = "display:none;"),
               withLoader(DTOutput("table1"), type = "html", loader = "loader6"),
               wellPanel(
                 h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
@@ -774,6 +759,8 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             regressModuleUI("linear")
           ),
           mainPanel(
+            downloadButton(outputId = "dl.linreg", style = "display:none;"),
+            actionButton("dl.linreg.clk", NULL, style = "display:none;"),
             withLoader(DTOutput("lineartable"), type = "html", loader = "loader6")
           )
         )
@@ -785,6 +772,8 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             regressModuleUI("logistic")
           ),
           mainPanel(
+            downloadButton(outputId = "dl.logreg", style = "display:none;"),
+            actionButton("dl.logreg.clk", NULL, style = "display:none;"),
             withLoader(DTOutput("logistictable"), type = "html", loader = "loader6")
           )
         )
@@ -796,13 +785,15 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             coxUI("cox")
           ),
           mainPanel(
+            downloadButton(outputId = "dl.coxreg", style = "display:none;"),
+            actionButton("dl.coxreg.clk", NULL, style = "display:none;"),
             withLoader(DTOutput("coxtable"), type = "html", loader = "loader6")
           )
         )
       )
     ),
     navbarMenu("Plot",
-      icon = icon("bar-chart-o"),
+      icon = icon("chart-column"),
       tabPanel(
         "Scatter plot",
         sidebarLayout(
@@ -860,9 +851,6 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     )
   )
 
-
-
-
   server <- function(input, output, session) {
     output$downloadData <- downloadHandler(
       filename = function() {
@@ -890,7 +878,6 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       )
     })
 
-
     output$data_label <- renderDT({
       datatable(data.label(),
         rownames = F, editable = F, extensions = "Buttons", caption = "Label of data",
@@ -902,15 +889,70 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       data.info()$naomit
     })
 
-
     out_untb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    observeEvent(input$dl.untable1.clk, {
+      shinyjs::click(id = "dl.untable1")
+    })
+
+    output$dl.untable1 <- downloadHandler(
+      filename = "untable1.docx",
+      content = function(file) {
+        tb <- out_untb1()$table
+        rn <- rownames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb)[1] <- " "
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.untable1", suspendWhenHidden = FALSE)
+
     output$untable1 <- renderDT({
       tb <- out_untb1()$table
       cap <- out_untb1()$caption
       out.tb1 <- datatable(tb,
         rownames = T, extensions = "Buttons", caption = cap,
         options = c(
-          jstable::opt.tb1("tb1"),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = "tb1"),
+                  list(extend = "excel", filename = "tb1"),
+                  list(extend = "pdf", filename = "tb1")
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.untable1.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
           list(scrollX = TRUE)
         )
@@ -923,13 +965,68 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.table1.clk, {
+      shinyjs::click(id = "dl.table1")
+    })
+
+    output$dl.table1 <- downloadHandler(
+      filename = "table1.docx",
+      content = function(file) {
+        tb <- out_tb1()$table
+        rn <- rownames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb)[1] <- " "
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.table1", suspendWhenHidden = FALSE)
+
     output$table1 <- renderDT({
       tb <- out_tb1()$table
       cap <- out_tb1()$caption
       out.tb1 <- datatable(tb,
         rownames = T, extensions = "Buttons", caption = cap,
         options = c(
-          opt.tb1("tb1"),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = "tb1"),
+                  list(extend = "excel", filename = "tb1"),
+                  list(extend = "pdf", filename = "tb1")
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.table1.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
           list(scrollX = TRUE)
         )
@@ -942,12 +1039,68 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, default.unires = F, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.linreg.clk, {
+      shinyjs::click(id = "dl.linreg")
+    })
+
+    output$dl.linreg <- downloadHandler(
+      filename = "linreg.docx",
+      content = function(file) {
+        tb <- out_linear()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.linreg", suspendWhenHidden = FALSE)
+
     output$lineartable <- renderDT({
       hide <- which(colnames(out_linear()$table) == "sig")
       datatable(out_linear()$table,
         rownames = T, extensions = "Buttons", caption = out_linear()$caption,
         options = c(
-          opt.tbreg(out_linear()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_linear()$caption),
+                  list(extend = "excel", filename = out_linear()$caption),
+                  list(extend = "pdf", filename = out_linear()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.linreg.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
@@ -956,12 +1109,68 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, default.unires = F, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.logreg.clk, {
+      shinyjs::click(id = "dl.logreg")
+    })
+
+    output$dl.logreg <- downloadHandler(
+      filename = "logreg.docx",
+      content = function(file) {
+        tb <- out_logistic()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.logreg", suspendWhenHidden = FALSE)
+
     output$logistictable <- renderDT({
       hide <- which(colnames(out_logistic()$table) == "sig")
       datatable(out_logistic()$table,
         rownames = T, extensions = "Buttons", caption = out_logistic()$caption,
         options = c(
-          opt.tbreg(out_logistic()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_logistic()$caption),
+                  list(extend = "excel", filename = out_logistic()$caption),
+                  list(extend = "pdf", filename = out_logistic()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.logreg.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
@@ -970,17 +1179,72 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, default.unires = F, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.coxreg.clk, {
+      shinyjs::click(id = "dl.coxreg")
+    })
+
+    output$dl.coxreg <- downloadHandler(
+      filename = "coxreg.docx",
+      content = function(file) {
+        tb <- out_cox()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.coxreg", suspendWhenHidden = FALSE)
+
     output$coxtable <- renderDT({
       hide <- which(colnames(out_cox()$table) == c("sig"))
       datatable(out_cox()$table,
         rownames = T, extensions = "Buttons", caption = out_cox()$caption,
         options = c(
-          opt.tbreg(out_cox()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_cox()$caption),
+                  list(extend = "excel", filename = out_cox()$caption),
+                  list(extend = "pdf", filename = out_cox()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.coxreg.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
-
 
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
