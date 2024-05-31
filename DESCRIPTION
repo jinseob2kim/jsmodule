@@ -19,7 +19,7 @@ Imports:
   data.table, 
   DT, 
   epiDisplay, 
-  flextable
+  flextable,
   forestploter, 
   geepack, 
   GGally, 
