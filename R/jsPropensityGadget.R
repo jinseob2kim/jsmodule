@@ -44,7 +44,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
 
   data_varStruct1 <- list(variable = names(out))
 
-
   ## Vars
   naCol <- names(out)[colSums(is.na(out)) > 0]
   # out <- out[, .SD, .SDcols = -naCol]
@@ -63,10 +62,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
   except_vars <- names(nclass)[nclass == 1]
   # except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
   factor_adds <- names(nclass)[nclass >= 1 & nclass <= 5]
-
-
-
-
 
   ui <- navbarPage(
     "Propensity score analysis",
@@ -377,7 +372,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       })
     })
 
-
     observeEvent(input$check_binary, {
       var.conti <- setdiff(names(out), c(factor_original, input$factor_vname))
       output$binary_var <- renderUI({
@@ -474,8 +468,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       })
     })
 
-
-
     data.info <- reactive({
       out1 <- data.table::data.table(out)
       out1[, (conti_original) := lapply(.SD, function(x) {
@@ -533,7 +525,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         }
       }
 
-
       if (!is.null(input$check_subset)) {
         if (input$check_subset) {
           validate(
@@ -588,7 +579,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         # nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
         # factor_2vars <- names(nclass_factor)[nclass_factor == 2]
 
-
         validate(
           need(!is.null(class01_factor), "No categorical variables coded as 0, 1 in data")
         )
@@ -601,7 +591,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         validate(
           need(length(factor_01vars_case_small) > 0, "No candidate group variable for PS calculation")
         )
-
 
         selectInput("group_pscal",
           label = "Group variable for PS calculation (0, 1 coding)",
@@ -645,12 +634,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       })
     })
 
-
-
-
-
-
-
     mat.info <- eventReactive(c(input$indep_pscal, input$group_pscal, input$caliper, input$ratio_ps, data.info()), {
       req(input$indep_pscal)
       if (is.null(input$group_pscal) | is.null(input$indep_pscal)) {
@@ -677,11 +660,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       wdata <- rbind(data.na, cbind(data.naomit, pscore, iptw))
       return(list(data = wdata, matdata = data[ID.pscal2828 %in% match.data(m.out)$ID.pscal2828]))
     })
-
-
-
-
-
 
     output$data <- renderDT({
       datatable(mat.info()$data,
@@ -713,7 +691,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       }
     })
 
-
     ## tb1
     data <- reactive({
       mat.info()$data[, .SD, .SDcols = -c("iptw")]
@@ -723,11 +700,9 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
     # data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
     design.survey <- reactive(survey::svydesign(ids = ~1, data = mat.info()$data[!is.na(iptw), ], weights = ~iptw))
 
-
     tb1_original <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = nfactor.limit)
     tb1_ps <- callModule(tb1module2, "tb1", data = matdata, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = nfactor.limit)
     tb1_iptw <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
-
 
     output$table1_original <- renderDT({
       tb <- tb1_original()$table
@@ -780,13 +755,11 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       return(out.tb1)
     })
 
-
     ## Regression
 
     out_linear_original <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, nfactor.limit = nfactor.limit)
     out_linear_ps <- callModule(regressModule2, "linear", data = matdata, data_label = data.label, data_varStruct = NULL, default.unires = F, nfactor.limit = nfactor.limit)
     out_linear_iptw <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, design.survey = design.survey, nfactor.limit = nfactor.limit)
-
 
     output$linear_original <- renderDT({
       hide <- which(colnames(out_linear_original()$table) == "sig")
@@ -832,13 +805,11 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
-
     ## Logistic
 
     out_logistic_original <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_logistic_ps <- callModule(logisticModule2, "logistic", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_logistic_iptw <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
-
 
     output$logistic_original <- renderDT({
       hide <- which(colnames(out_logistic_original()$table) == "sig")
@@ -875,7 +846,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
-
 
     ## Cox
 
@@ -929,7 +899,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       print(out_ggpairs_ps())
     })
 
-
     ## Kaplan
 
     out_kaplan_original <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
@@ -948,13 +917,11 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       print(out_kaplan_iptw())
     })
 
-
     ## ROC
 
     out_roc_original <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_roc_ps <- callModule(rocModule2, "roc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_roc_iptw <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
-
 
     output$plot_roc_original <- renderPlot({
       print(out_roc_original()$plot)
@@ -998,7 +965,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
     out_timeroc_ps <- callModule(timerocModule2, "timeroc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_timeroc_iptw <- callModule(timerocModule2, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
-
     output$plot_timeroc_original <- renderPlot({
       print(out_timeroc_original()$plot)
     })
@@ -1037,15 +1003,10 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
     })
   }
 
-
-
-
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
   runGadget(ui, server, viewer = viewer)
 }
-
-
 
 #' @title jsPropensityAddin: Rstudio addin of jsPropensityGadget
 #' @description Rstudio addin of jsPropensityGadget
@@ -1061,7 +1022,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
 #' @export
 #' @importFrom rstudioapi getActiveDocumentContext
 
-
 jsPropensityAddin <- function() {
   context <- rstudioapi::getActiveDocumentContext()
   # Set the default data to use based on the selection.
@@ -1070,10 +1030,6 @@ jsPropensityAddin <- function() {
   # viewer <- dialogViewer("Subset", width = 1000, height = 800)
   jsPropensityGadget(data)
 }
-
-
-
-
 
 #' @title jsPropensityExtAddin: RStudio Addin for propensity score analysis with external data.
 #' @description RStudio Addin for propensity score analysis with external csv/xlsx/sas7bdat/sav/dta file.
@@ -1107,6 +1063,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
   ui <- navbarPage(
     "Propensity score analysis",
+    inverse = TRUE,
     header = tagList(
       shinyjs::useShinyjs()
     ),
@@ -1539,6 +1496,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           print(target = file)
       }
     )
+
     outputOptions(output, "dl.table1.ps", suspendWhenHidden = FALSE)
 
     output$table1_ps <- renderDT({
@@ -1951,7 +1909,6 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
-
     observeEvent(input$dl.logreg.ps.clk, {
       shinyjs::click(id = "dl.logreg.ps")
     })
@@ -2308,7 +2265,6 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       print(out_ggpairs_ps())
     })
 
-
     ## Kaplan
 
     out_kaplan_original <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
@@ -2327,13 +2283,11 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       print(out_kaplan_iptw())
     })
 
-
     ## ROC
 
     out_roc_original <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_roc_ps <- callModule(rocModule2, "roc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_roc_iptw <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
-
 
     output$plot_roc_original <- renderPlot({
       print(out_roc_original()$plot)
@@ -2415,8 +2369,6 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       stopApp()
     })
   }
-
-
 
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
