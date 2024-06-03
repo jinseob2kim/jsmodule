@@ -44,7 +44,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
 
   data_varStruct1 <- list(variable = names(out))
 
-
   ## Vars
   naCol <- names(out)[colSums(is.na(out)) > 0]
   # out <- out[, .SD, .SDcols = -naCol]
@@ -63,10 +62,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
   except_vars <- names(nclass)[nclass == 1]
   # except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
   factor_adds <- names(nclass)[nclass >= 1 & nclass <= 5]
-
-
-
-
 
   ui <- navbarPage(
     "Propensity score analysis",
@@ -377,7 +372,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       })
     })
 
-
     observeEvent(input$check_binary, {
       var.conti <- setdiff(names(out), c(factor_original, input$factor_vname))
       output$binary_var <- renderUI({
@@ -474,8 +468,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       })
     })
 
-
-
     data.info <- reactive({
       out1 <- data.table::data.table(out)
       out1[, (conti_original) := lapply(.SD, function(x) {
@@ -533,7 +525,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         }
       }
 
-
       if (!is.null(input$check_subset)) {
         if (input$check_subset) {
           validate(
@@ -588,7 +579,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         # nclass_factor <- unlist(data()[, lapply(.SD, function(x){length(unique(x))}), .SDcols = factor_vars])
         # factor_2vars <- names(nclass_factor)[nclass_factor == 2]
 
-
         validate(
           need(!is.null(class01_factor), "No categorical variables coded as 0, 1 in data")
         )
@@ -601,7 +591,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         validate(
           need(length(factor_01vars_case_small) > 0, "No candidate group variable for PS calculation")
         )
-
 
         selectInput("group_pscal",
           label = "Group variable for PS calculation (0, 1 coding)",
@@ -645,12 +634,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       })
     })
 
-
-
-
-
-
-
     mat.info <- eventReactive(c(input$indep_pscal, input$group_pscal, input$caliper, input$ratio_ps, data.info()), {
       req(input$indep_pscal)
       if (is.null(input$group_pscal) | is.null(input$indep_pscal)) {
@@ -677,11 +660,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       wdata <- rbind(data.na, cbind(data.naomit, pscore, iptw))
       return(list(data = wdata, matdata = data[ID.pscal2828 %in% match.data(m.out)$ID.pscal2828]))
     })
-
-
-
-
-
 
     output$data <- renderDT({
       datatable(mat.info()$data,
@@ -713,7 +691,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       }
     })
 
-
     ## tb1
     data <- reactive({
       mat.info()$data[, .SD, .SDcols = -c("iptw")]
@@ -723,11 +700,9 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
     # data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
     design.survey <- reactive(survey::svydesign(ids = ~1, data = mat.info()$data[!is.na(iptw), ], weights = ~iptw))
 
-
     tb1_original <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = nfactor.limit)
     tb1_ps <- callModule(tb1module2, "tb1", data = matdata, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = nfactor.limit)
     tb1_iptw <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
-
 
     output$table1_original <- renderDT({
       tb <- tb1_original()$table
@@ -780,13 +755,11 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       return(out.tb1)
     })
 
-
     ## Regression
 
     out_linear_original <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, nfactor.limit = nfactor.limit)
     out_linear_ps <- callModule(regressModule2, "linear", data = matdata, data_label = data.label, data_varStruct = NULL, default.unires = F, nfactor.limit = nfactor.limit)
     out_linear_iptw <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, design.survey = design.survey, nfactor.limit = nfactor.limit)
-
 
     output$linear_original <- renderDT({
       hide <- which(colnames(out_linear_original()$table) == "sig")
@@ -832,13 +805,11 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
-
     ## Logistic
 
     out_logistic_original <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_logistic_ps <- callModule(logisticModule2, "logistic", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_logistic_iptw <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
-
 
     output$logistic_original <- renderDT({
       hide <- which(colnames(out_logistic_original()$table) == "sig")
@@ -875,7 +846,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
-
 
     ## Cox
 
@@ -929,7 +899,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       print(out_ggpairs_ps())
     })
 
-
     ## Kaplan
 
     out_kaplan_original <- callModule(kaplanModule, "kaplan", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
@@ -948,13 +917,11 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
       print(out_kaplan_iptw())
     })
 
-
     ## ROC
 
     out_roc_original <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_roc_ps <- callModule(rocModule2, "roc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_roc_iptw <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
-
 
     output$plot_roc_original <- renderPlot({
       print(out_roc_original()$plot)
@@ -998,7 +965,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
     out_timeroc_ps <- callModule(timerocModule2, "timeroc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_timeroc_iptw <- callModule(timerocModule2, "timeroc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
-
     output$plot_timeroc_original <- renderPlot({
       print(out_timeroc_original()$plot)
     })
@@ -1037,15 +1003,10 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
     })
   }
 
-
-
-
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
   runGadget(ui, server, viewer = viewer)
 }
-
-
 
 #' @title jsPropensityAddin: Rstudio addin of jsPropensityGadget
 #' @description Rstudio addin of jsPropensityGadget
@@ -1061,7 +1022,6 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
 #' @export
 #' @importFrom rstudioapi getActiveDocumentContext
 
-
 jsPropensityAddin <- function() {
   context <- rstudioapi::getActiveDocumentContext()
   # Set the default data to use based on the selection.
@@ -1070,10 +1030,6 @@ jsPropensityAddin <- function() {
   # viewer <- dialogViewer("Subset", width = 1000, height = 800)
   jsPropensityGadget(data)
 }
-
-
-
-
 
 #' @title jsPropensityExtAddin: RStudio Addin for propensity score analysis with external data.
 #' @description RStudio Addin for propensity score analysis with external csv/xlsx/sas7bdat/sav/dta file.
@@ -1097,6 +1053,8 @@ jsPropensityAddin <- function() {
 #' @importFrom jstable opt.tbreg
 #' @importFrom DT datatable %>% formatStyle styleEqual renderDT DTOutput
 #' @importFrom shinycustomloader withLoader
+#' @importFrom shinyjs useShinyjs click
+#' @import flextable
 #' @import shiny
 
 jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
@@ -1105,6 +1063,10 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
   ui <- navbarPage(
     "Propensity score analysis",
+    inverse = TRUE,
+    header = tagList(
+      shinyjs::useShinyjs()
+    ),
     tabPanel("Data",
       icon = icon("table"),
       sidebarLayout(
@@ -1134,6 +1096,8 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             type = "pills",
             tabPanel(
               "Original",
+              downloadButton(outputId = "dl.table1.original", style = "display:none;"),
+              actionButton("dl.table1.original.clk", NULL, style = "display:none;"),
               withLoader(DTOutput("table1_original"), type = "html", loader = "loader6"),
               wellPanel(
                 h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
@@ -1143,6 +1107,8 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             ),
             tabPanel(
               "Matching",
+              downloadButton(outputId = "dl.table1.ps", style = "display:none;"),
+              actionButton("dl.table1.ps.clk", NULL, style = "display:none;"),
               withLoader(DTOutput("table1_ps"), type = "html", loader = "loader6"),
               wellPanel(
                 h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
@@ -1152,6 +1118,8 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             ),
             tabPanel(
               "IPTW",
+              downloadButton(outputId = "dl.table1.iptw", style = "display:none;"),
+              actionButton("dl.table1.iptw.clk", NULL, style = "display:none;"),
               withLoader(DTOutput("table1_iptw"), type = "html", loader = "loader6"),
               wellPanel(
                 h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
@@ -1176,18 +1144,24 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
               type = "pills",
               tabPanel(
                 "Original",
+                downloadButton("dl.linreg.original", style = "display:none;"),
+                actionButton("dl.linreg.original.clk", NULL, style = "display:none;"),
                 withLoader(DTOutput("linear_original"), type = "html", loader = "loader6"),
                 br(),
                 uiOutput("warning_linear_original")
               ),
               tabPanel(
                 "Matching",
+                downloadButton("dl.linreg.ps", style = "display:none;"),
+                actionButton("dl.linreg.ps.clk", NULL, style = "display:none;"),
                 withLoader(DTOutput("linear_ps"), type = "html", loader = "loader6"),
                 br(),
                 uiOutput("warning_linear_ps")
               ),
               tabPanel(
                 "IPTW",
+                downloadButton("dl.linreg.iptw", style = "display:none;"),
+                actionButton("dl.linreg.iptw.clk", NULL, style = "display:none;"),
                 withLoader(DTOutput("linear_iptw"), type = "html", loader = "loader6")
               )
             )
@@ -1205,14 +1179,20 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
               type = "pills",
               tabPanel(
                 "Original",
+                downloadButton("dl.logreg.original", style = "display:none;"),
+                actionButton("dl.logreg.original.clk", NULL, style = "display:none;"),
                 withLoader(DTOutput("logistic_original"), type = "html", loader = "loader6")
               ),
               tabPanel(
                 "Matching",
+                downloadButton("dl.logreg.ps", style = "display:none;"),
+                actionButton("dl.logreg.ps.clk", NULL, style = "display:none;"),
                 withLoader(DTOutput("logistic_ps"), type = "html", loader = "loader6")
               ),
               tabPanel(
                 "IPTW",
+                downloadButton("dl.logreg.iptw", style = "display:none;"),
+                actionButton("dl.logreg.iptw.clk", NULL, style = "display:none;"),
                 withLoader(DTOutput("logistic_iptw"), type = "html", loader = "loader6")
               )
             )
@@ -1230,14 +1210,20 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
               type = "pills",
               tabPanel(
                 "Original",
+                downloadButton("dl.coxreg.original", style = "display:none;"),
+                actionButton("dl.coxreg.original.clk", NULL, style = "display:none;"),
                 withLoader(DTOutput("cox_original"), type = "html", loader = "loader6")
               ),
               tabPanel(
                 "Matching",
+                downloadButton("dl.coxreg.ps", style = "display:none;"),
+                actionButton("dl.coxreg.ps.clk", NULL, style = "display:none;"),
                 withLoader(DTOutput("cox_ps"), type = "html", loader = "loader6")
               ),
               tabPanel(
                 "IPTW",
+                downloadButton("dl.coxreg.iptw", style = "display:none;"),
+                actionButton("dl.coxreg.iptw.clk", NULL, style = "display:none;"),
                 withLoader(DTOutput("cox_iptw"), type = "html", loader = "loader6")
               )
             )
@@ -1246,7 +1232,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       )
     ),
     navbarMenu("Plot",
-      icon = icon("bar-chart-o"),
+      icon = icon("chart-column"),
       tabPanel(
         "Scatter plot",
         sidebarLayout(
@@ -1360,9 +1346,6 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     )
   )
 
-
-
-
   server <- function(input, output, session) {
     output$downloadData <- downloadHandler(
       filename = function() {
@@ -1374,7 +1357,6 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         data.table::fwrite(na.omit(out)[, -1], file)
       }
     )
-
 
     output$import <- renderUI({
       FilePsInput("datafile")
@@ -1408,7 +1390,6 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       # mat.info()$naomit
     })
 
-
     ## tb1
     data <- reactive({
       mat.info()$data[, .SD, .SDcols = -c("iptw")]
@@ -1418,11 +1399,33 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     # data_varStruct <- reactive(list(variable = names(mat.info()$matdata)))
     design.survey <- reactive(survey::svydesign(ids = ~1, data = mat.info()$data[!is.na(iptw), ], weights = ~iptw))
 
-
     tb1_original <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = nfactor.limit)
     tb1_ps <- callModule(tb1module2, "tb1", data = matdata, data_label = data.label, data_varStruct = NULL, design.survey = NULL, nfactor.limit = nfactor.limit)
     tb1_iptw <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.table1.original.clk, {
+      shinyjs::click(id = "dl.table1.original")
+    })
+
+    output$dl.table1.original <- downloadHandler(
+      filename = "table1_original.docx",
+      content = function(file) {
+        tb <- tb1_original()$table
+        rn <- rownames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb)[1] <- " "
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+    outputOptions(output, "dl.table1.original", suspendWhenHidden = FALSE)
 
     output$table1_original <- renderDT({
       tb <- tb1_original()$table
@@ -1430,7 +1433,37 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       out.tb1 <- datatable(tb,
         rownames = T, extensions = "Buttons", caption = cap,
         options = c(
-          opt.tb1("tb1"),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = "tb1"),
+                  list(extend = "excel", filename = "tb1"),
+                  list(extend = "pdf", filename = "tb1")
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.table1.original.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
           list(scrollX = TRUE)
         )
@@ -1440,6 +1473,31 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       }
       return(out.tb1)
     })
+
+    observeEvent(input$dl.table1.ps.clk, {
+      shinyjs::click(id = "dl.table1.ps")
+    })
+
+    output$dl.table1.ps <- downloadHandler(
+      filename = "table1_ps.docx",
+      content = function(file) {
+        tb <- tb1_ps()$table
+        rn <- rownames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb)[1] <- " "
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.table1.ps", suspendWhenHidden = FALSE)
 
     output$table1_ps <- renderDT({
       tb <- tb1_ps()$table
@@ -1447,7 +1505,37 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       out.tb1 <- datatable(tb,
         rownames = T, extensions = "Buttons", caption = cap,
         options = c(
-          opt.tb1("tb1"),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = "tb1"),
+                  list(extend = "excel", filename = "tb1"),
+                  list(extend = "pdf", filename = "tb1")
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.table1.ps.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
           list(scrollX = TRUE)
         )
@@ -1457,6 +1545,31 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       }
       return(out.tb1)
     })
+
+    observeEvent(input$dl.table1.iptw.clk, {
+      shinyjs::click(id = "dl.table1.iptw")
+    })
+
+    output$dl.table1.iptw <- downloadHandler(
+      filename = "table1_iptw.docx",
+      content = function(file) {
+        tb <- tb1_iptw()$table
+        rn <- rownames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb)[1] <- " "
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.table1.iptw", suspendWhenHidden = FALSE)
 
     output$table1_iptw <- renderDT({
       tb <- tb1_iptw()$table
@@ -1464,7 +1577,37 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       out.tb1 <- datatable(tb,
         rownames = T, extensions = "Buttons", caption = cap,
         options = c(
-          opt.tb1("tb1"),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = "tb1"),
+                  list(extend = "excel", filename = "tb1"),
+                  list(extend = "pdf", filename = "tb1")
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.table1.iptw.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
           list(scrollX = TRUE)
         )
@@ -1475,20 +1618,73 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       return(out.tb1)
     })
 
-
     ## Regression
-
     out_linear_original <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, nfactor.limit = nfactor.limit)
     out_linear_ps <- callModule(regressModule2, "linear", data = matdata, data_label = data.label, data_varStruct = NULL, default.unires = F, nfactor.limit = nfactor.limit)
     out_linear_iptw <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.linreg.original.clk, {
+      shinyjs::click(id = "dl.linreg.original")
+    })
+
+    output$dl.linreg.original <- downloadHandler(
+      filename = "linreg_original.docx",
+      content = function(file) {
+        tb <- out_linear_original()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.linreg.original", suspendWhenHidden = FALSE)
 
     output$linear_original <- renderDT({
       hide <- which(colnames(out_linear_original()$table) == "sig")
       datatable(out_linear_original()$table,
         rownames = T, extensions = "Buttons", caption = out_linear_original()$caption,
         options = c(
-          opt.tbreg(out_linear_original()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_linear_original()$caption),
+                  list(extend = "excel", filename = out_linear_original()$caption),
+                  list(extend = "pdf", filename = out_linear_original()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.linreg.original.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
@@ -1499,12 +1695,68 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       paste("<b>", out_linear_original()$warning, "</b>")
     })
 
+    observeEvent(input$dl.linreg.ps.clk, {
+      shinyjs::click(id = "dl.linreg.ps")
+    })
+
+    output$dl.linreg.ps <- downloadHandler(
+      filename = "linreg_ps.docx",
+      content = function(file) {
+        tb <- out_linear_ps()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.linreg.ps", suspendWhenHidden = FALSE)
+
     output$linear_ps <- renderDT({
       hide <- which(colnames(out_linear_ps()$table) == "sig")
       datatable(out_linear_ps()$table,
         rownames = T, extensions = "Buttons", caption = out_linear_ps()$caption,
         options = c(
-          opt.tbreg(out_linear_ps()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_linear_ps()$caption),
+                  list(extend = "excel", filename = out_linear_ps()$caption),
+                  list(extend = "pdf", filename = out_linear_ps()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.linreg.ps.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
@@ -1515,18 +1767,73 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       paste("<b>", out_linear_ps()$warning, "</b>")
     })
 
+    observeEvent(input$dl.linreg.iptw.clk, {
+      shinyjs::click(id = "dl.linreg.iptw")
+    })
+
+    output$dl.linreg.iptw <- downloadHandler(
+      filename = "linreg_iptw.docx",
+      content = function(file) {
+        tb <- out_linear_iptw()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.linreg.iptw", suspendWhenHidden = FALSE)
+
     output$linear_iptw <- renderDT({
       hide <- which(colnames(out_linear_iptw()$table) == "sig")
       datatable(out_linear_iptw()$table,
         rownames = T, extensions = "Buttons", caption = out_linear_iptw()$caption,
         options = c(
-          opt.tbreg(out_linear_iptw()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_linear_iptw()$caption),
+                  list(extend = "excel", filename = out_linear_iptw()$caption),
+                  list(extend = "pdf", filename = out_linear_iptw()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.linreg.iptw.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
-
 
     ## Logistic
 
@@ -1534,43 +1841,209 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     out_logistic_ps <- callModule(logisticModule2, "logistic", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_logistic_iptw <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.logreg.original.clk, {
+      shinyjs::click(id = "dl.logreg.original")
+    })
+
+    output$dl.logreg.original <- downloadHandler(
+      filename = "logreg_original.docx",
+      content = function(file) {
+        tb <- out_logistic_original()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.logreg.original", suspendWhenHidden = FALSE)
 
     output$logistic_original <- renderDT({
       hide <- which(colnames(out_logistic_original()$table) == "sig")
       datatable(out_logistic_original()$table,
         rownames = T, extensions = "Buttons", caption = out_logistic_original()$caption,
         options = c(
-          opt.tbreg(out_logistic_original()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_logistic_original()$caption),
+                  list(extend = "excel", filename = out_logistic_original()$caption),
+                  list(extend = "pdf", filename = out_logistic_original()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.logreg.original.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
+
+    observeEvent(input$dl.logreg.ps.clk, {
+      shinyjs::click(id = "dl.logreg.ps")
+    })
+
+    output$dl.logreg.ps <- downloadHandler(
+      filename = "logreg_ps.docx",
+      content = function(file) {
+        tb <- out_logistic_ps()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.logreg.ps", suspendWhenHidden = FALSE)
 
     output$logistic_ps <- renderDT({
       hide <- which(colnames(out_logistic_ps()$table) == "sig")
       datatable(out_logistic_ps()$table,
         rownames = T, extensions = "Buttons", caption = out_logistic_ps()$caption,
         options = c(
-          opt.tbreg(out_logistic_ps()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_logistic_ps()$caption),
+                  list(extend = "excel", filename = out_logistic_ps()$caption),
+                  list(extend = "pdf", filename = out_logistic_ps()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.logreg.ps.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
+
+    observeEvent(input$dl.logreg.iptw.clk, {
+      shinyjs::click(id = "dl.logreg.iptw")
+    })
+
+    output$dl.logreg.iptw <- downloadHandler(
+      filename = "logreg_iptw.docx",
+      content = function(file) {
+        tb <- out_logistic_iptw()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.logreg.iptw", suspendWhenHidden = FALSE)
 
     output$logistic_iptw <- renderDT({
       hide <- which(colnames(out_logistic_iptw()$table) == "sig")
       datatable(out_logistic_iptw()$table,
         rownames = T, extensions = "Buttons", caption = out_logistic_iptw()$caption,
         options = c(
-          opt.tbreg(out_logistic_iptw()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_logistic_iptw()$caption),
+                  list(extend = "excel", filename = out_logistic_iptw()$caption),
+                  list(extend = "pdf", filename = out_logistic_iptw()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.logreg.iptw.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
-
 
     ## Cox
 
@@ -1578,34 +2051,202 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     out_cox_ps <- callModule(coxModule, "cox", data = matdata, data_label = data.label, data_varStruct = NULL, default.unires = F, nfactor.limit = nfactor.limit)
     out_cox_iptw <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = F, design.survey = design.survey, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.coxreg.original.clk, {
+      shinyjs::click(id = "dl.coxreg.original")
+    })
+
+    output$dl.coxreg.original <- downloadHandler(
+      filename = "coxreg_original.docx",
+      content = function(file) {
+        tb <- out_cox_original()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.coxreg.original", suspendWhenHidden = FALSE)
+
     output$cox_original <- renderDT({
       hide <- which(colnames(out_cox_original()$table) == c("sig"))
       datatable(out_cox_original()$table,
         rownames = T, extensions = "Buttons", caption = out_cox_original()$caption,
         options = c(
-          opt.tbreg(out_cox_original()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_cox_original()$caption),
+                  list(extend = "excel", filename = out_cox_original()$caption),
+                  list(extend = "pdf", filename = out_cox_original()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.coxreg.original.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
+
+    observeEvent(input$dl.coxreg.ps.clk, {
+      shinyjs::click(id = "dl.coxreg.ps")
+    })
+
+    output$dl.coxreg.ps <- downloadHandler(
+      filename = "coxreg_ps.docx",
+      content = function(file) {
+        tb <- out_cox_ps()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.coxreg.ps", suspendWhenHidden = FALSE)
 
     output$cox_ps <- renderDT({
       hide <- which(colnames(out_cox_ps()$table) == c("sig"))
       datatable(out_cox_ps()$table,
         rownames = T, extensions = "Buttons", caption = out_cox_ps()$caption,
         options = c(
-          opt.tbreg(out_cox_ps()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_cox_ps()$caption),
+                  list(extend = "excel", filename = out_cox_ps()$caption),
+                  list(extend = "pdf", filename = out_cox_ps()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.coxreg.ps.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
+
+    observeEvent(input$dl.coxreg.iptw.clk, {
+      shinyjs::click(id = "dl.coxreg.iptw")
+    })
+
+    output$dl.coxreg.iptw <- downloadHandler(
+      filename = "coxreg_iptw.docx",
+      content = function(file) {
+        tb <- out_cox_iptw()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.coxreg.iptw", suspendWhenHidden = FALSE)
 
     output$cox_iptw <- renderDT({
       hide <- which(colnames(out_cox_iptw()$table) == c("sig"))
       datatable(out_cox_iptw()$table,
         rownames = T, extensions = "Buttons", caption = out_cox_iptw()$caption,
         options = c(
-          opt.tbreg(out_cox_iptw()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_cox_iptw()$caption),
+                  list(extend = "excel", filename = out_cox_iptw()$caption),
+                  list(extend = "pdf", filename = out_cox_iptw()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.coxreg.iptw.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
@@ -1623,7 +2264,6 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     output$ggpairs_plot_ps <- renderPlot({
       print(out_ggpairs_ps())
     })
-
 
     ## Kaplan
 
@@ -1643,13 +2283,11 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       print(out_kaplan_iptw())
     })
 
-
     ## ROC
 
     out_roc_original <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_roc_ps <- callModule(rocModule2, "roc", data = matdata, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
     out_roc_iptw <- callModule(rocModule2, "roc", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, nfactor.limit = nfactor.limit)
-
 
     output$plot_roc_original <- renderPlot({
       print(out_roc_original()$plot)
@@ -1731,8 +2369,6 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       stopApp()
     })
   }
-
-
 
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))

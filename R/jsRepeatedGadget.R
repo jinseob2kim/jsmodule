@@ -51,8 +51,6 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
 
   data.list <- list(data = out, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars)
 
-
-
   ui <- navbarPage(
     "Repeated measure analysis",
     tabPanel("Data",
@@ -222,7 +220,6 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
       })
     })
 
-
     observeEvent(input$check_binary, {
       var.conti <- setdiff(names(data.list$data), c(data.list$factor_original, input$factor_vname))
       output$binary_var <- renderUI({
@@ -319,7 +316,6 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
       })
     })
 
-
     data.info <- reactive({
       out <- data.table::data.table(data.list$data)
       out[, (data.list$conti_original) := lapply(.SD, function(x) {
@@ -413,7 +409,6 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
         out.label[variable == vn, var_label := ref[["name.old"]][w]]
       }
 
-
       return(list(data = out, label = out.label))
     })
 
@@ -428,16 +423,12 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
       )
     })
 
-
     output$data_label <- renderDT({
       datatable(data.label(),
         rownames = F, editable = F, extensions = "Buttons", caption = "Label of data",
         options = c(jstable::opt.data("label"), list(scrollX = TRUE))
       )
     })
-
-
-
 
     out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, showAllLevels = T)
 
@@ -499,7 +490,6 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
-
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
     output$ggpairs_plot <- renderPlot({
@@ -511,7 +501,6 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
     output$kaplan_plot <- renderPlot({
       print(out_kaplan())
     })
-
 
     out_roc <- callModule(rocModule, "roc", data = data, data_label = data.label, data_varStruct = NULL, id.cluster = id.gee, nfactor.limit = nfactor.limit)
 
@@ -545,14 +534,10 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
     })
   }
 
-
-
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
   runGadget(ui, server, viewer = viewer)
 }
-
-
 
 #' @title jsRepeatedAddin: Rstudio addin of jsRepeatedGadget
 #' @description Rstudio addin of jsRepeatedGadget
@@ -568,7 +553,6 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
 #' @export
 #' @importFrom rstudioapi getActiveDocumentContext
 
-
 jsRepeatedAddin <- function() {
   context <- rstudioapi::getActiveDocumentContext()
   # Set the default data to use based on the selection.
@@ -577,9 +561,6 @@ jsRepeatedAddin <- function() {
   # viewer <- dialogViewer("Subset", width = 1000, height = 800)
   jsRepeatedGadget(data, nfactor.limit = 20)
 }
-
-
-
 
 #' @title jsRepeatedExtAddin: RStudio Addin for repeated measure analysis with external data.
 #' @description RStudio Addin for repeated measure analysis with external csv/xlsx/sas7bdat/sav/dta file.
@@ -602,13 +583,18 @@ jsRepeatedAddin <- function() {
 #' @importFrom DT datatable %>% formatStyle styleEqual renderDT DTOutput
 #' @importFrom shinycustomloader withLoader
 #' @import shiny
-
+#' @importFrom shinyjs useShinyjs click
+#' @import flextable
 
 jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
   options(shiny.maxRequestSize = max.filesize * 1024^2)
 
   ui <- navbarPage(
     "Repeated measure analysis",
+    header = tagList(
+      shinyjs::useShinyjs()
+    ),
+    inverse = TRUE,
     tabPanel("Data",
       icon = icon("table"),
       sidebarLayout(
@@ -633,6 +619,8 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           tb1moduleUI("tb1")
         ),
         mainPanel(
+          downloadButton(outputId = "dl.table1", style = "display:none;"),
+          actionButton("dl.table1.clk", NULL, style = "display:none;"),
           withLoader(DTOutput("table1"), type = "html", loader = "loader6"),
           wellPanel(
             h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
@@ -651,6 +639,8 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             GEEModuleUI("linear")
           ),
           mainPanel(
+            downloadButton(outputId = "dl.lingee", style = "display:none;"),
+            actionButton("dl.lingee.clk", NULL, style = "display:none;"),
             withLoader(DTOutput("lineartable"), type = "html", loader = "loader6")
           )
         )
@@ -662,6 +652,8 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             GEEModuleUI("logistic")
           ),
           mainPanel(
+            downloadButton(outputId = "dl.loggee", style = "display:none;"),
+            actionButton("dl.loggee.clk", NULL, style = "display:none;"),
             withLoader(DTOutput("logistictable"), type = "html", loader = "loader6")
           )
         )
@@ -673,13 +665,15 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             coxUI("cox")
           ),
           mainPanel(
+            downloadButton(outputId = "dl.coxgee", style = "display:none;"),
+            actionButton("dl.coxgee.clk", NULL, style = "display:none;"),
             withLoader(DTOutput("coxtable"), type = "html", loader = "loader6")
           )
         )
       )
     ),
     navbarMenu("Plot",
-      icon = icon("bar-chart-o"),
+      icon = icon("chart-column"),
       tabPanel(
         "Scatter plot",
         sidebarLayout(
@@ -737,9 +731,6 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     )
   )
 
-
-
-
   server <- function(input, output, session) {
     output$downloadData <- downloadHandler(
       filename = function() {
@@ -766,7 +757,6 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       )
     })
 
-
     output$data_label <- renderDT({
       datatable(data.label(),
         rownames = F, editable = F, extensions = "Buttons", caption = "Label of data",
@@ -778,10 +768,32 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       data.info()$naomit
     })
 
-
-
-
     out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
+
+    observeEvent(input$dl.table1.clk, {
+      shinyjs::click(id = "dl.table1")
+    })
+
+    output$dl.table1 <- downloadHandler(
+      filename = "table1.docx",
+      content = function(file) {
+        tb <- out_tb1()$table
+        rn <- rownames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb)[1] <- " "
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.table1", suspendWhenHidden = FALSE)
 
     output$table1 <- renderDT({
       tb <- out_tb1()$table
@@ -789,7 +801,37 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       out.tb1 <- datatable(tb,
         rownames = T, extensions = "Buttons", caption = cap,
         options = c(
-          opt.tb1("tb1"),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = "tb1"),
+                  list(extend = "excel", filename = "tb1"),
+                  list(extend = "pdf", filename = "tb1")
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.table1.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
           list(scrollX = TRUE)
         )
@@ -802,12 +844,68 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_linear <- callModule(GEEModuleLinear, "linear", data = data, data_label = data.label, data_varStruct = NULL, id.gee = id.gee, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.lingee.clk, {
+      shinyjs::click(id = "dl.lingee")
+    })
+
+    output$dl.lingee <- downloadHandler(
+      filename = "lingee.docx",
+      content = function(file) {
+        tb <- out_linear()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.lingee", suspendWhenHidden = FALSE)
+
     output$lineartable <- renderDT({
       hide <- which(colnames(out_linear()$table) == "sig")
       datatable(out_linear()$table,
         rownames = T, extensions = "Buttons", caption = out_linear()$caption,
         options = c(
-          opt.tbreg(out_linear()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_linear()$caption),
+                  list(extend = "excel", filename = out_linear()$caption),
+                  list(extend = "pdf", filename = out_linear()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.lingee.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
@@ -816,12 +914,68 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_logistic <- callModule(GEEModuleLogistic, "logistic", data = data, data_label = data.label, data_varStruct = NULL, id.gee = id.gee, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.loggee.clk, {
+      shinyjs::click(id = "dl.loggee")
+    })
+
+    output$dl.loggee <- downloadHandler(
+      filename = "loggee.docx",
+      content = function(file) {
+        tb <- out_logistic()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.loggee", suspendWhenHidden = FALSE)
+
     output$logistictable <- renderDT({
       hide <- which(colnames(out_logistic()$table) == "sig")
       datatable(out_logistic()$table,
         rownames = T, extensions = "Buttons", caption = out_logistic()$caption,
         options = c(
-          opt.tbreg(out_logistic()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_logistic()$caption),
+                  list(extend = "excel", filename = out_logistic()$caption),
+                  list(extend = "pdf", filename = out_logistic()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.loggee.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
@@ -830,12 +984,68 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, id.cluster = id.gee, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.coxgee.clk, {
+      shinyjs::click(id = "dl.coxgee")
+    })
+
+    output$dl.coxgee <- downloadHandler(
+      filename = "coxgee.docx",
+      content = function(file) {
+        tb <- out_cox()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.coxgee", suspendWhenHidden = FALSE)
+
     output$coxtable <- renderDT({
       hide <- which(colnames(out_cox()$table) == c("sig"))
       datatable(out_cox()$table,
         rownames = T, extensions = "Buttons", caption = out_cox()$caption,
         options = c(
-          opt.tbreg(out_cox()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_cox()$caption),
+                  list(extend = "excel", filename = out_cox()$caption),
+                  list(extend = "pdf", filename = out_cox()$caption)
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.coxgee.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))

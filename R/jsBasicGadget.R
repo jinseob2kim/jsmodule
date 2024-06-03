@@ -805,6 +805,8 @@ jsBasicAddin <- function() {
 #' @importFrom jstable opt.tbreg
 #' @importFrom DT datatable %>% formatStyle styleEqual renderDT DTOutput
 #' @importFrom shinycustomloader withLoader
+#' @importFrom shinyjs useShinyjs click
+#' @import flextable
 #' @import shiny
 
 jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
@@ -813,7 +815,8 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
   ui <- navbarPage(
     header = tagList(
       includeCSS(system.file("www", "style.css", package = "jsmodule")),
-      tags$head(tags$link(rel = "shortcut icon", href = "www/favicon.ico"))
+      tags$head(tags$link(rel = "shortcut icon", href = "www/favicon.ico")),
+      shinyjs::useShinyjs()
     ),
     # theme = bslib::bs_theme(bootswatch = 'solar'),
     inverse = TRUE,
@@ -883,6 +886,8 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         mainPanel(
           markdown("> Table 1 for Descriptive statistics, see
           <a target = '_blank' href = 'https://www.ema.europa.eu/en/documents/scientific-guideline/ich-e-3-structure-content-clinical-study-reports-step-5_en.pdf'>Ich E3 Guideline 11.2 for medical definition</a>"),
+          downloadButton(outputId = "dl.table1", style = "display:none;"),
+          actionButton("dl.table1.clk", NULL, style = "display:none;"),
           withLoader(
             DTOutput("table1"),
             type = "html",
@@ -908,6 +913,8 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             regressModuleUI("linear")
           ),
           mainPanel(
+            downloadButton("dl.linreg", style = "display:none;"),
+            actionButton("dl.linreg.clk", NULL, style = "display:none;"),
             withLoader(
               DTOutput("lineartable"),
               type = "html",
@@ -925,6 +932,8 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             regressModuleUI("logistic")
           ),
           mainPanel(
+            downloadButton("dl.logreg", style = "display:none;"),
+            actionButton("dl.logreg.clk", NULL, style = "display:none;"),
             withLoader(
               DTOutput("logistictable"),
               type = "html",
@@ -940,6 +949,8 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             coxUI("cox")
           ),
           mainPanel(
+            downloadButton("dl.coxreg", style = "display:none;"),
+            actionButton("dl.coxreg.clk", NULL, style = "display:none;"),
             withLoader(
               DTOutput("coxtable"),
               type = "html",
@@ -1260,13 +1271,68 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_tb1 <- callModule(tb1module2, "tb1", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.table1.clk, {
+      shinyjs::click(id = "dl.table1")
+    })
+
+    output$dl.table1 <- downloadHandler(
+      filename = "table1.docx",
+      content = function(file) {
+        tb <- out_tb1()$table
+        rn <- rownames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb)[1] <- " "
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.table1", suspendWhenHidden = FALSE)
+
     output$table1 <- renderDT({
       tb <- out_tb1()$table
       cap <- out_tb1()$caption
       out.tb1 <- datatable(tb,
         rownames = T, extensions = "Buttons", caption = cap,
         options = c(
-          opt.tb1("tb1"),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = 25,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = "tb1"),
+                  list(extend = "excel", filename = "tb1"),
+                  list(extend = "pdf", filename = "tb1")
+                ) # ,
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS(
+                  "function ( e, dt, node, config ) {
+                  Shiny.setInputValue('dl.table1.clk', true, {priority: 'event'});
+                  }"
+                )
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
           list(scrollX = TRUE)
         )
@@ -1279,12 +1345,64 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.linreg.clk, {
+      shinyjs::click(id = "dl.linreg")
+    })
+
+    output$dl.linreg <- downloadHandler(
+      filename = "lin-reg.docx",
+      content = function(file) {
+        tb <- out_linear()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.linreg", suspendWhenHidden = FALSE)
+
     output$lineartable <- renderDT({
       hide <- which(colnames(out_linear()$table) == "sig")
       datatable(out_linear()$table,
         rownames = T, extensions = "Buttons", caption = out_linear()$caption,
         options = c(
-          opt.tbreg(out_linear()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = -1,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_linear()$caption),
+                  list(extend = "excel", filename = out_linear()$caption),
+                  list(extend = "pdf", filename = out_linear()$caption)
+                )
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS("function ( e, dt, node, config ) {Shiny.setInputValue('dl.linreg.clk', true, {priority: 'event'});}")
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
@@ -1297,12 +1415,64 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.logreg.clk, {
+      shinyjs::click(id = "dl.logreg")
+    })
+
+    output$dl.logreg <- downloadHandler(
+      filename = "log-reg.docx",
+      content = function(file) {
+        tb <- out_logistic()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.logreg", suspendWhenHidden = FALSE)
+
     output$logistictable <- renderDT({
       hide <- which(colnames(out_logistic()$table) == "sig")
       datatable(out_logistic()$table,
         rownames = T, extensions = "Buttons", caption = out_logistic()$caption,
         options = c(
-          opt.tbreg(out_logistic()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = -1,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_logistic()$caption),
+                  list(extend = "excel", filename = out_logistic()$caption),
+                  list(extend = "pdf", filename = out_logistic()$caption)
+                )
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS("function ( e, dt, node, config ) {Shiny.setInputValue('dl.logreg.clk', true, {priority: 'event'});}")
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
@@ -1311,12 +1481,64 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, nfactor.limit = nfactor.limit)
 
+    observeEvent(input$dl.coxreg.clk, {
+      shinyjs::click(id = "dl.coxreg")
+    })
+
+    output$dl.coxreg <- downloadHandler(
+      filename = "cox-reg.docx",
+      content = function(file) {
+        tb <- out_cox()$table
+        rn <- rownames(tb)
+        cn <- colnames(tb)
+        tb <- cbind(rn, data.frame(tb))
+        colnames(tb) <- c(" ", cn)
+
+        officer::read_docx() |>
+          body_add_flextable(
+            tb %>%
+              flextable() %>%
+              autofit() %>%
+              theme_booktabs(bold_header = TRUE)
+          ) |>
+          print(target = file)
+      }
+    )
+
+    outputOptions(output, "dl.coxreg", suspendWhenHidden = FALSE)
+
     output$coxtable <- renderDT({
       hide <- which(colnames(out_cox()$table) == c("sig"))
       datatable(out_cox()$table,
         rownames = T, extensions = "Buttons", caption = out_cox()$caption,
         options = c(
-          opt.tbreg(out_cox()$caption),
+          list(
+            dom = "<lf<rt>Bip>",
+            lengthMenu = list(
+              c(10, 25, -1),
+              c("10", "25", "All")
+            ),
+            pageLength = -1,
+            ordering = F,
+            buttons = list(
+              "copy",
+              "print",
+              list(
+                text = "Download",
+                extend = "collection",
+                buttons = list(
+                  list(extend = "csv", filename = out_cox()$caption),
+                  list(extend = "excel", filename = out_cox()$caption),
+                  list(extend = "pdf", filename = out_cox()$caption)
+                )
+              ),
+              list(
+                text = "Word",
+                extend = "collection",
+                action = DT::JS("function ( e, dt, node, config ) {Shiny.setInputValue('dl.coxreg.clk', true, {priority: 'event'});}")
+              )
+            )
+          ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#fed9cc"))
