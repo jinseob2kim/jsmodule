@@ -1,3 +1,9 @@
+# jsmodule 1.5.5
+
+## Update
+- Download table as word document (Thanks for [Jinhwan Kim](https://github.com/jhk0530))
+
+
 # jsmodule 1.5.4
 
 ## Update
