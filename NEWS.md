@@ -1,3 +1,9 @@
+# jsmodule 1.5.6
+
+## Bugfix:
+- Fix var_label displaying incorrectly when loading .sav file
+
+
 # jsmodule 1.5.5
 
 ## Update

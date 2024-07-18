@@ -17,8 +17,11 @@ mk.lev2 <- function(out.old, out.label) {
   label.variable <- sapply(out.old, function(x) attr(x, "label")) %>% .[!sapply(., is.null)]
 
   for (v in names(label.variable)) {
-    out.label[variable == v, var_label := label.variable[v]]
+    logical <- label.variable[[v]] %in% out.old[[v]]
+    tmp <- ifelse(sum(logical) > 0, rep(v, sum(logical)), label.variable[v])
+    out.label[variable == v, var_label := tmp]
   }
+
   for (v in names(label.value)) {
     if (any(out.label[variable == v, class] != "numeric")) {
       out.label[variable == v, val_label := label.value[[v]][level]]
