@@ -145,7 +145,7 @@ forestcoxUI <- function(id, label = "forestplot") {
 #' @rdname forestcoxServer
 #' @export
 #' @importFrom data.table data.table setDT setnames
-#' @importFrom jstable TableSubgroupMultiCox
+#' @importFrom jstableTableSubgroupMultiCox
 #' @importFrom forestploter forest_theme forest
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
@@ -159,7 +159,6 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
       if (is.null(data_varStruct)) {
         data_varStruct <- reactive(list(variable = names(data())))
       }
-
 
       vlist <- reactive({
         label <- data.table::data.table(data_label(), stringsAsFactors = T)
@@ -220,7 +219,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
 
       output$group_tbsub <- renderUI({
         req(input$dep)
-        selectInput(session$ns("group"), "Group", choices = c(vlist()$group2_vars, vlist()$conti_vars), selected = setdiff(c(vlist()$group2_vars, vlist()$conti_vars), c(input$dep, vlist()$factor_01vars[1]))[1])
+        selectInput(session$ns("group"), "Group", choices = setdiff(c(vlist()$group2_vars, vlist()$conti_vars), input$dep), selected = setdiff(c(vlist()$group2_vars, vlist()$conti_vars), c(input$dep, vlist()$factor_01vars[1]))[1])
       })
       output$dep_tbsub <- renderUI({
         selectInput(session$ns("dep"), "Outcome", choices = vlist()$factor_01vars, selected = vlist()$factor_01vars[1])
@@ -258,8 +257,6 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
           data <- design.survey()$variables
         }
 
-
-
         req(input$group, input$dep, input$day)
         group.tbsub <- input$group
         var.event <- input$dep
@@ -270,7 +267,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
 
         isgroup <- ifelse(group.tbsub %in% vlist()$group_vars, 1, 0)
 
-        # data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
+        #data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
         data <- data[!(var.day < var.time[1])]
         data[[var.event]] <- ifelse(data[[var.day]] >= var.time[2] & data[[var.event]] == "1", 0, as.numeric(as.vector(data[[var.event]])))
         data[[var.day]] <- ifelse(data[[var.day]] >= var.time[2], var.time[2], data[[var.day]])
@@ -284,8 +281,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
 
         form <- as.formula(paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = ""))
 
-
-        tbsub <- jstable::TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1)
+        tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1)
         # data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
         # tbsub<-TableSubgroupMultiCox(as.formula('Surv(mpg,vs)~am'), var_subgroups = 'kk',  data=out, time_eventrate = 365 , line = F, decimal.hr = 3, decimal.percent = 1)
         len <- nrow(label[variable == group.tbsub])
@@ -303,7 +299,6 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
           nn.ov <- round(svytable(as.formula(paste0("~", group.tbsub)), design = coxdata), 2)
         }
         ov <- data.table::data.table(t(c("OverAll", paste0(ev.ov, "/", nn.ov, " (", round(ev.ov / nn.ov * 100, 2), "%)"))))
-
         if (!is.null(vs)) {
           rbindlist(lapply(
             vs,
@@ -334,13 +329,12 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
             }
           )) -> ll
 
-
           names(ov) <- names(ll)
           cn <- rbind(ov, ll)
 
 
           names(cn)[-1] <- label[variable == group.tbsub, val_label]
-          tbsub <- cbind(Variable = tbsub[, 1], cn[, -1], tbsub[, c(label[variable == group.tbsub, level], names(tbsub)[4:6], "P value", "P for interaction")])
+          tbsub <- cbind(Variable = tbsub[, 1], cn[, -1], tbsub[, c(paste0(group.tbsub,'=',label[variable == group.tbsub, level]), names(tbsub)[4:6], "P value", "P for interaction")])
 
           tbsub[-(len - 1), 1] <- unlist(lapply(vs, function(x) {
             c(label[variable == x, var_label][1], paste0("     ", label[variable == x, val_label]))
@@ -349,7 +343,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         } else {
           cn <- ov
           names(cn)[-1] <- label[variable == group.tbsub, val_label]
-          tbsub <- cbind(Variable = tbsub[, 1], cn[, -1], tbsub[, c(label[variable == group.tbsub, level], names(tbsub)[4:6], "P value", "P for interaction")])
+          tbsub <- cbind(Variable = tbsub[, 1], cn[, -1], tbsub[, c(paste0(group.tbsub,'=',label[variable == group.tbsub, level]), names(tbsub)[4:6], "P value", "P for interaction")])
 
           colnames(tbsub)[1:(2 + 2 * nrow(label[variable == group.tbsub]))] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0(var.time[2], "-", input$day, "\n", " KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
         }
