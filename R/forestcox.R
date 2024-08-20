@@ -145,7 +145,7 @@ forestcoxUI <- function(id, label = "forestplot") {
 #' @rdname forestcoxServer
 #' @export
 #' @importFrom data.table data.table setDT setnames
-#' @importFrom jstableTableSubgroupMultiCox
+#' @importFrom jstable TableSubgroupMultiCox
 #' @importFrom forestploter forest_theme forest
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location

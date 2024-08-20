@@ -1,3 +1,8 @@
+# jsmodule 1.5.7
+
+## Bugfix:
+- Fix 2 group factor not working problem in `forestcoxServer`
+
 # jsmodule 1.5.6
 
 ## Bugfix:
