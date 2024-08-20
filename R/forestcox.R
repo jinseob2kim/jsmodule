@@ -267,7 +267,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
 
         isgroup <- ifelse(group.tbsub %in% vlist()$group_vars, 1, 0)
 
-        #data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
+        # data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
         data <- data[!(var.day < var.time[1])]
         data[[var.event]] <- ifelse(data[[var.day]] >= var.time[2] & data[[var.event]] == "1", 0, as.numeric(as.vector(data[[var.event]])))
         data[[var.day]] <- ifelse(data[[var.day]] >= var.time[2], var.time[2], data[[var.day]])
@@ -334,7 +334,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
 
 
           names(cn)[-1] <- label[variable == group.tbsub, val_label]
-          tbsub <- cbind(Variable = tbsub[, 1], cn[, -1], tbsub[, c(paste0(group.tbsub,'=',label[variable == group.tbsub, level]), names(tbsub)[4:6], "P value", "P for interaction")])
+          tbsub <- cbind(Variable = tbsub[, 1], cn[, -1], tbsub[, c(paste0(group.tbsub, "=", label[variable == group.tbsub, level]), names(tbsub)[4:6], "P value", "P for interaction")])
 
           tbsub[-(len - 1), 1] <- unlist(lapply(vs, function(x) {
             c(label[variable == x, var_label][1], paste0("     ", label[variable == x, val_label]))
@@ -343,7 +343,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         } else {
           cn <- ov
           names(cn)[-1] <- label[variable == group.tbsub, val_label]
-          tbsub <- cbind(Variable = tbsub[, 1], cn[, -1], tbsub[, c(paste0(group.tbsub,'=',label[variable == group.tbsub, level]), names(tbsub)[4:6], "P value", "P for interaction")])
+          tbsub <- cbind(Variable = tbsub[, 1], cn[, -1], tbsub[, c(paste0(group.tbsub, "=", label[variable == group.tbsub, level]), names(tbsub)[4:6], "P value", "P for interaction")])
 
           colnames(tbsub)[1:(2 + 2 * nrow(label[variable == group.tbsub]))] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0(var.time[2], "-", input$day, "\n", " KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
         }
