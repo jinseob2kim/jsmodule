@@ -1,3 +1,8 @@
+# jsmodule 1.5.8
+
+## Update
+- Add label option on lineplot
+
 # jsmodule 1.5.7
 
 ## Bugfix:
