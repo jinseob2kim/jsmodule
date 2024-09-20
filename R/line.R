@@ -377,7 +377,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         if (input$jitter) {
           add <- switch(input$options,
             "Mean_SE" = c("mean_se", "jitter"),
-            "Mean_SD" = c("mean_sd" , "jitter"),
+            "Mean_SD" = c("mean_sd", "jitter"),
             "Median_IQR" = c("median_iqr", "jitter")
           )
         }
@@ -414,7 +414,6 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           size = line.size,
           point.size = line.point.size,
           linetype = linetype
-
         )
 
         if (input$rev_y) {
@@ -434,26 +433,28 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         }
 
         if (input$label) {
-
-
-
-
-          if(con3 <- input$strata != "None"){
+          if (con3 <- input$strata != "None") {
             res.plot <- res.plot +
-              ggplot2::stat_summary(fun.data = function(x){
-                return(data.frame(y = mean(x), label = round(mean(x), 2))) },
+              ggplot2::stat_summary(
+                fun.data = function(x) {
+                  return(data.frame(y = mean(x), label = round(mean(x), 2)))
+                },
                 geom = "label",
-                aes(label = !!sym(input$y_line),
-                    group = !!sym(input$strata)))
-          }else{
+                aes(
+                  label = !!sym(input$y_line),
+                  group = !!sym(input$strata)
+                )
+              )
+          } else {
             res.plot <- res.plot +
-              ggplot2::stat_summary(fun.data = function(x){
-                return(data.frame(y = mean(x), label = round(do.call(add[1],list(x = x))[[1]], 2))) },
+              ggplot2::stat_summary(
+                fun.data = function(x) {
+                  return(data.frame(y = mean(x), label = round(do.call(add[1], list(x = x))[[1]], 2)))
+                },
                 geom = "label",
-                aes(label = !!sym(input$y_line),
-                    ))
+                aes(label = !!sym(input$y_line), )
+              )
           }
-
         }
 
 
