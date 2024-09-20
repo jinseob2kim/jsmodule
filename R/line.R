@@ -49,9 +49,11 @@ lineUI <- function(id, label = "lineplot") {
     checkboxInput(ns("linetype"), "Linetype"),
     checkboxInput(ns("jitter"), "Jitter"),
     checkboxInput(ns("rev_y"), "Reverse Y-axis"),
+    checkboxInput(ns("label"), "Label"),
     uiOutput(ns("pvalue")),
     uiOutput(ns("subvar")),
-    uiOutput(ns("subval")),
+    uiOutput(ns("subval"))
+
     # uiOutput(ns("size")),
     # uiOutput(ns("position.dodge"))
   )
@@ -112,6 +114,7 @@ lineUI <- function(id, label = "lineplot") {
 #' @rdname lineServer
 #' @export
 #' @import shiny
+#' @importFrom ggrepel geom_text_repel geom_label_repel
 #' @importFrom data.table data.table .SD :=
 #' @importFrom ggpubr ggline stat_compare_means geom_pwc
 #' @importFrom ggplot2 ggsave scale_y_reverse
@@ -361,7 +364,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
       })
 
       lineInput <- reactive({
-        req(c(input$x_line, input$y_line, input$strata, input$pvalfont, input$s_pvalue, input$positiondodge))
+        req(c(input$x_line, input$y_line, input$strata, input$pvalfont, input$s_pvalue, input$positiondodge, input$label))
         req(input$isStrata != "None")
 
         data <- data.table(data())
@@ -373,9 +376,9 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         )
         if (input$jitter) {
           add <- switch(input$options,
-            "Mean_SE" = c("jitter", "mean_se"),
-            "Mean_SD" = c("jitter", "mean_sd"),
-            "Median_IQR" = c("jitter", "median_iqr")
+            "Mean_SE" = c("mean_se", "jitter"),
+            "Mean_SD" = c("mean_sd" , "jitter"),
+            "Median_IQR" = c("median_iqr", "jitter")
           )
         }
 
@@ -411,6 +414,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           size = line.size,
           point.size = line.point.size,
           linetype = linetype
+
         )
 
         if (input$rev_y) {
@@ -428,6 +432,33 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
               ),
             )
         }
+
+        if (input$label) {
+          con1 <- input$isStrata & (input$strata != "None")
+          con2 <- input$isStrata
+          con3 <- input$strata != "None"
+
+          print(con1)
+          print(con2)
+          print(con3)
+          if(con3){
+            res.plot <- res.plot +
+              ggplot2::stat_summary(fun.data = function(x){
+                return(data.frame(y = mean(x), label = round(mean(x), 2))) },
+                geom = "label",
+                aes(label = !!sym(input$y_line),
+                    group = !!sym(input$strata)))
+          }else{
+            res.plot <- res.plot +
+              ggplot2::stat_summary(fun.data = function(x){
+                return(data.frame(y = mean(x), label = round(do.call(add[1],list(x = x))[[1]], 2))) },
+                geom = "label",
+                aes(label = !!sym(input$y_line),
+                    ))
+          }
+
+        }
+
 
         return(res.plot)
       })
