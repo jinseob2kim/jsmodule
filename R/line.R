@@ -434,14 +434,11 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         }
 
         if (input$label) {
-          con1 <- input$isStrata & (input$strata != "None")
-          con2 <- input$isStrata
-          con3 <- input$strata != "None"
 
-          print(con1)
-          print(con2)
-          print(con3)
-          if(con3){
+
+
+
+          if(con3 <- input$strata != "None"){
             res.plot <- res.plot +
               ggplot2::stat_summary(fun.data = function(x){
                 return(data.frame(y = mean(x), label = round(mean(x), 2))) },

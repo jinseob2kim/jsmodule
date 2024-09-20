@@ -9,7 +9,8 @@ Authors@R: c(
   person("Changwoo", "Lim", email = "limcw@zarathu.com", role = c("aut")),
   person("Jinhwan", "Kim", email = "jinhwan@zarathu.com", role = c("aut"), comment = c(ORCID = "0009-0009-3217-2417")),
   person("Yoonkyoung", "Jeon", email = "rachel200357@gmail.com", role = c("aut")),
-  person("Jaewoong", "Heo", email = "koolerjaebee@gmail.com", role = c("aut")))
+  person("Jaewoong", "Heo", email = "koolerjaebee@gmail.com", role = c("aut")),
+  person("Youngsun", "Park", email = "ddspys@gmail.com", role = c("aut"), comment = c(ORCID = "0009-0009-9336-2281")))
 Description: 'RStudio' addins and 'Shiny' modules for descriptive statistics, regression and survival analysis.
 Depends: R (>= 3.4.0)
 License: Apache License 2.0 
@@ -52,7 +53,8 @@ Imports:
   survIDINRI, 
   survival, 
   timeROC, 
-  utils
+  utils,
+  ggrepel
 URL: https://jinseob2kim.github.io/jsmodule/, https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
 Suggests: 
