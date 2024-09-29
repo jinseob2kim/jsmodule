@@ -191,7 +191,7 @@ FileSurvey <- function(input, output, session, nfactor.limit = 20) {
     # except_vars <- names(nclass)[ nclass== 1 | nclass >= 10]
     add_vars <- names(nclass)[nclass >= 2 & nclass <= 5]
     # factor_vars_ini <- union(factor_vars, add_vars)
-    return(list(data = out, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars, ref = ref, naomit = naomit))
+    return(list(data = out, data.old = out.old, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars, ref = ref, naomit = naomit))
   })
 
 

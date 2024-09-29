@@ -218,7 +218,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     return(list(
       data = out, data_varStruct = data_varStruct, factor_original = factor_vars,
       conti_original = conti_vars, factor_adds_list = factor_adds_list,
-      factor_adds = add_vars, naCol = naCol, except_vars = except_vars, ref = ref, naomit = naomit
+      factor_adds = add_vars, naCol = naCol, except_vars = except_vars, ref = ref, naomit = naomit, data.old = out.old
     ))
   })
 
@@ -402,7 +402,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     out.label <- mk.lev(out)
 
     if (tools::file_ext(input$file$name) == "sav") {
-      out.label <- mk.lev2(data()$data.old, out.label)
+      out.label <- mk.lev2(data.info()$data.old, out.label)
     }
 
     if (!is.null(input$check_binary)) {

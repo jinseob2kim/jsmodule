@@ -1,3 +1,7 @@
+# jsmodule 1.5.9
+## Bugfix:
+- `sav` file load in `FilePSInput.R`, `FileRepeatedInput.R`, `FileSurveyInput.R`
+
 # jsmodule 1.5.8
 
 ## Update
