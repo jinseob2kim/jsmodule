@@ -473,7 +473,8 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 
         fillcolor <- "white"
         if (input$fillcolor) {
-          fillcolor <- "gray"
+          fillcolor <- color
+          color <- "black"
         }
         pval.font.size <- c(input$pvalfont, input$p_pvalfont, input$p_pvalfont / 10)
         pval.coord <- c(input$pvalx, input$pvaly)

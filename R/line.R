@@ -52,7 +52,8 @@ lineUI <- function(id, label = "lineplot") {
     checkboxInput(ns("label"), "Label"),
     uiOutput(ns("pvalue")),
     uiOutput(ns("subvar")),
-    uiOutput(ns("subval"))
+    uiOutput(ns("subval")),
+
 
     # uiOutput(ns("size")),
     # uiOutput(ns("position.dodge"))
@@ -175,6 +176,9 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         )
       })
 
+
+
+
       output$strata_line <- renderUI({
         strata_vars <- setdiff(vlist()$factor_vars, vlist()$except_vars)
         strata_vars <- setdiff(strata_vars, input$x_line)
@@ -262,6 +266,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
 
         ifelse(!is.ggplot(msg), msg, "Success")
       })
+
 
 
       observeEvent(input$subcheck, {
@@ -363,8 +368,22 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         outUI
       })
 
+      y_r <- reactiveVal(NULL)
+
+      observeEvent(c(input$isStrata,
+                     input$x_line,
+                     input$y_line,
+                     input$strata,
+                     input$pvalfont,
+                     input$s_pvalue,
+                     input$positiondodge,
+                     input$label), {
+                       y_r(NULL)
+
+                     })
+
       lineInput <- reactive({
-        req(c(input$x_line, input$y_line, input$strata, input$pvalfont, input$s_pvalue, input$positiondodge, input$label))
+        req(c(input$x_line, input$y_line, input$strata, input$pvalfont, input$s_pvalue, input$positiondodge, input$label, input$y_range))
         req(input$isStrata != "None")
 
         data <- data.table(data())
@@ -406,6 +425,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
         line.point.size <- input$pointsize
         pval.font.size <- input$pvalfont
 
+
         res.plot <- ggpubr::ggline(data, input$x_line, input$y_line,
           color = color, add = add, add.params = add.params, conf.int = input$lineci,
           xlab = label[variable == input$x_line, var_label][1],
@@ -414,23 +434,39 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           size = line.size,
           point.size = line.point.size,
           linetype = linetype
+
         )
+
+
+
+
 
         if (input$rev_y) {
           res.plot <- res.plot + ggplot2::scale_y_reverse()
         }
+
+       y_range_internal <- ggplot_build(res.plot)$layout$panel_scales_y[[1]]$range$range
 
         if (input$isStrata & input$strata != "None") {
           res.plot <- res.plot +
             ggpubr::stat_compare_means(
               method = input$s_pvalue,
               size = pval.font.size,
+              label.y = 1.3 * (y_range_internal[2] - y_range_internal[1]) + y_range_internal[1],
+              #label.y = 1.3 * (input$y_range[2] - input$y_range[1]) + input$y_range[1],
+              #label.y = 1.3 * (y_r()[2] - y_r()[1]) + y_r()[1],
               aes(
                 label = scales::label_pvalue(add_p = TRUE)(after_stat(p)),
                 group = !!sym(input$strata)
-              ),
+              )
             )
         }
+
+        if(!is.null(y_r())){
+          res.plot <- res.plot + coord_cartesian(ylim = input$y_range)
+        }
+
+
 
         if (input$label) {
           if (con3 <- input$strata != "None") {
@@ -439,7 +475,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
                 fun.data = function(x) {
                   return(data.frame(y = mean(x), label = round(mean(x), 2)))
                 },
-                geom = "label",
+                geom = "label_repel",
                 aes(
                   label = !!sym(input$y_line),
                   group = !!sym(input$strata)
@@ -451,15 +487,37 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
                 fun.data = function(x) {
                   return(data.frame(y = mean(x), label = round(do.call(add[1], list(x = x))[[1]], 2)))
                 },
-                geom = "label",
-                aes(label = !!sym(input$y_line), )
+                geom = "label_repel",
+                aes(label = !!sym(input$y_line))
               )
           }
         }
 
 
+
+
         return(res.plot)
       })
+
+
+
+
+
+
+      observeEvent(lineInput(), {
+        if(is.null(y_r())){
+          y_r(ggplot_build(lineInput())$layout$panel_scales_y[[1]]$range$range)
+        }
+      })
+
+      observeEvent(y_r(),{
+        if(!is.null(y_r())){
+          range <- y_r()[2] - y_r()[1]
+          updateSliderInput(session, "y_range", min = round(y_r()[1] - range * 0.5), max = round(y_r()[2] + range * 0.5), value = y_r())
+        }
+      })
+
+
 
       output$downloadControls <- renderUI({
         tagList(
@@ -526,6 +584,8 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
             column(6, numericInput(session$ns("pointsize"), "Point size", step = 0.5, value = 0.5))
           ),
           sliderInput(session$ns("positiondodge"), "Position dodge", min = 0, max = 1, value = 0),
+          h3("X - Y range setting"),
+          sliderInput(session$ns("y_range"), "Y axis range", min = 0, max = 10000, value = c(0, 10000)),
           h3("P-value position"),
           sliderInput(session$ns("pvalfont"), "P-value font size",
             min = 1, max = 10, value = 4
