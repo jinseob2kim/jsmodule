@@ -370,17 +370,18 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
 
       y_r <- reactiveVal(NULL)
 
-      observeEvent(c(input$isStrata,
-                     input$x_line,
-                     input$y_line,
-                     input$strata,
-                     input$pvalfont,
-                     input$s_pvalue,
-                     input$positiondodge,
-                     input$label), {
-                       y_r(NULL)
-
-                     })
+      observeEvent(c(
+        input$isStrata,
+        input$x_line,
+        input$y_line,
+        input$strata,
+        input$pvalfont,
+        input$s_pvalue,
+        input$positiondodge,
+        input$label
+      ), {
+        y_r(NULL)
+      })
 
       lineInput <- reactive({
         req(c(input$x_line, input$y_line, input$strata, input$pvalfont, input$s_pvalue, input$positiondodge, input$label, input$y_range))
@@ -434,7 +435,6 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           size = line.size,
           point.size = line.point.size,
           linetype = linetype
-
         )
 
 
@@ -445,7 +445,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
           res.plot <- res.plot + ggplot2::scale_y_reverse()
         }
 
-       y_range_internal <- ggplot_build(res.plot)$layout$panel_scales_y[[1]]$range$range
+        y_range_internal <- ggplot_build(res.plot)$layout$panel_scales_y[[1]]$range$range
 
         if (input$isStrata & input$strata != "None") {
           res.plot <- res.plot +
@@ -453,8 +453,8 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
               method = input$s_pvalue,
               size = pval.font.size,
               label.y = 1.3 * (y_range_internal[2] - y_range_internal[1]) + y_range_internal[1],
-              #label.y = 1.3 * (input$y_range[2] - input$y_range[1]) + input$y_range[1],
-              #label.y = 1.3 * (y_r()[2] - y_r()[1]) + y_r()[1],
+              # label.y = 1.3 * (input$y_range[2] - input$y_range[1]) + input$y_range[1],
+              # label.y = 1.3 * (y_r()[2] - y_r()[1]) + y_r()[1],
               aes(
                 label = scales::label_pvalue(add_p = TRUE)(after_stat(p)),
                 group = !!sym(input$strata)
@@ -462,7 +462,7 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
             )
         }
 
-        if(!is.null(y_r())){
+        if (!is.null(y_r())) {
           res.plot <- res.plot + coord_cartesian(ylim = input$y_range)
         }
 
@@ -505,13 +505,13 @@ lineServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limi
 
 
       observeEvent(lineInput(), {
-        if(is.null(y_r())){
+        if (is.null(y_r())) {
           y_r(ggplot_build(lineInput())$layout$panel_scales_y[[1]]$range$range)
         }
       })
 
-      observeEvent(y_r(),{
-        if(!is.null(y_r())){
+      observeEvent(y_r(), {
+        if (!is.null(y_r())) {
           range <- y_r()[2] - y_r()[1]
           updateSliderInput(session, "y_range", min = round(y_r()[1] - range * 0.5), max = round(y_r()[2] + range * 0.5), value = y_r())
         }
