@@ -1,3 +1,7 @@
+# jsmodule 1.5.10
+## Update:
+- Change Boxplot fill type
+
 # jsmodule 1.5.9
 ## Bugfix:
 - `sav` file load in `FilePSInput.R`, `FileRepeatedInput.R`, `FileSurveyInput.R`
