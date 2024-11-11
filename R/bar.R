@@ -600,7 +600,7 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
             min = 0, max = 1, value = 0.5
           ),
           sliderInput(session$ns("pvaly"), "y-axis",
-            min = 0, max = 1, value = 1
+            min = 0, max = 1, value = 0.7
           ),
           h3("Pair P-value position"),
           sliderInput(session$ns("p_pvalfont"), "P-value font size",
