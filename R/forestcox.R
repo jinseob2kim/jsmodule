@@ -268,7 +268,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         isgroup <- ifelse(group.tbsub %in% vlist()$group_vars, 1, 0)
 
         # data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
-        data <- data[!(var.day < var.time[1])]
+        data <- data[data[[var.day]] >= var.time[1]]
         data[[var.event]] <- ifelse(data[[var.day]] >= var.time[2] & data[[var.event]] == "1", 0, as.numeric(as.vector(data[[var.event]])))
         data[[var.day]] <- ifelse(data[[var.day]] >= var.time[2], var.time[2], data[[var.day]])
 
