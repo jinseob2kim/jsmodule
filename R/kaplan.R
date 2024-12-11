@@ -495,14 +495,10 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
     if(input$cmp_risk_check){
       req(!is.null(input$cmp_event_km))
-      print(data.km %>% head())
-      print(input$event_km)
-      print('passing')
-      data.km[[input$cmp_event_km]]<- as.numeric(as.vector(data.km[[input$cmp_event_km]]))
+      data.km[[input$cmp_event_km]] <- as.numeric(as.vector(data.km[[input$cmp_event_km]]))
       data.km$cmpp_time <- with(data.km, ifelse(data.km[[input$event_km]]==0, data.km[[input$cmp_time_km]], data.km[[input$time_km]]))
       data.km$cmpp_event <- with(data.km, ifelse(data.km[[input$event_km]]==0, 2*data.km[[input$cmp_event_km]],  1))
-      print('passed')
-      print(data.km %>% head())
+      data.km$cmpp_event <- factor(data.km$cmpp_event, 0:2, labels=c("zero", "cmp", "cmprsk"))
     }
     if (input$subcheck == T) {
       validate(
@@ -691,19 +687,19 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
     if (is.null(design.survey)) {
       status_cmprsk <- NULL
-      print(res.km)
-      print(data.km %>% head(., n= 50))
       if (input$cmp_risk_check) {
-        status_cmprsk <- '1'
+        status_cmprsk <- 'cmp'
       }
       if (is.null(id.cluster)) {
+
+        if(input$cmp_risk_check){
         return(
           jskm::jskm(res.km,
             pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
             cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
             showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk =  status_cmprsk
-          )
-        )
+          ))
+
       } else {
         return(
           jskm::jskm(res.km,
