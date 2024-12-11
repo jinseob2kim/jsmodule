@@ -691,16 +691,26 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         status_cmprsk <- 'cmp'
       }
       if (is.null(id.cluster)) {
-
         if(input$cmp_risk_check){
+          return(
+            jskm::jskm(res.km,
+                       pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
+                       cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
+                       showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk =  status_cmprsk
+            )
+          )
+        }
+        else{
         return(
-          jskm::jskm(res.km,
-            pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-            cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
-            showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk =  status_cmprsk
-          ))
-
-      } else {
+            jskm::jskm(res.km,
+                       pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
+                       cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
+                       showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk =  status_cmprsk
+            )
+          )
+        }
+      }
+        else {
         return(
           jskm::jskm(res.km,
             pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
