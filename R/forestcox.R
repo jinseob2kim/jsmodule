@@ -258,11 +258,13 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
           )
           tagList(
             selectInput(session$ns("cmp_event_cox"), "Competing Event",
-                        choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = FALSE,
-                        selected = NULL),
+              choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = FALSE,
+              selected = NULL
+            ),
             selectInput(session$ns("cmp_time_cox"), "Competing Time",
-                        choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = FALSE,
-                        selected = NULL)
+              choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = FALSE,
+              selected = NULL
+            )
           )
         })
       })
@@ -299,15 +301,15 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         if (input$cmp_risk_check) {
           req(input$cmp_event_cox)
           req(input$cmp_time_cox)
-          form<- as.formula(paste("survival::Surv(fgstart, fgstop, fgstatus) ~ ", group.tbsub, sep = ""))
-          cox_data<- data
-          cox_data[[input$cmp_event_cox]]<- as.numeric(as.vector(cox_data[[input$cmp_event_cox]]))
-          cox_data$cmpp_time <- with(cox_data, ifelse(cox_data[[input$dep]]==0, cox_data[[input$cmp_time_cox]], cox_data[[input$day]]))
-          cox_data$cmpp_event <- with(cox_data, ifelse(cox_data[[input$dep]]==0, 2*cox_data[[input$cmp_event_cox]],  1))
-          cox_data$cmpp_event<- factor(cox_data$cmpp_event)
-          fg_data <- survival::finegray(formula = survival::Surv(cmpp_time,cmpp_event) ~ ., data = cox_data)
-          tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = fg_data, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1, weights = 'fgwt')
-        }else{
+          form <- as.formula(paste("survival::Surv(fgstart, fgstop, fgstatus) ~ ", group.tbsub, sep = ""))
+          cox_data <- data
+          cox_data[[input$cmp_event_cox]] <- as.numeric(as.vector(cox_data[[input$cmp_event_cox]]))
+          cox_data$cmpp_time <- with(cox_data, ifelse(cox_data[[input$dep]] == 0, cox_data[[input$cmp_time_cox]], cox_data[[input$day]]))
+          cox_data$cmpp_event <- with(cox_data, ifelse(cox_data[[input$dep]] == 0, 2 * cox_data[[input$cmp_event_cox]], 1))
+          cox_data$cmpp_event <- factor(cox_data$cmpp_event)
+          fg_data <- survival::finegray(formula = survival::Surv(cmpp_time, cmpp_event) ~ ., data = cox_data)
+          tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = fg_data, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1, weights = "fgwt")
+        } else {
           form <- as.formula(paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = ""))
           tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1)
         }
