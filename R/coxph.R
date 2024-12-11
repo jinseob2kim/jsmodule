@@ -15,10 +15,12 @@ coxUI <- function(id) {
   tagList(
     uiOutput(ns("eventtime")),
     checkboxInput(ns("check_rangetime"), "Choose time ranges"),
+    checkboxInput(ns("cmp_risk_check"), "Competing Risk Analysis(Fine-Gray)"),
+    uiOutput(ns("cmp_eventtime")),
     uiOutput(ns("rangetime")),
     uiOutput(ns("indep")),
     sliderInput(ns("decimal"), "Digits",
-      min = 1, max = 4, value = 2
+                min = 1, max = 4, value = 2
     ),
     checkboxInput(ns("subcheck"), "Sub-group analysis"),
     uiOutput(ns("subvar")),
@@ -83,7 +85,7 @@ coxUI <- function(id) {
 #' @importFrom labelled var_label<-
 #' @importFrom stats glm as.formula model.frame step
 #' @importFrom purrr map_lgl
-#' @importFrom survival cluster coxph Surv
+#' @importFrom survival cluster coxph Surv finegray
 
 coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, id.cluster = NULL, ties.coxph = "efron") {
   ## To remove NOTE.
@@ -156,23 +158,40 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
     tagList(
       selectInput(session$ns("event_cox"), "Event",
-        choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
-        selected = NULL
+                  choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
+                  selected = NULL
       ),
       selectInput(session$ns("time_cox"), "Time",
-        choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = F,
-        selected = NULL
+                  choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = F,
+                  selected = NULL
       )
     )
   })
 
+  observeEvent(input$cmp_risk_check, {
+    output$cmp_eventtime <- renderUI({
+      req(input$cmp_risk_check == TRUE)
+      validate(
+        need(length(vlist()$factor_01vars) >= 1, "No candidate event variables coded as 0, 1"),
+        need(length(vlist()$conti_vars_positive) >= 1, "No candidate time variables")
+      )
+      tagList(
+        selectInput(session$ns("cmp_event_cox"), "Competing Event",
+                    choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = FALSE,
+                    selected = NULL),
+        selectInput(session$ns("cmp_time_cox"), "Competing Time",
+                    choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = FALSE,
+                    selected = NULL)
+      )
+    })
+  })
 
   observeEvent(input$check_rangetime, {
     output$rangetime <- renderUI({
       req(input$check_rangetime == T)
       sliderInput(session$ns("range_time"), "Time ranges",
-        min = min(data()[[input$time_cox]], na.rm = T), max = max(data()[[input$time_cox]], na.rm = T),
-        value = c(min(data()[[input$time_cox]], na.rm = T), median(data()[[input$time_cox]], na.rm = T))
+                  min = min(data()[[input$time_cox]], na.rm = T), max = max(data()[[input$time_cox]], na.rm = T),
+                  value = c(min(data()[[input$time_cox]], na.rm = T), median(data()[[input$time_cox]], na.rm = T))
       )
     })
   })
@@ -271,8 +290,8 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
     tagList(
       selectInput(session$ns("indep_cox"), "Independent variables",
-        choices = mklist(data_varStruct(), indep.cox), multiple = T,
-        selected = indep.cox[varsIni]
+                  choices = mklist(data_varStruct(), indep.cox), multiple = T,
+                  selected = indep.cox[varsIni]
       )
     )
   })
@@ -295,8 +314,8 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
       tagList(
         selectInput(session$ns("subvar_cox"), "Sub-group variables",
-          choices = var_subgroup_list, multiple = T,
-          selected = var_subgroup[1]
+                    choices = var_subgroup_list, multiple = T,
+                    selected = var_subgroup[1]
         )
       )
     })
@@ -312,14 +331,14 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     for (v in seq_along(input$subvar_cox)) {
       if (input$subvar_cox[[v]] %in% vlist()$factor_vars) {
         outUI[[v]] <- selectInput(session$ns(paste0("subval_cox", v)), paste0("Sub-group value: ", input$subvar_cox[[v]]),
-          choices = data_label()[variable == input$subvar_cox[[v]], level], multiple = T,
-          selected = data_label()[variable == input$subvar_cox[[v]], level][1]
+                                  choices = data_label()[variable == input$subvar_cox[[v]], level], multiple = T,
+                                  selected = data_label()[variable == input$subvar_cox[[v]], level][1]
         )
       } else {
         val <- stats::quantile(data()[[input$subvar_cox[[v]]]], na.rm = T)
         outUI[[v]] <- sliderInput(session$ns(paste0("subval_cox", v)), paste0("Sub-group range: ", input$subvar_cox[[v]]),
-          min = val[1], max = val[5],
-          value = c(val[2], val[4])
+                                  min = val[1], max = val[5],
+                                  value = c(val[2], val[4])
         )
       }
     }
@@ -351,10 +370,20 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     validate(
       need(!is.null(input$indep_cox), "Please select at least 1 independent variable.")
     )
-    if (is.null(id.cluster)) {
-      return(as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", paste(input$indep_cox, collapse = "+"), sep = "")))
-    } else {
-      return(as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", paste(input$indep_cox, collapse = "+"), " + cluster(", id.cluster(), ")", sep = "")))
+    if (input$cmp_risk_check) {
+      req(input$cmp_event_cox)
+      req(input$cmp_time_cox)
+      as.formula(paste(
+        "survival::Surv(fgstart, fgstop, fgstatus) ~ ",
+        paste(input$indep_cox, collapse = "+")
+      ))
+    }
+    else{
+      if (is.null(id.cluster)) {
+        return(as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", paste(input$indep_cox, collapse = "+"), sep = "")))
+      } else {
+        return(as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", paste(input$indep_cox, collapse = "+"), " + cluster(", id.cluster(), ")", sep = "")))
+      }
     }
   })
 
@@ -363,7 +392,6 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     req(!is.null(input$event_cox))
     req(!is.null(input$time_cox))
     data.cox <- data()
-
     if (input$check_rangetime == T) {
       req(input$time_cox)
       data.cox <- data.cox[!(get(input$time_cox) < input$range_time[1])]
@@ -396,6 +424,19 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       label.regress <- data_label()[label.regress2]
       data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
     }
+    if (input$cmp_risk_check == T) {
+      req(input$cmp_event_cox)
+      req(input$cmp_time_cox)
+      req(input$event_cox)
+      req(input$time_cox)
+      data.cox[[input$cmp_event_cox]]<- as.numeric(as.vector(data.cox[[input$cmp_event_cox]]))
+      data.cox$cmpp_time <- with(data.cox, ifelse(data.cox[[input$event_cox]]==0, data.cox[[input$cmp_time_cox]], data.cox[[input$time_cox]]))
+      data.cox$cmpp_event <- with(data.cox, ifelse(data.cox[[input$event_cox]]==0, 2*data.cox[[input$cmp_event_cox]],  1))
+      data.cox$cmpp_event<- factor(data.cox$cmpp_event)
+      fg_data <- survival::finegray(formula = survival::Surv(cmpp_time,cmpp_event) ~ ., data = data.cox)
+      data.cox<-data.table::data.table(fg_data)
+      cc <- substitute(survival::coxph(.form, data = data.cox, weight = fgwt,  model = T,  ties = .ties), list(.form = form.cox(), .ties = ties.coxph))
+    }
     mf <- model.frame(form.cox(), data.cox)
     validate(
       need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
@@ -404,11 +445,10 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     validate(
       need(sum(lgl.1level) == 0, paste(paste(names(lgl.1level)[lgl.1level], collapse = " ,"), "has(have) a unique value. Please remove that from independent variables"))
     )
-
     if (is.null(design.survey)) {
-      if (is.null(id.cluster)) {
+      if (is.null(id.cluster)&!input$cmp_risk_check) {
         cc <- substitute(survival::coxph(.form, data = data.cox, model = T, ties = .ties), list(.form = form.cox(), .ties = ties.coxph))
-      } else {
+      } else if (!is.null(id.cluster)&!input$cmp_risk_check){
         cc <- substitute(survival::coxph(.form, data = data.cox, model = T, robust = T, ties = .ties), list(.form = form.cox(), .ties = ties.coxph))
       }
       res.cox <- eval(cc)
@@ -420,7 +460,6 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
         scope <- lapply(list(input$step_upper, input$step_lower), function(x) {
           as.formula(ifelse(is.null(x), "~1", paste0("~", paste(x, collapse = "+"))))
         })
-
         data.cox.step <<- data.cox[complete.cases(data.cox[, .SD, .SDcols = c(input$time_cox, input$event_cox, input$indep_cox)])]
 
         if (is.null(id.cluster)) {

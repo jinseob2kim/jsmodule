@@ -45,6 +45,8 @@ kaplanUI <- function(id) {
     uiOutput(ns("eventtime")),
     uiOutput(ns("indep")),
     uiOutput(ns("cutconti")),
+    checkboxInput(ns("cmp_risk_check"), "Competing risk analysis", F),
+    uiOutput(ns("cmp_var")),
     checkboxInput(ns("scale"), "% y scale", F),
     checkboxInput(ns("cumhaz"), "Show cumulative incidence", F),
     checkboxInput(ns("pval"), "Show p-value(log-rank test)", T),
@@ -161,7 +163,6 @@ ggplotdownUI <- function(id) {
 optionUI <- function(id) {
   # Create a namespace function using the provided id
   ns <- NS(id)
-
   shinyWidgets::dropdownButton(
     uiOutput(ns("option_kaplan")),
     circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
@@ -310,6 +311,30 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     )
   })
 
+  observeEvent(input$cmp_risk_check, {
+    output$cmp_var <- renderUI({
+      req(input$cmp_risk_check == TRUE)
+      validate(
+        need(length(vlist()$factor_01vars) >= 1, "No candidate event variables coded as 0, 1"),
+        need(length(vlist()$conti_vars_positive) >= 1, "No candidate time variables")
+      )
+      tagList(
+        selectInput(session$ns("cmp_event_km"), "Competing Event",
+                    choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = FALSE,
+                    selected = NULL),
+        selectInput(session$ns("cmp_time_km"), "Competing Time",
+                    choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = FALSE,
+                    selected = NULL)
+      )
+    })
+  })
+
+  observeEvent(input$cmp_risk_check, {
+    if (input$cmp_risk_check) {
+      updateCheckboxInput(session, "pval", value = FALSE)
+      updateCheckboxInput(session, "cumhaz", value = TRUE)
+    }
+  })
 
 
   output$indep <- renderUI({
@@ -434,8 +459,22 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
   form.km <- reactive({
     validate(
       need(!is.null(input$indep_km), "Please select at least 1 independent variable."),
-      need(!is.null(input$time_km), "Please select at least 1 time variable.")
+      need(!is.null(input$time_km), "Please select at least 1 time variable."),
+      need(!is.null(input$event_km), "Please select at least 1 event variable.")
     )
+    if (input$cmp_risk_check) {
+      validate(
+        need(!is.null(input$cmp_event_km), "Please select a competing event variable."),
+        need(!is.null(input$cmp_time_km), "Please select a competing time variable.")
+      )
+      if (input$indep_km == "None") {
+        return(as.formula(paste("survival::Surv(cmpp_time, cmpp_event) ~ ", "1", sep = "")))
+      } else if (input$indep_km %in% vlist()$factor_vars) {
+        return(as.formula(paste("survival::Surv(cmpp_time, cmpp_event) ~ ", input$indep_km, sep = "")))
+      } else {
+        return(as.formula(paste("survival::Surv(cmpp_time, cmpp_event) ~ ", "xcat", sep = "")))
+      }
+    }
 
     if (input$indep_km == "None") {
       return(as.formula(paste("survival::Surv(", input$time_km, ",", input$event_km, ") ~ ", "1", sep = "")))
@@ -454,6 +493,13 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     data.km <- data()
     label.regress <- data_label()
     data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
+    if(input$cmp_risk_check){
+      req(!is.null(input$cmp_event_km))
+      data.km[[input$cmp_event_km]] <- as.numeric(as.vector(data.km[[input$cmp_event_km]]))
+      data.km$cmpp_time <- with(data.km, ifelse(data.km[[input$event_km]]==0, data.km[[input$cmp_time_km]], data.km[[input$time_km]]))
+      data.km$cmpp_event <- with(data.km, ifelse(data.km[[input$event_km]]==0, 2*data.km[[input$cmp_event_km]],  1))
+      data.km$cmpp_event <- factor(data.km$cmpp_event, 0:2, labels=c("zero", "cmp", "cmprsk"))
+    }
     if (input$subcheck == T) {
       validate(
         need(length(input$subvar_km) > 0, "No variables for subsetting"),
@@ -640,20 +686,36 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     }
 
     if (is.null(design.survey)) {
+      status_cmprsk <- NULL
+      if (input$cmp_risk_check) {
+        status_cmprsk <- 'cmp'
+      }
       if (is.null(id.cluster)) {
-        return(
-          jskm::jskm(res.km,
-            pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
-            cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
-            showpercent = input$showpercent, surv.scale = surv.scale
+        if(input$cmp_risk_check){
+          return(
+            jskm::jskm(res.km,
+                       pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
+                       cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
+                       showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk =  status_cmprsk
+            )
           )
-        )
-      } else {
+        }
+        else{
+        return(
+            jskm::jskm(res.km,
+                       pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
+                       cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
+                       showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk =  status_cmprsk
+            )
+          )
+        }
+      }
+        else {
         return(
           jskm::jskm(res.km,
             pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
             cumhaz = input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
-            showpercent = input$showpercent, surv.scale = surv.scale
+            showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk =  status_cmprsk
           )
         )
       }
