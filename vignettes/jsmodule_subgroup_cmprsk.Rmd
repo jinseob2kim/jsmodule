@@ -1,0 +1,51 @@
+---
+title: "Introducing Basic statistics of jsmodule"
+author: "Jinseob Kim"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introducing Basic statistics of jsmodule}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = T
+)
+```
+
+
+## Subgroup Analysis
+
+### Subgroup analysis for Cox regression is available by selecting the event, time, group, and subgroup variables.
+
+![](figures/subgroup_cox.png){out.width="50%"}
+
+### Subgroup analysis for linear regression is available by selecting the group, outcome, and subgroup variables.
+
+![](figures/subreg.png){out.width="50%"}
+
+### Subgroup analysis for logistic regression is available by selecting the group, outcome, and subgroup variables.
+
+![](figures/sublog.png){out.width="50%"}
+
+## Competing risk analysis
+
+### Competing risk analysis can be performed by selecting the regression tab and choosing the Cox model. After clicking on "Competing Risk Analysis," select the competing risk and competing time variables to display results using the Fine-Gray method
+
+![](figures/cmprsk_cox.png){out.width="50%"}
+
+### Kaplan-Meier plots are also available with competing risks reflected. After clicking on "Competing Risk Analysis," select the competing risk and competing time variables to generate Kaplan-Meier plots that account for competing risks. 
+
+![](figures/cmprsk_kaplan.png){out.width="50%"}
+
+### Subgroup analysis for Cox regression with competing risks is also available. After clicking on "Competing Risk Analysis," select the competing risk and competing time variables to generate Kaplan-Meier plots that account for competing risks. 
+
+![](figures/cmprsk_subcox.png){out.width="50%"}
+
+## Web applications
+
+  - https://openstat.ai
