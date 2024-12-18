@@ -59,6 +59,7 @@ rocUI <- function(id) {
   tagList(
     uiOutput(ns("event")),
     uiOutput(ns("indep")),
+    uiOutput(ns("cutval")),
     uiOutput(ns("addmodel")),
     checkboxInput(ns("subcheck"), "Sub-group analysis"),
     uiOutput(ns("subvar")),
@@ -444,6 +445,43 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
     )
   })
 
+  observe({
+    if (nmodel() == 1 && length(indeps()[[1]]) == 1) {
+      output$cutval <- renderUI({
+        req(indeps()[[1]])
+        selected_var <- data()[[indeps()[[1]][1]]]
+        if (!is.null(input$event_roc) && !is.null(indeps()[[1]][1])) {
+          clean_data <- data()[complete.cases(data()[, c(input$event_roc, indeps()[[1]][1]), with = FALSE]), ]
+          forms <- paste0(input$event_roc, "~", indeps()[[1]][1])
+          mm <- glm(as.formula(forms), data = clean_data, family = binomial)
+          roc_obj <- pROC::roc(clean_data[[input$event_roc]], predict(mm, type = "response"))
+          best_threshold <- pROC::coords(roc_obj, "best", input = "threshold", best.method = "youden")["threshold"]
+        } else {
+          best_threshold <- NULL
+        }
+
+        if (is.numeric(selected_var)) {
+          min_val <- min(selected_var, na.rm = TRUE)
+          max_val <- max(selected_var, na.rm = TRUE)
+          tagList(
+            helpText("Select a numeric cutoff value for the chosen variable. Default is the best threshold (Youden index)."),
+            numericInput(
+              inputId = session$ns("cutval"),
+              label = paste("Select Cutoff for", indeps()[[1]][1]),
+              value = ifelse(is.null(best_threshold), median(selected_var, na.rm = TRUE), round(best_threshold, 3)),
+              min = min_val,
+              max = max_val
+            )
+          )
+        } else {
+          p("Selected variable is not numeric. Please select a numeric variable.")
+        }
+      })
+    } else {
+      output$cutval <- renderUI({ NULL })
+    }
+  })
+
   observeEvent(input$add, {
     insertUI(
       selector = paste0("div:has(> #", session$ns("add"), ")"),
@@ -543,6 +581,7 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
     data.roc <- data()[complete.cases(data()[, .SD, .SDcols = unique(unlist(indeps()))])]
     label.regress <- data_label()
     data.roc[[input$event_roc]] <- as.numeric(as.vector(data.roc[[input$event_roc]]))
+
     if (input$subcheck == TRUE) {
       validate(
         need(length(input$subvar_roc) > 0, "No variables for subsetting"),
@@ -575,17 +614,45 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
           mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
           return(pROC::roc(mm$y, predict(mm, type = "response")))
         })
-
         if (nmodel() == 1 & length(indeps()) == 1) {
           res.roc1 <- lapply(indeps(), function(x) {
             forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
             mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
             return(pROC::roc(mm$y, mm$x[, 2]))
           })
-          res.cut <- pROC::coords(res.roc1[[1]],
-            x = "best", input = "threshold", best.method = "youden",
-            ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv")
+          ###
+          if (!is.null(input$cutval)) {
+            res.cut <- pROC::coords(
+              res.roc1[[1]],
+              x = input$cutval,
+              input = "threshold",
+              ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
+              transpose = TRUE
+            )
+          } else {
+            res.cut <- pROC::coords(
+              res.roc1[[1]],
+              x = "best", input = "threshold", best.method = "youden",
+              ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
+              transpose = TRUE
+            )
+          }
+          total_pos <- sum(res.roc1[[1]]$roc$cases)
+          total_neg <- sum(res.roc1[[1]]$roc$controls)
+          tp <- round(res.cut["sensitivity"] * total_pos)
+          tn <- round(res.cut["specificity"] * total_neg)
+          fn <- total_pos - tp
+          fp <- total_neg - tn
+          res.cut <- data.frame(
+            Threshold = c(round(res.cut["threshold"], 3)),
+            Sensitivity = c(round(res.cut["sensitivity"], 3)),
+            Specificity = c(round(res.cut["specificity"], 3)),
+            Accuracy = c(round(res.cut["accuracy"], 3)),
+            PPV = c(round(res.cut["ppv"], 3)),
+            NPV = c(round(res.cut["npv"], 3))
           )
+          rownames(res.cut) <- c("Value")
+          ###
         } else {
           res.cut <- NULL
         }
@@ -640,10 +707,40 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
           mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x = T)
           return(pROC::roc(mm$y, mm$x[, 2]))
         })
-        res.cut <- pROC::coords(res.roc1[[1]],
-          x = "best", input = "threshold", best.method = "youden",
-          ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv")
+        ###
+        if (!is.null(input$cutval)) {
+          res.cut <- pROC::coords(
+            res.roc1[[1]],
+            x = input$cutval,
+            input = "threshold",
+            ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
+            transpose = TRUE
+          )
+        } else {
+          res.cut <- pROC::coords(
+            res.roc1[[1]],
+            x = "best", input = "threshold", best.method = "youden",
+            ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
+            transpose = TRUE
+          )
+        }
+        total_pos <- sum(res.roc1[[1]]$roc$cases)
+        total_neg <- sum(res.roc1[[1]]$roc$controls)
+        tp <- round(res.cut["sensitivity"] * total_pos)
+        tn <- round(res.cut["specificity"] * total_neg)
+        fn <- total_pos - tp
+        fp <- total_neg - tn
+        res.cut <- data.frame(
+          Threshold = c(round(res.cut["threshold"], 3)),
+          Sensitivity = c(round(res.cut["sensitivity"], 3)),
+          Specificity = c(round(res.cut["specificity"], 3)),
+          Accuracy = c(round(res.cut["accuracy"], 3)),
+          PPV = c(round(res.cut["ppv"], 3)),
+          NPV = c(round(res.cut["npv"], 3))
         )
+        rownames(res.cut) <- c("Value")
+        ###
+
       } else {
         res.cut <- NULL
       }
@@ -932,6 +1029,42 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
     })
   })
 
+  observe({
+    if (nmodel() == 1 && length(indeps()[[1]]) == 1) {
+      output$cutval <- renderUI({
+        req(indeps()[[1]])
+        selected_var <- data()[[indeps()[[1]][1]]]
+        if (!is.null(input$event_roc) && !is.null(indeps()[[1]][1])) {
+          clean_data <- data()[complete.cases(data()[, c(input$event_roc, indeps()[[1]][1]), with = FALSE]), ]
+          forms <- paste0(input$event_roc, "~", indeps()[[1]][1])
+          mm <- glm(as.formula(forms), data = clean_data, family = binomial)
+          roc_obj <- pROC::roc(clean_data[[input$event_roc]], predict(mm, type = "response"))
+          best_threshold <- pROC::coords(roc_obj, "best", input = "threshold", best.method = "youden")["threshold"]
+        } else {
+          best_threshold <- NULL
+        }
+
+        if (is.numeric(selected_var)) {
+          min_val <- min(selected_var, na.rm = TRUE)
+          max_val <- max(selected_var, na.rm = TRUE)
+          tagList(
+            helpText("Select a numeric cutoff value for the chosen variable. Default is the best threshold (Youden index)."),
+            numericInput(
+              inputId = session$ns("cutval"),
+              label = paste("Select Cutoff for", indeps()[[1]][1]),
+              value = ifelse(is.null(best_threshold), median(selected_var, na.rm = TRUE), round(best_threshold, 3)),
+              min = min_val,
+              max = max_val
+            )
+          )
+        } else {
+          p("Selected variable is not numeric. Please select a numeric variable.")
+        }
+      })
+    } else {
+      output$cutval <- renderUI({ NULL })
+    }
+  })
 
 
 
@@ -1053,10 +1186,40 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
             mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
             return(pROC::roc(mm$y, mm$x[, 2]))
           })
-          res.cut <- pROC::coords(res.roc1[[1]],
-            x = "best", input = "threshold", best.method = "youden",
-            ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv")
+          ###
+          if (!is.null(input$cutval)) {
+            res.cut <- pROC::coords(
+              res.roc1[[1]],
+              x = input$cutval,
+              input = "threshold",
+              ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
+              transpose = TRUE
+            )
+          } else {
+            res.cut <- pROC::coords(
+              res.roc1[[1]],
+              x = "best", input = "threshold", best.method = "youden",
+              ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
+              transpose = TRUE
+            )
+          }
+          total_pos <- sum(res.roc1[[1]]$roc$cases)
+          total_neg <- sum(res.roc1[[1]]$roc$controls)
+          tp <- round(res.cut["sensitivity"] * total_pos)
+          tn <- round(res.cut["specificity"] * total_neg)
+          fn <- total_pos - tp
+          fp <- total_neg - tn
+          res.cut <- data.frame(
+            Threshold = c(round(res.cut["threshold"], 3)),
+            Sensitivity = c(round(res.cut["sensitivity"], 3)),
+            Specificity = c(round(res.cut["specificity"], 3)),
+            Accuracy = c(round(res.cut["accuracy"], 3)),
+            PPV = c(round(res.cut["ppv"], 3)),
+            NPV = c(round(res.cut["npv"], 3))
           )
+          rownames(res.cut) <- c("Value")
+          ###
+
         } else {
           res.cut <- NULL
         }
@@ -1111,10 +1274,40 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
           mm <- survey::svyglm(as.formula(forms), design = data.design, family = quasibinomial(), x = T)
           return(pROC::roc(mm$y, mm$x[, 2]))
         })
-        res.cut <- pROC::coords(res.roc1[[1]],
-          x = "best", input = "threshold", best.method = "youden",
-          ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv")
+        ###
+        if (!is.null(input$cutval)) {
+          res.cut <- pROC::coords(
+            res.roc1[[1]],
+            x = input$cutval,
+            input = "threshold",
+            ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
+            transpose = TRUE
+          )
+        } else {
+          res.cut <- pROC::coords(
+            res.roc1[[1]],
+            x = "best", input = "threshold", best.method = "youden",
+            ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
+            transpose = TRUE
+          )
+        }
+        total_pos <- sum(res.roc1[[1]]$roc$cases)
+        total_neg <- sum(res.roc1[[1]]$roc$controls)
+        tp <- round(res.cut["sensitivity"] * total_pos)
+        tn <- round(res.cut["specificity"] * total_neg)
+        fn <- total_pos - tp
+        fp <- total_neg - tn
+        res.cut <- data.frame(
+          Threshold = c(round(res.cut["threshold"], 3)),
+          Sensitivity = c(round(res.cut["sensitivity"], 3)),
+          Specificity = c(round(res.cut["specificity"], 3)),
+          Accuracy = c(round(res.cut["accuracy"], 3)),
+          PPV = c(round(res.cut["ppv"], 3)),
+          NPV = c(round(res.cut["npv"], 3))
         )
+        rownames(res.cut) <- c("Value")
+        ###
+
       } else {
         res.cut <- NULL
       }

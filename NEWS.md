@@ -1,3 +1,7 @@
+# jsmodule 1.6.1
+## Update
+- Add function to allow adjusting cutoff for a single independent variable and observing model's metrics in `rocModule`, `rocModule2`.
+
 # jsmodule 1.6.0 
 ## Update
 - Add competing risk analysis in subgroup, Kaplan-meier, regression tab.
