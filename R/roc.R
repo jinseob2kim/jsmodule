@@ -478,7 +478,9 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
         }
       })
     } else {
-      output$cutval <- renderUI({ NULL })
+      output$cutval <- renderUI({
+        NULL
+      })
     }
   })
 
@@ -740,7 +742,6 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
         )
         rownames(res.cut) <- c("Value")
         ###
-
       } else {
         res.cut <- NULL
       }
@@ -1062,7 +1063,9 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
         }
       })
     } else {
-      output$cutval <- renderUI({ NULL })
+      output$cutval <- renderUI({
+        NULL
+      })
     }
   })
 
@@ -1219,7 +1222,6 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
           )
           rownames(res.cut) <- c("Value")
           ###
-
         } else {
           res.cut <- NULL
         }
@@ -1307,7 +1309,6 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
         )
         rownames(res.cut) <- c("Value")
         ###
-
       } else {
         res.cut <- NULL
       }

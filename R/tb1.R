@@ -281,7 +281,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
           testNonNormal = kruskal.test, argsNonNormal = list(NULL),
           showAllLevels = showAllLevels, printToggle = F, quote = F, smd = F, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
           catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, labeldata = data_label, minMax = input$nonnormal_range,
-          pairwise =  isTRUE(input$strata)
+          pairwise = isTRUE(input$strata)
         )
 
         return(res)
@@ -307,7 +307,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
           testNonNormal = testNN, argsNonNormal = list(NULL),
           showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
           catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, minMax = input$nonnormal_range,
-          pairwise =  isTRUE(input$strata)
+          pairwise = isTRUE(input$strata)
         )
 
         return(res)
@@ -332,7 +332,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
           testNonNormal = testNN, argsNonNormal = list(NULL),
           showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, exact = NULL, nonnormal = input$nonnormal_vars,
           catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub, minMax = input$nonnormal_range,
-          pairwise =  isTRUE(input$strata)
+          pairwise = isTRUE(input$strata)
         )
 
         return(res)
@@ -347,7 +347,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
           data = Svydesign, vars = vars, includeNA = F, test = F,
           showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
           catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, minMax = input$nonnormal_range,
-          pairwise =  isTRUE(input$strata)
+          pairwise = isTRUE(input$strata)
         )
 
         return(res)
@@ -363,7 +363,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
           data = Svydesign, vars = vars.tb1, strata = input$group_vars, includeNA = F, test = T,
           showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
           catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, minMax = input$nonnormal_range,
-          pairwise =  isTRUE(input$strata)
+          pairwise = isTRUE(input$strata)
         )
 
         return(res)
@@ -374,7 +374,7 @@ tb1module <- function(input, output, session, data, data_label, data_varStruct =
           data = Svydesign, vars = vars.tb1, strata = input$group_vars, strata2 = input$group2_vars, includeNA = F, test = T,
           showAllLevels = showAllLevels, printToggle = F, quote = F, smd = input$smd, Labels = T, nonnormal = input$nonnormal_vars,
           catDigits = input$decimal_tb1_cat, contDigits = input$decimal_tb1_con, pDigits = input$decimal_tb1_p, labeldata = data_label, psub = input$psub, minMax = input$nonnormal_range,
-          pairwise =isTRUE(input$strata)
+          pairwise = isTRUE(input$strata)
         )
 
         return(res)
