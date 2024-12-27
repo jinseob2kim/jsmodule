@@ -55,6 +55,8 @@
 forestglmUI <- function(id, label = "forestplot") {
   ns <- NS(id)
   tagList(
+
+    uiOutput(ns("random_var_ui")),
     uiOutput(ns("group_tbsub")),
     uiOutput(ns("dep_tbsub")),
     uiOutput(ns("subvar_tbsub")),
@@ -73,6 +75,7 @@ forestglmUI <- function(id, label = "forestplot") {
 #' @param data_varStruct Reactive List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
+#' @param repeated data when repeated id. default: F
 #' @return Shiny module server for forestglm
 #' @details Shiny module server for forestglm
 #' @examples
@@ -137,7 +140,7 @@ forestglmUI <- function(id, label = "forestplot") {
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
-forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL) {
+forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, repeated  = F) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -211,6 +214,17 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
         return(setdiff(names(data()), vlist()$isNA_vars))
       })
 
+      output$random_var_ui <- renderUI({
+        req(repeated) # repeated가 TRUE일 때만 렌더링
+        selectInput(
+          session$ns("random_var"),
+          "Select Random Variable",
+          choices = names(data()),
+          selected = names(data())[1]
+        )
+      })
+
+
       output$group_tbsub <- renderUI({
         selectInput(session$ns("group"), "Group", choices = vlist()$group2_vars, selected = setdiff(vlist()$group2_vars, c(input$dep, dep()[1]))[1])
       })
@@ -269,6 +283,14 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
         # data[[var.event]] <- ifelse(data[[var.day]] > 365 * 5 & data[[var.event]] == 1, 0,  as.numeric(as.vector(data[[var.event]])))
 
         tbsub <- jstable::TableSubgroupMultiGLM(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, family = family)
+
+        if(repeated){
+          form <- paste(var.event, " ~ ", group.tbsub, sep = "")
+          form <- as.formula(paste0(form,'+ (1|', input$random_var, ')'))
+          print(form)
+          tbsub <- jstable::TableSubgroupMultiGLM(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, family = family)
+          print(tbsub)
+        }
         # tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs, data=coxdata,family=family)
         len <- nrow(label[variable == group.tbsub])
         data <- data.table::setDT(data)
@@ -373,11 +395,11 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
       res <- reactive({
         list(
           datatable(tbsub(),
-            caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions = "Buttons",
-            options = c(
-              opt.tb1(paste0("tbsub_", input$dep)),
-              list(scrollX = TRUE, columnDefs = list(list(className = "dt-right", targets = 0)))
-            )
+                    caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions = "Buttons",
+                    options = c(
+                      opt.tb1(paste0("tbsub_", input$dep)),
+                      list(scrollX = TRUE, columnDefs = list(list(className = "dt-right", targets = 0)))
+                    )
           ),
           figure()
         )
@@ -449,16 +471,16 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
         }
         selected_columns <- c(c(1:(2 + ll)), len + 1, (len - 1):(len))
         forestploter::forest(data[, .SD, .SDcols = selected_columns],
-          lower = as.numeric(data$Lower),
-          upper = as.numeric(data$Upper),
-          ci_column = 3 + ll,
-          est = as.numeric(data_est),
-          ref_line = ifelse(family == "gaussian", 0, 1),
-          x_trans = ifelse(family == "gaussian", "none", "log"),
-          ticks_digits = 1,
-          xlim = xlim,
-          arrow_lab = c(input$arrow_left, input$arrow_right),
-          theme = tm
+                             lower = as.numeric(data$Lower),
+                             upper = as.numeric(data$Upper),
+                             ci_column = 3 + ll,
+                             est = as.numeric(data_est),
+                             ref_line = ifelse(family == "gaussian", 0, 1),
+                             x_trans = ifelse(family == "gaussian", "none", "log"),
+                             ticks_digits = 1,
+                             xlim = xlim,
+                             arrow_lab = c(input$arrow_left, input$arrow_right),
+                             theme = tm
         ) -> zz
 
         l <- dim(zz)

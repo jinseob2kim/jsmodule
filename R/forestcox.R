@@ -2,6 +2,7 @@
 #' @description Shiny module UI for forestcox
 #' @param id id
 #' @param label label, Default: 'forestplot'
+#' @param repeated data when repeated id. default: F
 #' @return Shinymodule UI
 #' @details Shinymodule UI for forestcox
 #' @examples
@@ -62,6 +63,7 @@
 forestcoxUI <- function(id, label = "forestplot") {
   ns <- NS(id)
   tagList(
+    uiOutput(ns("cluster_id_ui")),
     uiOutput(ns("group_tbsub")),
     uiOutput(ns("dep_tbsub")),
     uiOutput(ns("day_tbsub")),
@@ -152,7 +154,7 @@ forestcoxUI <- function(id, label = "forestplot") {
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
-forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL) {
+forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, repeated = F) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -217,6 +219,16 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
           group2_vars = group2_vars,
           factor_01vars = factor_01vars, factor_01_list = factor_01_list, group_vars = group_vars, group_list = group_list, except_vars = except_vars
         ))
+      })
+
+      output$cluster_id_ui <- renderUI({
+        req(repeated) # repeated가 TRUE일 때만 렌더링
+        selectInput(
+          session$ns("cluster_id"),
+          "Select Cluster ID",
+          choices = names(data()), # data 열 이름 사용
+          selected = names(data())[1] # 기본값으로 첫 번째 열 선택
+        )
       })
 
       output$group_tbsub <- renderUI({
@@ -309,10 +321,32 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
           cox_data$cmpp_event <- factor(cox_data$cmpp_event)
           fg_data <- survival::finegray(formula = survival::Surv(cmpp_time, cmpp_event) ~ ., data = cox_data)
           tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = fg_data, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1, weights = "fgwt")
-        } else {
+          if(repeated){
+            form <- as.formula(
+              paste(
+                "survival::Surv(fgstart, fgstop, fgstatus) ~ ",
+                group.tbsub,
+                " + cluster(", input$cluster_id, ")",
+                sep = ""
+              )
+            )
+            tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = fg_data, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1, weights = "fgwt")
+            names(tbsub) <- gsub(paste0('\\s*\\+\\s*cluster\\(',input$cluster_id,'\\)'), '', names(tbsub))
+          }
+
+          } else {
           form <- as.formula(paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = ""))
+
           tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1)
-        }
+          if(repeated){
+            form <- paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = "")
+            form <- as.formula(paste(form, " + cluster(", input$cluster_id, ")", sep = ""))
+            tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1)
+            names(tbsub) <- gsub(paste0('\\s*\\+\\s*cluster\\(',input$cluster_id,'\\)'), '', names(tbsub))
+
+          }
+
+          }
 
 
 

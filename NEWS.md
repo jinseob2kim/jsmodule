@@ -2,7 +2,7 @@
 ## Update
 - Add function to allow adjusting cutoff for a single independent variable and observing model's metrics in `rocModule`, `rocModule2`.
 - Add option to turn pairwise p value option on in case level of stratified group >= 3, in `tb1moduleUI`.
-- Add subgroup analysis for propensity score matching.
+- Add subgroup analysis for propensity score matching/repeated/survey.
 
 # jsmodule 1.6.0 
 ## Update
