@@ -699,152 +699,235 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     ),
     inverse = TRUE,
     tabPanel("Data",
-      icon = icon("table"),
-      sidebarLayout(
-        sidebarPanel(
-          uiOutput("import"),
-          downloadButton("downloadData", "Example data")
-        ),
-        mainPanel(
-          tabsetPanel(
-            type = "pills",
-            tabPanel("Data", withLoader(DTOutput("data"), type = "html", loader = "loader6")),
-            tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type = "html", loader = "loader6"))
-          ),
-          htmlOutput("naomit")
-        )
-      )
+             icon = icon("table"),
+             sidebarLayout(
+               sidebarPanel(
+                 uiOutput("import"),
+                 downloadButton("downloadData", "Example data")
+               ),
+               mainPanel(
+                 tabsetPanel(
+                   type = "pills",
+                   tabPanel("Data", withLoader(DTOutput("data"), type = "html", loader = "loader6")),
+                   tabPanel("Label", withLoader(DTOutput("data_label", width = "100%"), type = "html", loader = "loader6"))
+                 ),
+                 htmlOutput("naomit")
+               )
+             )
     ),
     tabPanel("Table 1",
-      icon = icon("percentage"),
-      sidebarLayout(
-        sidebarPanel(
-          tb1moduleUI("tb1")
-        ),
-        mainPanel(
-          tabsetPanel(
-            type = "pills",
-            tabPanel(
-              "Unweighted",
-              downloadButton(outputId = "dl.untable1", style = "display:none;"),
-              actionButton("dl.untable1.clk", NULL, style = "display:none;"),
-              withLoader(DTOutput("untable1"), type = "html", loader = "loader6"),
-              wellPanel(
-                h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
-                h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
-                h5("Categorical variables  are summarized with table")
-              )
-            ),
-            tabPanel(
-              "Weighted",
-              downloadButton(outputId = "dl.table1", style = "display:none;"),
-              actionButton("dl.table1.clk", NULL, style = "display:none;"),
-              withLoader(DTOutput("table1"), type = "html", loader = "loader6"),
-              wellPanel(
-                h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
-                h5("Non-normal continuous variables are summarized with median [IQR or min,max] and complex sampling rank test"),
-                h5("Categorical variables  are summarized with table and svychisq test")
+             icon = icon("percentage"),
+             sidebarLayout(
+               sidebarPanel(
+                 tb1moduleUI("tb1")
+               ),
+               mainPanel(
+                 tabsetPanel(
+                   type = "pills",
+                   tabPanel(
+                     "Unweighted",
+                     downloadButton(outputId = "dl.untable1", style = "display:none;"),
+                     actionButton("dl.untable1.clk", NULL, style = "display:none;"),
+                     withLoader(DTOutput("untable1"), type = "html", loader = "loader6"),
+                     wellPanel(
+                       h5("Normal continuous variables  are summarized with Mean (SD) and t-test(2 groups) or ANOVA(> 2 groups)"),
+                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and kruskal-wallis test"),
+                       h5("Categorical variables  are summarized with table")
+                     )
+                   ),
+                   tabPanel(
+                     "Weighted",
+                     downloadButton(outputId = "dl.table1", style = "display:none;"),
+                     actionButton("dl.table1.clk", NULL, style = "display:none;"),
+                     withLoader(DTOutput("table1"), type = "html", loader = "loader6"),
+                     wellPanel(
+                       h5("Normal continuous variables  are summarized with Mean (SD) and complex survey regression"),
+                       h5("Non-normal continuous variables are summarized with median [IQR or min,max] and complex sampling rank test"),
+                       h5("Categorical variables  are summarized with table and svychisq test")
+                     )
+                   )
+                 )
+               )
+             )
+    ),
+    navbarMenu("Survey regression",
+               icon = icon("list-alt"),
+               tabPanel(
+                 "Linear",
+                 sidebarLayout(
+                   sidebarPanel(
+                     regressModuleUI("linear")
+                   ),
+                   mainPanel(
+                     downloadButton(outputId = "dl.linreg", style = "display:none;"),
+                     actionButton("dl.linreg.clk", NULL, style = "display:none;"),
+                     withLoader(DTOutput("lineartable"), type = "html", loader = "loader6")
+                   )
+                 )
+               ),
+               tabPanel(
+                 "Binomial",
+                 sidebarLayout(
+                   sidebarPanel(
+                     regressModuleUI("logistic")
+                   ),
+                   mainPanel(
+                     downloadButton(outputId = "dl.logreg", style = "display:none;"),
+                     actionButton("dl.logreg.clk", NULL, style = "display:none;"),
+                     withLoader(DTOutput("logistictable"), type = "html", loader = "loader6")
+                   )
+                 )
+               ),
+               tabPanel(
+                 "Cox model",
+                 sidebarLayout(
+                   sidebarPanel(
+                     coxUI("cox")
+                   ),
+                   mainPanel(
+                     downloadButton(outputId = "dl.coxreg", style = "display:none;"),
+                     actionButton("dl.coxreg.clk", NULL, style = "display:none;"),
+                     withLoader(DTOutput("coxtable"), type = "html", loader = "loader6")
+                   )
+                 )
+               )
+    ),
+    navbarMenu("Plot",
+               icon = icon("chart-column"),
+               tabPanel(
+                 "Scatter plot",
+                 sidebarLayout(
+                   sidebarPanel(
+                     ggpairsModuleUI1("ggpairs")
+                   ),
+                   mainPanel(
+                     withLoader(plotOutput("ggpairs_plot"), type = "html", loader = "loader6"),
+                     ggpairsModuleUI2("ggpairs")
+                   )
+                 )
+               ),
+               tabPanel(
+                 "Kaplan-meier plot",
+                 sidebarLayout(
+                   sidebarPanel(
+                     kaplanUI("kaplan")
+                   ),
+                   mainPanel(
+                     optionUI("kaplan"),
+                     withLoader(plotOutput("kaplan_plot"), type = "html", loader = "loader6"),
+                     ggplotdownUI("kaplan")
+                   )
+                 )
+               )
+    ),
+    navbarMenu("ROC analysis",
+               icon = icon("check"),
+               tabPanel(
+                 "ROC",
+                 sidebarLayout(
+                   sidebarPanel(
+                     rocUI("roc")
+                   ),
+                   mainPanel(
+                     withLoader(plotOutput("plot_roc"), type = "html", loader = "loader6"),
+                     ggplotdownUI("roc"),
+                     withLoader(DTOutput("table_roc"), type = "html", loader = "loader6")
+                   )
+                 )
+               ),
+               tabPanel(
+                 "Time-dependent ROC",
+                 sidebarLayout(
+                   sidebarPanel(
+                     timerocUI("timeroc")
+                   ),
+                   mainPanel(
+                     withLoader(plotOutput("plot_timeroc"), type = "html", loader = "loader6"),
+                     ggplotdownUI("timeroc"),
+                     withLoader(DTOutput("table_timeroc"), type = "html", loader = "loader6")
+                   )
+                 )
+               )
+    ),
+
+    navbarMenu(
+      title = "Subgroup analysis",
+      icon = icon("chart-bar"),
+      tabPanel(
+        title = "subgroup cox",
+        sidebarLayout(
+          sidebarPanel(
+            forestcoxUI("Forest")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput("tablesub"),
+                  type = "html",
+                  loader = "loader6"
+                )
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot", width = "100%"),
+                ggplotdownUI("Forest")
               )
             )
           )
         )
-      )
-    ),
-    navbarMenu("Survey regression",
-      icon = icon("list-alt"),
+      ),
       tabPanel(
-        "Linear",
+        title = "subgroup regression",
         sidebarLayout(
           sidebarPanel(
-            regressModuleUI("linear")
+            forestglmUI("Forest_glm")
           ),
           mainPanel(
-            downloadButton(outputId = "dl.linreg", style = "display:none;"),
-            actionButton("dl.linreg.clk", NULL, style = "display:none;"),
-            withLoader(DTOutput("lineartable"), type = "html", loader = "loader6")
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput("tablesub_glm"),
+                  type = "html",
+                  loader = "loader6"
+                )
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot_glm", width = "100%"),
+                ggplotdownUI("Forest_glm")
+              )
+            )
           )
         )
       ),
       tabPanel(
-        "Binomial",
+        title = "subgroup logistic regression",
         sidebarLayout(
           sidebarPanel(
-            regressModuleUI("logistic")
+            forestglmUI("Forest_glmbi")
           ),
           mainPanel(
-            downloadButton(outputId = "dl.logreg", style = "display:none;"),
-            actionButton("dl.logreg.clk", NULL, style = "display:none;"),
-            withLoader(DTOutput("logistictable"), type = "html", loader = "loader6")
-          )
-        )
-      ),
-      tabPanel(
-        "Cox model",
-        sidebarLayout(
-          sidebarPanel(
-            coxUI("cox")
-          ),
-          mainPanel(
-            downloadButton(outputId = "dl.coxreg", style = "display:none;"),
-            actionButton("dl.coxreg.clk", NULL, style = "display:none;"),
-            withLoader(DTOutput("coxtable"), type = "html", loader = "loader6")
-          )
-        )
-      )
-    ),
-    navbarMenu("Plot",
-      icon = icon("chart-column"),
-      tabPanel(
-        "Scatter plot",
-        sidebarLayout(
-          sidebarPanel(
-            ggpairsModuleUI1("ggpairs")
-          ),
-          mainPanel(
-            withLoader(plotOutput("ggpairs_plot"), type = "html", loader = "loader6"),
-            ggpairsModuleUI2("ggpairs")
-          )
-        )
-      ),
-      tabPanel(
-        "Kaplan-meier plot",
-        sidebarLayout(
-          sidebarPanel(
-            kaplanUI("kaplan")
-          ),
-          mainPanel(
-            optionUI("kaplan"),
-            withLoader(plotOutput("kaplan_plot"), type = "html", loader = "loader6"),
-            ggplotdownUI("kaplan")
-          )
-        )
-      )
-    ),
-    navbarMenu("ROC analysis",
-      icon = icon("check"),
-      tabPanel(
-        "ROC",
-        sidebarLayout(
-          sidebarPanel(
-            rocUI("roc")
-          ),
-          mainPanel(
-            withLoader(plotOutput("plot_roc"), type = "html", loader = "loader6"),
-            ggplotdownUI("roc"),
-            withLoader(DTOutput("table_roc"), type = "html", loader = "loader6")
-          )
-        )
-      ),
-      tabPanel(
-        "Time-dependent ROC",
-        sidebarLayout(
-          sidebarPanel(
-            timerocUI("timeroc")
-          ),
-          mainPanel(
-            withLoader(plotOutput("plot_timeroc"), type = "html", loader = "loader6"),
-            ggplotdownUI("timeroc"),
-            withLoader(DTOutput("table_timeroc"), type = "html", loader = "loader6")
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput("tablesub_glmbi"),
+                  type = "html",
+                  loader = "loader6"
+                )
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot_glmbi", width = "100%"),
+                ggplotdownUI("Forest_glmbi")
+              )
+            )
           )
         )
       )
@@ -873,15 +956,15 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     output$data <- renderDT({
       datatable(data(),
-        rownames = F, editable = F, extensions = "Buttons", caption = "Data",
-        options = c(opt.data("data"), list(scrollX = TRUE))
+                rownames = F, editable = F, extensions = "Buttons", caption = "Data",
+                options = c(opt.data("data"), list(scrollX = TRUE))
       )
     })
 
     output$data_label <- renderDT({
       datatable(data.label(),
-        rownames = F, editable = F, extensions = "Buttons", caption = "Label of data",
-        options = c(opt.data("label"), list(scrollX = TRUE))
+                rownames = F, editable = F, extensions = "Buttons", caption = "Label of data",
+                options = c(opt.data("label"), list(scrollX = TRUE))
       )
     })
 
@@ -920,42 +1003,42 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       tb <- out_untb1()$table
       cap <- out_untb1()$caption
       out.tb1 <- datatable(tb,
-        rownames = T, extensions = "Buttons", caption = cap,
-        options = c(
-          list(
-            dom = "<lf<rt>Bip>",
-            lengthMenu = list(
-              c(10, 25, -1),
-              c("10", "25", "All")
-            ),
-            pageLength = 25,
-            ordering = F,
-            buttons = list(
-              "copy",
-              "print",
-              list(
-                text = "Download",
-                extend = "collection",
-                buttons = list(
-                  list(extend = "csv", filename = "tb1"),
-                  list(extend = "excel", filename = "tb1"),
-                  list(extend = "pdf", filename = "tb1")
-                ) # ,
-              ),
-              list(
-                text = "Word",
-                extend = "collection",
-                action = DT::JS(
-                  "function ( e, dt, node, config ) {
+                           rownames = T, extensions = "Buttons", caption = cap,
+                           options = c(
+                             list(
+                               dom = "<lf<rt>Bip>",
+                               lengthMenu = list(
+                                 c(10, 25, -1),
+                                 c("10", "25", "All")
+                               ),
+                               pageLength = 25,
+                               ordering = F,
+                               buttons = list(
+                                 "copy",
+                                 "print",
+                                 list(
+                                   text = "Download",
+                                   extend = "collection",
+                                   buttons = list(
+                                     list(extend = "csv", filename = "tb1"),
+                                     list(extend = "excel", filename = "tb1"),
+                                     list(extend = "pdf", filename = "tb1")
+                                   ) # ,
+                                 ),
+                                 list(
+                                   text = "Word",
+                                   extend = "collection",
+                                   action = DT::JS(
+                                     "function ( e, dt, node, config ) {
                   Shiny.setInputValue('dl.untable1.clk', true, {priority: 'event'});
                   }"
-                )
-              )
-            )
-          ),
-          list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
-          list(scrollX = TRUE)
-        )
+                                   )
+                                 )
+                               )
+                             ),
+                             list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
+                             list(scrollX = TRUE)
+                           )
       )
       if ("sig" %in% colnames(tb)) {
         out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
@@ -994,42 +1077,42 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       tb <- out_tb1()$table
       cap <- out_tb1()$caption
       out.tb1 <- datatable(tb,
-        rownames = T, extensions = "Buttons", caption = cap,
-        options = c(
-          list(
-            dom = "<lf<rt>Bip>",
-            lengthMenu = list(
-              c(10, 25, -1),
-              c("10", "25", "All")
-            ),
-            pageLength = 25,
-            ordering = F,
-            buttons = list(
-              "copy",
-              "print",
-              list(
-                text = "Download",
-                extend = "collection",
-                buttons = list(
-                  list(extend = "csv", filename = "tb1"),
-                  list(extend = "excel", filename = "tb1"),
-                  list(extend = "pdf", filename = "tb1")
-                ) # ,
-              ),
-              list(
-                text = "Word",
-                extend = "collection",
-                action = DT::JS(
-                  "function ( e, dt, node, config ) {
+                           rownames = T, extensions = "Buttons", caption = cap,
+                           options = c(
+                             list(
+                               dom = "<lf<rt>Bip>",
+                               lengthMenu = list(
+                                 c(10, 25, -1),
+                                 c("10", "25", "All")
+                               ),
+                               pageLength = 25,
+                               ordering = F,
+                               buttons = list(
+                                 "copy",
+                                 "print",
+                                 list(
+                                   text = "Download",
+                                   extend = "collection",
+                                   buttons = list(
+                                     list(extend = "csv", filename = "tb1"),
+                                     list(extend = "excel", filename = "tb1"),
+                                     list(extend = "pdf", filename = "tb1")
+                                   ) # ,
+                                 ),
+                                 list(
+                                   text = "Word",
+                                   extend = "collection",
+                                   action = DT::JS(
+                                     "function ( e, dt, node, config ) {
                   Shiny.setInputValue('dl.table1.clk', true, {priority: 'event'});
                   }"
-                )
-              )
-            )
-          ),
-          list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
-          list(scrollX = TRUE)
-        )
+                                   )
+                                 )
+                               )
+                             ),
+                             list(columnDefs = list(list(visible = FALSE, targets = which(colnames(tb) %in% c("test", "sig"))))),
+                             list(scrollX = TRUE)
+                           )
       )
       if ("sig" %in% colnames(tb)) {
         out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
@@ -1068,42 +1151,42 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     output$lineartable <- renderDT({
       hide <- which(colnames(out_linear()$table) == "sig")
       datatable(out_linear()$table,
-        rownames = T, extensions = "Buttons", caption = out_linear()$caption,
-        options = c(
-          list(
-            dom = "<lf<rt>Bip>",
-            lengthMenu = list(
-              c(10, 25, -1),
-              c("10", "25", "All")
-            ),
-            pageLength = 25,
-            ordering = F,
-            buttons = list(
-              "copy",
-              "print",
-              list(
-                text = "Download",
-                extend = "collection",
-                buttons = list(
-                  list(extend = "csv", filename = out_linear()$caption),
-                  list(extend = "excel", filename = out_linear()$caption),
-                  list(extend = "pdf", filename = out_linear()$caption)
-                ) # ,
-              ),
-              list(
-                text = "Word",
-                extend = "collection",
-                action = DT::JS(
-                  "function ( e, dt, node, config ) {
+                rownames = T, extensions = "Buttons", caption = out_linear()$caption,
+                options = c(
+                  list(
+                    dom = "<lf<rt>Bip>",
+                    lengthMenu = list(
+                      c(10, 25, -1),
+                      c("10", "25", "All")
+                    ),
+                    pageLength = 25,
+                    ordering = F,
+                    buttons = list(
+                      "copy",
+                      "print",
+                      list(
+                        text = "Download",
+                        extend = "collection",
+                        buttons = list(
+                          list(extend = "csv", filename = out_linear()$caption),
+                          list(extend = "excel", filename = out_linear()$caption),
+                          list(extend = "pdf", filename = out_linear()$caption)
+                        ) # ,
+                      ),
+                      list(
+                        text = "Word",
+                        extend = "collection",
+                        action = DT::JS(
+                          "function ( e, dt, node, config ) {
                   Shiny.setInputValue('dl.linreg.clk', true, {priority: 'event'});
                   }"
+                        )
+                      )
+                    )
+                  ),
+                  list(columnDefs = list(list(visible = FALSE, targets = hide))),
+                  list(scrollX = TRUE)
                 )
-              )
-            )
-          ),
-          list(columnDefs = list(list(visible = FALSE, targets = hide))),
-          list(scrollX = TRUE)
-        )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
@@ -1138,42 +1221,42 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     output$logistictable <- renderDT({
       hide <- which(colnames(out_logistic()$table) == "sig")
       datatable(out_logistic()$table,
-        rownames = T, extensions = "Buttons", caption = out_logistic()$caption,
-        options = c(
-          list(
-            dom = "<lf<rt>Bip>",
-            lengthMenu = list(
-              c(10, 25, -1),
-              c("10", "25", "All")
-            ),
-            pageLength = 25,
-            ordering = F,
-            buttons = list(
-              "copy",
-              "print",
-              list(
-                text = "Download",
-                extend = "collection",
-                buttons = list(
-                  list(extend = "csv", filename = out_logistic()$caption),
-                  list(extend = "excel", filename = out_logistic()$caption),
-                  list(extend = "pdf", filename = out_logistic()$caption)
-                ) # ,
-              ),
-              list(
-                text = "Word",
-                extend = "collection",
-                action = DT::JS(
-                  "function ( e, dt, node, config ) {
+                rownames = T, extensions = "Buttons", caption = out_logistic()$caption,
+                options = c(
+                  list(
+                    dom = "<lf<rt>Bip>",
+                    lengthMenu = list(
+                      c(10, 25, -1),
+                      c("10", "25", "All")
+                    ),
+                    pageLength = 25,
+                    ordering = F,
+                    buttons = list(
+                      "copy",
+                      "print",
+                      list(
+                        text = "Download",
+                        extend = "collection",
+                        buttons = list(
+                          list(extend = "csv", filename = out_logistic()$caption),
+                          list(extend = "excel", filename = out_logistic()$caption),
+                          list(extend = "pdf", filename = out_logistic()$caption)
+                        ) # ,
+                      ),
+                      list(
+                        text = "Word",
+                        extend = "collection",
+                        action = DT::JS(
+                          "function ( e, dt, node, config ) {
                   Shiny.setInputValue('dl.logreg.clk', true, {priority: 'event'});
                   }"
+                        )
+                      )
+                    )
+                  ),
+                  list(columnDefs = list(list(visible = FALSE, targets = hide))),
+                  list(scrollX = TRUE)
                 )
-              )
-            )
-          ),
-          list(columnDefs = list(list(visible = FALSE, targets = hide))),
-          list(scrollX = TRUE)
-        )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
@@ -1208,41 +1291,41 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     output$coxtable <- renderDT({
       hide <- which(colnames(out_cox()$table) == c("sig"))
       datatable(out_cox()$table,
-        rownames = T, extensions = "Buttons", caption = out_cox()$caption,
-        options = c(
-          list(
-            dom = "<lf<rt>Bip>",
-            lengthMenu = list(
-              c(10, 25, -1),
-              c("10", "25", "All")
-            ),
-            pageLength = 25,
-            ordering = F,
-            buttons = list(
-              "copy",
-              "print",
-              list(
-                text = "Download",
-                extend = "collection",
-                buttons = list(
-                  list(extend = "csv", filename = out_cox()$caption),
-                  list(extend = "excel", filename = out_cox()$caption),
-                  list(extend = "pdf", filename = out_cox()$caption)
-                ) # ,
-              ),
-              list(
-                text = "Word",
-                extend = "collection",
-                action = DT::JS(
-                  "function ( e, dt, node, config ) {
+                rownames = T, extensions = "Buttons", caption = out_cox()$caption,
+                options = c(
+                  list(
+                    dom = "<lf<rt>Bip>",
+                    lengthMenu = list(
+                      c(10, 25, -1),
+                      c("10", "25", "All")
+                    ),
+                    pageLength = 25,
+                    ordering = F,
+                    buttons = list(
+                      "copy",
+                      "print",
+                      list(
+                        text = "Download",
+                        extend = "collection",
+                        buttons = list(
+                          list(extend = "csv", filename = out_cox()$caption),
+                          list(extend = "excel", filename = out_cox()$caption),
+                          list(extend = "pdf", filename = out_cox()$caption)
+                        ) # ,
+                      ),
+                      list(
+                        text = "Word",
+                        extend = "collection",
+                        action = DT::JS(
+                          "function ( e, dt, node, config ) {
                   Shiny.setInputValue('dl.coxreg.clk', true, {priority: 'event'});
                   }"
+                        )
+                      )
+                    )
+                  ),
+                  list(columnDefs = list(list(visible = FALSE, targets = hide)))
                 )
-              )
-            )
-          ),
-          list(columnDefs = list(list(visible = FALSE, targets = hide)))
-        )
       ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
     })
 
@@ -1266,9 +1349,9 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     output$table_roc <- renderDT({
       datatable(out_roc()$tb,
-        rownames = F, editable = F, extensions = "Buttons",
-        caption = "ROC results",
-        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+                rownames = F, editable = F, extensions = "Buttons",
+                caption = "ROC results",
+                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
       )
     })
 
@@ -1280,16 +1363,45 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
     output$table_timeroc <- renderDT({
       datatable(out_timeroc()$tb,
-        rownames = F, editable = F, extensions = "Buttons", caption = "ROC results",
-        options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
+                rownames = F, editable = F, extensions = "Buttons", caption = "ROC results",
+                options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
       )
     })
 
     session$onSessionEnded(function() {
       stopApp()
     })
-  }
 
+
+
+    outtable <- forestcoxServer("Forest", data = data, data_label = data.label)
+    output$tablesub <- renderDT({
+      outtable()[[1]]
+    })
+    output$forestplot <- renderPlot({
+      outtable()[[2]]
+    })
+
+    outtable_glm <- forestglmServer("Forest_glm", data = data, data_label = data.label, family = "gaussian")
+    output$tablesub_glm <- renderDT({
+      outtable_glm()[[1]]
+    })
+    output$forestplot_glm <- renderPlot({
+      outtable_glm()[[2]]
+    })
+
+    outtable_glmbi <- forestglmServer("Forest_glmbi", data = data, data_label = data.label, family = "binomial")
+    output$tablesub_glmbi <- renderDT({
+      outtable_glmbi()[[1]]
+    })
+    output$forestplot_glmbi <- renderPlot({
+      outtable_glmbi()[[2]]
+    })
+    session$onSessionEnded(function() {
+      stopApp()
+    })
+
+  }
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
   viewer <- browserViewer(browser = getOption("browser"))
   runGadget(ui, server, viewer = viewer)
