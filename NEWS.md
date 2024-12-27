@@ -1,3 +1,8 @@
+# jsmodule 1.6.1
+## Update
+- Add subgroub analysis in propensity score matching.
+
+
 # jsmodule 1.6.0 
 ## Update
 - Add competing risk analysis in subgroup, Kaplan-meier, regression tab.
