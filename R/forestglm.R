@@ -55,8 +55,6 @@
 forestglmUI <- function(id, label = "forestplot") {
   ns <- NS(id)
   tagList(
-
-    uiOutput(ns("random_var_ui")),
     uiOutput(ns("group_tbsub")),
     uiOutput(ns("dep_tbsub")),
     uiOutput(ns("subvar_tbsub")),
@@ -75,7 +73,7 @@ forestglmUI <- function(id, label = "forestplot") {
 #' @param data_varStruct Reactive List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
-#' @param repeated data when repeated id. default: F
+#' @param repeated_id data when repeated id. default: F
 #' @return Shiny module server for forestglm
 #' @details Shiny module server for forestglm
 #' @examples
@@ -140,7 +138,7 @@ forestglmUI <- function(id, label = "forestplot") {
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
-forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, repeated  = F) {
+forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, repeated_id  = NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -214,16 +212,6 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
         return(setdiff(names(data()), vlist()$isNA_vars))
       })
 
-      output$random_var_ui <- renderUI({
-        req(repeated) # repeated가 TRUE일 때만 렌더링
-        selectInput(
-          session$ns("random_var"),
-          "Select Random Variable",
-          choices = names(data()),
-          selected = names(data())[1]
-        )
-      })
-
 
       output$group_tbsub <- renderUI({
         selectInput(session$ns("group"), "Group", choices = vlist()$group2_vars, selected = setdiff(vlist()$group2_vars, c(input$dep, dep()[1]))[1])
@@ -284,12 +272,10 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
 
         tbsub <- jstable::TableSubgroupMultiGLM(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, family = family)
 
-        if(repeated){
+        if(!is.null(repeated_id)){
           form <- paste(var.event, " ~ ", group.tbsub, sep = "")
-          form <- as.formula(paste0(form,'+ (1|', input$random_var, ')'))
-          print(form)
+          form <- as.formula(paste0(form,'+ (1|', repeated_id, ')'))
           tbsub <- jstable::TableSubgroupMultiGLM(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, family = family)
-          print(tbsub)
         }
         # tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs, data=coxdata,family=family)
         len <- nrow(label[variable == group.tbsub])

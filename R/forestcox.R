@@ -2,7 +2,7 @@
 #' @description Shiny module UI for forestcox
 #' @param id id
 #' @param label label, Default: 'forestplot'
-#' @param repeated data when repeated id. default: F
+#' @param cluster_id cluster id. default: NULL
 #' @return Shinymodule UI
 #' @details Shinymodule UI for forestcox
 #' @examples
@@ -154,7 +154,7 @@ forestcoxUI <- function(id, label = "forestplot") {
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
-forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, repeated = F) {
+forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, cluster_id = NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -221,16 +221,6 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         ))
       })
 
-      output$cluster_id_ui <- renderUI({
-        req(repeated) # repeated가 TRUE일 때만 렌더링
-        selectInput(
-          session$ns("cluster_id"),
-          "Select Cluster ID",
-          choices = names(data()), # data 열 이름 사용
-          selected = names(data())[1] # 기본값으로 첫 번째 열 선택
-        )
-      })
-
       output$group_tbsub <- renderUI({
         req(input$dep)
         selectInput(session$ns("group"), "Group", choices = setdiff(c(vlist()$group2_vars, vlist()$conti_vars), input$dep), selected = setdiff(c(vlist()$group2_vars, vlist()$conti_vars), c(input$dep, vlist()$factor_01vars[1]))[1])
@@ -253,6 +243,8 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         day <- input$day
         sliderInput(session$ns("time"), "Select time range", min = min(data()[[day]], na.rm = TRUE), max = max(data()[[day]], na.rm = TRUE), value = c(min(data()[[day]], na.rm = TRUE), max(data()[[day]], na.rm = TRUE)))
       })
+
+      print(cluster_id)
 
       output$xlim_forest <- renderUI({
         req(tbsub)
@@ -321,28 +313,29 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
           cox_data$cmpp_event <- factor(cox_data$cmpp_event)
           fg_data <- survival::finegray(formula = survival::Surv(cmpp_time, cmpp_event) ~ ., data = cox_data)
           tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = fg_data, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1, weights = "fgwt")
-          if(repeated){
+          if(!is.null(cluster_id)){
             form <- as.formula(
               paste(
                 "survival::Surv(fgstart, fgstop, fgstatus) ~ ",
                 group.tbsub,
-                " + cluster(", input$cluster_id, ")",
+                " + cluster(", cluster_id, ")",
                 sep = ""
               )
             )
             tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = fg_data, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1, weights = "fgwt")
-            names(tbsub) <- gsub(paste0('\\s*\\+\\s*cluster\\(',input$cluster_id,'\\)'), '', names(tbsub))
+            names(tbsub) <- gsub(paste0('\\s*\\+\\s*cluster\\(',cluster_id,'\\)'), '', names(tbsub))
           }
 
           } else {
           form <- as.formula(paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = ""))
 
           tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1)
-          if(repeated){
+          if(!is.null(cluster_id)){
             form <- paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = "")
-            form <- as.formula(paste(form, " + cluster(", input$cluster_id, ")", sep = ""))
+            form <- as.formula(paste(form, " + cluster(", cluster_id, ")", sep = ""))
+            print(form)
             tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1)
-            names(tbsub) <- gsub(paste0('\\s*\\+\\s*cluster\\(',input$cluster_id,'\\)'), '', names(tbsub))
+            names(tbsub) <- gsub(paste0('\\s*\\+\\s*cluster\\(',cluster_id,'\\)'), '', names(tbsub))
 
           }
 

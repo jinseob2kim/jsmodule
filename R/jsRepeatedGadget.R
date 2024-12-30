@@ -733,7 +733,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       title = "Subgroup analysis",
       icon = icon("chart-bar"),
       tabPanel(
-        title = "subgroup cox",
+        title = "subgroup marginal cox",
         sidebarLayout(
           sidebarPanel(
             forestcoxUI("Forest")
@@ -759,7 +759,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       ),
       tabPanel(
-        title = "subgroup regression",
+        title = "subgroup linear mixed model",
         sidebarLayout(
           sidebarPanel(
             forestglmUI("Forest_glm")
@@ -785,7 +785,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       ),
       tabPanel(
-        title = "subgroup logistic regression",
+        title = "subgroup logistic GLMM",
         sidebarLayout(
           sidebarPanel(
             forestglmUI("Forest_glmbi")
@@ -1173,32 +1173,44 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     })
 
 
-    outtable <- forestcoxServer("Forest", data = data, data_label = data.label, repeated = T)
-    output$tablesub <- renderDT({
-      outtable()[[1]]
+    observe({
+      outtable <- forestcoxServer(
+        id = "Forest",
+        data = data,
+        data_label = data.label,
+        cluster_id = id.gee()  # Reactive 값 호출
+      )
+
+      output$tablesub <- renderDT({
+        outtable()[[1]]
+      })
+
+      output$forestplot <- renderPlot({
+        outtable()[[2]]
+      })
     })
-    output$forestplot <- renderPlot({
-      outtable()[[2]]
-    })
-    outtable_glm <- forestglmServer("Forest_glm", data = data, data_label = data.label, family = "gaussian", repeated = T)
+
+    observe({
+    outtable_glm <- forestglmServer("Forest_glm", data = data, data_label = data.label, family = "gaussian", repeated_id = id.gee())
     output$tablesub_glm <- renderDT({
       outtable_glm()[[1]]
     })
     output$forestplot_glm <- renderPlot({
       outtable_glm()[[2]]
     })
-    outtable_glmbi <- forestglmServer("Forest_glmbi", data = data, data_label = data.label, family = "binomial", repeated = T)
+    })
+
+    observe({
+    outtable_glmbi <- forestglmServer("Forest_glmbi", data = data, data_label = data.label, family = "binomial", repeated_id = id.gee())
     output$tablesub_glmbi <- renderDT({
       outtable_glmbi()[[1]]
     })
     output$forestplot_glmbi <- renderPlot({
       outtable_glmbi()[[2]]
     })
-
-
-    session$onSessionEnded(function() {
-      stopApp()
     })
+
+
   }
 
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
