@@ -313,7 +313,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
           cox_data$cmpp_event <- factor(cox_data$cmpp_event)
           fg_data <- survival::finegray(formula = survival::Surv(cmpp_time, cmpp_event) ~ ., data = cox_data)
           tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = fg_data, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1, weights = "fgwt")
-          if(!is.null(cluster_id)){
+          if (!is.null(cluster_id)) {
             form <- as.formula(
               paste(
                 "survival::Surv(fgstart, fgstop, fgstatus) ~ ",
@@ -323,23 +323,20 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
               )
             )
             tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = fg_data, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1, weights = "fgwt")
-            names(tbsub) <- gsub(paste0('\\s*\\+\\s*cluster\\(',cluster_id,'\\)'), '', names(tbsub))
+            names(tbsub) <- gsub(paste0("\\s*\\+\\s*cluster\\(", cluster_id, "\\)"), "", names(tbsub))
           }
-
-          } else {
+        } else {
           form <- as.formula(paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = ""))
 
           tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1)
-          if(!is.null(cluster_id)){
+          if (!is.null(cluster_id)) {
             form <- paste("Surv(", var.day, ",", var.event, ") ~ ", group.tbsub, sep = "")
             form <- as.formula(paste(form, " + cluster(", cluster_id, ")", sep = ""))
             print(form)
             tbsub <- TableSubgroupMultiCox(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, time_eventrate = var.time[2], line = F, decimal.hr = 3, decimal.percent = 1)
-            names(tbsub) <- gsub(paste0('\\s*\\+\\s*cluster\\(',cluster_id,'\\)'), '', names(tbsub))
-
+            names(tbsub) <- gsub(paste0("\\s*\\+\\s*cluster\\(", cluster_id, "\\)"), "", names(tbsub))
           }
-
-          }
+        }
 
 
 

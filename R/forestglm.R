@@ -138,7 +138,7 @@ forestglmUI <- function(id, label = "forestplot") {
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
-forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, repeated_id  = NULL) {
+forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, repeated_id = NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -272,9 +272,9 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
 
         tbsub <- jstable::TableSubgroupMultiGLM(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, family = family)
 
-        if(!is.null(repeated_id)){
+        if (!is.null(repeated_id)) {
           form <- paste(var.event, " ~ ", group.tbsub, sep = "")
-          form <- as.formula(paste0(form,'+ (1|', repeated_id, ')'))
+          form <- as.formula(paste0(form, "+ (1|", repeated_id, ")"))
           tbsub <- jstable::TableSubgroupMultiGLM(form, var_subgroups = vs, var_cov = setdiff(input$cov, vs), data = coxdata, family = family)
         }
         # tbsub <-  TableSubgroupMultiGLM(form, var_subgroups = vs, data=coxdata,family=family)
@@ -381,11 +381,11 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
       res <- reactive({
         list(
           datatable(tbsub(),
-                    caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions = "Buttons",
-                    options = c(
-                      opt.tb1(paste0("tbsub_", input$dep)),
-                      list(scrollX = TRUE, columnDefs = list(list(className = "dt-right", targets = 0)))
-                    )
+            caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions = "Buttons",
+            options = c(
+              opt.tb1(paste0("tbsub_", input$dep)),
+              list(scrollX = TRUE, columnDefs = list(list(className = "dt-right", targets = 0)))
+            )
           ),
           figure()
         )
@@ -457,16 +457,16 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
         }
         selected_columns <- c(c(1:(2 + ll)), len + 1, (len - 1):(len))
         forestploter::forest(data[, .SD, .SDcols = selected_columns],
-                             lower = as.numeric(data$Lower),
-                             upper = as.numeric(data$Upper),
-                             ci_column = 3 + ll,
-                             est = as.numeric(data_est),
-                             ref_line = ifelse(family == "gaussian", 0, 1),
-                             x_trans = ifelse(family == "gaussian", "none", "log"),
-                             ticks_digits = 1,
-                             xlim = xlim,
-                             arrow_lab = c(input$arrow_left, input$arrow_right),
-                             theme = tm
+          lower = as.numeric(data$Lower),
+          upper = as.numeric(data$Upper),
+          ci_column = 3 + ll,
+          est = as.numeric(data_est),
+          ref_line = ifelse(family == "gaussian", 0, 1),
+          x_trans = ifelse(family == "gaussian", "none", "log"),
+          ticks_digits = 1,
+          xlim = xlim,
+          arrow_lab = c(input$arrow_left, input$arrow_right),
+          theme = tm
         ) -> zz
 
         l <- dim(zz)
