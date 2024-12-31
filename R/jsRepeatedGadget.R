@@ -728,6 +728,88 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           )
         )
       )
+    ),
+    navbarMenu(
+      title = "Subgroup analysis",
+      icon = icon("chart-bar"),
+      tabPanel(
+        title = "subgroup marginal cox",
+        sidebarLayout(
+          sidebarPanel(
+            forestcoxUI("Forest")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput("tablesub"),
+                  type = "html",
+                  loader = "loader6"
+                )
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot", width = "100%"),
+                ggplotdownUI("Forest")
+              )
+            )
+          )
+        )
+      ),
+      tabPanel(
+        title = "subgroup linear mixed model",
+        sidebarLayout(
+          sidebarPanel(
+            forestglmUI("Forest_glm")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput("tablesub_glm"),
+                  type = "html",
+                  loader = "loader6"
+                )
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot_glm", width = "100%"),
+                ggplotdownUI("Forest_glm")
+              )
+            )
+          )
+        )
+      ),
+      tabPanel(
+        title = "subgroup logistic GLMM",
+        sidebarLayout(
+          sidebarPanel(
+            forestglmUI("Forest_glmbi")
+          ),
+          mainPanel(
+            tabsetPanel(
+              type = "pills",
+              tabPanel(
+                title = "Data",
+                withLoader(
+                  DTOutput("tablesub_glmbi"),
+                  type = "html",
+                  loader = "loader6"
+                )
+              ),
+              tabPanel(
+                title = "figure",
+                plotOutput("forestplot_glmbi", width = "100%"),
+                ggplotdownUI("Forest_glmbi")
+              )
+            )
+          )
+        )
+      )
     )
   )
 
@@ -1090,9 +1172,45 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
       )
     })
 
-    session$onSessionEnded(function() {
-      stopApp()
+
+    observe({
+      outtable <- forestcoxServer(
+        id = "Forest",
+        data = data,
+        data_label = data.label,
+        cluster_id = id.gee()  # Reactive 값 호출
+      )
+
+      output$tablesub <- renderDT({
+        outtable()[[1]]
+      })
+
+      output$forestplot <- renderPlot({
+        outtable()[[2]]
+      })
     })
+
+    observe({
+    outtable_glm <- forestglmServer("Forest_glm", data = data, data_label = data.label, family = "gaussian", repeated_id = id.gee())
+    output$tablesub_glm <- renderDT({
+      outtable_glm()[[1]]
+    })
+    output$forestplot_glm <- renderPlot({
+      outtable_glm()[[2]]
+    })
+    })
+
+    observe({
+    outtable_glmbi <- forestglmServer("Forest_glmbi", data = data, data_label = data.label, family = "binomial", repeated_id = id.gee())
+    output$tablesub_glmbi <- renderDT({
+      outtable_glmbi()[[1]]
+    })
+    output$forestplot_glmbi <- renderPlot({
+      outtable_glmbi()[[2]]
+    })
+    })
+
+
   }
 
   # viewer <- dialogViewer("Descriptive statistics", width = 1100, height = 850)
