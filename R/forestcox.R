@@ -244,7 +244,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         sliderInput(session$ns("time"), "Select time range", min = min(data()[[day]], na.rm = TRUE), max = max(data()[[day]], na.rm = TRUE), value = c(min(data()[[day]], na.rm = TRUE), max(data()[[day]], na.rm = TRUE)))
       })
 
-      #print(cluster_id)
+      # print(cluster_id)
 
       output$xlim_forest <- renderUI({
         req(tbsub)
