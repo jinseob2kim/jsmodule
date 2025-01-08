@@ -2,7 +2,6 @@
 #' @description Shiny module UI for forestcox
 #' @param id id
 #' @param label label, Default: 'forestplot'
-#' @param cluster_id cluster id. default: NULL
 #' @return Shinymodule UI
 #' @details Shinymodule UI for forestcox
 #' @examples
@@ -85,6 +84,7 @@ forestcoxUI <- function(id, label = "forestplot") {
 #' @param data_varStruct Reactive List of variable structure, Default: NULL
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
+#' @param cluster_id cluster option variable for marginal cox model
 #' @return Shiny module server for forestcox
 #' @details Shiny module server for forestcox
 #' @examples
@@ -244,7 +244,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         sliderInput(session$ns("time"), "Select time range", min = min(data()[[day]], na.rm = TRUE), max = max(data()[[day]], na.rm = TRUE), value = c(min(data()[[day]], na.rm = TRUE), max(data()[[day]], na.rm = TRUE)))
       })
 
-      print(cluster_id)
+      #print(cluster_id)
 
       output$xlim_forest <- renderUI({
         req(tbsub)

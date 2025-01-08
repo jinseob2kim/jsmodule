@@ -11,7 +11,8 @@ forestglmServer(
   family,
   data_varStruct = NULL,
   nfactor.limit = 10,
-  design.survey = NULL
+  design.survey = NULL,
+  repeated_id = NULL
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ forestglmServer(
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 
 \item{design.survey}{reactive survey data. default: NULL}
+
+\item{repeated_id}{data when repeated id. default: F}
 }
 \value{
 Shiny module server for forestglm

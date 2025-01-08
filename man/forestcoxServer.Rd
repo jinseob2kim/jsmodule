@@ -10,7 +10,8 @@ forestcoxServer(
   data_label,
   data_varStruct = NULL,
   nfactor.limit = 10,
-  design.survey = NULL
+  design.survey = NULL,
+  cluster_id = NULL
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ forestcoxServer(
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 
 \item{design.survey}{reactive survey data. default: NULL}
+
+\item{cluster_id}{cluster option variable for marginal cox model}
 }
 \value{
 Shiny module server for forestcox
