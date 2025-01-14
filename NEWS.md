@@ -1,3 +1,7 @@
+# jsmodule 1.6.2
+## Update
+- Add options to customize x axis ticks in forest plot
+
 # jsmodule 1.6.1
 ## Update
 - Add function to allow adjusting cutoff for a single independent variable and observing model's metrics in `rocModule`, `rocModule2`.
