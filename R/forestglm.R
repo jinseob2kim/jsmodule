@@ -383,10 +383,10 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
 
 
       observeEvent(input$custom_forest, {
-        output$beta_points <-renderUI({
+        output$beta_points <- renderUI({
           req(input$custom_forest == TRUE)
           tagList(
-            sliderInput(session$ns("num_points"), "select number of x axis ticks",  min = 2,max = 8,value = 3)
+            sliderInput(session$ns("num_points"), "select number of x axis ticks", min = 2, max = 8, value = 3)
           )
         })
       })

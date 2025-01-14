@@ -252,10 +252,10 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
 
 
       observeEvent(input$custom_forest, {
-        output$hr_points <-renderUI({
+        output$hr_points <- renderUI({
           req(input$custom_forest == TRUE)
           tagList(
-          sliderInput(session$ns("num_points"), "select number of x axis ticks",  min = 2,max = 8,value = 3)
+            sliderInput(session$ns("num_points"), "select number of x axis ticks", min = 2, max = 8, value = 3)
           )
         })
       })
