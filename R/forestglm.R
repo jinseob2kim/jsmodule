@@ -59,6 +59,9 @@ forestglmUI <- function(id, label = "forestplot") {
     uiOutput(ns("dep_tbsub")),
     uiOutput(ns("subvar_tbsub")),
     uiOutput(ns("cov_tbsub")),
+    checkboxInput(ns("custom_forest"), "Custom X axis ticks in forest plot"),
+    uiOutput(ns("beta_points")),
+    uiOutput(ns("numeric_inputs"))
   )
 }
 
@@ -378,6 +381,46 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
         return(tbsub)
       })
 
+
+      observeEvent(input$custom_forest, {
+        output$beta_points <-renderUI({
+          req(input$custom_forest == TRUE)
+          tagList(
+            sliderInput(session$ns("num_points"), "select number of x axis ticks",  min = 2,max = 8,value = 3)
+          )
+        })
+      })
+
+      output$numeric_inputs <- renderUI({
+        req(input$num_points)
+        fluidRow(
+          lapply(seq_len(input$num_points), function(i) {
+            column(
+              width = floor(12 / input$num_points),
+              numericInput(
+                session$ns(paste0("point_", i)),
+                paste("Point", i, ":"),
+                value = 1.0
+              )
+            )
+          })
+        )
+      })
+
+
+
+      ticks <- reactive({
+        if (is.null(input$num_points)) {
+          a <- c(0, 1, 2)
+        } else {
+          a <- sapply(seq_len(input$num_points), function(i) input[[paste0("point_", i)]])
+        }
+        return(a)
+      })
+
+
+
+
       res <- reactive({
         list(
           datatable(tbsub(),
@@ -464,7 +507,8 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
           ref_line = ifelse(family == "gaussian", 0, 1),
           x_trans = ifelse(family == "gaussian", "none", "log"),
           ticks_digits = 1,
-          xlim = xlim,
+          xlim = NULL,
+          ticks_at = ticks(),
           arrow_lab = c(input$arrow_left, input$arrow_right),
           theme = tm
         ) -> zz

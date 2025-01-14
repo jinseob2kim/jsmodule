@@ -70,7 +70,10 @@ forestcoxUI <- function(id, label = "forestplot") {
     uiOutput(ns("cov_tbsub")),
     uiOutput(ns("time_tbsub")),
     checkboxInput(ns("cmp_risk_check"), "Competing Risk Analysis(Fine-Gray)"),
-    uiOutput(ns("cmp_eventtime"))
+    uiOutput(ns("cmp_eventtime")),
+    checkboxInput(ns("custom_forest"), "Custom X axis ticks in forest plot"),
+    uiOutput(ns("hr_points")),
+    uiOutput(ns("numeric_inputs"))
   )
 }
 
@@ -246,12 +249,34 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
 
       # print(cluster_id)
 
-      output$xlim_forest <- renderUI({
-        req(tbsub)
-        data <- tbsub()
-        data <- data[!(HR == 0 | Lower == 0)]$Upper
-        numericInput(session$ns("xMax"), "max HR for forestplot", value = round(max(as.numeric(data[data != "Inf"]), na.rm = TRUE), 2))
+
+
+      observeEvent(input$custom_forest, {
+        output$hr_points <-renderUI({
+          req(input$custom_forest == TRUE)
+          tagList(
+          sliderInput(session$ns("num_points"), "select number of x axis ticks",  min = 2,max = 8,value = 3)
+          )
+        })
       })
+
+      output$numeric_inputs <- renderUI({
+        req(input$num_points)
+        fluidRow(
+          lapply(seq_len(input$num_points), function(i) {
+            column(
+              width = floor(12 / input$num_points),
+              numericInput(
+                session$ns(paste0("point_", i)),
+                paste("Point", i, ":"),
+                value = 1.0
+              )
+            )
+          })
+        )
+      })
+
+
 
       observeEvent(input$cmp_risk_check, {
         output$cmp_eventtime <- renderUI({
@@ -410,6 +435,20 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
       })
 
 
+
+
+      ticks <- reactive({
+        if (is.null(input$num_points)) {
+          a <- c(0, 1, 2)
+        } else {
+          a <- sapply(seq_len(input$num_points), function(i) input[[paste0("point_", i)]])
+        }
+        return(a)
+      })
+
+
+
+
       figure <- reactive({
         group.tbsub <- input$group
         label <- data_label()
@@ -430,8 +469,6 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         if (is.null(input$xMax) || any(is.na(xlim))) {
           xlim <- c(0, 2)
         }
-
-
         forestploter::forest(data[, .SD, .SDcols = selected_columns],
           lower = as.numeric(data$Lower),
           upper = as.numeric(data$Upper),
@@ -440,8 +477,9 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
           ref_line = 1,
           ticks_digits = 1,
           x_trans = "log",
-          xlim = xlim,
+          xlim = NULL,
           arrow_lab = c(input$arrow_left, input$arrow_right),
+          ticks_at = ticks(),
           theme = tm
         ) -> zz
 
@@ -451,6 +489,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         zz$heights[(l[1] - 2):(l[1] - 1)] <- h
         return(zz)
       })
+
       res <- reactive({
         list(
           datatable(tbsub(),
@@ -463,13 +502,11 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
           figure()
         )
       })
+
       output$downloadControls <- renderUI({
         tagList(
           fluidRow(
             column(
-              3,
-              uiOutput(session$ns("xlim_forest"))
-            ), column(
               3,
               numericInput(session$ns("font"), "font-size", value = 12)
             ),
