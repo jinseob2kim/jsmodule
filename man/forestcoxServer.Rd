@@ -11,7 +11,9 @@ forestcoxServer(
   data_varStruct = NULL,
   nfactor.limit = 10,
   design.survey = NULL,
-  cluster_id = NULL
+  cluster_id = NULL,
+  vec.event = NULL,
+  vec.time = NULL
 )
 }
 \arguments{
@@ -28,6 +30,10 @@ forestcoxServer(
 \item{design.survey}{reactive survey data. default: NULL}
 
 \item{cluster_id}{cluster option variable for marginal cox model}
+
+\item{vec.event}{event variables as vector for survival analysis,  Default: NULL}
+
+\item{vec.time}{time variables as vector for survival analysis,  Default: NULL}
 }
 \value{
 Shiny module server for forestcox

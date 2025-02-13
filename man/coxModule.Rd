@@ -16,7 +16,9 @@ coxModule(
   default.unires = T,
   limit.unires = 20,
   id.cluster = NULL,
-  ties.coxph = "efron"
+  ties.coxph = "efron",
+  vec.event = NULL,
+  vec.time = NULL
 )
 }
 \arguments{
@@ -43,6 +45,10 @@ coxModule(
 \item{id.cluster}{reactive cluster variable if marginal cox model, Default: NULL}
 
 \item{ties.coxph}{'coxph' ties option, one of 'efron', 'breslow', 'exact', default: 'erfon'}
+
+\item{vec.event}{event variables as vector for survival analysis,  Default: NULL}
+
+\item{vec.time}{time variables as vector for survival analysis,  Default: NULL}
 }
 \value{
 Shiny modulde server for Cox's model.

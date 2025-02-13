@@ -16,7 +16,9 @@ kaplanModule(
   id.cluster = NULL,
   timeby = NULL,
   range.x = NULL,
-  range.y = NULL
+  range.y = NULL,
+  vec.event = NULL,
+  vec.time = NULL
 )
 }
 \arguments{
@@ -43,6 +45,10 @@ kaplanModule(
 \item{range.x}{range of x axis, Default: NULL}
 
 \item{range.y}{range of y axis, Default: NULL}
+
+\item{vec.event}{event variables as vector for survival analysis,  Default: NULL}
+
+\item{vec.time}{time variables as vector for survival analysis,  Default: NULL}
 }
 \value{
 Shiny module server for kaplan-meier plot.

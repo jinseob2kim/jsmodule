@@ -88,6 +88,8 @@ forestcoxUI <- function(id, label = "forestplot") {
 #' @param nfactor.limit nlevels limit in factor variable, Default: 10
 #' @param design.survey reactive survey data. default: NULL
 #' @param cluster_id cluster option variable for marginal cox model
+#' @param vec.event event variables as vector for survival analysis,  Default: NULL
+#' @param vec.time time variables as vector for survival analysis,  Default: NULL
 #' @return Shiny module server for forestcox
 #' @details Shiny module server for forestcox
 #' @examples
@@ -157,12 +159,12 @@ forestcoxUI <- function(id, label = "forestplot") {
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 
-forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, cluster_id = NULL) {
+forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, cluster_id = NULL, vec.event = NULL, vec.time = NULL) {
   moduleServer(
     id,
     function(input, output, session) {
       N <- V1 <- V2 <- .N <- HR <- Lower <- Upper <- level <- val_label <- variable <- NULL
-
+      fix_et <- !is.null(vec.event) && !is.null(vec.time) && (length(vec.event) == length(vec.time))
       if (is.null(data_varStruct)) {
         data_varStruct <- reactive(list(variable = names(data())))
       }
@@ -229,7 +231,11 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         selectInput(session$ns("group"), "Group", choices = setdiff(c(vlist()$group2_vars, vlist()$conti_vars), input$dep), selected = setdiff(c(vlist()$group2_vars, vlist()$conti_vars), c(input$dep, vlist()$factor_01vars[1]))[1])
       })
       output$dep_tbsub <- renderUI({
-        selectInput(session$ns("dep"), "Outcome", choices = vlist()$factor_01vars, selected = vlist()$factor_01vars[1])
+        if (!fix_et) {
+          selectInput(session$ns("dep"), "Outcome", choices = vlist()$factor_01vars, selected = vlist()$factor_01vars[1])
+        } else {
+          selectInput(session$ns("dep"), "Outcome", choices = vec.event, selected = vec.event[1])
+        }
       })
       output$subvar_tbsub <- renderUI({
         req(input$dep)
@@ -239,13 +245,45 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
         selectInput(session$ns("cov"), "Addtional covariates", choices = vlist()$group_vars, selected = NULL, multiple = T)
       })
       output$day_tbsub <- renderUI({
-        selectInput(session$ns("day"), "Time", choices = vlist()$conti_vars_positive, selected = vlist()$conti_vars_positive[1])
+        if (!fix_et) {
+          selectInput(session$ns("day"), "Time", choices = vlist()$conti_vars_positive, selected = vlist()$conti_vars_positive[1])
+        } else {
+          selectInput(session$ns("day"), "Time", choices = vec.time, selected = vec.time[1])
+        }
       })
       output$time_tbsub <- renderUI({
         req(input$day)
         day <- input$day
         sliderInput(session$ns("time"), "Select time range", min = min(data()[[day]], na.rm = TRUE), max = max(data()[[day]], na.rm = TRUE), value = c(min(data()[[day]], na.rm = TRUE), max(data()[[day]], na.rm = TRUE)))
       })
+
+
+
+
+      if (fix_et) {
+
+        paired_forest <- setNames(vec.time, vec.event)
+        paired_rev_forest <- setNames(vec.event, vec.time)
+
+
+        observeEvent(input$dep, {
+          req(input$dep)
+          new_day <- paired_forest[[input$dep]]
+          if (!is.null(new_day) && new_day != input$day) {
+            updateSelectInput(session, "day", selected = new_day)
+          }
+        })
+
+        observeEvent(input$day, {
+          req(input$day)
+          new_dep <- paired_rev_forest[[input$day]]
+          if (!is.null(new_dep) && new_dep != input$dep) {
+            updateSelectInput(session, "dep", selected = new_dep)
+          }
+        })
+      }
+
+
 
       # print(cluster_id)
 

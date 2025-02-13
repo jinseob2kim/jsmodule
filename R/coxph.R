@@ -47,6 +47,8 @@ coxUI <- function(id) {
 #' @param limit.unires Change to default.unires = F if number of independent variables > limit.unires, Default: 20
 #' @param id.cluster reactive cluster variable if marginal cox model, Default: NULL
 #' @param ties.coxph 'coxph' ties option, one of 'efron', 'breslow', 'exact', default: 'erfon'
+#' @param vec.event event variables as vector for survival analysis,  Default: NULL
+#' @param vec.time time variables as vector for survival analysis,  Default: NULL
 #' @return Shiny modulde server for Cox's model.
 #' @details Shiny modulde server for Cox's model.
 #' @examples
@@ -86,11 +88,13 @@ coxUI <- function(id) {
 #' @importFrom stats glm as.formula model.frame step
 #' @importFrom purrr map_lgl
 #' @importFrom survival cluster coxph Surv finegray
+#' @importFrom stats setNames
 
-coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, id.cluster = NULL, ties.coxph = "efron") {
+
+coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, id.cluster = NULL, ties.coxph = "efron", vec.event = NULL, vec.time = NULL) {
   ## To remove NOTE.
   data.cox.step <- level <- val_label <- variable <- NULL
-
+  fix_et <- !is.null(vec.event) && !is.null(vec.time) && (length(vec.event) == length(vec.time))
   if (is.null(data_varStruct)) {
     data_varStruct <- reactive(list(variable = names(data())))
   }
@@ -149,24 +153,53 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     ))
   })
 
+
+
+
   output$eventtime <- renderUI({
-    validate(
-      need(length(vlist()$factor_01vars) >= 1, "No candidate event variables coded as 0, 1"),
-      need(length(vlist()$conti_vars_positive) >= 1, "No candidate time variables")
-    )
-
-
-    tagList(
-      selectInput(session$ns("event_cox"), "Event",
-        choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
-        selected = NULL
-      ),
-      selectInput(session$ns("time_cox"), "Time",
-        choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = F,
-        selected = NULL
+    if (!fix_et) {
+      validate(
+        need(length(vlist()$factor_01vars) >= 1, "No candidate event variables coded as 0, 1"),
+        need(length(vlist()$conti_vars_positive) >= 1, "No candidate time variables")
       )
-    )
+      tagList(
+        selectInput(session$ns("event_cox"), "Event",
+                    choices = mklist(data_varStruct(), vlist()$factor_01vars),
+                    multiple = FALSE,
+                    selected = NULL),
+        selectInput(session$ns("time_cox"), "Time",
+                    choices = mklist(data_varStruct(), vlist()$conti_vars_positive),
+                    multiple = FALSE,
+                    selected = NULL)
+      )
+    } else {
+      tagList(
+        selectInput(session$ns("event_cox"), "Event", choices = vec.event, selected = NULL),
+        selectInput(session$ns("time_cox"), "Time", choices = vec.time, selected = NULL)
+      )
+    }
   })
+
+  if (fix_et) {
+    paired     <- setNames(vec.time, vec.event)
+    paired_rev <- setNames(vec.event, vec.time)
+
+    observeEvent(input$event_cox, {
+      req(input$event_cox)
+      new_time <- paired[[ input$event_cox ]]
+      if (!is.null(new_time) && new_time != input$time_cox) {
+        updateSelectInput(session, "time_cox", selected = new_time)
+      }
+    })
+
+    observeEvent(input$time_cox, {
+      req(input$time_cox)
+      new_event <- paired_rev[[ input$time_cox ]]
+      if (!is.null(new_event) && new_event != input$event_cox) {
+        updateSelectInput(session, "event_cox", selected = new_event)
+      }
+    })
+  }
 
   observeEvent(input$cmp_risk_check, {
     output$cmp_eventtime <- renderUI({
@@ -203,6 +236,8 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
   output$indep <- renderUI({
     req(!is.null(input$event_cox))
     req(!is.null(input$time_cox))
+
+    # Helper function (as in your original code)
     mklist <- function(varlist, vars) {
       lapply(
         varlist,
@@ -216,87 +251,122 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       )
     }
 
-
-    if (is.null(design.survey)) {
-      indep.cox <- setdiff(names(data()), c(vlist()$except_vars, input$event_cox, input$time_cox))
-      if (!is.null(id.cluster)) {
-        indep.cox <- setdiff(names(data()), c(vlist()$except_vars, input$event_cox, input$time_cox, id.cluster()))
-      }
-
-      if (default.unires) {
-        data.cox <- data()
-
-        if (input$check_rangetime == T) {
-          data.cox <- data.cox[!(get(input$time_cox) < input$range_time[1])]
-          data.cox[[input$event_cox]] <- ifelse(data.cox[[input$time_cox]] >= input$range_time[2] & data.cox[[input$event_cox]] == "1", 0, as.numeric(as.vector(data.cox[[input$event_cox]])))
-          data.cox[[input$time_cox]] <- ifelse(data.cox[[input$time_cox]] >= input$range_time[2], input$range_time[2], data.cox[[input$time_cox]])
-        }
-
-        data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
-
-        varsIni <- sapply(
-          indep.cox,
-          function(v) {
-            if (is.null(id.cluster)) {
-              forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, sep = ""))
-              coef <- tryCatch(summary(survival::coxph(forms, data = data.cox, ties = ties.coxph))$coefficients, error = function(e) {
-                return(NULL)
-              })
-            } else {
-              forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, " + cluster(", id.cluster(), ")", sep = ""))
-              coef <- tryCatch(summary(survival::coxph(forms, data = data.cox, robust = T, ties = ties.coxph))$coefficients, error = function(e) {
-                return(NULL)
-              })
-            }
-            sigOK <- ifelse(is.null(coef), F, !all(coef[, "Pr(>|z|)"] > 0.05))
-            return(sigOK)
-          }
-        )
-        if (length(varsIni[varsIni == T]) > limit.unires) {
-          varsIni <- c(T, rep(F, length(indep.cox) - 1))
+    # Determine the list of independent variables based on fix_et:
+    if (fix_et) {
+      # Fixed list: use fixed vectors (vec.event & vec.time) rather than the current inputs.
+      if (is.null(design.survey)) {
+        indep.cox <- setdiff(names(data()), c(vlist()$except_vars, vec.event, vec.time))
+        if (!is.null(id.cluster)) {
+          indep.cox <- setdiff(names(data()), c(vlist()$except_vars, vec.event, vec.time, id.cluster()))
         }
       } else {
-        varsIni <- c(T, rep(F, length(indep.cox) - 1))
+        indep.cox <- setdiff(names(data()),
+                             c(vlist()$except_vars, vec.event, vec.time,
+                               names(design.survey()$allprob),
+                               names(design.survey()$strata),
+                               names(design.survey()$cluster)))
       }
+      # When fixed, initially nothing is selected.
+      selected.indep <- if (!is.null(input$indep_cox)) intersect(input$indep_cox, indep.cox) else character(0)
     } else {
-      indep.cox <- setdiff(names(data()), c(vlist()$except_vars, input$event_cox, input$time_cox, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
-      if (default.unires) {
-        data.design <- design.survey()
-        if (input$check_rangetime == T) {
-          data.design <- subset(data.design, !(get(input$time_cox) < input$range_time[1]))
-          data.design$variables[[input$event_cox]] <- ifelse(data.design$variables[[input$time_cox]] >= input$range_time[2] & data.design$variables[[input$event_cox]] == "1", 0, as.numeric(as.vector(data.design$variables[[input$event_cox]])))
-          data.design$variables[[input$time_cox]] <- ifelse(data.design$variables[[input$time_cox]] >= input$range_time[2], input$range_time[2], data.design$variables[[input$time_cox]])
+      # Dynamic list: exclude the current event and time (as in your original code)
+      if (is.null(design.survey)) {
+        indep.cox <- setdiff(names(data()), c(vlist()$except_vars, input$event_cox, input$time_cox))
+        if (!is.null(id.cluster)) {
+          indep.cox <- setdiff(names(data()), c(vlist()$except_vars, input$event_cox, input$time_cox, id.cluster()))
         }
 
-        data.design$variables[[input$event_cox]] <- as.numeric(as.vector(data.design$variables[[input$event_cox]]))
-
-        varsIni <- sapply(
-          indep.cox,
-          function(v) {
-            forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, sep = ""))
-            coef <- tryCatch(summary(survey::svycoxph(forms, design = data.design))$coefficients, error = function(e) {
-              return(NULL)
-            })
-            sigOK <- ifelse(is.null(coef), F, !all(coef[, "Pr(>|z|)"] > 0.05))
-            return(sigOK)
+        if (default.unires) {
+          data.cox <- data()
+          if (input$check_rangetime == T) {
+            data.cox <- data.cox[!(get(input$time_cox) < input$range_time[1])]
+            data.cox[[input$event_cox]] <- ifelse(
+              data.cox[[input$time_cox]] >= input$range_time[2] & data.cox[[input$event_cox]] == "1",
+              0, as.numeric(as.vector(data.cox[[input$event_cox]]))
+            )
+            data.cox[[input$time_cox]] <- ifelse(
+              data.cox[[input$time_cox]] >= input$range_time[2],
+              input$range_time[2],
+              data.cox[[input$time_cox]]
+            )
           }
-        )
-        if (length(varsIni[varsIni == T]) > limit.unires) {
-          varsIni <- c(T, rep(F, length(indep.cox) - 1))
+          data.cox[[input$event_cox]] <- as.numeric(as.vector(data.cox[[input$event_cox]]))
+          varsIni <- sapply(
+            indep.cox,
+            function(v) {
+              if (is.null(id.cluster)) {
+                forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, sep = ""))
+                coef <- tryCatch(summary(survival::coxph(forms, data = data.cox, ties = ties.coxph))$coefficients,
+                                 error = function(e) { return(NULL) })
+              } else {
+                forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, " + cluster(", id.cluster(), ")", sep = ""))
+                coef <- tryCatch(summary(survival::coxph(forms, data = data.cox, robust = TRUE, ties = ties.coxph))$coefficients,
+                                 error = function(e) { return(NULL) })
+              }
+              sigOK <- ifelse(is.null(coef), FALSE, !all(coef[, "Pr(>|z|)"] > 0.05))
+              return(sigOK)
+            }
+          )
+          if (length(varsIni[varsIni == TRUE]) > limit.unires) {
+            varsIni <- c(TRUE, rep(FALSE, length(indep.cox) - 1))
+          }
+          selected.indep <- indep.cox[varsIni]
+        } else {
+          selected.indep <- indep.cox
         }
       } else {
-        varsIni <- c(T, rep(F, length(indep.cox) - 1))
+        indep.cox <- setdiff(names(data()),
+                             c(vlist()$except_vars, input$event_cox, input$time_cox,
+                               names(design.survey()$allprob),
+                               names(design.survey()$strata),
+                               names(design.survey()$cluster)))
+        if (default.unires) {
+          data.design <- design.survey()
+          if (input$check_rangetime == T) {
+            data.design <- subset(data.design, !(get(input$time_cox) < input$range_time[1]))
+            data.design$variables[[input$event_cox]] <- ifelse(
+              data.design$variables[[input$time_cox]] >= input$range_time[2] &
+                data.design$variables[[input$event_cox]] == "1",
+              0, as.numeric(as.vector(data.design$variables[[input$event_cox]]))
+            )
+            data.design$variables[[input$time_cox]] <- ifelse(
+              data.design$variables[[input$time_cox]] >= input$range_time[2],
+              input$range_time[2],
+              data.design$variables[[input$time_cox]]
+            )
+          }
+          data.design$variables[[input$event_cox]] <- as.numeric(as.vector(data.design$variables[[input$event_cox]]))
+          varsIni <- sapply(
+            indep.cox,
+            function(v) {
+              forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, sep = ""))
+              coef <- tryCatch(summary(survey::svycoxph(forms, design = data.design))$coefficients,
+                               error = function(e) { return(NULL) })
+              sigOK <- ifelse(is.null(coef), FALSE, !all(coef[, "Pr(>|z|)"] > 0.05))
+              return(sigOK)
+            }
+          )
+          if (length(varsIni[varsIni == TRUE]) > limit.unires) {
+            varsIni <- c(TRUE, rep(FALSE, length(indep.cox) - 1))
+          }
+          selected.indep <- indep.cox[varsIni]
+        } else {
+          selected.indep <- indep.cox
+        }
       }
     }
 
-
     tagList(
       selectInput(session$ns("indep_cox"), "Independent variables",
-        choices = mklist(data_varStruct(), indep.cox), multiple = T,
-        selected = indep.cox[varsIni]
+                  choices = mklist(data_varStruct(), indep.cox),
+                  multiple = TRUE,
+                  selected = selected.indep
+
       )
     )
   })
+
+
 
   observeEvent(input$subcheck, {
     output$subvar <- renderUI({

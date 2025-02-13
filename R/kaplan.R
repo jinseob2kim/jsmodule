@@ -185,6 +185,8 @@ optionUI <- function(id) {
 #' @param timeby timeby, Default: NULL
 #' @param range.x range of x axis, Default: NULL
 #' @param range.y range of y axis, Default: NULL
+#' @param vec.event event variables as vector for survival analysis,  Default: NULL
+#' @param vec.time time variables as vector for survival analysis,  Default: NULL
 #' @return Shiny module server for kaplan-meier plot.
 #' @details Shiny module server for kaplan-meier plot.
 #' @examples
@@ -223,7 +225,7 @@ optionUI <- function(id) {
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom labelled var_label<-
-#' @importFrom stats glm as.formula model.frame na.omit
+#' @importFrom stats glm as.formula model.frame na.omit setNames
 #' @importFrom purrr map_lgl
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
@@ -231,9 +233,9 @@ optionUI <- function(id) {
 
 
 kaplanModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL,
-                         timeby = NULL, range.x = NULL, range.y = NULL) {
-  ## To remove NOTE.
+                         timeby = NULL, range.x = NULL, range.y = NULL, vec.event = NULL, vec.time = NULL) {
   brewer.pal.info <- level <- val_label <- variable <- NULL
+  fix_et <- !is.null(vec.event) && !is.null(vec.time) && (length(vec.event) == length(vec.time))
 
   if (is.null(data_varStruct)) {
     data_varStruct <- reactive(list(variable = names(data())))
@@ -294,22 +296,49 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
   })
 
   output$eventtime <- renderUI({
-    validate(
-      need(length(vlist()$factor_01vars) >= 1, "No candidate event variables coded as 0, 1"),
-      need(length(vlist()$conti_vars_positive) >= 1, "No candidate time variables")
-    )
-
-    tagList(
-      selectInput(session$ns("event_km"), "Event",
-        choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
-        selected = NULL
-      ),
-      selectInput(session$ns("time_km"), "Time",
-        choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = F,
-        selected = NULL
+    if (!fix_et) {
+      validate(
+        need(length(vlist()$factor_01vars) >= 1, "No candidate event variables coded as 0, 1"),
+        need(length(vlist()$conti_vars_positive) >= 1, "No candidate time variables")
       )
-    )
+      tagList(
+        selectInput(session$ns("event_km"), "Event",
+                    choices = mklist(data_varStruct(), vlist()$factor_01vars),
+                    multiple = FALSE, selected = NULL),
+        selectInput(session$ns("time_km"), "Time",
+                    choices = mklist(data_varStruct(), vlist()$conti_vars_positive),
+                    multiple = FALSE, selected = NULL)
+      )
+    } else {
+      tagList(
+        selectInput(session$ns("event_km"), "Event", choices = vec.event, selected = NULL),
+        selectInput(session$ns("time_km"), "Time", choices = vec.time, selected = NULL)
+      )
+    }
   })
+
+  if (fix_et) {
+    paired_km     <- setNames(vec.time, vec.event)
+    paired_rev_km <- setNames(vec.event, vec.time)
+
+    observeEvent(input$event_km, {
+      req(input$event_km)
+      new_time <- paired_km[[input$event_km]]
+      if (!is.null(new_time) && new_time != input$time_km) {
+        updateSelectInput(session, "time_km", selected = new_time)
+      }
+    })
+
+    observeEvent(input$time_km, {
+      req(input$time_km)
+      new_event <- paired_rev_km[[input$time_km]]
+      if (!is.null(new_event) && new_event != input$event_km) {
+        updateSelectInput(session, "event_km", selected = new_event)
+      }
+    })
+  }
+
+
 
   observeEvent(input$cmp_risk_check, {
     output$cmp_var <- renderUI({
@@ -342,36 +371,55 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
   output$indep <- renderUI({
     req(!is.null(input$event_km))
     req(!is.null(input$time_km))
+
     mklist <- function(varlist, vars) {
-      lapply(
-        varlist,
-        function(x) {
-          inter <- intersect(x, vars)
-          if (length(inter) == 1) {
-            inter <- c(inter, "")
-          }
-          return(inter)
+      lapply(varlist, function(x) {
+        inter <- intersect(x, vars)
+        if (length(inter) == 1) {
+          inter <- c(inter, "")
         }
-      )
+        return(inter)
+      })
     }
 
+    if (fix_et) {
+      if (is.null(design.survey)) {
+        indep.km <- setdiff(names(data()), c(vlist()$except_vars, vec.event, vec.time))
+        if (!is.null(id.cluster)) {
+          indep.km <- setdiff(names(data()), c(vlist()$except_vars, vec.event, vec.time, id.cluster()))
+        }
+      } else {
+        indep.km <- setdiff(names(data()),
+                            c(vlist()$except_vars, vec.event, vec.time,
+                              names(design.survey()$allprob),
+                              names(design.survey()$strata),
+                              names(design.survey()$cluster)))
+      }
 
-    if (!is.null(design.survey)) {
-      indep.km <- setdiff(names(data()), c(vlist()$except_vars, input$event_km, input$time_km, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
-    } else if (!is.null(id.cluster)) {
-      indep.km <- setdiff(names(data()), c(vlist()$except_vars, input$event_km, input$time_km, id.cluster()))
+      selected_indep <- if (!is.null(input$indep_km) && input$indep_km != "None") input$indep_km else ""
     } else {
-      indep.km <- setdiff(names(data()), c(vlist()$except_vars, input$event_km, input$time_km))
+
+      if (!is.null(design.survey)) {
+        indep.km <- setdiff(names(data()), c(vlist()$except_vars, input$event_km, input$time_km,
+                                             names(design.survey()$allprob),
+                                             names(design.survey()$strata),
+                                             names(design.survey()$cluster)))
+      } else if (!is.null(id.cluster)) {
+        indep.km <- setdiff(names(data()), c(vlist()$except_vars, input$event_km, input$time_km, id.cluster()))
+      } else {
+        indep.km <- setdiff(names(data()), c(vlist()$except_vars, input$event_km, input$time_km))
+      }
+      selected_indep <- if (!is.null(input$indep_km) && input$indep_km != "None") input$indep_km else "None"
     }
 
 
-    tagList(
-      selectInput(session$ns("indep_km"), "Independent variables",
-        choices = c("None", mklist(data_varStruct(), indep.km)), multiple = F,
-        selected = "None"
-      )
-    )
+    selectInput(session$ns("indep_km"), "Independent variables",
+                choices = c("None", mklist(data_varStruct(), indep.km)),
+                multiple = FALSE,
+                selected = selected_indep)
   })
+
+
 
   observeEvent(input$indep_km, {
     output$cutconti <- renderUI({
@@ -615,7 +663,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         }
       }
 
-      value.timeby <- signif(xmax / 7, 1)
+      value.timeby <- round(signif(xmax / 7, 1) / xstep.default) * xstep.default
       if (!is.null(timeby)) {
         value.timeby <- timeby
       }
