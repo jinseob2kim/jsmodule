@@ -261,7 +261,6 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
 
 
       if (fix_et) {
-
         paired_forest <- setNames(vec.time, vec.event)
         paired_rev_forest <- setNames(vec.event, vec.time)
 

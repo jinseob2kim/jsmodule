@@ -303,11 +303,13 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       )
       tagList(
         selectInput(session$ns("event_km"), "Event",
-                    choices = mklist(data_varStruct(), vlist()$factor_01vars),
-                    multiple = FALSE, selected = NULL),
+          choices = mklist(data_varStruct(), vlist()$factor_01vars),
+          multiple = FALSE, selected = NULL
+        ),
         selectInput(session$ns("time_km"), "Time",
-                    choices = mklist(data_varStruct(), vlist()$conti_vars_positive),
-                    multiple = FALSE, selected = NULL)
+          choices = mklist(data_varStruct(), vlist()$conti_vars_positive),
+          multiple = FALSE, selected = NULL
+        )
       )
     } else {
       tagList(
@@ -318,7 +320,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
   })
 
   if (fix_et) {
-    paired_km     <- setNames(vec.time, vec.event)
+    paired_km <- setNames(vec.time, vec.event)
     paired_rev_km <- setNames(vec.event, vec.time)
 
     observeEvent(input$event_km, {
@@ -389,21 +391,26 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
           indep.km <- setdiff(names(data()), c(vlist()$except_vars, vec.event, vec.time, id.cluster()))
         }
       } else {
-        indep.km <- setdiff(names(data()),
-                            c(vlist()$except_vars, vec.event, vec.time,
-                              names(design.survey()$allprob),
-                              names(design.survey()$strata),
-                              names(design.survey()$cluster)))
+        indep.km <- setdiff(
+          names(data()),
+          c(
+            vlist()$except_vars, vec.event, vec.time,
+            names(design.survey()$allprob),
+            names(design.survey()$strata),
+            names(design.survey()$cluster)
+          )
+        )
       }
 
       selected_indep <- if (!is.null(input$indep_km) && input$indep_km != "None") input$indep_km else ""
     } else {
-
       if (!is.null(design.survey)) {
-        indep.km <- setdiff(names(data()), c(vlist()$except_vars, input$event_km, input$time_km,
-                                             names(design.survey()$allprob),
-                                             names(design.survey()$strata),
-                                             names(design.survey()$cluster)))
+        indep.km <- setdiff(names(data()), c(
+          vlist()$except_vars, input$event_km, input$time_km,
+          names(design.survey()$allprob),
+          names(design.survey()$strata),
+          names(design.survey()$cluster)
+        ))
       } else if (!is.null(id.cluster)) {
         indep.km <- setdiff(names(data()), c(vlist()$except_vars, input$event_km, input$time_km, id.cluster()))
       } else {
@@ -414,9 +421,10 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
 
     selectInput(session$ns("indep_km"), "Independent variables",
-                choices = c("None", mklist(data_varStruct(), indep.km)),
-                multiple = FALSE,
-                selected = selected_indep)
+      choices = c("None", mklist(data_varStruct(), indep.km)),
+      multiple = FALSE,
+      selected = selected_indep
+    )
   })
 
 
