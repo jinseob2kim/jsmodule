@@ -864,13 +864,13 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         tb <- cbind(rn, data.frame(tb))
         colnames(tb)[1] <- " "
 
-        officer::read_docx() |>
+        officer::read_docx() %>%
           body_add_flextable(
             tb %>%
               flextable() %>%
               autofit() %>%
               theme_booktabs(bold_header = TRUE)
-          ) |>
+          ) %>%
           print(target = file)
       }
     )
@@ -939,13 +939,13 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         tb <- cbind(rn, data.frame(tb))
         colnames(tb) <- c(" ", cn)
 
-        officer::read_docx() |>
+        officer::read_docx() %>%
           body_add_flextable(
             tb %>%
               flextable() %>%
               autofit() %>%
               theme_booktabs(bold_header = TRUE)
-          ) |>
+          ) %>%
           print(target = file)
       }
     )
@@ -1009,13 +1009,13 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         tb <- cbind(rn, data.frame(tb))
         colnames(tb) <- c(" ", cn)
 
-        officer::read_docx() |>
+        officer::read_docx() %>%
           body_add_flextable(
             tb %>%
               flextable() %>%
               autofit() %>%
               theme_booktabs(bold_header = TRUE)
-          ) |>
+          ) %>%
           print(target = file)
       }
     )
@@ -1079,13 +1079,13 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         tb <- cbind(rn, data.frame(tb))
         colnames(tb) <- c(" ", cn)
 
-        officer::read_docx() |>
+        officer::read_docx() %>%
           body_add_flextable(
             tb %>%
               flextable() %>%
               autofit() %>%
               theme_booktabs(bold_header = TRUE)
-          ) |>
+          ) %>%
           print(target = file)
       }
     )
