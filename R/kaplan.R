@@ -670,7 +670,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
           xmax <- max(res.km$time)
         }
       }
-
+      xstep.default <- ifelse(xmax <= 365, 0.5, 5)
       value.timeby <- round(signif(xmax / 7, 1) / xstep.default) * xstep.default
       if (!is.null(timeby)) {
         value.timeby <- timeby
@@ -683,7 +683,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         range.y <- c(0, 1)
       }
 
-      xstep.default <- ifelse(xmax <= 365, 0.5, 5)
+
 
 
 
