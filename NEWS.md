@@ -1,3 +1,8 @@
+# jsmodule 1.6.4
+## Update
+- Added an option to adjust the line thickness of the Kaplan-Meier plot.
+
+
 # jsmodule 1.6.3
 ## Update
 - Added an option to the Kaplan-Meier, Cox, and ForestCox modules that allows the outcome (event) and time variables to be linked when the user specifies vec.event and vec.time. When this option is enabled, selecting an event variable automatically updates the corresponding time variable, and vice versa.
