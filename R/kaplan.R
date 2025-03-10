@@ -754,7 +754,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
             jskm::jskm(res.km,
               pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
               cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
-              showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk = status_cmprsk, linewidth=input$linewidth_km
+              showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk = status_cmprsk, linewidth = input$linewidth_km
             )
           )
         } else {
@@ -762,7 +762,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
             jskm::jskm(res.km,
               pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
               cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
-              showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk = status_cmprsk, linewidth=input$linewidth_km
+              showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk = status_cmprsk, linewidth = input$linewidth_km
             )
           )
         }
@@ -771,7 +771,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
           jskm::jskm(res.km,
             pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
             cumhaz = input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
-            showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk = status_cmprsk, linewidth=input$linewidth_km
+            showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk = status_cmprsk, linewidth = input$linewidth_km
           )
         )
       }
@@ -780,7 +780,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         jskm::svyjskm(res.km,
           pval = input$pval, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
           cumhaz = input$cumhaz, design = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
-          showpercent = input$showpercent, surv.scale = surv.scale, linewidth=input$linewidth_km
+          showpercent = input$showpercent, surv.scale = surv.scale, linewidth = input$linewidth_km
         )
       )
     }
@@ -863,7 +863,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         ),
         textInput(session$ns("xaxis_km"), "x-axis text", "Time-to-event"),
         radioButtons(session$ns("pal_km"), "Line color", choices = rownames(RColorBrewer::brewer.pal.info), selected = "Set1", inline = T),
-        sliderInput(session$ns("linewidth_km"),'Line Width', min=0, max=2, value=1, step=0.1)
+        sliderInput(session$ns("linewidth_km"), "Line Width", min = 0, max = 2, value = 1, step = 0.1)
       )
     } else {
       tagList(
@@ -886,7 +886,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         checkboxInput(session$ns("linetype"), "Different line type", value = F),
         h3("Others"),
         textInput(session$ns("xaxis_km"), "x-axis text", "Time-to-event"),
-        sliderInput(session$ns("linewidth_km"),'Line Width', min=0, max=2, value=1, step=0.1)
+        sliderInput(session$ns("linewidth_km"), "Line Width", min = 0, max = 2, value = 1, step = 0.1)
       )
     }
   })
