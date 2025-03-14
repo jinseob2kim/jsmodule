@@ -275,6 +275,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       # When fixed, initially nothing is selected.
       selected.indep <- if (!is.null(input$indep_cox)) intersect(input$indep_cox, indep.cox) else character(0)
     } else {
+      print('nofix')
       # Dynamic list: exclude the current event and time (as in your original code)
       if (is.null(design.survey)) {
         indep.cox <- setdiff(names(data()), c(vlist()$except_vars, input$event_cox, input$time_cox))
@@ -324,7 +325,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
           }
           selected.indep <- indep.cox[varsIni]
         } else {
-          selected.indep <- indep.cox
+          selected.indep <- indep.cox[1]
         }
       } else {
         indep.cox <- setdiff(
