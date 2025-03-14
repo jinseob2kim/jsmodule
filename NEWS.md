@@ -1,3 +1,8 @@
+# jsmodule 1.6.5
+## Update
+- Select first variable when vec.event and vec.time is NULL in coxph.R.
+
+
 # jsmodule 1.6.4
 ## Update
 - Added an option to adjust the line thickness of the Kaplan-Meier plot.

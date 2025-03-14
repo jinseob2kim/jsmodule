@@ -324,7 +324,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
           }
           selected.indep <- indep.cox[varsIni]
         } else {
-          selected.indep <- indep.cox
+          selected.indep <- indep.cox[1]
         }
       } else {
         indep.cox <- setdiff(
