@@ -27,7 +27,9 @@ coxUI <- function(id) {
     uiOutput(ns("subval")),
     checkboxInput(ns("step_check"), "Stepwise variable selection"),
     uiOutput(ns("step_direction")),
-    uiOutput(ns("step_scope"))
+    uiOutput(ns("step_scope")),
+    checkboxInput(ns("pcut_univariate"),"filter_pvalue", value = FALSE),
+    uiOutput(ns("pcut_slider"))
   )
 }
 
@@ -153,7 +155,24 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     ))
   })
 
+  output$pcut_slider <- renderUI({
+    req(input$pcut_univariate)
+    print("Rendering sliderInput!")
+    sliderInput(session$ns("pcut"), "Choose a p-value", min = 0, max = 0.1, value = 0.05, step = 0.001)
+  })
 
+
+  observeEvent(input$pcut_univariate, {
+    if (input$pcut_univariate) {
+      updateCheckboxInput(session, "step_check", value = FALSE)
+    }
+  })
+
+  observeEvent(c(input$step_check), {
+    if (input$step_check) {
+      updateCheckboxInput(session, "pcut_univariate", value = FALSE)
+    }
+  })
 
 
   output$eventtime <- renderUI({
@@ -559,7 +578,12 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
         res.cox <- stats::step(eval(cc.step), direction = input$step_direction, scope = list(upper = scope[[1]], lower = scope[[2]]))
       }
-      tb.cox <- jstable::cox2.display(res.cox, dec = input$decimal)
+      if(input$pcut_univariate==FALSE){
+        tb.cox <- jstable::cox2.display(res.cox, dec = input$decimal)
+      }else{
+        tb.cox <- jstable::cox2.display(res.cox, dec = input$decimal, pcut.univariate = input$pcut)
+      }
+
       tb.cox <- jstable::LabeljsCox(tb.cox, ref = label.regress)
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
       sig <- out.cox[, ncol(out.cox)]
@@ -624,7 +648,11 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
           need(is.null(design.survey), "Survey cox model can't support stepwise selection")
         )
       }
-      tb.cox <- jstable::svycox.display(res.cox, decimal = input$decimal)
+      if(input$pcut_univariate==FALSE){
+        tb.cox <- jstable::svycox.display(res.cox, decimal = input$decimal)
+      }else{
+        tb.cox <- jstable::svycox.display(res.cox, decimal = input$decimal, pcut.univariate = input$pcut)
+      }
       tb.cox <- jstable::LabeljsCox(tb.cox, label.regress)
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
       sig <- out.cox[, ncol(out.cox)]

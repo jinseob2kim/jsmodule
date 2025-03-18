@@ -1,5 +1,6 @@
 # jsmodule 1.6.5
 ## Update
+- Added a slider to adjust pcut.univariate, allowing multivariate analysis to be performed only with significant variables.
 - Select first variable when vec.event and vec.time is NULL in coxph.R.
 
 

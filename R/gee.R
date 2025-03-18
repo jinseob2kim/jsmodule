@@ -56,7 +56,9 @@ GEEModuleUI <- function(id) {
     ),
     checkboxInput(ns("regressUI_subcheck"), "Sub-group analysis"),
     uiOutput(ns("regressUI_subvar")),
-    uiOutput(ns("regressUI_subval"))
+    uiOutput(ns("regressUI_subval")),
+    checkboxInput(ns("pcut_univariate"),"filter_pvalue", value = FALSE),
+    uiOutput(ns("pcut_slider"))
   )
 }
 
@@ -172,6 +174,11 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
     ))
   })
 
+  output$pcut_slider <- renderUI({
+    req(input$pcut_univariate)
+    print("Rendering sliderInput!")
+    sliderInput(session$ns("pcut"), "Choose a p-value", min = 0, max = 0.1, value = 0.05, step = 0.001)
+  })
 
 
   output$dep <- renderUI({
@@ -295,7 +302,12 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
 
     nomiss <- stats::complete.cases(data.regress[, c(y, xs), with = F])
     res.gee <- geepack::geeglm(form, data = data.regress[nomiss, ], family = "gaussian", id = get(idgee_Plz_Noduplicate), corstr = "exchangeable")
-    info.gee <- jstable::geeglm.display(res.gee, decimal = input$decimal)
+    if(input$pcut_univariate==FALSE){
+      info.gee <- jstable::geeglm.display(res.gee, decimal = input$decimal)
+    }else{
+      info.gee <- jstable::geeglm.display(res.gee, decimal = input$decimal, pcut.univariate = input$pcut)
+    }
+
     info.gee$caption <- gsub("idgee_Plz_Noduplicate", idgee_Plz_Noduplicate, info.gee$caption)
     ltb.gee <- jstable::LabeljsGeeglm(info.gee, ref = label.regress)
     out.tb <- rbind(ltb.gee$table, ltb.gee$metric)
@@ -431,6 +443,11 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
     ))
   })
 
+  output$pcut_slider <- renderUI({
+    req(input$pcut_univariate)
+    print("Rendering sliderInput!")
+    sliderInput(session$ns("pcut"), "Choose a p-value", min = 0, max = 0.1, value = 0.05, step = 0.001)
+  })
 
 
   output$dep <- renderUI({
@@ -560,7 +577,11 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
 
     nomiss <- stats::complete.cases(data.logistic[, c(y, xs), with = F])
     res.gee <- geepack::geeglm(form, data = data.logistic[nomiss, ], family = "binomial", id = get(idgee_Plz_Noduplicate), corstr = "exchangeable")
-    info.gee <- jstable::geeglm.display(res.gee, decimal = input$decimal)
+    if(input$pcut_univariate==FALSE){
+      info.gee <- jstable::geeglm.display(res.gee, decimal = input$decimal)
+    }else{
+      info.gee <- jstable::geeglm.display(res.gee, decimal = input$decimal, input$pcut)
+    }
     info.gee$caption <- gsub("idgee_Plz_Noduplicate", idgee_Plz_Noduplicate, info.gee$caption)
     ltb.gee <- jstable::LabeljsGeeglm(info.gee, ref = label.regress)
     out.tb <- rbind(ltb.gee$table, ltb.gee$metric)
