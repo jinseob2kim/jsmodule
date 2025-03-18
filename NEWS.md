@@ -1,3 +1,7 @@
+# jsmodule 1.6.5
+## Update
+- Added a slider to adjust pcut.univariate, allowing multivariate analysis to be performed only with significant variables.
+
 # jsmodule 1.6.4
 ## Update
 - Added an option to adjust the line thickness of the Kaplan-Meier plot.
