@@ -14,7 +14,8 @@ regressModule2(
   nfactor.limit = 10,
   design.survey = NULL,
   default.unires = T,
-  limit.unires = 20
+  limit.unires = 20,
+  vec.event = NULL
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ regressModule2(
 \item{default.unires}{Set default independent variables using univariate analysis, Default: T}
 
 \item{limit.unires}{Change to default.unires = F if number of independent variables > limit.unires, Default: 20}
+
+\item{vec.event}{event variables as vector for linear regression,  Default: NULL}
 }
 \value{
 Shiny modulde server for linear regression.

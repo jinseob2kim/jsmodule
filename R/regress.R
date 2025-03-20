@@ -126,6 +126,7 @@ regressModuleUI <- function(id) {
 #' @param design.survey reactive survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis, Default: T
 #' @param limit.unires Change to default.unires = F if number of independent variables > limit.unires, Default: 20
+#' @param vec.event event variables as vector for linear regression,  Default: NULL
 #' @return Shiny modulde server for linear regression.
 #' @details Shiny modulde server for linear regression.
 #' @examples
@@ -165,7 +166,7 @@ regressModuleUI <- function(id) {
 #' @importFrom stats glm as.formula model.frame model.matrix step
 #' @importFrom purrr map_lgl
 
-regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
+regressModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, vec.event=NULL) {
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
 
@@ -220,19 +221,38 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 
 
   output$dep <- renderUI({
-    tagList(
-      selectInput(session$ns("dep_vars"), "Dependent variable",
-        choices = vlist()$conti_list, multiple = F,
-        selected = vlist()$conti_vars[1]
+    if(is.null(vec.event)){
+      tagList(
+        selectInput(session$ns("dep_vars"), "Dependent variable",
+                    choices = vlist()$conti_list, multiple = F,
+                    selected = vlist()$conti_vars[1]
+        )
       )
-    )
+    }else{
+      tagList(
+        selectInput(session$ns("dep_vars"), "Dependent variable",
+                    choices = , multiple = F,
+                    selected = vec.event[1]
+        )
+      )
+
+    }
+
   })
 
 
   output$indep <- renderUI({
     req(!is.null(input$dep_vars))
     if (is.null(design.survey)) {
-      vars <- setdiff(setdiff(names(data()), vlist()$except_vars), input$dep_vars)
+      if (is.null(vec.event)){
+        vars <- setdiff(setdiff(names(data()), vlist()$except_vars), input$dep_vars)
+        #print(vlist()$conti_list)
+
+      }else{
+        vars <- setdiff(setdiff(setdiff(names(data()), vlist()$except_vars), input$dep_vars), vec.event)
+      }
+
+
       if (default.unires) {
         varsIni <- sapply(
           vars,
@@ -253,7 +273,14 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
         varsIni <- c(T, rep(F, length(vars) - 1))
       }
     } else {
-      vars <- setdiff(setdiff(names(data()), vlist()$except_vars), c(input$dep_vars, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
+      #여기를 수정
+      if(is.null(vec.event)){
+        vars <- setdiff(setdiff(names(data()), vlist()$except_vars), c(input$dep_vars, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster)))
+        print(vlist()$conti_list)
+      }else{
+        vars <- setdiff(setdiff(setdiff(names(data()), vlist()$except_vars), c(input$dep_vars, names(design.survey()$allprob), names(design.survey()$strata), names(design.survey()$cluster))),vec.event)
+      }
+
       if (default.unires) {
         varsIni <- sapply(
           vars,
@@ -553,6 +580,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @param design.survey reactive survey data. default: NULL
 #' @param default.unires Set default independent variables using univariate analysis, Default: T
 #' @param limit.unires Change to default.unires = F if number of independent variables > limit.unires, Default: 20
+#' @param vec.event event variables as vector for logistic regression,  Default: NULL
 #' @return Shiny modulde server for logistic regression.
 #' @details Shiny modulde server for logistic regression.
 #' @examples
@@ -593,7 +621,7 @@ regressModule2 <- function(input, output, session, data, data_label, data_varStr
 #' @importFrom purrr map_lgl
 
 
-logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20) {
+logisticModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, vec.event=NULL) {
   ## To remove NOTE.
   level <- val_label <- variable <- NULL
 
@@ -644,19 +672,34 @@ logisticModule2 <- function(input, output, session, data, data_label, data_varSt
     validate(
       need(length(vlist()$factor2_vars) >= 1, "No candidate dependent variable")
     )
-    tagList(
-      selectInput(session$ns("dep_vars"), "Dependent variable",
-        choices = vlist()$factor2_list, multiple = F,
-        selected = vlist()$factor2_vars[1]
+    if(is.null(vec.event)){
+      tagList(
+        selectInput(session$ns("dep_vars"), "Dependent variable",
+                    choices = vlist()$factor2_list, multiple = F,
+                    selected = vlist()$factor2_vars[1]
+        )
       )
-    )
+    }else{
+      tagList(
+        selectInput(session$ns("dep_vars"), "Dependent variable",
+                    choices = vec.event, multiple = F,
+                    selected = vec.event[1]
+        )
+      )
+    }
+
   })
 
 
   output$indep <- renderUI({
     req(!is.null(input$dep_vars))
     if (is.null(design.survey)) {
-      vars <- setdiff(setdiff(names(data()), vlist()$except_vars), input$dep_vars)
+      if(is.null(vec.event)){
+        vars <- setdiff(setdiff(names(data()), vlist()$except_vars), input$dep_vars)
+      }else{
+        vars <- setdiff(setdiff(setdiff(names(data()), vlist()$except_vars), input$dep_vars), vec.event)
+      }
+
       if (default.unires) {
         varsIni <- sapply(
           vars,
