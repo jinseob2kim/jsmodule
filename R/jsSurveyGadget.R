@@ -47,8 +47,14 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
 
   data.list <- list(data = out, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars)
 
+  addResourcePath("www", system.file("www", package = "jsmodule"))
+
   ui <- navbarPage(
     "Survey data analysis",
+    header=
+      singleton(tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/style_survey.css")
+      )),
     tabPanel("Data",
       icon = icon("table"),
       sidebarLayout(
@@ -525,7 +531,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -544,7 +550,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -560,7 +566,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey, default.unires = F)
@@ -574,7 +580,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, design.survey = design.survey, default.unires = F)
@@ -587,7 +593,7 @@ jsSurveyGadget <- function(data, nfactor.limit = 20) {
           opt.tbreg(out_cox()$caption),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
@@ -692,11 +698,17 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
   data.example <- utils::data("nhanes", package = "survey")
   options(shiny.maxRequestSize = max.filesize * 1024^2, survey.lonely.psu = "certainty")
 
+  addResourcePath("www", system.file("www", package = "jsmodule"))
+
   ui <- navbarPage(
     "Survey data analysis",
-    header = tagList(
-      shinyjs::useShinyjs()
-    ),
+    # header = tagList(
+    #   shinyjs::useShinyjs()
+    # ),
+    header=
+      singleton(tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/style_survey.css")
+      )),
     inverse = TRUE,
     tabPanel("Data",
       icon = icon("table"),
@@ -1040,7 +1052,7 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -1114,7 +1126,7 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -1186,7 +1198,7 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_logistic <- callModule(logisticModule2, "logistic", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, default.unires = F, nfactor.limit = nfactor.limit)
@@ -1256,7 +1268,7 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, design.survey = design.survey, default.unires = F, nfactor.limit = nfactor.limit)
@@ -1325,7 +1337,7 @@ jsSurveyExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)

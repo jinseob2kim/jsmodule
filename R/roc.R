@@ -505,8 +505,9 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
 
 
-
+# 요기
   indeps <- reactive(lapply(1:nmodel(), function(i) {
+    req(nmodel())
     input[[paste0("indep_roc", i)]]
   }))
 
@@ -1031,13 +1032,13 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
   })
 
   observe({
-    if (nmodel() == 1 && length(indeps()[[1]]) == 1) {
+    if (nmodel() == 1 && length(indeproc()[[1]]) == 1) {
       output$cutval <- renderUI({
-        req(indeps()[[1]])
-        selected_var <- data()[[indeps()[[1]][1]]]
-        if (!is.null(input$event_roc) && !is.null(indeps()[[1]][1])) {
-          clean_data <- data()[complete.cases(data()[, c(input$event_roc, indeps()[[1]][1]), with = FALSE]), ]
-          forms <- paste0(input$event_roc, "~", indeps()[[1]][1])
+        req(indeproc()[[1]])
+        selected_var <- data()[[indeproc()[[1]][1]]]
+        if (!is.null(input$event_roc) && !is.null(indeproc()[[1]][1])) {
+          clean_data <- data()[complete.cases(data()[, c(input$event_roc, indeproc()[[1]][1]), with = FALSE]), ]
+          forms <- paste0(input$event_roc, "~", indeproc()[[1]][1])
           mm <- glm(as.formula(forms), data = clean_data, family = binomial)
           roc_obj <- pROC::roc(clean_data[[input$event_roc]], predict(mm, type = "response"))
           best_threshold <- pROC::coords(roc_obj, "best", input = "threshold", best.method = "youden")["threshold"]
@@ -1072,9 +1073,10 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
 
 
 
-
+#여기
 
   indeps <- reactive(lapply(1:nmodel(), function(i) {
+    req(nmodel())
     input[[paste0("indep_roc", i)]]
   }))
 

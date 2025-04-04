@@ -51,8 +51,14 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
 
   data.list <- list(data = out, factor_original = factor_vars, conti_original = conti_vars, factor_adds_list = names(nclass)[nclass <= nfactor.limit], factor_adds = add_vars)
 
+  addResourcePath("www", system.file("www", package = "jsmodule"))
+
   ui <- navbarPage(
     "Repeated measure analysis",
+    header=
+      singleton(tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/style_repeated.css")
+      )),
     tabPanel("Data",
       icon = icon("table"),
       sidebarLayout(
@@ -444,7 +450,7 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -460,7 +466,7 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_logistic <- callModule(GEEModuleLogistic, "logistic", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, id.gee = id.gee)
@@ -474,7 +480,7 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit, default.unires = T, id.cluster = id.gee)
@@ -487,7 +493,7 @@ jsRepeatedGadget <- function(data, nfactor.limit = 20) {
           opt.tbreg(out_cox()$caption),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)
@@ -589,11 +595,18 @@ jsRepeatedAddin <- function() {
 jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
   options(shiny.maxRequestSize = max.filesize * 1024^2)
 
+
+  addResourcePath("www", system.file("www", package = "jsmodule"))
+
   ui <- navbarPage(
     "Repeated measure analysis",
-    header = tagList(
-      shinyjs::useShinyjs()
-    ),
+    # header = tagList(
+    #   shinyjs::useShinyjs()
+    # ),
+    header=
+      singleton(tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/style_repeated.css")
+      )),
     inverse = TRUE,
     tabPanel("Data",
       icon = icon("table"),
@@ -919,7 +932,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -991,7 +1004,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_logistic <- callModule(GEEModuleLogistic, "logistic", data = data, data_label = data.label, data_varStruct = NULL, id.gee = id.gee, nfactor.limit = nfactor.limit)
@@ -1061,7 +1074,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_cox <- callModule(coxModule, "cox", data = data, data_label = data.label, data_varStruct = NULL, default.unires = T, id.cluster = id.gee, nfactor.limit = nfactor.limit)
@@ -1130,7 +1143,7 @@ jsRepeatedExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     out_ggpairs <- callModule(ggpairsModule2, "ggpairs", data = data, data_label = data.label, data_varStruct = NULL, nfactor.limit = nfactor.limit)

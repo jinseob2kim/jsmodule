@@ -1,7 +1,7 @@
 Package: jsmodule
 Title: 'RStudio' Addins and 'Shiny' Modules for Medical Research
-Version: 1.6.5
-Date: 2025-03-20
+Version: 1.6.6
+Date: 2025-04-04
 Authors@R: c(
   person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c("aut", "cre"),  comment = c(ORCID = "0000-0002-9403-605X")),
   person("Zarathu", role = c("cph", "fnd")),
@@ -13,7 +13,8 @@ Authors@R: c(
   person("Youngsun", "Park", email = "ddspys@gmail.com", role = c("aut"), comment = c(ORCID = "0009-0009-9336-2281")),
   person("Hyungwoo", "Jo", email = "street_4@naver.com", role = c("aut")),
   person("Jeongmin", "Seo", email = "jmme425@naver.com", role = c("aut")),
-  person("Sungho", "Choi", email = "1213sam0@gmail.com", role = c("aut"))
+  person("Sungho", "Choi", email = "1213sam0@gmail.com", role = c("aut")),
+  person("Yeji", "Kang", email = "yejikang63@gmail.com", role = c("aut"))
   )
 Description: 'RStudio' addins and 'Shiny' modules for descriptive statistics, regression and survival analysis.
 Depends: R (>= 3.4.0)

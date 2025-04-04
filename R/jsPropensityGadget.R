@@ -63,8 +63,15 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
   # except_vars <- names(nclass)[ nclass== 1 | nclass >= nfactor.limit]
   factor_adds <- names(nclass)[nclass >= 1 & nclass <= 5]
 
+
+  addResourcePath("www", system.file("www", package = "jsmodule"))
+
   ui <- navbarPage(
     "Propensity score analysis",
+    header=
+      singleton(tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/style_repeated.css")
+      )),
     tabPanel("Data",
       icon = icon("table"),
       sidebarLayout(
@@ -716,7 +723,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -733,7 +740,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -750,7 +757,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -770,7 +777,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     output$warning_linear_original <- renderText({
@@ -786,7 +793,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     output$warning_linear_ps <- renderText({
@@ -802,7 +809,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     ## Logistic
@@ -820,7 +827,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     output$logistic_ps <- renderDT({
@@ -832,7 +839,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     output$logistic_iptw <- renderDT({
@@ -844,7 +851,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     ## Cox
@@ -861,7 +868,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
           opt.tbreg(out_cox_original()$caption),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     output$cox_ps <- renderDT({
@@ -872,7 +879,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
           opt.tbreg(out_cox_ps()$caption),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     output$cox_iptw <- renderDT({
@@ -883,7 +890,7 @@ jsPropensityGadget <- function(data, nfactor.limit = 20) {
           opt.tbreg(out_cox_iptw()$caption),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     ## ggpairs
@@ -1061,12 +1068,19 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
   iptw <- NULL
   options(shiny.maxRequestSize = max.filesize * 1024^2)
 
+  addResourcePath("www", system.file("www", package = "jsmodule"))
+
+
   ui <- navbarPage(
     "Propensity score analysis",
+    header=
+      singleton(tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/style_repeated.css")
+      )),
     inverse = TRUE,
-    header = tagList(
-      shinyjs::useShinyjs()
-    ),
+    # header = tagList(
+    #   shinyjs::useShinyjs()
+    # ),
     tabPanel("Data",
       icon = icon("table"),
       sidebarLayout(
@@ -1551,7 +1565,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -1623,7 +1637,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -1695,7 +1709,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         )
       )
       if ("sig" %in% colnames(tb)) {
-        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+        out.tb1 <- out.tb1 %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
       }
       return(out.tb1)
     })
@@ -1770,7 +1784,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     output$warning_linear_original <- renderText({
@@ -1842,7 +1856,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     output$warning_linear_ps <- renderText({
@@ -1914,7 +1928,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     ## Logistic
@@ -1988,7 +2002,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     observeEvent(input$dl.logreg.ps.clk, {
@@ -2056,7 +2070,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     observeEvent(input$dl.logreg.iptw.clk, {
@@ -2124,7 +2138,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           list(columnDefs = list(list(visible = FALSE, targets = hide))),
           list(scrollX = TRUE)
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     ## Cox
@@ -2197,7 +2211,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     observeEvent(input$dl.coxreg.ps.clk, {
@@ -2264,7 +2278,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     observeEvent(input$dl.coxreg.iptw.clk, {
@@ -2331,7 +2345,7 @@ jsPropensityExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           ),
           list(columnDefs = list(list(visible = FALSE, targets = hide)))
         )
-      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "yellow"))
+      ) %>% formatStyle("sig", target = "row", backgroundColor = styleEqual("**", "#E9EA8D"))
     })
 
     ## ggpairs

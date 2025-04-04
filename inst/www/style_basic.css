@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
+
+body, .navbar, .container-fluid, .form-control, .btn, .well {
+  font-family: 'Roboto Slab', serif !important;
+}
+
+body {
+  background-color: #FCFCFC;
+  color: #1A1A1A;
+}
+
+table.dataTable tbody tr.selected>*{
+  box-shadow: inset 0 0 0 9999px #9DBF9E !important;
+}
+
+table.dataTable tbody tr:hover > * {
+  background-color: #E3F0E3 !important;
+}
+
+table.dataTable thead th {
+  background-color: #DDEDDD;
+  font-weight: bold;
+}
+
+table.dataTable tbody tr.selected {
+  outline: 0.1px solid #6A8A66 !important;
+}
+
+.navbar-default .navbar-nav > li > a,
+.navbar-default .navbar-brand {
+  color: #ffffff !important;
+}
+
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-brand:hover {
+  color: #A3CFA3 !important;
+}
+
+.navbar.navbar-inverse {
+  background-color: #1E3C1E !important;
+  border-color: #1E3C1E !important;
+}
+
+.navbar.navbar-inverse .navbar-nav > li > a,
+.navbar.navbar-inverse .navbar-brand {
+  color: #ffffff !important;
+}
+
+.navbar.navbar-inverse .navbar-nav > li > a:hover,
+.navbar.navbar-inverse .navbar-brand:hover {
+  color:	#A3CFA3 !important;
+  background-color: transparent !important;
+}
+
+.navbar.navbar-inverse .navbar-nav > .active > a,
+.navbar.navbar-inverse .navbar-nav > .active > a:hover,
+.navbar.navbar-inverse .navbar-nav > .active > a:focus {
+  background-color:	#1E3C1E !important;
+  color: #ffffff !important;
+}
+
+.hover>tbody>tr.selected:hover>*, table.dataTable.display>tbody>tr.selected:hover>*{
+  box-shadow: inset 0 0 0 9999px	#A3CFA3 !important;
+}
+
+.progress-bar{
+  background: #6A8A66 !important;
+}
+
+.dataTables_scrollBody, .dataTables_scroll{
+  margin-bottom: 1em;
+}
+
+#downloadData {
+  color: #fff;
+  background-color: #1E3C1E;
+}
+
+.sidebarPanel, .well, .panel, .form-group, .form-control {
+  background-color: #F9FAED !important;
+  color: #000000 !important;
+}
+
+.well {
+  border: 2px solid #DEDCA6;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.sidebarPanel label,
+.sidebarPanel .shiny-input-container,
+.sidebarPanel input,
+.sidebarPanel select,
+.sidebarPanel .btn,
+.sidebarPanel .form-control {
+  color: #000000 !important;
+}
+
+.sidebarPanel .btn {
+  background-color: #4A774A;
+  color: #ffffff;
+}
+
+.sidebarPanel .btn:hover {
+  background-color: #23374D;
+}
+
+.app-title {
+  text-shadow: 1px 2px 3px #bebebe;
+  font-family: 'Roboto Slab', serif;
+  font-weight: bold;
+}
+
+.nav-pills > li > a {
+  background-color: #4A774A;
+  color: #ffffff;
+  border-radius: 5px;
+  margin-right: 5px;
+}
+
+.nav-pills > li.active > a,
+.nav-pills > li.active > a:focus,
+.nav-pills > li.active > a:hover {
+  background-color: #1E3C1E;
+  color: #ffffff;
+}
+
+.nav-pills > li > a:hover {
+  background-color: #23374D;
+  color: #ffffff;
+}
+
+.irs-bar,
+.irs-bar-edge,
+.irs-single,
+.irs-from,
+.irs-to,
+.irs-slider {
+  background-color: #4A774A !important;
+  border-color: #4A774A !important;
+}
+
+select:focus,
+select:active,
+select:hover,
+.form-control:focus {
+  border-color: #4A774A !important;
+  box-shadow: 0 0 5px #4A774A !important;
+}
+
+.irs-grid-text {
+  color: #1A1A1A;
+}
+
+.btn:focus,
+.btn:active,
+.btn:hover {
+  box-shadow: none !important;
+  background-color: #4A774A !important;
+  border-color: #4A774A !important;
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus {
+  background-color: #4A774A !important;
+  color: #ffffff !important;
+}
+
+.btn-danger, .btn-danger:focus, .btn-danger:hover {
+  background-color: #4A774A !important;
+  border-color: #4A774A !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #4A774A !important;
+  border-color: #4A774A !important;
+}
+
+input[type="checkbox"]:checked::before {
+  background-color: #4A774A !important;
+  color: white !important;
+}
+
+input[type="checkbox"]:focus {
+  box-shadow: 0 0 0 0.15rem rgba(74, 119, 74, 0.4) !important;
+}
+
+.btn {
+  background-color: #4A774A;
+  border-color: #4A774A;
+  color: white;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: 500;
+}
+
+h4, h5 {
+  font-weight: 600;
+  color: #1E3C1E;
+}
