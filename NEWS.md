@@ -1,3 +1,7 @@
+# jsmodule 1.6.6
+## Update
+- Modified the jsmodule theme to enhance visual consistency and readability.
+
 # jsmodule 1.6.5
 ## Update
 - Added a slider to adjust pcut.univariate, allowing multivariate analysis to be performed only with significant variables.

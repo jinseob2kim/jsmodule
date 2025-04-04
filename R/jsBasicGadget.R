@@ -47,12 +47,13 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 
   ui <- navbarPage(
     header = tagList(
-      includeCSS(system.file("www", "style.css", package = "jsmodule")),
+      includeCSS(system.file("www", "style_basic.css", package = "jsmodule")),
       tags$head(tags$link(rel = "shortcut icon", href = "www/favicon.ico"))
     ),
     # theme = bslib::bs_theme(bootswatch = 'solar'),
     inverse = TRUE,
     title = span(
+      class ="app-title",
       "Basic statistics",
       span( # Github & Homepage
         a(
@@ -814,13 +815,14 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
   ui <- navbarPage(
     header = tagList(
-      includeCSS(system.file("www", "style.css", package = "jsmodule")),
+      includeCSS(system.file("www", "style_basic.css", package = "jsmodule")),
       tags$head(tags$link(rel = "shortcut icon", href = "www/favicon.ico")),
       shinyjs::useShinyjs()
     ),
     # theme = bslib::bs_theme(bootswatch = 'solar'),
     inverse = TRUE,
     title = span(
+      class ="app-title",
       "Basic statistics",
       span( # Github & Homepage
         a(
@@ -853,7 +855,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             tabPanel(
               title = "Data",
               style = "margin-top:1em;",
-              # markdown("> Category data is shown with <span style='background: #337ab7; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>**Blue**</span>."),
+              markdown("> Category data is shown with <span style='background: #6A8A66; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>**Green**</span>."),
               withLoader(
                 DTOutput("data"),
                 type = "html",
@@ -885,7 +887,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
         ),
         mainPanel(
           markdown("> Table 1 for Descriptive statistics, see
-          <a target = '_blank' href = 'https://www.ema.europa.eu/en/documents/scientific-guideline/ich-e-3-structure-content-clinical-study-reports-step-5_en.pdf'>Ich E3 Guideline 11.2 for medical definition</a>"),
+          <a target = '_blank' href = 'https://www.ema.europa.eu/en/documents/scientific-guideline/ich-e-3-structure-content-clinical-study-reports-step-5_en.pdf' style='color: #4A774A'>Ich E3 Guideline 11.2 for medical definition</a>"),
           downloadButton(outputId = "dl.table1", style = "display:none;"),
           actionButton("dl.table1.clk", NULL, style = "display:none;"),
           withLoader(
@@ -1217,7 +1219,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
 
       v <- sapply(colnames(PRdata), function(i) {
         if (i %in% nv) {
-          return(paste0("<div style = 'background: #337ab7; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>", i, "</div>"))
+          return(paste0("<div style = 'background: #6A8A66; color: #fff; border-radius: 3px; margin: 0 3px 3px 0; padding: 1px 3px;'>", i, "</div>"))
         }
         return(i)
       }, simplify = TRUE, USE.NAMES = FALSE)

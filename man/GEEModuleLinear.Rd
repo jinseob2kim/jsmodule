@@ -12,7 +12,8 @@ GEEModuleLinear(
   data_label,
   data_varStruct = NULL,
   nfactor.limit = 10,
-  id.gee
+  id.gee,
+  vec.event = NULL
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ GEEModuleLinear(
 \item{nfactor.limit}{nlevels limit in factor variable, Default: 10}
 
 \item{id.gee}{reactive repeated measure variable}
+
+\item{vec.event}{event variables as vector for gaussian generalized estimating equation(GEE),  Default: NULL}
 }
 \value{
 Shiny modulde server for gaussian generalized estimating equation(GEE).
