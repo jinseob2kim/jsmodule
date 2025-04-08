@@ -27,9 +27,7 @@ coxUI <- function(id) {
     uiOutput(ns("subval")),
     checkboxInput(ns("step_check"), "Stepwise variable selection"),
     uiOutput(ns("step_direction")),
-    uiOutput(ns("step_scope")),
-    checkboxInput(ns("pcut_univariate"),"filter_pvalue", value = FALSE),
-    uiOutput(ns("pcut_slider"))
+    uiOutput(ns("step_scope"))
   )
 }
 
@@ -155,24 +153,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
     ))
   })
 
-  output$pcut_slider <- renderUI({
-    req(input$pcut_univariate)
-    print("Rendering sliderInput!")
-    sliderInput(session$ns("pcut"), "Choose a p-value", min = 0, max = 0.1, value = 0.05, step = 0.001)
-  })
 
-
-  observeEvent(input$pcut_univariate, {
-    if (input$pcut_univariate) {
-      updateCheckboxInput(session, "step_check", value = FALSE)
-    }
-  })
-
-  observeEvent(c(input$step_check), {
-    if (input$step_check) {
-      updateCheckboxInput(session, "pcut_univariate", value = FALSE)
-    }
-  })
 
 
   output$eventtime <- renderUI({
@@ -255,26 +236,20 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
 
   output$indep <- renderUI({
-    req(!is.null(input$event_cox))
-    req(!is.null(input$time_cox))
-
-    # Helper function (as in your original code)
-    mklist <- function(varlist, vars) {
-      lapply(
-        varlist,
-        function(x) {
-          inter <- intersect(x, vars)
-          if (length(inter) == 1) {
-            inter <- c(inter, "")
-          }
-          return(inter)
-        }
-      )
+    if (!fix_et) {
+      req(!is.null(input$event_cox))
+      req(!is.null(input$time_cox))
     }
-
-    # Determine the list of independent variables based on fix_et:
+    mklist <- function(varlist, vars) {
+      lapply(varlist, function(x) {
+        inter <- intersect(x, vars)
+        if (length(inter) == 1) {
+          inter <- c(inter, "")
+        }
+        return(inter)
+      })
+    }
     if (fix_et) {
-      # Fixed list: use fixed vectors (vec.event & vec.time) rather than the current inputs.
       if (is.null(design.survey)) {
         indep.cox <- setdiff(names(data()), c(vlist()$except_vars, vec.event, vec.time))
         if (!is.null(id.cluster)) {
@@ -291,16 +266,16 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
           )
         )
       }
-      # When fixed, initially nothing is selected.
-      selected.indep <- if (!is.null(input$indep_cox)) intersect(input$indep_cox, indep.cox) else character(0)
+      prev_sel <- isolate(input$indep_cox)
+      selected.indep <- if (!is.null(prev_sel)) intersect(prev_sel, indep.cox) else character(0)
     } else {
-      # Dynamic list: exclude the current event and time (as in your original code)
+      req(!is.null(input$event_cox))
+      req(!is.null(input$time_cox))
       if (is.null(design.survey)) {
         indep.cox <- setdiff(names(data()), c(vlist()$except_vars, input$event_cox, input$time_cox))
         if (!is.null(id.cluster)) {
           indep.cox <- setdiff(names(data()), c(vlist()$except_vars, input$event_cox, input$time_cox, id.cluster()))
         }
-
         if (default.unires) {
           data.cox <- data()
           if (input$check_rangetime == T) {
@@ -322,17 +297,11 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
               if (is.null(id.cluster)) {
                 forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, sep = ""))
                 coef <- tryCatch(summary(survival::coxph(forms, data = data.cox, ties = ties.coxph))$coefficients,
-                  error = function(e) {
-                    return(NULL)
-                  }
-                )
+                                 error = function(e) NULL)
               } else {
                 forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, " + cluster(", id.cluster(), ")", sep = ""))
                 coef <- tryCatch(summary(survival::coxph(forms, data = data.cox, robust = TRUE, ties = ties.coxph))$coefficients,
-                  error = function(e) {
-                    return(NULL)
-                  }
-                )
+                                 error = function(e) NULL)
               }
               sigOK <- ifelse(is.null(coef), FALSE, !all(coef[, "Pr(>|z|)"] > 0.05))
               return(sigOK)
@@ -376,10 +345,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
             function(v) {
               forms <- as.formula(paste("survival::Surv(", input$time_cox, ",", input$event_cox, ") ~ ", v, sep = ""))
               coef <- tryCatch(summary(survey::svycoxph(forms, design = data.design))$coefficients,
-                error = function(e) {
-                  return(NULL)
-                }
-              )
+                               error = function(e) NULL)
               sigOK <- ifelse(is.null(coef), FALSE, !all(coef[, "Pr(>|z|)"] > 0.05))
               return(sigOK)
             }
@@ -393,13 +359,11 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
         }
       }
     }
-
     tagList(
       selectInput(session$ns("indep_cox"), "Independent variables",
-        choices = mklist(data_varStruct(), indep.cox),
-        multiple = TRUE,
-        selected = selected.indep
-      )
+                  choices = mklist(data_varStruct(), indep.cox),
+                  multiple = TRUE,
+                  selected = selected.indep)
     )
   })
 
@@ -578,12 +542,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
 
         res.cox <- stats::step(eval(cc.step), direction = input$step_direction, scope = list(upper = scope[[1]], lower = scope[[2]]))
       }
-      if(input$pcut_univariate==FALSE){
-        tb.cox <- jstable::cox2.display(res.cox, dec = input$decimal)
-      }else{
-        tb.cox <- jstable::cox2.display(res.cox, dec = input$decimal, pcut.univariate = input$pcut)
-      }
-
+      tb.cox <- jstable::cox2.display(res.cox, dec = input$decimal)
       tb.cox <- jstable::LabeljsCox(tb.cox, ref = label.regress)
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
       sig <- out.cox[, ncol(out.cox)]
@@ -648,11 +607,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
           need(is.null(design.survey), "Survey cox model can't support stepwise selection")
         )
       }
-      if(input$pcut_univariate==FALSE){
-        tb.cox <- jstable::svycox.display(res.cox, decimal = input$decimal)
-      }else{
-        tb.cox <- jstable::svycox.display(res.cox, decimal = input$decimal, pcut.univariate = input$pcut)
-      }
+      tb.cox <- jstable::svycox.display(res.cox, decimal = input$decimal)
       tb.cox <- jstable::LabeljsCox(tb.cox, label.regress)
       out.cox <- rbind(tb.cox$table, tb.cox$metric)
       sig <- out.cox[, ncol(out.cox)]
