@@ -1,3 +1,7 @@
+# jsmodule 1.6.7
+## Update
+- Independant variable can be selected continuously when there is vec.event and vec.time
+
 # jsmodule 1.6.6
 ## Update
 - Modified the jsmodule theme to enhance visual consistency and readability.
