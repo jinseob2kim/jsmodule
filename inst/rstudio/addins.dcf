@@ -19,8 +19,6 @@ Description: RStudio Addin for propensity score analysis with external data.
 Binding: jsPropensityExtAddin
 Interactive: true
 
-
-
 Name: Repeated measure analysis
 Description: RStudio Addin for repeated measure analysis
 Binding: jsRepeatedAddin
@@ -40,6 +38,11 @@ Interactive: true
 Name: Survey data analysis with external data
 Description: RStudio Addin for survey data analysis with external data.
 Binding: jsSurveyExtAddin
+Interactive: true
+
+Name: Zarathu Template Generator
+Description: Launch Shiny app to generate template code
+Binding: templateGenerator
 Interactive: true
 
 
