@@ -1,7 +1,5 @@
 #' @title templateGenerator: Shiny Gadget for global/app.R template.
 #' @description Opens a Shiny app that allows users to generate a Shiny project template.
-#' @param data data
-#' @param nfactor.limit nlevels limit for categorical variables
 #' @return Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plots
 #' @details Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plots
 #' @examples
@@ -16,22 +14,22 @@
 templateGenerator <- function(){
 
 ui <- fluidPage(
-  titlePanel("Zarathu Shiny Generator"),
+  titlePanel("Shiny Generator"),
 
   sidebarLayout(
     sidebarPanel(
-      textInput("author", "작성자", value = "LHJ"),
-      textInput("folder_name", "폴더 이름", value = "my_app"),
-      textInput("save_path", "경로", value = getwd()),
-      actionButton("generate", "템플릿 생성", class = "btn-primary")
+      textInput("author", "author", value = "LHJ"),
+      textInput("folder_name", "folder_name", value = "my_app"),
+      textInput("save_path", "path", value = getwd()),
+      actionButton("generate", "generate template", class = "btn-primary")
     ),
 
     mainPanel(
       verbatimTextOutput("status"),
 
       tags$hr(),
-      h4("포함할 분석 기능 선택"),
-      helpText("※ Data, Table 1은 항상 포함됩니다."),
+      h4("select options"),
+      helpText("Data and table 1 are always included."),
 
       fluidRow(
         column(12, strong("Regression")),
@@ -82,7 +80,7 @@ server <- function(input, output, session) {
 
     selected_panels <- c(input$regression_panels, input$plot_panels, input$roc_panels)
 
-    ## global.R 생성
+    ## global.R
     global_code <- paste(
       paste0( "Created by ", input$author, " on ", Sys.Date()),
 
@@ -127,11 +125,11 @@ for (v in names(vars02)[vars02 == TRUE]) {
 var.subgroup <- NULL', sep = '\n')
 
 
-  # app_code를 만들건데, 이는 반응형으로 만들기 위해 ui_parts를 거쳐 만들 예정.
-  ## app.R 기본 시작
+  # app_code> interactive> ui_parts
+  ## app.R
   ui_parts <- list()
 
-  ## Data tab 포함 (실제 UI로)
+  ## Data tab  ( UI)
   ui_parts <- append(ui_parts, list(
     'tabPanel("Data", icon = icon("table"),
         sidebarLayout(
@@ -158,7 +156,7 @@ var.subgroup <- NULL', sep = '\n')
     )'
   ))
 
-  # Table 1 (무조건 포함)
+  # Table 1 ()
   ui_parts <- append(ui_parts, list(
     'tabPanel("Table 1", icon = icon("percentage"),
     sidebarLayout(
@@ -340,7 +338,7 @@ var.subgroup <- NULL', sep = '\n')
     ))
   }
 
-  # 최종적으로 하나의 문자열로 합치기
+  # 1
   ui_code <- paste(ui_parts, collapse = ",\n")
 
 
@@ -552,7 +550,7 @@ var.subgroup <- NULL', sep = '\n')
   server_parts <- paste(server_parts, collapse = "\n")
 
 
-  # Table 1 처리
+  # Table 1
   server_parts <- c(server_parts, '
 out_tb1 <- callModule(tb1module2, "tb1",
                       data = data,
@@ -573,7 +571,7 @@ output$table1 <- renderDT({
 })
 ')
 
-  # 조건부 서버 로직 껍데기
+  # server_add.
   if ("linear" %in% selected_panels) {
     server_parts <- c(server_parts, '
   out_linear <- callModule(regressModule2, "linear", data = data, data_label = data.label, data_varStruct =  reactive(c(varlist[c(2, 1)], varlist_new())), default.unires = F, nfactor.limit = nfactor.limit)
@@ -752,7 +750,7 @@ out_timeroc <- callModule(timerocModule, "timeroc", data = data, data_label = da
 
 
 
-  # 등등 계속 추가
+  # further options.
 
 
   app_code <- paste('
@@ -787,12 +785,12 @@ server <- function(input, output, session) {', "\n",
 shinyApp(ui, server)
 ', collapse = "\n")
 
-## 저장
+## save
 writeLines(global_code, file.path(app_dir, "global.R"))
 writeLines(app_code, file.path(app_dir, "app.R"))
 
 output$status <- renderText({
-  paste0("앱 생성 완료!\n", app_dir, "\n포함된 탭: Data, Table1, ", paste(selected_panels, collapse = ", "))
+  paste0("App creation complete!\n", app_dir, "\n Included tabs: Data, Table 1, ", paste(selected_panels, collapse = ", "))
 })
   })
 }

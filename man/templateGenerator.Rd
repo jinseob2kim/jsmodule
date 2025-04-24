@@ -6,11 +6,6 @@
 \usage{
 templateGenerator()
 }
-\arguments{
-\item{data}{data}
-
-\item{nfactor.limit}{nlevels limit for categorical variables}
-}
 \value{
 Shiny Gadget including Data, Label info, Table 1, Regression(linear, logistic), Basic plots
 }

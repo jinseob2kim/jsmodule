@@ -1,3 +1,7 @@
+# jsmodule 1.6.8
+## Update
+- New addin: templateGenerator, make your shiny in ease.
+
 # jsmodule 1.6.7
 ## Update
 - Independant variable can be selected continuously when there is vec.event and vec.time
