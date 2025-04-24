@@ -82,7 +82,7 @@ server <- function(input, output, session) {
 
     ## global.R
     global_code <- paste(
-      paste0( "Created by ", input$author, " on ", Sys.Date()),
+      paste0( "Created by ", input$author),
 
       '# global.R ----
 
@@ -766,7 +766,7 @@ library(officer)
 
 source("global.R")
 nfactor.limit <- 20
-ui <- navbarPage("Zarathu App",
+ui <- navbarPage("App",
   theme = bslib::bs_theme(version = 3),
   ',ui_code,'
 )
