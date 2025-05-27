@@ -15,8 +15,8 @@ timerocModule(
   nfactor.limit = 10,
   design.survey = NULL,
   id.cluster = NULL,
-  iid = T,
-  NRIIDI = T
+  iid = TRUE,
+  NRIIDI = TRUE
 )
 
 timerocModule2(
@@ -70,90 +70,6 @@ shiny module server for time-dependent roc analysis- input number of model as in
 shiny module server for time-dependent roc analysis
 
 shiny module server for time dependent roc analysis- input number of model as integer
-}
-\examples{
-library(shiny)
-library(DT)
-library(data.table)
-library(jstable)
-library(ggplot2)
-library(timeROC)
-library(survIDINRI)
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-      timerocUI("timeroc")
-    ),
-    mainPanel(
-      plotOutput("plot_timeroc"),
-      ggplotdownUI("timeroc"),
-      DTOutput("table_timeroc")
-    )
-  )
-)
-
-server <- function(input, output, session) {
-  data <- reactive(mtcars)
-  data.label <- jstable::mk.lev(mtcars)
-
-  out_timeroc <- callModule(timerocModule, "timeroc",
-    data = data, data_label = data.label,
-    data_varStruct = NULL
-  )
-
-  output$plot_timeroc <- renderPlot({
-    print(out_timeroc()$plot)
-  })
-
-  output$table_timeroc <- renderDT({
-    datatable(out_timeroc()$tb,
-      rownames = F, editable = F, extensions = "Buttons",
-      caption = "ROC results",
-      options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
-    )
-  })
-}
-library(shiny)
-library(DT)
-library(data.table)
-library(jstable)
-library(ggplot2)
-library(timeROC)
-library(survIDINRI)
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-      timerocUI("timeroc")
-    ),
-    mainPanel(
-      plotOutput("plot_timeroc"),
-      ggplotdownUI("timeroc"),
-      DTOutput("table_timeroc")
-    )
-  )
-)
-
-server <- function(input, output, session) {
-  data <- reactive(mtcars)
-  data.label <- jstable::mk.lev(mtcars)
-
-  out_timeroc <- callModule(timerocModule2, "timeroc",
-    data = data, data_label = data.label,
-    data_varStruct = NULL
-  )
-
-  output$plot_timeroc <- renderPlot({
-    print(out_timeroc()$plot)
-  })
-
-  output$table_timeroc <- renderDT({
-    datatable(out_timeroc()$tb,
-      rownames = F, editable = F, extensions = "Buttons",
-      caption = "ROC results",
-      options = c(jstable::opt.tbreg("roctable"), list(scrollX = TRUE))
-    )
-  })
-}
 }
 \seealso{
 \code{\link[stats]{quantile}}

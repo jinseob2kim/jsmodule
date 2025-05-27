@@ -1,3 +1,7 @@
+# jsmodule 1.6.9
+## Update
+- Added Brier and AUC calculation to timeroc functionality; fixed bugs.
+
 # jsmodule 1.6.8
 ## Update
 - New addin: templateGenerator, make your shiny in ease.
