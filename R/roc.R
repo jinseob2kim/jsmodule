@@ -452,9 +452,9 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
         selected_var <- data()[[indeps()[[1]][1]]]
         if (!is.null(input$event_roc) && !is.null(indeps()[[1]][1])) {
           clean_data <- data()[complete.cases(data()[, c(input$event_roc, indeps()[[1]][1]), with = FALSE]), ]
-          forms <- paste0(input$event_roc, "~", indeps()[[1]][1])
-          mm <- glm(as.formula(forms), data = clean_data, family = binomial)
-          roc_obj <- pROC::roc(clean_data[[input$event_roc]], predict(mm, type = "response"))
+          #forms <- paste0(input$event_roc, "~", indeps()[[1]][1])
+          #mm <- glm(as.formula(forms), data = clean_data, family = binomial)
+          roc_obj <- pROC::roc(clean_data[[input$event_roc]], clean_data[[indeps()[[1]][1]]])
           best_threshold <- pROC::coords(roc_obj, "best", input = "threshold", best.method = "youden")["threshold"]
         } else {
           best_threshold <- NULL
@@ -1038,9 +1038,9 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
         selected_var <- data()[[indeproc()[[1]][1]]]
         if (!is.null(input$event_roc) && !is.null(indeproc()[[1]][1])) {
           clean_data <- data()[complete.cases(data()[, c(input$event_roc, indeproc()[[1]][1]), with = FALSE]), ]
-          forms <- paste0(input$event_roc, "~", indeproc()[[1]][1])
-          mm <- glm(as.formula(forms), data = clean_data, family = binomial)
-          roc_obj <- pROC::roc(clean_data[[input$event_roc]], predict(mm, type = "response"))
+          #forms <- paste0(input$event_roc, "~", indeproc()[[1]][1])
+          #mm <- glm(as.formula(forms), data = clean_data, family = binomial)
+          roc_obj <- pROC::roc(clean_data[[input$event_roc]], clean_data[[indeps()[[1]][1]]])
           best_threshold <- pROC::coords(roc_obj, "best", input = "threshold", best.method = "youden")["threshold"]
         } else {
           best_threshold <- NULL

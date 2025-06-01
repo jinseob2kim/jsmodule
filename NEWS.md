@@ -1,3 +1,6 @@
+# jsmodule 1.6.10
+- Fix: default cut-off value in `rocModule` and `rocModule2` when there is only one independent variable.
+
 # jsmodule 1.6.9
 ## Update
 - Added Brier and AUC calculation to timeroc functionality; fixed bugs.
