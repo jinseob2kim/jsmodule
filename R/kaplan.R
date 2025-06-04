@@ -670,7 +670,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
           xmax <- max(res.km$time)
         }
       }
-      xstep.default <- ifelse(xmax <= 365, 0.5, 5)
+      xstep.default <- ifelse(xmax <= 365, 0.25, 5)
       value.timeby <- round(signif(xmax / 7, 1) / xstep.default) * xstep.default
       if (!is.null(timeby)) {
         value.timeby <- timeby
@@ -709,7 +709,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
 
   kmInput <- reactive({
     req(kmList())
-    req(input$timeby >= 1)
+    req(input$timeby >= 0.25)
     req(input$xlims)
     req(input$ylims)
     res.km <- kmList()$res
