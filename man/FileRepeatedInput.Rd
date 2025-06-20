@@ -2,54 +2,61 @@
 % Please edit documentation in R/FileRepeatedInput.R
 \name{FileRepeatedInput}
 \alias{FileRepeatedInput}
-\title{FileRepeatedInput: File upload UI for repeated measure analysis.}
+\alias{FileRepeated}
+\title{FileRepeatedInput: UI for repeated measures analysis.}
 \usage{
 FileRepeatedInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
+
+FileRepeated(input, output, session, nfactor.limit = 20)
 }
 \arguments{
-\item{id}{id}
+\item{id}{A string, the module id.}
 
-\item{label}{label, Default: 'csv/xlsx/sav/sas7bdat/dta file'}
+\item{label}{A string, the label for the file input.}
+
+\item{input, output, session}{Standard Shiny server parameters.}
+
+\item{nfactor.limit}{An integer, the threshold for unique values.}
 }
 \value{
-File upload UI for repeated measure analysis.
+A Shiny UI object.
+
+A reactive list with the processed `data`, `label`, and `id.gee`.
 }
 \description{
 File upload UI for repeated measure analysis.
-}
-\details{
-File upload UI for repeated measure analysis.
+
+Server module for repeated measures analysis. It uses
+`DataManager` and adds a control for selecting the repeated measures variable.
 }
 \examples{
-library(shiny)
-library(DT)
-library(data.table)
-library(readxl)
-library(jstable)
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-      FileRepeatedInput("datafile")
-    ),
-    mainPanel(
-      tabsetPanel(
-        type = "pills",
-        tabPanel("Data", DTOutput("data")),
-        tabPanel("Label", DTOutput("data_label", width = "100\%"))
+if (interactive()) {
+  library(shiny)
+  library(DT)
+  library(jstable)
+
+  ui <- fluidPage(
+    sidebarLayout(
+      sidebarPanel(FileRepeatedInput("datafile")),
+      mainPanel(
+        tabsetPanel(
+          type = "pills",
+          tabPanel("Data", DTOutput("data")),
+          tabPanel("Label", DTOutput("data_label"))
+        )
       )
     )
   )
-)
 
-server <- function(input, output, session) {
-  data <- callModule(FileRepeated, "datafile")
-
-  output$data <- renderDT({
-    data()$data
-  })
-
-  output$label <- renderDT({
-    data()$label
-  })
+  server <- function(input, output, session) {
+    data_info <- callModule(FileRepeated, "datafile")
+    output$data <- renderDT({
+      data_info()$data
+    })
+    output$label <- renderDT({
+      data_info()$label
+    })
+  }
+  shinyApp(ui, server)
 }
 }

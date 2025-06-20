@@ -2,59 +2,65 @@
 % Please edit documentation in R/FilePsInput.R
 \name{FilePsInput}
 \alias{FilePsInput}
-\title{FilePsInput: Shiny module UI for file upload for propensity score matching.}
+\alias{FilePs}
+\title{FilePsInput: Shiny module UI for propensity score analysis.}
 \usage{
 FilePsInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
+
+FilePs(input, output, session, nfactor.limit = 20)
 }
 \arguments{
-\item{id}{id}
+\item{id}{A string, the module id.}
 
-\item{label}{label, Default: 'csv/xlsx/sav/sas7bdat file'}
+\item{label}{A string, the label for the file input.}
+
+\item{input, output, session}{Standard Shiny server parameters.}
+
+\item{nfactor.limit}{An integer, the threshold for unique values.}
 }
 \value{
-Shiny module UI for file upload for propensity score matching.
+A Shiny UI object.
+
+A reactive expression returning a list with matched data and other
+information.
 }
 \description{
-Shiny module UI for file upload for propensity score matching.
-}
-\details{
-Shiny module UI for file upload for propensity score matching.
+Provides a file input and UI outputs for options related to
+propensity score matching.
+
+Server-side logic for propensity score analysis. It uses
+`DataManager` for common data tasks and adds specific controls and
+calculations for propensity score matching.
 }
 \examples{
-library(shiny)
-library(DT)
-library(data.table)
-library(readxl)
-library(jstable)
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-      FilePsInput("datafile")
-    ),
-    mainPanel(
-      tabsetPanel(
-        type = "pills",
-        tabPanel("Data", DTOutput("data")),
-        tabPanel("Matching data", DTOutput("matdata")),
-        tabPanel("Label", DTOutput("data_label", width = "100\%"))
+if (interactive()) {
+  library(shiny)
+  library(DT)
+  library(jstable)
+
+  ui <- fluidPage(
+    sidebarLayout(
+      sidebarPanel(
+        FilePsInput("datafile")
+      ),
+      mainPanel(
+        tabsetPanel(
+          type = "pills",
+          tabPanel("Data", DTOutput("data")),
+          tabPanel("Matching data", DTOutput("matdata")),
+          tabPanel("Label", DTOutput("data_label"))
+        )
       )
     )
   )
-)
 
-server <- function(input, output, session) {
-  mat.info <- callModule(FilePs, "datafile")
+  server <- function(input, output, session) {
+    mat_info <- callModule(FilePs, "datafile")
 
-  output$data <- renderDT({
-    mat.info()$data
-  })
-
-  output$matdata <- renderDT({
-    mat.info()$matdata
-  })
-
-  output$label <- renderDT({
-    mat.info()$label
-  })
+    output$data <- renderDT({ mat_info()$data })
+    output$matdata <- renderDT({ mat_info()$matdata })
+    output$data_label <- renderDT({ mat_info()$label })
+  }
+  shinyApp(ui, server)
 }
 }
