@@ -89,6 +89,7 @@ timerocUI <- function(id) {
 
 timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey = NULL, id.cluster = NULL) {
   data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
+  library(survival)
   form <- as.formula(paste0("Surv(", var.time, ",", var.event, ") ~ ", paste(vars.ind, collapse = "+")))
 
   if (is.null(design.survey)) {
