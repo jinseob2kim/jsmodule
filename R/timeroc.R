@@ -292,7 +292,6 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 #' @return shiny module server for time-dependent roc analysis
 #' @details shiny module server for time-dependent roc analysis
 #' @examples
-#'
 #'   library(shiny)
 #'   library(DT)
 #'   library(data.table)
@@ -360,7 +359,7 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 #'   }
 #'
 #'   shinyApp(ui, server)
-#' }
+#'
 #' @seealso
 #'  \code{\link[stats]{quantile}}
 #'  \code{\link[data.table]{setkey}}
@@ -750,7 +749,6 @@ timerocModule <- function(input, output, session, data, data_label,
 #' @return shiny module server for time dependent roc analysis- input number of model as integer
 #' @details shiny module server for time dependent roc analysis- input number of model as integer
 #' @examples
-#'
 #'   library(shiny)
 #'   library(DT)
 #'   library(data.table)
@@ -818,7 +816,6 @@ timerocModule <- function(input, output, session, data, data_label,
 #'   }
 #'
 #'   shinyApp(ui, server)
-#' }
 #'
 #'
 #' @seealso
