@@ -130,21 +130,64 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     })
 
     # Render Independent variables UI
+    # output$indep_ps <- renderUI({
+    #   req(input$group_pscal)
+    #
+    #   # vars <- setdiff(names(data_table), c(processed_data$except_vars, input$var_subset, input$group_pscal))
+    #   # varsIni <- vars
+    #   #
+    #   # if (!is.null(input$pcut_ps) && input$pcut_ps != "No") {
+    #   #   pcut_val <- as.numeric(input$pcut_ps)
+    #   #   sig_vars <- sapply(vars, function(v) {
+    #   #     forms <- as.formula(paste0("`",input$group_pscal, "` ~ `", v, "`"))
+    #   #     model <- tryCatch(glm(forms, data = data_table, family = binomial), error = function(e) NULL)
+    #   #     if (is.null(model) || nrow(summary(model)$coefficients) < 2) return(FALSE)
+    #   #     any(summary(model)$coefficients[-1, 4] <= pcut_val, na.rm=TRUE)
+    #   #   })
+    #   #   varsIni <- vars[sig_vars]
+    #   # }
+    #
+    #   vars <- setdiff(names(data_table), c(processed_data$except_vars, input$var_subset, input$group_pscal))
+    #   varsIni <- vars
+    #
+    #   if (!is.null(input$pcut_ps) && input$pcut_ps != "No") {
+    #     pcut_val <- as.numeric(input$pcut_ps)
+    #     sig_vars <- sapply(vars, function(v) {
+    #       forms <- as.formula(paste0("`",input$group_pscal, "` ~ `", v, "`"))
+    #       model <- tryCatch(glm(forms, data = data_table, family = binomial), error = function(e) NULL)
+    #       if (is.null(model) || nrow(summary(model)$coefficients) < 2) return(FALSE)
+    #       any(summary(model)$coefficients[-1, 4] <= pcut_val, na.rm=TRUE)
+    #     })
+    #     varsIni <- vars[sig_vars]
+    #   }
+    #
+    #   selectInput(session$ns("indep_pscal"),
+    #               "Independent variables for PS",
+    #               choices = mklist(data_var_struct, vars),
+    #               multiple = TRUE,
+    #               selected = varsIni)
+    # })
+    # Render Independent variables UI
     output$indep_ps <- renderUI({
       req(input$group_pscal)
 
       vars <- setdiff(names(data_table), c(processed_data$except_vars, input$var_subset, input$group_pscal))
-      varsIni <- vars
 
+      # p-value cut 옵션 값에 따라 초기 선택 변수를 결정하는 로직
       if (!is.null(input$pcut_ps) && input$pcut_ps != "No") {
+        # p-value cut을 사용하는 경우: 유의한 변수만 선택
         pcut_val <- as.numeric(input$pcut_ps)
         sig_vars <- sapply(vars, function(v) {
-          forms <- as.formula(paste0("`",input$group_pscal, "` ~ `", v, "`"))
+          forms <- as.formula(paste0("`", input$group_pscal, "` ~ `", v, "`"))
           model <- tryCatch(glm(forms, data = data_table, family = binomial), error = function(e) NULL)
           if (is.null(model) || nrow(summary(model)$coefficients) < 2) return(FALSE)
-          any(summary(model)$coefficients[-1, 4] <= pcut_val, na.rm=TRUE)
+          any(summary(model)$coefficients[-1, 4] <= pcut_val, na.rm = TRUE)
         })
         varsIni <- vars[sig_vars]
+      } else {
+        # p-value cut을 사용하지 않는 경우 (기본값 "No" 또는 NULL):
+        # 옛날 앱처럼 목록의 첫 번째 변수만 선택
+        varsIni <- vars[1]
       }
 
       selectInput(session$ns("indep_pscal"),
@@ -167,7 +210,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
                    choices = c("1:1" = 1, "1:2" = 2, "1:3" = 3, "1:4" = 4), selected = 1, inline = TRUE)
     })
     output$caliperps <- renderUI({
-      sliderInput(session$ns("caliper"), "Caliper for matching (0=none)", value = 0.2, min = 0, max = 1, step = 0.01)
+      sliderInput(session$ns("caliper"), "Caliper for matching (0=none)", value = 0, min = 0, max = 1, step = 0.01)
     })
   })
 
@@ -229,7 +272,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     return(list(
       data = wdata,
       matdata = matdata,
-      label = updated_label,
+      data.label = updated_label,
       naomit = processed_info$naomit,
       group_var = input$group_pscal
     ))
