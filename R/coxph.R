@@ -505,10 +505,11 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       data.cox$cmpp_time <- with(data.cox, ifelse(data.cox[[input$event_cox]] == 0, data.cox[[input$cmp_time_cox]], data.cox[[input$time_cox]]))
       data.cox$cmpp_event <- with(data.cox, ifelse(data.cox[[input$event_cox]] == 0, 2 * data.cox[[input$cmp_event_cox]], 1))
       data.cox$cmpp_event <- factor(data.cox$cmpp_event)
-      fg_data <- survival::finegray(formula = survival::Surv(cmpp_time, cmpp_event) ~ ., data = data.cox)
+      data.cox$id_finegray <- 1:nrow(data.cox)
+      fg_data <- survival::finegray(formula = survival::Surv(cmpp_time, cmpp_event) ~ ., data = data.cox, id = id_finegray)
       data.cox <- data.table::data.table(fg_data)
-      cc <- substitute(survival::coxph(.form, data = data.cox, weight = fgwt, model = T, ties = .ties), list(.form = form.cox(), .ties = ties.coxph))
-    }
+      cc <- substitute(survival::coxph(.form, data = data.cox, weight = fgwt, model = T, ties = .ties, cluster = id_finegray), list(.form = form.cox(), .ties = ties.coxph))
+      }
     mf <- model.frame(form.cox(), data.cox)
     validate(
       need(nrow(mf) > 0, paste("No complete data due to missingness. Please remove some variables from independent variables"))
@@ -524,6 +525,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
         cc <- substitute(survival::coxph(.form, data = data.cox, model = T, robust = T, ties = .ties), list(.form = form.cox(), .ties = ties.coxph))
       }
       res.cox <- eval(cc)
+
       if (input$step_check == T) {
         validate(
           need(!is.null(input$step_upper), "Upper limits can't be NULL, please select at least 1 variable."),
