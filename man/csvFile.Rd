@@ -7,53 +7,17 @@
 csvFile(input, output, session, nfactor.limit = 20)
 }
 \arguments{
-\item{input}{input}
+\item{input, output, session}{Standard Shiny server parameters.}
 
-\item{output}{output}
-
-\item{session}{session}
-
-\item{nfactor.limit}{nfactor limit to include, Default: 20}
+\item{nfactor.limit}{An integer, the threshold for unique values to suggest
+a numeric variable as categorical, Default: 20}
 }
 \value{
-Shiny module Server for file(csv or xlsx) upload.
+A reactive expression that returns a list with two elements:
+`data` (the processed data.table) and `label` (a data.table with variable
+label information).
 }
 \description{
-Shiny module Server for file(csv or xlsx) upload.
-}
-\details{
-Shiny module Server for file(csv or xlsx) upload.
-}
-\examples{
-library(shiny)
-library(DT)
-library(data.table)
-library(readxl)
-library(jstable)
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-      csvFileInput("datafile")
-    ),
-    mainPanel(
-      tabsetPanel(
-        type = "pills",
-        tabPanel("Data", DTOutput("data")),
-        tabPanel("Label", DTOutput("data_label", width = "100\%"))
-      )
-    )
-  )
-)
-
-server <- function(input, output, session) {
-  data <- callModule(csvFile, "datafile")
-
-  output$data <- renderDT({
-    data()$data
-  })
-
-  output$label <- renderDT({
-    data()$label
-  })
-}
+The server-side logic for the `csvFileInput` module. It uses
+the `DataManager` R6 class to handle all data processing.
 }

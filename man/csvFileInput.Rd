@@ -7,49 +7,55 @@
 csvFileInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
 }
 \arguments{
-\item{id}{id}
+\item{id}{A string, the module id.}
 
-\item{label}{label, Default: 'csv/xlsx/sav/sas7bdat/dta file'}
+\item{label}{A string, the label for the file input,
+Default: 'Upload data (csv/xlsx/sav/sas7bdat/dta)'}
 }
 \value{
-Shiny module UI for file(csv or xlsx) upload.
+A Shiny UI object.
 }
 \description{
-Shiny module UI for file(csv or xlsx) upload.
+Shiny module UI for file upload supporting csv, xlsx, sav,
+sas7bdat, and dta formats. It provides UI outputs for various data
+manipulation options.
 }
 \details{
-Shiny module UI for file(csv or xlsx) upload.
+This function only defines the UI. The corresponding server
+function, `csvFile`, handles the logic.
 }
 \examples{
-library(shiny)
-library(DT)
-library(data.table)
-library(readxl)
-library(jstable)
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-      csvFileInput("datafile")
-    ),
-    mainPanel(
-      tabsetPanel(
-        type = "pills",
-        tabPanel("Data", DTOutput("data")),
-        tabPanel("Label", DTOutput("data_label", width = "100\%"))
+if (interactive()) {
+  library(shiny)
+  library(DT)
+  library(jstable)
+
+  ui <- fluidPage(
+    sidebarLayout(
+      sidebarPanel(
+        csvFileInput("datafile")
+      ),
+      mainPanel(
+        tabsetPanel(
+          type = "pills",
+          tabPanel("Data", DTOutput("data")),
+          tabPanel("Label", DTOutput("data_label"))
+        )
       )
     )
   )
-)
 
-server <- function(input, output, session) {
-  data <- callModule(csvFile, "datafile")
+  server <- function(input, output, session) {
+    data_info <- callModule(csvFile, "datafile")
 
-  output$data <- renderDT({
-    data()$data
-  })
+    output$data <- renderDT({
+      data_info()$data
+    })
 
-  output$label <- renderDT({
-    data()$label
-  })
+    output$label <- renderDT({
+      data_info()$label
+    })
+  }
+  shinyApp(ui, server)
 }
 }

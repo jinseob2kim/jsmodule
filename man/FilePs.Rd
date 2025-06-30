@@ -2,63 +2,21 @@
 % Please edit documentation in R/FilePsInput.R
 \name{FilePs}
 \alias{FilePs}
-\title{FilePs: Shiny module Server for file upload for propensity score matching.}
+\title{FilePs: Shiny module Server for propensity score analysis.}
 \usage{
 FilePs(input, output, session, nfactor.limit = 20)
 }
 \arguments{
-\item{input}{input}
+\item{input, output, session}{Standard Shiny server parameters.}
 
-\item{output}{output}
-
-\item{session}{session}
-
-\item{nfactor.limit}{nfactor limit to include, Default: 20}
+\item{nfactor.limit}{An integer, the threshold for unique values.}
 }
 \value{
-Shiny module Server for file upload for propensity score matching.
+A reactive expression returning a list with matched data and other
+information.
 }
 \description{
-Shiny module Server for file upload for propensity score matching.
-}
-\details{
-Shiny module Server for file upload for propensity score matching.
-}
-\examples{
-library(shiny)
-library(DT)
-library(data.table)
-library(readxl)
-library(jstable)
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-      FilePsInput("datafile")
-    ),
-    mainPanel(
-      tabsetPanel(
-        type = "pills",
-        tabPanel("Data", DTOutput("data")),
-        tabPanel("Matching data", DTOutput("matdata")),
-        tabPanel("Label", DTOutput("data_label", width = "100\%"))
-      )
-    )
-  )
-)
-
-server <- function(input, output, session) {
-  mat.info <- callModule(FilePs, "datafile")
-
-  output$data <- renderDT({
-    mat.info()$data
-  })
-
-  output$matdata <- renderDT({
-    mat.info()$matdata
-  })
-
-  output$label <- renderDT({
-    mat.info()$label
-  })
-}
+Server-side logic for propensity score analysis. It uses
+`DataManager` for common data tasks and adds specific controls and
+calculations for propensity score matching.
 }
