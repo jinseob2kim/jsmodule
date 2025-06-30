@@ -196,7 +196,8 @@ DataManager <- R6::R6Class("DataManager",
             "\u003c" = 1 - as.integer(out[[var_name]] < cut_input),
             "\u003e" = 1 - as.integer(out[[var_name]] > cut_input)
           )
-          out[, BinaryGroupRandom := factor(new_val)]
+          # FIX maintained: Create an ordered factor for ROC analysis to work correctly.
+          out[, BinaryGroupRandom := factor(new_val, ordered = TRUE)]
 
           cn.new <- paste0(var_name, "_group_", sym.ineq2[con_input], cut_input)
           data.table::setnames(out, "BinaryGroupRandom", cn.new)
