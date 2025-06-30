@@ -508,7 +508,7 @@ coxModule <- function(input, output, session, data, data_label, data_varStruct =
       data.cox$id_finegray <- 1:nrow(data.cox)
       fg_data <- survival::finegray(formula = survival::Surv(cmpp_time, cmpp_event) ~ ., data = data.cox, id = id_finegray)
       data.cox <- data.table::data.table(fg_data)
-      cc <- substitute(survival::coxph(.form, data = data.cox, weight = fgwt, model = T, ties = .ties, cluster = id_finegray), list(.form = form.cox(), .ties = ties.coxph))
+      cc <- substitute(survival::coxph(.form, data = data.cox, weight = fgwt, model = T, ties = .ties, id = id_finegray), list(.form = form.cox(), .ties = ties.coxph))
       }
     mf <- model.frame(form.cox(), data.cox)
     validate(
