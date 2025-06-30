@@ -2,58 +2,19 @@
 % Please edit documentation in R/FileSurveyInput.R
 \name{FileSurvey}
 \alias{FileSurvey}
-\title{FileSurvey: File upload server module for survey data analysis.}
+\title{FileSurvey: Server for survey data analysis.}
 \usage{
 FileSurvey(input, output, session, nfactor.limit = 20)
 }
 \arguments{
-\item{input}{input}
+\item{input, output, session}{Standard Shiny server parameters.}
 
-\item{output}{output}
-
-\item{session}{session}
-
-\item{nfactor.limit}{nfactor limit to include, Default: 20}
+\item{nfactor.limit}{An integer, the threshold for unique values.}
 }
 \value{
-File upload server module for survey data analysis.
+A reactive list with `data`, `label`, `naomit`, and the `survey` object.
 }
 \description{
-File upload server module for survey data analysis.
-}
-\details{
-File upload server module for survey data analysis.
-}
-\examples{
-library(shiny)
-library(DT)
-library(data.table)
-library(readxl)
-library(jstable)
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(
-      FileSurveyInput("datafile")
-    ),
-    mainPanel(
-      tabsetPanel(
-        type = "pills",
-        tabPanel("Data", DTOutput("data")),
-        tabPanel("Label", DTOutput("data_label", width = "100\%"))
-      )
-    )
-  )
-)
-
-server <- function(input, output, session) {
-  data <- callModule(FileSurvey, "datafile")
-
-  output$data <- renderDT({
-    data()$data
-  })
-
-  output$label <- renderDT({
-    data()$label
-  })
-}
+Server module for survey data analysis. It uses `DataManager`
+and adds controls and logic for creating a `survey.design` object.
 }
