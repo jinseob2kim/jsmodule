@@ -2,33 +2,21 @@
 % Please edit documentation in R/FileSurveyInput.R
 \name{FileSurveyInput}
 \alias{FileSurveyInput}
-\alias{FileSurvey}
 \title{FileSurveyInput: UI for survey data analysis.}
 \usage{
 FileSurveyInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
-
-FileSurvey(input, output, session, nfactor.limit = 20)
 }
 \arguments{
 \item{id}{A string, the module id.}
 
 \item{label}{A string, the label for the file input.}
-
-\item{input, output, session}{Standard Shiny server parameters.}
-
-\item{nfactor.limit}{An integer, the threshold for unique values.}
 }
 \value{
 A Shiny UI object.
-
-A reactive list with `data`, `label`, `naomit`, and the `survey` object.
 }
 \description{
 File upload UI for survey data analysis, with controls for
 survey design elements.
-
-Server module for survey data analysis. It uses `DataManager`
-and adds controls and logic for creating a `survey.design` object.
 }
 \examples{
 if (interactive()) {

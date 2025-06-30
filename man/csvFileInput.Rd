@@ -2,38 +2,23 @@
 % Please edit documentation in R/csvFileInput.R
 \name{csvFileInput}
 \alias{csvFileInput}
-\alias{csvFile}
 \title{csvFileInput: Shiny module UI for file upload.}
 \usage{
 csvFileInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
-
-csvFile(input, output, session, nfactor.limit = 20)
 }
 \arguments{
 \item{id}{A string, the module id.}
 
 \item{label}{A string, the label for the file input,
 Default: 'Upload data (csv/xlsx/sav/sas7bdat/dta)'}
-
-\item{input, output, session}{Standard Shiny server parameters.}
-
-\item{nfactor.limit}{An integer, the threshold for unique values to suggest
-a numeric variable as categorical, Default: 20}
 }
 \value{
 A Shiny UI object.
-
-A reactive expression that returns a list with two elements:
-`data` (the processed data.table) and `label` (a data.table with variable
-label information).
 }
 \description{
 Shiny module UI for file upload supporting csv, xlsx, sav,
 sas7bdat, and dta formats. It provides UI outputs for various data
 manipulation options.
-
-The server-side logic for the `csvFileInput` module. It uses
-the `DataManager` R6 class to handle all data processing.
 }
 \details{
 This function only defines the UI. The corresponding server

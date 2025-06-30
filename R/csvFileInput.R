@@ -77,7 +77,7 @@ csvFileInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") 
 #' @return A reactive expression that returns a list with two elements:
 #' `data` (the processed data.table) and `label` (a data.table with variable
 #' label information).
-#' @rdname csvFileInput
+#' @rdname csvFile
 #' @export
 csvFile <- function(input, output, session, nfactor.limit = 20) {
   # Instantiate the data manager, which handles all the logic.

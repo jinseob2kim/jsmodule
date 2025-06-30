@@ -2,35 +2,21 @@
 % Please edit documentation in R/FilePsInput.R
 \name{FilePsInput}
 \alias{FilePsInput}
-\alias{FilePs}
 \title{FilePsInput: Shiny module UI for propensity score analysis.}
 \usage{
 FilePsInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
-
-FilePs(input, output, session, nfactor.limit = 20)
 }
 \arguments{
 \item{id}{A string, the module id.}
 
 \item{label}{A string, the label for the file input.}
-
-\item{input, output, session}{Standard Shiny server parameters.}
-
-\item{nfactor.limit}{An integer, the threshold for unique values.}
 }
 \value{
 A Shiny UI object.
-
-A reactive expression returning a list with matched data and other
-information.
 }
 \description{
 Provides a file input and UI outputs for options related to
 propensity score matching.
-
-Server-side logic for propensity score analysis. It uses
-`DataManager` for common data tasks and adds specific controls and
-calculations for propensity score matching.
 }
 \examples{
 if (interactive()) {

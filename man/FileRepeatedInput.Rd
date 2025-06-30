@@ -2,32 +2,20 @@
 % Please edit documentation in R/FileRepeatedInput.R
 \name{FileRepeatedInput}
 \alias{FileRepeatedInput}
-\alias{FileRepeated}
 \title{FileRepeatedInput: UI for repeated measures analysis.}
 \usage{
 FileRepeatedInput(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)")
-
-FileRepeated(input, output, session, nfactor.limit = 20)
 }
 \arguments{
 \item{id}{A string, the module id.}
 
 \item{label}{A string, the label for the file input.}
-
-\item{input, output, session}{Standard Shiny server parameters.}
-
-\item{nfactor.limit}{An integer, the threshold for unique values.}
 }
 \value{
 A Shiny UI object.
-
-A reactive list with the processed `data`, `label`, and `id.gee`.
 }
 \description{
 File upload UI for repeated measure analysis.
-
-Server module for repeated measures analysis. It uses
-`DataManager` and adds a control for selecting the repeated measures variable.
 }
 \examples{
 if (interactive()) {

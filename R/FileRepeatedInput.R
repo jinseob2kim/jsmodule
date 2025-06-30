@@ -62,7 +62,7 @@ FileRepeatedInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dt
 #' @param input,output,session Standard Shiny server parameters.
 #' @param nfactor.limit An integer, the threshold for unique values.
 #' @return A reactive list with the processed `data`, `label`, and `id.gee`.
-#' @rdname FileRepeatedInput
+#' @rdname FileRepeated
 #' @export
 FileRepeated <- function(input, output, session, nfactor.limit = 20) {
   # 1. Instantiate the common data manager

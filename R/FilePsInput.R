@@ -71,7 +71,7 @@ FilePsInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)") {
 #' @param nfactor.limit An integer, the threshold for unique values.
 #' @return A reactive expression returning a list with matched data and other
 #' information.
-#' @rdname FilePsInput
+#' @rdname FilePs
 #' @export
 #' @import shiny
 #' @importFrom MatchIt matchit match.data

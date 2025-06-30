@@ -69,7 +69,7 @@ FileSurveyInput <- function(id, label = "Upload data (csv/xlsx/sav/sas7bdat/dta)
 #' @param input,output,session Standard Shiny server parameters.
 #' @param nfactor.limit An integer, the threshold for unique values.
 #' @return A reactive list with `data`, `label`, `naomit`, and the `survey` object.
-#' @rdname FileSurveyInput
+#' @rdname FileSurvey
 #' @export
 #' @import shiny
 #' @importFrom survey svydesign
