@@ -93,7 +93,7 @@ coxUI <- function(id) {
 
 coxModule <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, default.unires = T, limit.unires = 20, id.cluster = NULL, ties.coxph = "efron", vec.event = NULL, vec.time = NULL) {
   ## To remove NOTE.
-  data.cox.step <- level <- val_label <- variable <- NULL
+  id_finegray <- data.cox.step <- level <- val_label <- variable <- NULL
   fix_et <- !is.null(vec.event) && !is.null(vec.time) && (length(vec.event) == length(vec.time))
   if (is.null(data_varStruct)) {
     data_varStruct <- reactive(list(variable = names(data())))

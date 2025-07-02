@@ -313,7 +313,7 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 #'
 #'   server <- function(input, output, session) {
 #'     data <- reactive({
-#'       dt_data <- as.data.table(pbc) # Ensure 'pbc' dataset is available, e.g., from `survival` package
+#'       dt_data <- as.data.table(pbc)
 #'
 #'       factor_vars <- names(dt_data)[sapply(dt_data, function(x){length(table(x))}) <= 6]
 #'       dt_data[, (factor_vars) := lapply(.SD, factor), .SDcols = factor_vars]
@@ -770,7 +770,7 @@ timerocModule <- function(input, output, session, data, data_label,
 #'
 #'   server <- function(input, output, session) {
 #'     data <- reactive({
-#'       dt_data <- as.data.table(pbc) # Ensure 'pbc' dataset is available, e.g., from `survival` package
+#'       dt_data <- as.data.table(pbc)
 #'
 #'       factor_vars <- names(dt_data)[sapply(dt_data, function(x){length(table(x))}) <= 6]
 #'       dt_data[, (factor_vars) := lapply(.SD, factor), .SDcols = factor_vars]
