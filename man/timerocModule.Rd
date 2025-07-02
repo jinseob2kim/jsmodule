@@ -138,7 +138,6 @@ shiny module server for time dependent roc analysis- input number of model as in
 
   }
 
-  shinyApp(ui, server)
 
   library(shiny)
   library(DT)
@@ -206,7 +205,6 @@ shiny module server for time dependent roc analysis- input number of model as in
 
   }
 
-  shinyApp(ui, server)
 
 
 }

@@ -358,7 +358,6 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 #'
 #'   }
 #'
-#'   shinyApp(ui, server)
 #'
 #' @seealso
 #'  \code{\link[stats]{quantile}}
@@ -815,7 +814,6 @@ timerocModule <- function(input, output, session, data, data_label,
 #'
 #'   }
 #'
-#'   shinyApp(ui, server)
 #'
 #'
 #' @seealso
