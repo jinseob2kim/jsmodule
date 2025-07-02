@@ -113,7 +113,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
       factor_vars <- names(data_table)[sapply(data_table, is.factor)]
       validate(need(length(factor_vars) > 0, "No categorical variables in data."))
 
-      class01_factor <- sapply(data_table[, ..factor_vars], function(x) identical(levels(x), c("0", "1")))
+      class01_factor <- sapply(data_table[, .SD, .SDcols = factor_vars], function(x) identical(levels(x), c("0", "1")))
       validate(need(any(class01_factor, na.rm=T), "No categorical variables coded as 0, 1 in data."))
 
       factor_01vars <- factor_vars[class01_factor]
@@ -224,7 +224,7 @@ FilePs <- function(input, output, session, nfactor.limit = 20) {
     data[, ID.pscal2828 := .I]
 
     cols_to_check <- c(input$group_pscal, input$indep_pscal)
-    complete_cases_idx <- which(complete.cases(data[, ..cols_to_check]))
+    complete_cases_idx <- which(complete.cases(data[, .SD, .SDcols = cols_to_check]))
 
     validate(need(length(complete_cases_idx) > 0, "No complete cases for matching analysis."))
 
