@@ -65,7 +65,7 @@ Imports:
   htmltools,
   riskRegression,
   R6
-URL: https://jinseob2kim.github.io/jsmodule/, https://github.com/jinseob2kim/jsmodule, https://hbgyeom1.github.io/jsmodule/
+URL: https://jinseob2kim.github.io/jsmodule/, https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
 Suggests: 
   testthat,
