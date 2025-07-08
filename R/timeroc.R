@@ -139,64 +139,145 @@ timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey 
 #' @importFrom riskRegression Score
 
 timeROC_table <- function(ListModel, dec.auc = 3, dec.p = 3) {
-  concords <- lapply(ListModel, function(x) survival::concordance(x$coxph))
+
+  # 1. Harrell's C-index
+  concords <- lapply(ListModel, function(x) {
+    if (!is.null(x$coxph) && inherits(x$coxph, "coxph")) {
+      survival::concordance(x$coxph)
+    } else { NULL }
+  })
+
+  valid_idx <- !sapply(concords, is.null)
+  if (!any(valid_idx)) stop("No valid coxph models found in ListModel.")
+
+  concords <- concords[valid_idx]
+  ListModel <- ListModel[valid_idx]
+
   harrell <- sapply(concords, `[[`, "concordance")
-  se1.96 <- qnorm(0.975) * sqrt(sapply(concords, `[[`, "var"))
-  harrell.ci <- paste0(round(harrell - se1.96, dec.auc), "-", round(harrell + se1.96, dec.auc))
+  se_harrell <- sapply(concords, function(x) sqrt(x$var))
+
+  harrell.ci <- paste0(round(harrell - 1.96 * se_harrell, dec.auc), "-", round(harrell + 1.96 * se_harrell, dec.auc))
   harrell <- round(harrell, dec.auc)
 
-  auc_list <- list()
-  brier_list <- list()
+  # 2. Prepare for Score
+  model_list <- lapply(ListModel, `[[`, "coxph")
+  names(model_list) <- paste("Model", seq_along(model_list))
 
-  for (i in seq_along(ListModel)) {
-    if(!is.na(ListModel[[i]]$timeROC$AUC[2])){
-      model <- ListModel[[i]]$coxph
-      data <- ListModel[[i]]$data
-      f <- model$formula
-      score <- riskRegression::Score(list(coxph = model), formula = f, data = data, times = ListModel[[i]]$t,
-                                     metrics = c("AUC", "Brier"), summary = "IPA", cause = 1)
-      # print(score)
-      auc_list[[i]] <- round(score$AUC$score$AUC, dec.auc)
-      brier_list[[i]] <- round(score$Brier$score[score$Brier$score$model == "coxph", "Brier"], dec.auc)
-    }
+  eval_data <- ListModel[[1]]$data
+  eval_time <- ListModel[[1]]$t
+  eval_formula <- Surv(time, status) ~ 1
 
+  # 3. Call Score and handle potential errors
+  score_results <- tryCatch({
+    riskRegression::Score(
+      object = model_list,
+      formula = eval_formula,
+      data = eval_data,
+      times = eval_time,
+      metrics = c("AUC", "Brier"),
+      conf.int = TRUE,
+      cause = 1,
+      null.model = FALSE
+    )
+  }, error = function(e) {
+    # Return NULL on error to handle gracefully
+    warning(paste("riskRegression::Score failed. Time-dependent metrics will be omitted. Error:", e$message))
+    return(NULL)
+  })
+
+  # 4. Create results table
+  # Check if time-dependent metrics from Score() are valid
+  time_metrics_valid <- !is.null(score_results) && !all(is.na(score_results$AUC$score$AUC))
+
+  p_format <- function(p) {
+    sapply(p, function(val) {
+      if (is.na(val)) return(NA)
+      if (val < 0.001) "< 0.001" else round(val, dec.p)
+    })
   }
 
-  if (length(ListModel) == 1) {
-    if(length(auc_list)>0 && length(brier_list)>0){
+  if (time_metrics_valid) {
+    # Case 1: AUC/Brier metrics are available
+    auc_scores <- score_results$AUC$score$AUC
+    brier_scores <- score_results$Brier$score$Brier
+
+    if (length(ListModel) == 1) {
+      # Single model case
       out <- data.table::data.table(
-        "Prediction Model" = "Model 1",
+        "Prediction Model" = names(model_list),
         "Harrell's C-index" = harrell,
-        "95% CI" = harrell.ci,
-        "AUC" = unlist(auc_list),
-        "Brier" = unlist(brier_list)
+        "95% CI (Harrell)" = harrell.ci,
+        "AUC" = round(auc_scores, dec.auc),
+        "95% CI (AUC)" = paste0(round(score_results$AUC$score$lower, dec.auc), "-", round(score_results$AUC$score$upper, dec.auc)),
+        "Brier" = round(brier_scores, dec.auc),
+        "95% CI (Brier)" = paste0(round(score_results$Brier$score$lower, dec.auc), "-", round(score_results$Brier$score$upper, dec.auc))
       )
-    }else{
+    } else {
+      # Multiple models case
+      harrell.pdiff <- c(NA, sapply(2:length(ListModel), function(i) {
+        d <- harrell[i] - harrell[i-1]
+        s <- sqrt(se_harrell[i]^2 + se_harrell[i-1]^2)
+        p <- 2 * pnorm(-abs(d / s))
+        return(p)
+      }))
+
+      auc_iid <- score_results$AUC$iid
+      auc.pdiff <- c(NA, sapply(2:length(auc_scores), function(i) {
+        se_diff <- sqrt(sum((auc_iid[, i] - auc_iid[, i-1])^2))
+        p <- 2 * pnorm(-abs((auc_scores[i] - auc_scores[i-1]) / se_diff))
+        return(p)
+      }))
+
+      brier_iid <- score_results$Brier$iid
+      brier.pdiff <- c(NA, sapply(2:length(brier_scores), function(i) {
+        se_diff <- sqrt(sum((brier_iid[, i] - brier_iid[, i-1])^2))
+        p <- 2 * pnorm(-abs((brier_scores[i] - brier_scores[i-1]) / se_diff))
+        return(p)
+      }))
+
       out <- data.table::data.table(
-        "Prediction Model" = "Model 1",
+        "Prediction Model" = names(model_list),
         "Harrell's C-index" = harrell,
-        "95% CI" = harrell.ci
+        "95% CI (Harrell's C-index)" = harrell.ci,
+        "P-value (Harrell's C-index)" = p_format(harrell.pdiff),
+        "AUC" = round(auc_scores, dec.auc),
+        "95% CI (AUC)" = paste0(round(score_results$AUC$score$lower, dec.auc), "-", round(score_results$AUC$score$upper, dec.auc)),
+        "P-value (AUC)" = p_format(auc.pdiff),
+        "Brier" = round(brier_scores, dec.auc),
+        "95% CI (Brier)" = paste0(round(score_results$Brier$score$lower, dec.auc), "-", round(score_results$Brier$score$upper, dec.auc)),
+        "P-value (Brier)" = p_format(brier.pdiff)
       )
     }
   } else {
-    harrell.pdiff <- c(NA, sapply(2:length(ListModel), function(i) {
-      d <- harrell[i] - harrell[i-1]
-      s <- sqrt(se1.96[i]^2 + se1.96[i-1]^2)
-      p <- 2 * pnorm(abs(d / s), lower.tail = FALSE)
-      ifelse(p < 0.001, "< 0.001", round(p, dec.p))
-    }))
+    # Case 2: AUC/Brier metrics are not available, return Harrell's C-index only
+    warning(paste("Could not calculate time-dependent metrics (AUC, Brier) for t =", eval_time, ". The time point may be too early. Returning Harrell's C-index only."))
 
-    out <- data.table::data.table(
-      "Prediction Model" = paste0("Model ", seq_along(ListModel)),
-      "Harrell's C-index" = harrell,
-      "95% CI" = harrell.ci,
-      "P-value for Harrell's C-index Difference" = harrell.pdiff,
-      "AUC" = unlist(auc_list),
-      "Brier" = unlist(brier_list)
-    )
+    if (length(ListModel) == 1) {
+      # Single model case
+      out <- data.table::data.table(
+        "Prediction Model" = names(model_list),
+        "Harrell's C-index" = harrell,
+        "95% CI (Harrell)" = harrell.ci
+      )
+    } else {
+      # Multiple models case
+      harrell.pdiff <- c(NA, sapply(2:length(ListModel), function(i) {
+        d <- harrell[i] - harrell[i-1]
+        s <- sqrt(se_harrell[i]^2 + se_harrell[i-1]^2)
+        p <- 2 * pnorm(-abs(d / s))
+        return(p)
+      }))
+
+      out <- data.table::data.table(
+        "Prediction Model" = names(model_list),
+        "Harrell's C-index" = harrell,
+        "95% CI (Harrell's C-index)" = harrell.ci,
+        "P-value (Harrell's C-index)" = p_format(harrell.pdiff)
+      )
+    }
   }
 
-  return(out[])
+  return(out)
 }
 
 #' @title survIDINRI_helper: Helper function for IDI.INF.OUT in survIDINRI packages
@@ -268,8 +349,8 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 
 
   if (ncol(out) == 6) {
-    names(out) <- c("IDI", "95% CI", "P-value for IDI",
-                  "continuous NRI", "95% CI", "P-value for NRI")
+    names(out) <- c("IDI", "95% CI (IDI)", "P-value (IDI)",
+                    "continuous NRI", "95% CI (NRI)", "P-value (NRI)")
   }
   # names(out) <- c("IDI", "95% CI", "P-value for IDI", "continuous NRI", "95% CI", "P-value for NRI")
   return(out[])
