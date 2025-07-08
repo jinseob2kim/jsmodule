@@ -557,7 +557,7 @@ timerocModule <- function(input, output, session, data, data_label,
 
   observeEvent(input$rmv, {
     removeUI(
-      selector = paste0("div:has(> #", session$ns(paste0("indep_km", nmodel())), ")")
+      selector = paste0(".shiny-input-container:has(#", session$ns(paste0("indep_km", nmodel())), ")")
     )
     nmodel(nmodel() - 1)
   })
