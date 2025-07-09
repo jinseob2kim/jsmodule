@@ -547,11 +547,16 @@ timerocModule <- function(input, output, session, data, data_label,
 
 
   observeEvent(input$add, {
+    indep_choices <- mklist(data_varStruct(), indeproc())
+    if (is.null(indep_choices) || length(indep_choices) == 0) indep_choices <- character(0)
     insertUI(
       selector = paste0("div:has(> #", session$ns("add"), ")"),
       where = "beforeBegin",
-      ui = selectInput(session$ns(paste0("indep_km", nmodel() + 1)), paste0("Independent variables for Model ", nmodel() + 1),
-                       choices =  mklist(data_varStruct(), indeproc()), multiple = TRUE
+      ui = selectInput(
+        session$ns(paste0("indep_km", nmodel() + 1)),
+        paste0("Independent variables for Model ", nmodel() + 1),
+        choices = indep_choices,
+        multiple = TRUE
       )
     )
     nmodel(nmodel() + 1)
