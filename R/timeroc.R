@@ -165,7 +165,8 @@ timeROC_table <- function(ListModel, dec.auc = 3, dec.p = 3) {
 
   eval_data <- ListModel[[1]]$data
   eval_time <- ListModel[[1]]$t
-  eval_formula <- Surv(time, status) ~ 1
+  # Bug Fix: Hardcoded formula 'Surv(time, status) ~ 1'
+  eval_formula <- ListModel[[1]]$coxph$formula
 
   # 3. Call Score and handle potential errors
   score_results <- tryCatch({
@@ -184,6 +185,15 @@ timeROC_table <- function(ListModel, dec.auc = 3, dec.p = 3) {
     warning(paste("riskRegression::Score failed. Time-dependent metrics will be omitted. Error:", e$message))
     return(NULL)
   })
+
+  # Helper function for p-value calculation
+  calculate_pdiff <- function(scores, iid) {
+    c(NA, sapply(2:length(scores), function(i) {
+      se_diff <- sqrt(sum((iid[, i] - iid[, i-1])^2))
+      p <- 2 * pnorm(-abs((scores[i] - scores[i-1]) / se_diff))
+      return(p)
+    }))
+  }
 
   # 4. Create results table
   # Check if time-dependent metrics from Score() are valid
@@ -214,6 +224,7 @@ timeROC_table <- function(ListModel, dec.auc = 3, dec.p = 3) {
       )
     } else {
       # Multiple models case
+      # The p-value calculation for Harrell's C assumes independence, which may not be accurate for nested models.
       harrell.pdiff <- c(NA, sapply(2:length(ListModel), function(i) {
         d <- harrell[i] - harrell[i-1]
         s <- sqrt(se_harrell[i]^2 + se_harrell[i-1]^2)
@@ -221,19 +232,8 @@ timeROC_table <- function(ListModel, dec.auc = 3, dec.p = 3) {
         return(p)
       }))
 
-      auc_iid <- score_results$AUC$iid
-      auc.pdiff <- c(NA, sapply(2:length(auc_scores), function(i) {
-        se_diff <- sqrt(sum((auc_iid[, i] - auc_iid[, i-1])^2))
-        p <- 2 * pnorm(-abs((auc_scores[i] - auc_scores[i-1]) / se_diff))
-        return(p)
-      }))
-
-      brier_iid <- score_results$Brier$iid
-      brier.pdiff <- c(NA, sapply(2:length(brier_scores), function(i) {
-        se_diff <- sqrt(sum((brier_iid[, i] - brier_iid[, i-1])^2))
-        p <- 2 * pnorm(-abs((brier_scores[i] - brier_scores[i-1]) / se_diff))
-        return(p)
-      }))
+      auc.pdiff <- calculate_pdiff(score_results$AUC$score$AUC, score_results$AUC$iid)
+      brier.pdiff <- calculate_pdiff(score_results$Brier$score$Brier, score_results$Brier$iid)
 
       out <- data.table::data.table(
         "Prediction Model" = names(model_list),
@@ -314,6 +314,8 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
   data <- data.table::data.table(data)
   data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
   vars <- c(Reduce(union, list(var.event, var.time, unlist(list.vars.ind))))
+
+
 
   if (!is.null(id.cluster)) {
     data <- na.omit(data[, .SD, .SDcols = c(vars, id.cluster)])
@@ -557,7 +559,7 @@ timerocModule <- function(input, output, session, data, data_label,
 
   observeEvent(input$rmv, {
     removeUI(
-      selector = paste0(".shiny-input-container:has(#", session$ns(paste0("indep_km", nmodel())), ")")
+      selector = paste0("div:has(> #", session$ns(paste0("indep_km", nmodel())), ")")
     )
     nmodel(nmodel() - 1)
   })
@@ -624,8 +626,6 @@ timerocModule <- function(input, output, session, data, data_label,
     }
     outUI
   })
-
-
 
 
 
