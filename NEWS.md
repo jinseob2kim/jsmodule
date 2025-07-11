@@ -1,3 +1,13 @@
+# jsmodule 1.6.12
+## Update
+- refactor ROC time dependent table function (remove for statement)
+- add new column in ROC time dependent table (CI & p-value difference of AUC & Brier)
+## Bugfix
+- "survive"" library dependent issue in ROC time dependent feat
+- remove error message when add new model in ROC time dependent feat
+- fix remove model button that remain removed label issue in ROC time dependent feat
+
+
 # jsmodule 1.6.11
 - Update: simplified file input functions.
 - Update: Modified the Fine-Gray module to use the `id` argument.
