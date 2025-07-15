@@ -1,3 +1,4 @@
+url: https://jinseob2kim.github.io/jsmodule/
 URL: https://jinseob2kim.github.io/jsmodule/, https://github.com/jinseob2kim/jsmodule
 development:
   mode: auto
@@ -12,7 +13,7 @@ template:
   bootstrap: 5
   light-switch: yes
   bslib:
-    navbar-bg: '#19490A'
+    pkgdown-navbar-bg: '#19490A'
   params:
     docsearch:
       api_key: ffde01d60d45a47d3239f39b9bee59c7
