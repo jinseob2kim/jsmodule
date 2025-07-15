@@ -1,0 +1,7 @@
+usethis::use_pkgdown_github_pages()
+pkgdown::build_site()
+pkgdown::build_site()
+pkgdown::deploy_to_branch()
+usethis::use_pkgdown_github_pages()
+pkgdown::build_site()
+pkgdown::deploy_to_branch()
