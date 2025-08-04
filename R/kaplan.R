@@ -51,6 +51,7 @@ kaplanUI <- function(id) {
     checkboxInput(ns("cumhaz"), "Show cumulative incidence", F),
     checkboxInput(ns("pval"), "Show p-value(log-rank test)", T),
     checkboxInput(ns("table"), "Show table", T),
+    checkboxInput(ns("number_censored"), "Show number censored", F),
     checkboxInput(ns("ci"), "Show 95% CI", F),
     checkboxInput(ns("marks"), "Show censoring marks", F),
     uiOutput(ns("ranges")),
@@ -752,7 +753,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         if (input$cmp_risk_check) {
           return(
             jskm::jskm(res.km,
-              pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
+              pval = input$pval, marks = input$marks, table = input$table, table.censor = input$number_censored, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
               cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
               showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk = status_cmprsk, linewidth = input$linewidth_km
             )
@@ -760,7 +761,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
         } else {
           return(
             jskm::jskm(res.km,
-              pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
+              pval = input$pval, marks = input$marks, table = input$table, table.censor = input$number_censored, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
               cumhaz = input$cumhaz, cluster.option = "None", cluster.var = NULL, data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
               showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk = status_cmprsk, linewidth = input$linewidth_km
             )
@@ -769,7 +770,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
       } else {
         return(
           jskm::jskm(res.km,
-            pval = input$pval, marks = input$marks, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
+            pval = input$pval, marks = input$marks, table = input$table, table.censor = input$number_censored, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
             cumhaz = input$cumhaz, cluster.option = "cluster", cluster.var = id.cluster(), data = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
             showpercent = input$showpercent, surv.scale = surv.scale, status.cmprsk = status_cmprsk, linewidth = input$linewidth_km
           )
@@ -778,7 +779,7 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
     } else {
       return(
         jskm::svyjskm(res.km,
-          pval = input$pval, table = input$table, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
+          pval = input$pval, table = input$table, table.censor = input$number_censored, ylab = ylab, ystrataname = yst.name, ystratalabs = yst.lab, ci = input$ci, timeby = input$timeby, xlims = input$xlims, ylims = input$ylims,
           cumhaz = input$cumhaz, design = data.km, pval.coord = pval.coord, legendposition = legend.p, linecols = pal, xlabs = text.x, dashed = dashed, cut.landmark = cut.landmark,
           showpercent = input$showpercent, surv.scale = surv.scale, linewidth = input$linewidth_km
         )
