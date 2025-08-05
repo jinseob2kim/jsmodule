@@ -61,7 +61,9 @@ forestglmUI <- function(id, label = "forestplot") {
     uiOutput(ns("cov_tbsub")),
     checkboxInput(ns("custom_forest"), "Custom X axis ticks in forest plot"),
     uiOutput(ns("beta_points")),
-    uiOutput(ns("numeric_inputs"))
+    uiOutput(ns("numeric_inputs")),
+    checkboxInput(ns("summ"), "Toggle Overall Shape"),
+    checkboxInput(ns("tt"), "Change Edge Shape")
   )
 }
 
@@ -424,11 +426,11 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
       res <- reactive({
         list(
           datatable(tbsub(),
-            caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions = "Buttons",
-            options = c(
-              opt.tb1(paste0("tbsub_", input$dep)),
-              list(scrollX = TRUE, columnDefs = list(list(className = "dt-right", targets = 0)))
-            )
+                    caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions = "Buttons",
+                    options = c(
+                      opt.tb1(paste0("tbsub_", input$dep)),
+                      list(scrollX = TRUE, columnDefs = list(list(className = "dt-right", targets = 0)))
+                    )
           ),
           figure()
         )
@@ -442,15 +444,19 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
               uiOutput(session$ns("xlim_forest"))
             ),
             column(
-              3,
+              2,
+              numericInput(session$ns("rect"), "rectangle-size", value = 0.5, step = 0.1)
+            ),
+            column(
+              2,
               numericInput(session$ns("font"), "font-size", value = 12)
             ),
             column(
-              3,
+              2,
               textInput(session$ns("arrow_left"), "arrow left", value = "Better")
             ),
             column(
-              3,
+              2,
               textInput(session$ns("arrow_right"), "arrow right", value = "Worse")
             )
           ),
@@ -467,7 +473,8 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
         )
       })
       figure <- reactive({
-        data <- data.table::setDT(tbsub())
+        # Changed how we copy data; this is safer
+        data <- data.table::copy(tbsub())
         group.tbsub <- input$group
         if (family != "binomial") {
           if (family == "gaussian") {
@@ -477,21 +484,34 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
           }
 
           ll <- 1
-          data[Beta == 0 | Lower == 0, ":="(Beta = NA, Lower = NA, Upper = NA)]
+          # Copy rows to keep values for display
+          data_for_display <- data[, .(Beta, Lower, Upper)]
+          # Now we can safely replace values for plotting
+          data[Beta == 0 | Lower == 0, ":="(Beta = 0.001, Lower = min(data[Lower > 0, Lower]), Upper = 999)]
         } else {
           r <- "OR"
           ll <- nrow(data_label()[variable == group.tbsub])
-          data[OR == 0 | Lower == 0, ":="(OR = NA, Lower = NA, Upper = NA)]
+          # Copy rows to keep values for display 2
+          data_for_display <- data[, .(OR, Lower, Upper)]
+          # Now we can safely replace values for plotting 2
+          data[OR == 0 | Lower == 0, ":="(OR = 0.001, Lower = min(data[Lower > 0, Lower]), Upper = 999)]
         }
 
         len <- ncol(data)
         data_est <- data[, get(r)]
         data[is.na(data)] <- " "
-        data[[r]] <- ifelse(data[[r]] == " ", " ", paste0(data[[r]], " (", data$Lower, "-", data$Upper, ")"))
+        # Change row name selection to use copied row
+        data[[r]] <- ifelse(data[[r]] == " ", " ", paste0(data_for_display[[r]], " (", data_for_display$Lower, "-", data_for_display$Upper, ")"))
         data$` ` <- paste(rep(" ", 20), collapse = " ")
+        # Just like TT
+        if (isTRUE(input$tt)) {
+          ci_Theight = FALSE
+        } else {
+          ci_Theight = 0.2
+        }
         tm <- forestploter::forest_theme(
           base_size = input$font,
-          ci_Theight = 0.2
+          ci_Theight = ci_Theight
         )
         xlim <- c(ifelse(family == "gaussian", (-1) * input$xMax, 1 / input$xMax), input$xMax)
         xlim <- round(xlim[order(xlim)], 2)
@@ -499,18 +519,34 @@ forestglmServer <- function(id, data, data_label, family, data_varStruct = NULL,
           xlim <- c(0, 2)
         }
         selected_columns <- c(c(1:(2 + ll)), len + 1, (len - 1):(len))
+        # Determine Overall shape line vs diamond
+        is_summary <- if (isTRUE(input$summ)) {
+          rep(FALSE, nrow(data))
+        } else {
+          data$Subgroup == "Overall"
+        }
+        # Rectangle size
+        if (is.null(input$rect) || is.na(input$rect)) {
+          rect <- 0.5
+        } else {
+          rect <- input$rect
+        }
         forestploter::forest(data[, .SD, .SDcols = selected_columns],
-          lower = as.numeric(data$Lower),
-          upper = as.numeric(data$Upper),
-          ci_column = 3 + ll,
-          est = as.numeric(data_est),
-          ref_line = ifelse(family == "gaussian", 0, 1),
-          x_trans = ifelse(family == "gaussian", "none", "log"),
-          ticks_digits = 1,
-          xlim = NULL,
-          ticks_at = ticks(),
-          arrow_lab = c(input$arrow_left, input$arrow_right),
-          theme = tm
+                             lower = as.numeric(data$Lower),
+                             upper = as.numeric(data$Upper),
+                             # Rectangle size
+                             sizes = rep(rect, nrow(data)),
+                             # Show summary which is the diamond shape here
+                             is_summary = is_summary,
+                             ci_column = 3 + ll,
+                             est = as.numeric(data_est),
+                             ref_line = ifelse(family == "gaussian", 0, 1),
+                             x_trans = ifelse(family == "gaussian", "none", "log"),
+                             ticks_digits = 1,
+                             xlim = NULL,
+                             ticks_at = ticks(),
+                             arrow_lab = c(input$arrow_left, input$arrow_right),
+                             theme = tm
         ) -> zz
 
         l <- dim(zz)

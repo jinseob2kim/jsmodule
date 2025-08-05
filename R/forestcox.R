@@ -73,7 +73,13 @@ forestcoxUI <- function(id, label = "forestplot") {
     uiOutput(ns("cmp_eventtime")),
     checkboxInput(ns("custom_forest"), "Custom X axis ticks in forest plot"),
     uiOutput(ns("hr_points")),
-    uiOutput(ns("numeric_inputs"))
+    uiOutput(ns("numeric_inputs")),
+    # Checkbox to decide line or diamond shape for Overall defult is ???
+    checkboxInput(ns("summ"), "Toggle Overall Shape"),
+    # Just like TT
+    checkboxInput(ns("tt"), "Change Edge Shape"),
+    # Checkbox for show/hide KM rate. Default is hide
+    checkboxInput(ns("km"), "Show KM rate")
   )
 }
 
@@ -324,12 +330,12 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
           )
           tagList(
             selectInput(session$ns("cmp_event_cox"), "Competing Event",
-              choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = FALSE,
-              selected = NULL
+                        choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = FALSE,
+                        selected = NULL
             ),
             selectInput(session$ns("cmp_time_cox"), "Competing Time",
-              choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = FALSE,
-              selected = NULL
+                        choices = mklist(data_varStruct(), vlist()$conti_vars_positive), multiple = FALSE,
+                        selected = NULL
             )
           )
         })
@@ -467,7 +473,6 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
 
           colnames(tbsub)[1:(2 + 2 * nrow(label[variable == group.tbsub]))] <- c("Subgroup", paste0("N(%): ", label[variable == group.tbsub, val_label]), paste0(var.time[2], "-", input$day, "\n", " KM rate(%): ", label[variable == group.tbsub, val_label]), "HR")
         }
-
         return(tbsub)
       })
 
@@ -489,37 +494,65 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
       figure <- reactive({
         group.tbsub <- input$group
         label <- data_label()
-        data <- data.table::setDT(tbsub())
+        # Changed how we copy data; this is safer
+        data <- data.table::copy(tbsub())
         len <- ncol(data)
 
         ll <- ifelse(group.tbsub %in% vlist()$group_vars, nrow(label[variable == group.tbsub]), 0)
-        data[HR == 0 | Lower == 0, ":="(HR = NA, Lower = NA, Upper = NA)]
+        # Copy rows to keep values for display
+        data_for_display <- data[, .(HR, Lower, Upper)]
+        # Now we can safely replace values for plotting
+        data[HR == 0 | Lower == 0, ":="(HR = 0.001, Lower = min(data[Lower > 0, Lower]), Upper = 999)]
         data_est <- data$`HR`
         data[is.na(data)] <- " "
-        data$HR <- ifelse(data$HR == " ", " ", paste0(data$HR, " (", data$Lower, "-", data$Upper, ")"))
+        # Change row name selection to use copied row
+        data$HR <- ifelse(data$HR == " ", " ", paste0(data_for_display$HR, " (", data_for_display$Lower, "-", data_for_display$Upper, ")"))
         data.table::setnames(data, "HR", "HR (95% CI)")
         data$` ` <- paste(rep(" ", 20), collapse = " ")
-        tm <- forestploter::forest_theme(base_size = input$font, ci_Theight = 0.2)
-        selected_columns <- c(c(1:(2 + 2 * ll)), len + 1, (len - 1):(len))
-        xlim <- c(1 / input$xMax, input$xMax)
-        xlim <- round(xlim[order(xlim)], 2)
-        if (is.null(input$xMax) || any(is.na(xlim))) {
-          xlim <- c(0, 2)
+        # Just like TT
+        if (isTRUE(input$tt)) {
+          ci_Theight = FALSE
+        } else {
+          ci_Theight = 0.2
+        }
+        tm <- forestploter::forest_theme(base_size = input$font, ci_Theight = ci_Theight)
+        # Now change row selection based on KM rate button
+        if (isTRUE(input$km)) {
+          selected_columns <- c(c(1:(2 + 2 * ll)), len + 1, (len - 1):(len))
+          ci_column <- 3 + 2 * ll
+        } else {
+          selected_columns <- c(1:(1 + ll), 2 + 2*ll, len + 1, (len - 1):len)
+          ci_column <- 3 + ll
+        }
+        # Determine Overall shape line vs diamond
+        is_summary <- if (isTRUE(input$summ)) {
+          rep(FALSE, nrow(data))
+        } else {
+          data$Subgroup == "Overall"
+        }
+        # Rectangle size
+        if (is.null(input$rect) || is.na(input$rect)) {
+          rect <- 0.5
+        } else {
+          rect <- input$rect
         }
         forestploter::forest(data[, .SD, .SDcols = selected_columns],
-          lower = as.numeric(data$Lower),
-          upper = as.numeric(data$Upper),
-          ci_column = 3 + 2 * ll,
-          est = as.numeric(data_est),
-          ref_line = 1,
-          ticks_digits = 1,
-          x_trans = "log",
-          xlim = NULL,
-          arrow_lab = c(input$arrow_left, input$arrow_right),
-          ticks_at = ticks(),
-          theme = tm
+                             lower = as.numeric(data$Lower),
+                             upper = as.numeric(data$Upper),
+                             # Rectangle size
+                             sizes = rep(rect, nrow(data)),
+                             # Show summary which is the diamond shape here
+                             is_summary = is_summary,
+                             ci_column = ci_column,
+                             est = as.numeric(data_est),
+                             ref_line = 1,
+                             ticks_digits = 1,
+                             x_trans = "log",
+                             xlim = NULL,
+                             arrow_lab = c(input$arrow_left, input$arrow_right),
+                             ticks_at = ticks(),
+                             theme = tm
         ) -> zz
-
         l <- dim(zz)
         h <- zz$height[(l[1] - 2):(l[1] - 1)]
         zz <- print(zz[, 2:(l[2] - 1)], autofit = TRUE)
@@ -530,11 +563,11 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
       res <- reactive({
         list(
           datatable(tbsub(),
-            caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions = "Buttons",
-            options = c(
-              opt.tb1(paste0("tbsub_", input$dep)),
-              list(scrollX = TRUE, columnDefs = list(list(className = "dt-right", targets = 0)))
-            )
+                    caption = paste0(input$dep, " subgroup analysis"), rownames = F, extensions = "Buttons",
+                    options = c(
+                      opt.tb1(paste0("tbsub_", input$dep)),
+                      list(scrollX = TRUE, columnDefs = list(list(className = "dt-right", targets = 0)))
+                    )
           ),
           figure()
         )
@@ -543,6 +576,10 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
       output$downloadControls <- renderUI({
         tagList(
           fluidRow(
+            column(
+              3,
+              numericInput(session$ns("rect"), "rectangle-size", value = 0.5, step = 0.1)
+            ),
             column(
               3,
               numericInput(session$ns("font"), "font-size", value = 12)
