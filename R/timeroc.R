@@ -57,6 +57,22 @@ timerocUI <- function(id) {
     uiOutput(ns("addmodel")),
     uiOutput(ns("time")),
     checkboxInput(ns("subcheck"), "Sub-group analysis"),
+    tags$p(
+      strong("- Harrell’s C-index:"),
+      " calculated via ",
+      code("survival::concordance()")
+    ),
+    tags$p(
+      strong("- AUC & Brier:"),
+      " obtained using ",
+      code("riskRegression::Score()")
+    ),
+    tags$p(
+      strong("- NRI & IDI:"),
+      " computed with ",
+      code("survIDINRI::IDI.INF()"), " / ",
+      code("survIDINRI::IDI.INF.OUT()")
+    ),
     uiOutput(ns("subvar")),
     uiOutput(ns("subval"))
   )
@@ -91,14 +107,11 @@ timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey 
   data[[var.event]] <- as.numeric(as.vector(data[[var.event]]))
   form <- as.formula(paste0("Surv(", var.time, ",", var.event, ") ~ ", paste(vars.ind, collapse = "+")))
 
+  # no more cluster
   if (is.null(design.survey)) {
-    if (!is.null(id.cluster)) {
-      cmodel <- survival::coxph(form, data = data, x = TRUE, y = TRUE, model = TRUE, cluster = data[[id.cluster]])
-    } else {
-      cmodel <- survival::coxph(form, data = data, x = TRUE, y = TRUE, model = TRUE)
-    }
+    cmodel <- survival::coxph(form, data = data, x = TRUE, y = TRUE, model = TRUE, cluster = NULL)
   } else {
-    cmodel <- survey::svycoxph(form, design = design.survey, x = TRUE, y = TRUE, model = TRUE)
+    cmodel <- survey::svycoxph(form, design = design.survey, x = TRUE, y = TRUE, model = TRUE, cluster = NULL)
   }
 
   T <- cmodel$y[, 1]
@@ -139,25 +152,69 @@ timeROChelper <- function(var.event, var.time, vars.ind, t, data, design.survey 
 #' @importFrom riskRegression Score
 
 timeROC_table <- function(ListModel, dec.auc = 3, dec.p = 3) {
-
+  ############
   # 1. Harrell's C-index
-  concords <- lapply(ListModel, function(x) {
-    if (!is.null(x$coxph) && inherits(x$coxph, "coxph")) {
-      survival::concordance(x$coxph)
-    } else { NULL }
+  # concords <- lapply(ListModel, function(x) {
+  #   if (!is.null(x$coxph) && inherits(x$coxph, "coxph")) {
+  #     survival::concordance(x$coxph)
+  #   } else { NULL }
+  # })
+  #
+  # valid_idx <- !sapply(concords, is.null)
+  # if (!any(valid_idx)) stop("No valid coxph models found in ListModel.")
+  #
+  # concords <- concords[valid_idx]
+  # ListModel <- ListModel[valid_idx]
+  #
+  # harrell <- sapply(concords, `[[`, "concordance")
+  # se_harrell <- sapply(concords, function(x) sqrt(x$var))
+  #
+  # harrell.ci <- paste0(round(harrell - 1.96 * se_harrell, dec.auc), "-", round(harrell + 1.96 * se_harrell, dec.auc))
+  # harrell <- round(harrell, dec.auc)
+
+  dyn_harrell <- lapply(ListModel, function(x) {
+
+    # original data's time & event, t0
+    ymat <- x$coxph$y
+    T0 <- ymat[, 1] # [,1]=time
+    D0 <- ymat[, 2] # [,2]=event
+    t0 <- x$t # timeROChelper()'s t
+
+    # right truncation after t0
+    T_tr <- pmin(T0, t0)
+    D_tr <- ifelse(T0 <= t0 & D0 == 1, 1, 0)
+
+    # linear predictor from original cox model
+    lp <- stats::predict(x$coxph, type = "lp")
+
+    # Cox fitting with lp as independent variable
+    df_tr <- data.frame(time = T_tr, status = D_tr, lp = lp)
+    fit_tr <- survival::coxph(
+      survival::Surv(time, status) ~ lp,
+      data = df_tr,
+      x = TRUE,
+      y = TRUE,
+      model = TRUE
+    )
+
+    # calculate concordance
+    conc_tr <- survival::concordance(fit_tr)
+
+    list(
+      c   = conc_tr$concordance,
+      var = conc_tr$var
+    )
   })
 
-  valid_idx <- !sapply(concords, is.null)
-  if (!any(valid_idx)) stop("No valid coxph models found in ListModel.")
+  # Concordance point estimate & SE
+  harrell    <- sapply(dyn_harrell, `[[`, "c")
+  se_harrell <- sapply(dyn_harrell, function(z) sqrt(z$var))
 
-  concords <- concords[valid_idx]
-  ListModel <- ListModel[valid_idx]
-
-  harrell <- sapply(concords, `[[`, "concordance")
-  se_harrell <- sapply(concords, function(x) sqrt(x$var))
-
-  harrell.ci <- paste0(round(harrell - 1.96 * se_harrell, dec.auc), "-", round(harrell + 1.96 * se_harrell, dec.auc))
-  harrell <- round(harrell, dec.auc)
+  harrell    <- round(harrell,   dec.auc)
+  harrell.ci <- paste0(
+    round(harrell - 1.96 * se_harrell, dec.auc), "-",
+    round(harrell + 1.96 * se_harrell, dec.auc)
+  )
 
   # 2. Prepare for Score
   model_list <- lapply(ListModel, `[[`, "coxph")
@@ -384,7 +441,8 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 #'   library(survIDINRI)
 #'
 #'   ui <- fluidPage(sidebarLayout(
-#'     sidebarPanel(timerocUI("timeroc")),
+#'     sidebarPanel(
+#'     timerocUI("timeroc"),
 #'     mainPanel(
 #'       plotOutput("plot_timeroc"),
 #'       ggplotdownUI("timeroc"),
@@ -571,13 +629,15 @@ timerocModule <- function(input, output, session, data, data_label,
 
   indeps <- reactive(lapply(1:nmodel(), function(i) input[[paste0("indep_km", i)]]))
 
+  ####################수정
+
   output$time <- renderUI({
     req(input$time_km)
     tvar <- data()[[input$time_km]]
     sliderInput(session$ns("time_to_roc"), "Time to analyze",
                 min = min(tvar, na.rm = TRUE),
                 max = max(tvar, na.rm = TRUE),
-                value = median(tvar, na.rm = TRUE)
+                value = max(tvar, na.rm = TRUE)
     )
   })
 
@@ -636,7 +696,8 @@ timerocModule <- function(input, output, session, data, data_label,
 
 
   timerocList <- reactive({
-    req(input$event_km, input$time_km)
+    #########수정
+    req(input$event_km, input$time_km, input$time_to_roc)
     for (i in 1:nmodel()) {
       req(input[[paste0("indep_km", i)]])
     }
@@ -646,7 +707,7 @@ timerocModule <- function(input, output, session, data, data_label,
 
     data.km <- data()[complete.cases(data()[, .SD, .SDcols = unique(unlist(indeps()))])]
     data.km <- data.km[complete.cases(data.km[, .SD, .SDcols = input$event_km ])]
-    data.km[[input$event_km]] <- as.numeric(as.vector(data.km[[input$event_km]]))
+
     if (input$subcheck == TRUE) {
       validate(
         need(length(input$subvar_km) > 0, "No variables for subsetting"),
@@ -684,14 +745,14 @@ timerocModule <- function(input, output, session, data, data_label,
           if(c("AUC") %in% names(res.tb)){
             res.tb <-cbind(
               res.tb,
-              survIDINRI_helper(input$event_km, input$time_km, indeps(), input$time_to_roc, data.km)
+              survIDINRI_helper(input$event_km, input$time_km, indeps(), t = input$time_to_roc, data.km)
             )
           }
 
         }
       }else{
         res.roc <- lapply(indeps(), function(x) {
-          timeROChelper(input$event_km, input$time_km, vars.ind = x, t = input$time_to_roc, data = data.km, id.cluster=id.cluster())
+          timeROChelper(input$event_km, input$time_km, vars.ind = x, t = input$time_to_roc, data = data.km)
         })
 
         if (nmodel() == 1 || !NRIIDI) {
@@ -702,7 +763,7 @@ timerocModule <- function(input, output, session, data, data_label,
           if(c("AUC") %in% names(res.tb)){
             res.tb <-cbind(
               res.tb,
-              survIDINRI_helper(input$event_km, input$time_km, indeps(), input$time_to_roc, data.km)
+              survIDINRI_helper(input$event_km, input$time_km, indeps(), t = input$time_to_roc, data.km)
             )
           }
 
@@ -748,7 +809,7 @@ timerocModule <- function(input, output, session, data, data_label,
         if(c("AUC") %in% names(res.tb)){
           res.tb <-cbind(
             res.tb,
-            survIDINRI_helper(input$event_km, input$time_km, indeps(), input$time_to_roc, data.km)
+            survIDINRI_helper(input$event_km, input$time_km, indeps(), t = input$time_to_roc, data.km)
           )
         }
 
@@ -787,6 +848,7 @@ timerocModule <- function(input, output, session, data, data_label,
     list(plot = p, tb = res.tb)
   })
 
+
   output$downloadControls <- renderUI({
     tagList(
       column(4, selectInput(session$ns("file_ext"), "File type", c("jpg", "pdf", "svg", "pptx"), selected = "pptx")),
@@ -795,28 +857,47 @@ timerocModule <- function(input, output, session, data, data_label,
     )
   })
 
+
+  ############
+  roc_plot <- reactive({
+    timerocList()$plot
+  })
+
+  ######################
   output$downloadButton <- downloadHandler(
     filename = function() {
       paste0(input$event_km, "_", input$time_km, "_timeROC.", input$file_ext)
     },
+
+    #################### withProgress issues handled
     content = function(file) {
-      withProgress(message = "Downloading plot...", value = 0.5, {
-        plot <- timerocList()$plot
-        if (input$file_ext == "pptx") {
-          doc <- officer::read_pptx()
-          doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
-          doc <- officer::ph_with(doc, rvg::dml(ggobj = plot),
-                                  location = officer::ph_location(width = input$fig_width, height = input$fig_height))
-          print(doc, target = file)
-        } else {
-          ggsave(file, plot, dpi = 300, width = input$fig_width, height = input$fig_height, units = "in")
-        }
-      })
+      p <- roc_plot()
+
+      if (input$file_ext == "pptx") {
+        doc <- officer::read_pptx() %>%
+          officer::add_slide(layout = "Title and Content", master = "Office Theme") %>%
+          officer::ph_with(
+            rvg::dml(ggobj = p),
+            location = officer::ph_location(width = input$fig_width,
+                                            height = input$fig_height)
+          )
+        print(doc, target = file)
+      } else {
+        ggplot2::ggsave(
+          filename = file,
+          plot     = p,
+          width    = input$fig_width,
+          height   = input$fig_height,
+          units    = "in",
+          dpi      = 300
+        )
+      }
     }
   )
 
   return(timerocList)
 }
+
 
 #' @title timerocModule2: shiny module server for time dependent roc analysis- input number of model as integer
 #' @description shiny module server for time-dependent roc analysis- input number of model as integer
@@ -1024,15 +1105,11 @@ timerocModule2 <- function(input, output, session, data, data_label, data_varStr
   output$time <- renderUI({
     req(input$time_km)
     tvar <- data()[[input$time_km]]
-    if (min(tvar, na.rm = T) >= 365) {
-      sliderInput(session$ns("time_to_roc"), "Time to analyze", min = min(tvar, na.rm = T), max = max(tvar, na.rm = T), value = median(tvar, na.rm = T))
-    } else if (max(tvar, na.rm = T) >= 365) {
-      sliderInput(session$ns("time_to_roc"), "Time to analyze", min = min(tvar, na.rm = T), max = max(tvar, na.rm = T), value = 365, step = 5)
-    } else if (max(tvar, na.rm = T) >= 12) {
-      sliderInput(session$ns("time_to_roc"), "Time to analyze", min = min(tvar, na.rm = T), max = max(tvar, na.rm = T), value = 12)
-    } else {
-      sliderInput(session$ns("time_to_roc"), "Time to analyze", min = min(tvar, na.rm = T), max = max(tvar, na.rm = T), value = median(tvar, na.rm = T))
-    }
+    sliderInput(session$ns("time_to_roc"), "Time to analyze",
+                min = min(tvar, na.rm = TRUE),
+                max = max(tvar, na.rm = TRUE),
+                value = max(tvar, na.rm = TRUE)
+    )
   })
 
 

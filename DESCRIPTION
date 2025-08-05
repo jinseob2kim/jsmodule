@@ -15,7 +15,8 @@ Authors@R: c(
   person("Jeongmin", "Seo", email = "jmme425@naver.com", role = c("aut")),
   person("Hojun", "LEE", email = "yejikang63@gmail.com", role = c("aut")),
   person("Sungho", "Choi", email = "1213sam0@gmail.com", role = c("aut")),
-  person("Yeji", "Kang", email = "yejikang63@gmail.com", role = c("aut"))
+  person("Yeji", "Kang", email = "yejikang63@gmail.com", role = c("aut")),
+  person("Mingu", "Jee", email = "rafamingujee047@gmail.com", role = c("aut"))
   )
 Description: 'RStudio' addins and 'Shiny' modules for descriptive statistics, regression and survival analysis.
 Depends: R (>= 3.4.0)
