@@ -1,3 +1,7 @@
+# jsmodule 1.6.13
+## Update
+- Added an option to the Kaplan-Meier module to show censored counts in the numbers-at-risk table. When enabled, default label is automatically extended from "Numbers at risk" to "Numbers at risk (number censored)".
+
 # jsmodule 1.6.12
 ## Update
 - refactor ROC time dependent table function (remove for statement)
