@@ -38,6 +38,7 @@
 #'   })
 #'
 #'   output$cut_roc <- renderTable({
+#'     if (is.null(out_roc()$cut)) return(NULL)
 #'     print(out_roc()$cut)
 #'   })
 #'
@@ -99,12 +100,12 @@ rocUI <- function(id) {
 
 reclassificationJS <- function(data, cOutcome, predrisk1, predrisk2, cutoff, dec.value = 3, dec.p = 3) {
   c1 <- cut(predrisk1,
-    breaks = cutoff, include.lowest = TRUE,
-    right = FALSE
+            breaks = cutoff, include.lowest = TRUE,
+            right = FALSE
   )
   c2 <- cut(predrisk2,
-    breaks = cutoff, include.lowest = TRUE,
-    right = FALSE
+            breaks = cutoff, include.lowest = TRUE,
+            right = FALSE
   )
   tabReclas <- table(`Initial Model` = c1, `Updated Model` = c2)
   # cat(" _________________________________________\n")
@@ -114,19 +115,19 @@ reclassificationJS <- function(data, cOutcome, predrisk1, predrisk2, cutoff, dec
   # cat("\n Outcome: absent \n  \n")
   TabAbs <- ta[, , 1]
   tab1 <- cbind(TabAbs, ` % reclassified` = round((rowSums(TabAbs) -
-    diag(TabAbs)) / rowSums(TabAbs), 2) * 100)
+                                                     diag(TabAbs)) / rowSums(TabAbs), 2) * 100)
   names(dimnames(tab1)) <- c("Initial Model", "Updated Model")
   # print(tab1)
   # cat("\n \n Outcome: present \n  \n")
   TabPre <- ta[, , 2]
   tab2 <- cbind(TabPre, ` % reclassified` = round((rowSums(TabPre) -
-    diag(TabPre)) / rowSums(TabPre), 2) * 100)
+                                                     diag(TabPre)) / rowSums(TabPre), 2) * 100)
   names(dimnames(tab2)) <- c("Initial Model", "Updated Model")
   # print(tab2)
   # cat("\n \n Combined Data \n  \n")
   Tab <- tabReclas
   tab <- cbind(Tab, ` % reclassified` = round((rowSums(Tab) -
-    diag(Tab)) / rowSums(Tab), 2) * 100)
+                                                 diag(Tab)) / rowSums(Tab), 2) * 100)
   names(dimnames(tab)) <- c("Initial Model", "Updated Model")
   # print(tab)
   # cat(" _________________________________________\n")
@@ -291,6 +292,7 @@ ROC_table <- function(ListModel, dec.auc = 3, dec.p = 3) {
 #'   })
 #'
 #'   output$cut_roc <- renderTable({
+#'     if (is.null(out_roc()$cut)) return(NULL)
 #'     print(out_roc()$cut)
 #'   })
 #'
@@ -389,8 +391,8 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
     tagList(
       selectInput(session$ns("event_roc"), "Event",
-        choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
-        selected = NULL
+                  choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
+                  selected = NULL
       )
     )
   })
@@ -440,48 +442,42 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
   output$indep <- renderUI({
     selectInput(session$ns(paste0("indep_roc", 1)), paste0("Independent variables for Model ", 1),
-      choices = mklist(data_varStruct(), indeproc()), multiple = T,
-      selected = unlist(mklist(data_varStruct(), indeproc()))[1]
+                choices = mklist(data_varStruct(), indeproc()), multiple = T,
+                selected = unlist(mklist(data_varStruct(), indeproc()))[1]
     )
   })
-
   observe({
-    if (nmodel() == 1 && length(indeps()[[1]]) == 1) {
-      output$cutval <- renderUI({
-        req(indeps()[[1]])
-        selected_var <- data()[[indeps()[[1]][1]]]
-        if (!is.null(input$event_roc) && !is.null(indeps()[[1]][1])) {
-          clean_data <- data()[complete.cases(data()[, c(input$event_roc, indeps()[[1]][1]), with = FALSE]), ]
-          #forms <- paste0(input$event_roc, "~", indeps()[[1]][1])
-          #mm <- glm(as.formula(forms), data = clean_data, family = binomial)
-          roc_obj <- pROC::roc(clean_data[[input$event_roc]], clean_data[[indeps()[[1]][1]]])
-          best_threshold <- pROC::coords(roc_obj, "best", input = "threshold", best.method = "youden")["threshold"]
-        } else {
-          best_threshold <- NULL
-        }
+    iv <- indeps()[[1]][1]
+    output$cutval <- renderUI({
+      if (is.null(iv) || is.null(input$event_roc)) return(NULL)
+      if (!is.numeric(data()[[iv]])) return(NULL)
 
-        if (is.numeric(selected_var)) {
-          min_val <- min(selected_var, na.rm = TRUE)
-          max_val <- max(selected_var, na.rm = TRUE)
-          tagList(
-            helpText("Select a numeric cutoff value for the chosen variable. Default is the best threshold (Youden index)."),
-            numericInput(
-              inputId = session$ns("cutval"),
-              label = paste("Select Cutoff for", indeps()[[1]][1]),
-              value = ifelse(is.null(best_threshold), median(selected_var, na.rm = TRUE), round(best_threshold, 3)),
-              min = min_val,
-              max = max_val
-            )
-          )
-        } else {
-          p("Selected variable is not numeric. Please select a numeric variable.")
-        }
-      })
-    } else {
-      output$cutval <- renderUI({
-        NULL
-      })
-    }
+      clean_data <- data()[complete.cases(
+        data()[, .SD, .SDcols = c(input$event_roc, iv)]
+      )]
+      roc_obj <- tryCatch(
+        pROC::roc(clean_data[[input$event_roc]], clean_data[[iv]]),
+        error = function(e) NULL
+      )
+
+      best_thr <- if (!is.null(roc_obj)) {
+        as.numeric(pROC::coords(
+          roc_obj, "best",
+          input       = "threshold",
+          best.method = "youden"
+        )["threshold"])
+      } else {
+        median(data()[[iv]], na.rm = TRUE)
+      }
+
+      numericInput(
+        inputId = session$ns("cutval"),
+        label = paste("Select cutoff for", iv),
+        value = round(best_thr, 3),
+        min = min(data()[[iv]], na.rm = TRUE),
+        max = max(data()[[iv]], na.rm = TRUE)
+      )
+    })
   })
 
   observeEvent(input$add, {
@@ -489,8 +485,8 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
       selector = paste0("div:has(> #", session$ns("add"), ")"),
       where = "beforeBegin",
       ui = selectInput(session$ns(paste0("indep_roc", nmodel() + 1)), paste0("Independent variables for Model ", nmodel() + 1),
-        choices = mklist(data_varStruct(), indeproc()), multiple = T,
-        selected = unlist(mklist(data_varStruct(), indeproc()))[1:min(length(indeproc()), nmodel() + 1)]
+                       choices = mklist(data_varStruct(), indeproc()), multiple = T,
+                       selected = unlist(mklist(data_varStruct(), indeproc()))[1:min(length(indeproc()), nmodel() + 1)]
       )
     )
     nmodel(nmodel() + 1)
@@ -505,7 +501,7 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
 
 
-# 요기
+  # 요기
   indeps <- reactive(lapply(1:nmodel(), function(i) {
     req(nmodel())
     input[[paste0("indep_roc", i)]]
@@ -534,8 +530,8 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
       tagList(
         selectInput(session$ns("subvar_roc"), "Sub-group variables",
-          choices = var_subgroup_list, multiple = T,
-          selected = var_subgroup[1]
+                    choices = var_subgroup_list, multiple = T,
+                    selected = var_subgroup[1]
         )
       )
     })
@@ -551,14 +547,14 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
     for (v in seq_along(input$subvar_roc)) {
       if (input$subvar_roc[[v]] %in% vlist()$factor_vars) {
         outUI[[v]] <- selectInput(session$ns(paste0("subval_roc", v)), paste0("Sub-group value: ", input$subvar_roc[[v]]),
-          choices = data_label()[variable == input$subvar_roc[[v]], level], multiple = T,
-          selected = data_label()[variable == input$subvar_roc[[v]], level][1]
+                                  choices = data_label()[variable == input$subvar_roc[[v]], level], multiple = T,
+                                  selected = data_label()[variable == input$subvar_roc[[v]], level][1]
         )
       } else {
         val <- stats::quantile(data()[[input$subvar_roc[[v]]]], na.rm = T)
         outUI[[v]] <- sliderInput(session$ns(paste0("subval_roc", v)), paste0("Sub-group range: ", input$subvar_roc[[v]]),
-          min = val[1], max = val[5],
-          value = c(val[2], val[4])
+                                  min = val[1], max = val[5],
+                                  value = c(val[2], val[4])
         )
       }
     }
@@ -609,67 +605,62 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
       label.regress <- data_label()[label.regress2]
       data.roc[[input$event_roc]] <- as.numeric(as.vector(data.roc[[input$event_roc]]))
     }
-
     if (is.null(design.survey)) {
       if (is.null(id.cluster)) {
         res.roc <- lapply(indeps(), function(x) {
-          forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
-          mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
-          return(pROC::roc(mm$y, predict(mm, type = "response")))
+          form <- as.formula(paste0(input$event_roc,"~",paste(x,collapse="+")))
+          mm <- glm(form, data=data.roc, family=binomial, x=TRUE)
+          pROC::roc(mm$y, predict(mm, type="response"))
         })
-        if (nmodel() == 1 & length(indeps()) == 1) {
-          res.roc1 <- lapply(indeps(), function(x) {
-            forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
-            mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
-            return(pROC::roc(mm$y, mm$x[, 2]))
-          })
-          ###
-          if (!is.null(input$cutval)) {
-            res.cut <- pROC::coords(
-              res.roc1[[1]],
-              x = input$cutval,
-              input = "threshold",
-              ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
-              transpose = TRUE
-            )
+        if (nmodel()==1 && length(indeps()[[1]])==1) {
+          iv <- indeps()[[1]][1]
+          if (is.numeric(data.roc[[iv]])) {
+            res.roc1 <- lapply(indeps(), function(x) {
+              form <- as.formula(paste0(input$event_roc,"~",paste(x,collapse="+")))
+              mm <- glm(form, data=data.roc, family=binomial, x=TRUE)
+              pROC::roc(mm$y, mm$x[,2])
+            })
+            cut_coords <- tryCatch({
+              if (!is.null(input$cutval)) {
+                pROC::coords(res.roc1[[1]], x=input$cutval, input="threshold",
+                             ret=c("threshold","sensitivity","specificity","accuracy","ppv","npv"),
+                             transpose=TRUE)
+              } else {
+                pROC::coords(res.roc1[[1]], x="best", input="threshold", best.method="youden",
+                             ret=c("threshold","sensitivity","specificity","accuracy","ppv","npv"),
+                             transpose=TRUE)
+              }
+            }, error=function(e) NULL)
+            if (!is.null(cut_coords)) {
+              res.cut <- data.frame(
+                Threshold = round(cut_coords["threshold"],3),
+                Sensitivity = round(cut_coords["sensitivity"],3),
+                Specificity = round(cut_coords["specificity"],3),
+                Accuracy = round(cut_coords["accuracy"],3),
+                PPV = round(cut_coords["ppv"],3),
+                NPV = round(cut_coords["npv"],3),
+                row.names = "Value"
+              )
+            } else {
+              res.cut <- NULL
+            }
           } else {
-            res.cut <- pROC::coords(
-              res.roc1[[1]],
-              x = "best", input = "threshold", best.method = "youden",
-              ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
-              transpose = TRUE
-            )
+            res.cut <- NULL
           }
-          total_pos <- sum(res.roc1[[1]]$roc$cases)
-          total_neg <- sum(res.roc1[[1]]$roc$controls)
-          tp <- round(res.cut["sensitivity"] * total_pos)
-          tn <- round(res.cut["specificity"] * total_neg)
-          fn <- total_pos - tp
-          fp <- total_neg - tn
-          res.cut <- data.frame(
-            Threshold = c(round(res.cut["threshold"], 3)),
-            Sensitivity = c(round(res.cut["sensitivity"], 3)),
-            Specificity = c(round(res.cut["specificity"], 3)),
-            Accuracy = c(round(res.cut["accuracy"], 3)),
-            PPV = c(round(res.cut["ppv"], 3)),
-            NPV = c(round(res.cut["npv"], 3))
-          )
-          rownames(res.cut) <- c("Value")
-          ###
         } else {
           res.cut <- NULL
         }
       } else {
         res.roc <- lapply(indeps(), function(x) {
-          forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
-          mm <- geepack::geeglm(as.formula(forms), data = data.roc, family = "binomial", id = get(id.cluster()), corstr = "exchangeable")
-          pROC::roc(mm$y, predict(mm, type = "response"))
+          form <- as.formula(paste0(input$event_roc,"~",paste(x,collapse="+")))
+          mm <- geepack::geeglm(form, data=data.roc, family=binomial,
+                                id=get(id.cluster()), corstr="exchangeable")
+          pROC::roc(mm$y, predict(mm, type="response"))
         })
-
         res.cut <- NULL
       }
+      res.tb <- ROC_table(res.roc, dec.auc=3, dec.p=3)
 
-      res.tb <- ROC_table(res.roc, dec.auc = 3, dec.p = 3)
     } else {
       data.design <- design.survey()
       label.regress <- data_label()
@@ -765,20 +756,20 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
       column(
         4,
         selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-          choices = c("jpg", "pdf", "tiff", "svg", "pptx"), multiple = F,
-          selected = "pptx"
+                       choices = c("jpg", "pdf", "tiff", "svg", "pptx"), multiple = F,
+                       selected = "pptx"
         )
       ),
       column(
         4,
         sliderInput(session$ns("fig_width"), "Width (in):",
-          min = 5, max = 15, value = 8
+                    min = 5, max = 15, value = 8
         )
       ),
       column(
         4,
         sliderInput(session$ns("fig_height"), "Height (in):",
-          min = 5, max = 15, value = 6
+                    min = 5, max = 15, value = 6
         )
       )
     )
@@ -977,8 +968,8 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
 
     tagList(
       selectInput(session$ns("event_roc"), "Event",
-        choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
-        selected = NULL
+                  choices = mklist(data_varStruct(), vlist()$factor_01vars), multiple = F,
+                  selected = NULL
       )
     )
   })
@@ -1024,56 +1015,50 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
     lapply(1:nmodel(), {
       function(x) {
         selectInput(session$ns(paste0("indep_roc", x)), paste0("Independent variables for Model ", x),
-          choices = mklist(data_varStruct(), indeproc()), multiple = T,
-          selected = unlist(mklist(data_varStruct(), indeproc()))[x]
+                    choices = mklist(data_varStruct(), indeproc()), multiple = T,
+                    selected = unlist(mklist(data_varStruct(), indeproc()))[x]
         )
       }
     })
   })
 
   observe({
-    if (nmodel() == 1 && length(indeproc()[[1]]) == 1) {
-      output$cutval <- renderUI({
-        req(indeproc()[[1]])
-        selected_var <- data()[[indeproc()[[1]][1]]]
-        if (!is.null(input$event_roc) && !is.null(indeproc()[[1]][1])) {
-          clean_data <- data()[complete.cases(data()[, c(input$event_roc, indeproc()[[1]][1]), with = FALSE]), ]
-          #forms <- paste0(input$event_roc, "~", indeproc()[[1]][1])
-          #mm <- glm(as.formula(forms), data = clean_data, family = binomial)
-          roc_obj <- pROC::roc(clean_data[[input$event_roc]], clean_data[[indeps()[[1]][1]]])
-          best_threshold <- pROC::coords(roc_obj, "best", input = "threshold", best.method = "youden")["threshold"]
-        } else {
-          best_threshold <- NULL
-        }
+    output$cutval <- renderUI({
+      req(nmodel() == 1, length(indeps()[[1]]) == 1)
 
-        if (is.numeric(selected_var)) {
-          min_val <- min(selected_var, na.rm = TRUE)
-          max_val <- max(selected_var, na.rm = TRUE)
-          tagList(
-            helpText("Select a numeric cutoff value for the chosen variable. Default is the best threshold (Youden index)."),
-            numericInput(
-              inputId = session$ns("cutval"),
-              label = paste("Select Cutoff for", indeps()[[1]][1]),
-              value = ifelse(is.null(best_threshold), median(selected_var, na.rm = TRUE), round(best_threshold, 3)),
-              min = min_val,
-              max = max_val
-            )
-          )
-        } else {
-          p("Selected variable is not numeric. Please select a numeric variable.")
-        }
-      })
-    } else {
-      output$cutval <- renderUI({
-        NULL
-      })
-    }
+      iv <- indeps()[[1]][1]
+      if (!is.numeric(data()[[iv]])) return(NULL)
+
+      clean_data <- data()[complete.cases(data()[, .(get(input$event_roc), get(iv))]), ]
+      roc_obj <- tryCatch(
+        pROC::roc(clean_data[[input$event_roc]], clean_data[[iv]]),
+        error = function(e) NULL
+      )
+
+      best_thr <- if (!is.null(roc_obj)) {
+        as.numeric(pROC::coords(
+          roc_obj, "best",
+          input       = "threshold",
+          best.method = "youden"
+        )["threshold"])
+      } else {
+        median(data()[[iv]], na.rm = TRUE)
+      }
+
+      numericInput(
+        inputId = session$ns("cutval"),
+        label   = paste("Select Cutoff for", iv),
+        value   = round(best_thr, 3),
+        min     = min(data()[[iv]], na.rm = TRUE),
+        max     = max(data()[[iv]], na.rm = TRUE)
+      )
+    })
   })
 
 
 
 
-#여기
+  #여기
 
   indeps <- reactive(lapply(1:nmodel(), function(i) {
     req(nmodel())
@@ -1102,8 +1087,8 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
 
       tagList(
         selectInput(session$ns("subvar_roc"), "Sub-group variables",
-          choices = var_subgroup_list, multiple = T,
-          selected = var_subgroup[1]
+                    choices = var_subgroup_list, multiple = T,
+                    selected = var_subgroup[1]
         )
       )
     })
@@ -1119,14 +1104,14 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
     for (v in seq_along(input$subvar_roc)) {
       if (input$subvar_roc[[v]] %in% vlist()$factor_vars) {
         outUI[[v]] <- selectInput(session$ns(paste0("subval_roc", v)), paste0("Sub-group value: ", input$subvar_roc[[v]]),
-          choices = data_label()[variable == input$subvar_roc[[v]], level], multiple = T,
-          selected = data_label()[variable == input$subvar_roc[[v]], level][1]
+                                  choices = data_label()[variable == input$subvar_roc[[v]], level], multiple = T,
+                                  selected = data_label()[variable == input$subvar_roc[[v]], level][1]
         )
       } else {
         val <- stats::quantile(data()[[input$subvar_roc[[v]]]], na.rm = T)
         outUI[[v]] <- sliderInput(session$ns(paste0("subval_roc", v)), paste0("Sub-group range: ", input$subvar_roc[[v]]),
-          min = val[1], max = val[5],
-          value = c(val[2], val[4])
+                                  min = val[1], max = val[5],
+                                  value = c(val[2], val[4])
         )
       }
     }
@@ -1180,64 +1165,67 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
     if (is.null(design.survey)) {
       if (is.null(id.cluster)) {
         res.roc <- lapply(indeps(), function(x) {
-          forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
-          mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
-          return(pROC::roc(mm$y, predict(mm, type = "response")))
-        })
-
-        if (nmodel() == 1 & length(indeps()) == 1) {
-          res.roc1 <- lapply(indeps(), function(x) {
-            forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
-            mm <- glm(as.formula(forms), data = data.roc, family = binomial, x = T)
-            return(pROC::roc(mm$y, mm$x[, 2]))
-          })
-          ###
-          if (!is.null(input$cutval)) {
-            res.cut <- pROC::coords(
-              res.roc1[[1]],
-              x = input$cutval,
-              input = "threshold",
-              ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
-              transpose = TRUE
-            )
-          } else {
-            res.cut <- pROC::coords(
-              res.roc1[[1]],
-              x = "best", input = "threshold", best.method = "youden",
-              ret = c("threshold", "sensitivity", "specificity", "accuracy", "ppv", "npv"),
-              transpose = TRUE
-            )
-          }
-          total_pos <- sum(res.roc1[[1]]$roc$cases)
-          total_neg <- sum(res.roc1[[1]]$roc$controls)
-          tp <- round(res.cut["sensitivity"] * total_pos)
-          tn <- round(res.cut["specificity"] * total_neg)
-          fn <- total_pos - tp
-          fp <- total_neg - tn
-          res.cut <- data.frame(
-            Threshold = c(round(res.cut["threshold"], 3)),
-            Sensitivity = c(round(res.cut["sensitivity"], 3)),
-            Specificity = c(round(res.cut["specificity"], 3)),
-            Accuracy = c(round(res.cut["accuracy"], 3)),
-            PPV = c(round(res.cut["ppv"], 3)),
-            NPV = c(round(res.cut["npv"], 3))
+          form <- as.formula(paste0(input$event_roc, "~", paste(x, collapse = "+")))
+          mm   <- glm(form, data = data.roc, family = binomial, x = TRUE)
+          tryCatch(
+            pROC::roc(mm$y, predict(mm, type = "response")),
+            error = function(e) {
+              message("Skipping ROC for Model: ", paste(x, collapse = "+"),
+                      " (marker not numeric)")
+              NULL
+            }
           )
-          rownames(res.cut) <- c("Value")
-          ###
+        })
+        res.roc <- Filter(Negate(is.null), res.roc)
+
+        if (length(res.roc)==1 && length(indeps()[[1]])==1) {
+          iv <- indeps()[[1]][1]
+          if (is.numeric(data.roc[[iv]])) {
+            res.roc1 <- lapply(indeps(), function(x) {
+              form <- as.formula(paste0(input$event_roc, "~", paste(x, collapse = "+")))
+              mm   <- glm(form, data = data.roc, family = binomial, x = TRUE)
+              tryCatch(
+                pROC::roc(mm$y, mm$x[,2]),
+                error = function(e) NULL
+              )
+            })
+            cut_coords <- tryCatch({
+              if (!is.null(input$cutval)) {
+                pROC::coords(res.roc1[[1]], x=input$cutval, input="threshold",
+                             ret=c("threshold","sensitivity","specificity","accuracy","ppv","npv"),
+                             transpose=TRUE)
+              } else {
+                pROC::coords(res.roc1[[1]], x="best", input="threshold", best.method="youden",
+                             ret=c("threshold","sensitivity","specificity","accuracy","ppv","npv"),
+                             transpose=TRUE)
+              }
+            }, error=function(e) NULL)
+
+            if (!is.null(cut_coords)) {
+              res.cut <- data.frame(
+                Threshold   = round(cut_coords["threshold"],   3),
+                Sensitivity = round(cut_coords["sensitivity"], 3),
+                Specificity = round(cut_coords["specificity"], 3),
+                Accuracy    = round(cut_coords["accuracy"],    3),
+                PPV         = round(cut_coords["ppv"],         3),
+                NPV         = round(cut_coords["npv"],         3),
+                row.names   = "Value"
+              )
+            } else {
+              res.cut <- NULL
+            }
+          } else {
+            res.cut <- NULL
+          }
         } else {
           res.cut <- NULL
         }
       } else {
-        res.roc <- lapply(indeps(), function(x) {
-          forms <- paste0(input$event_roc, "~", paste(x, collapse = "+"))
-          mm <- geepack::geeglm(as.formula(forms), data = data.roc, family = "binomial", id = get(id.cluster()), corstr = "exchangeable")
-          pROC::roc(mm$y, predict(mm, type = "response"))
-        })
-
         res.cut <- NULL
       }
 
-      res.tb <- ROC_table(res.roc, dec.auc = 3, dec.p = 3)
+      res.tb <- ROC_table(res.roc, dec.auc=3, dec.p=3)
+
     } else {
       data.design <- design.survey()
       label.regress <- data_label()
@@ -1333,20 +1321,20 @@ rocModule2 <- function(input, output, session, data, data_label, data_varStruct 
       column(
         4,
         selectizeInput(session$ns("file_ext"), "File extension (dpi = 300)",
-          choices = c("jpg", "pdf", "tiff", "svg", "pptx"), multiple = F,
-          selected = "pptx"
+                       choices = c("jpg", "pdf", "tiff", "svg", "pptx"), multiple = F,
+                       selected = "pptx"
         )
       ),
       column(
         4,
         sliderInput(session$ns("fig_width"), "Width (in):",
-          min = 5, max = 15, value = 8
+                    min = 5, max = 15, value = 8
         )
       ),
       column(
         4,
         sliderInput(session$ns("fig_height"), "Height (in):",
-          min = 5, max = 15, value = 6
+                    min = 5, max = 15, value = 6
         )
       )
     )
