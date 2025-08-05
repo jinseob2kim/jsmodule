@@ -58,7 +58,7 @@ timerocUI <- function(id) {
     uiOutput(ns("time")),
     checkboxInput(ns("subcheck"), "Sub-group analysis"),
     tags$p(
-      strong("- Harrell’s C-index:"),
+      strong("- Harrell's C-index:"),
       " calculated via ",
       code("survival::concordance()")
     ),
@@ -629,7 +629,7 @@ timerocModule <- function(input, output, session, data, data_label,
 
   indeps <- reactive(lapply(1:nmodel(), function(i) input[[paste0("indep_km", i)]]))
 
-  ####################수정
+  ####################Fix
 
   output$time <- renderUI({
     req(input$time_km)
@@ -696,7 +696,7 @@ timerocModule <- function(input, output, session, data, data_label,
 
 
   timerocList <- reactive({
-    #########수정
+    #########Fix
     req(input$event_km, input$time_km, input$time_to_roc)
     for (i in 1:nmodel()) {
       req(input[[paste0("indep_km", i)]])
