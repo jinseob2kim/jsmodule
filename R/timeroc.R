@@ -998,7 +998,7 @@ timerocModule <- function(input, output, session, data, data_label,
 
 timerocModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL, iid = T, NRIIDI = T) {
   ## To remove NOTE.
-  ListModel <- compare <- level <- variable <- FP <- TP <- model <- Sensitivity <- Specificity <- NULL
+  . <- ListModel <- compare <- level <- variable <- FP <- TP <- model <- Sensitivity <- Specificity <- NULL
 
   if (is.null(data_varStruct)) {
     data_varStruct <- reactive(list(variable = names(data())))
