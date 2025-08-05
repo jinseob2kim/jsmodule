@@ -79,6 +79,7 @@ server <- function(input, output, session) {
   })
 
   output$cut_roc <- renderTable({
+    if (is.null(out_roc()$cut)) return(NULL)
     print(out_roc()$cut)
   })
 

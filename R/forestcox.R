@@ -169,7 +169,7 @@ forestcoxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor
   moduleServer(
     id,
     function(input, output, session) {
-      N <- V1 <- V2 <- .N <- HR <- Lower <- Upper <- level <- val_label <- variable <- NULL
+      . <- N <- V1 <- V2 <- .N <- HR <- Lower <- Upper <- level <- val_label <- variable <- NULL
       fix_et <- !is.null(vec.event) && !is.null(vec.time) && (length(vec.event) == length(vec.time))
       if (is.null(data_varStruct)) {
         data_varStruct <- reactive(list(variable = names(data())))
