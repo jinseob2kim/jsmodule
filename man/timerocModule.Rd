@@ -81,8 +81,7 @@ shiny module server for time dependent roc analysis- input number of model as in
   library(survIDINRI)
 
   ui <- fluidPage(sidebarLayout(
-    sidebarPanel(
-    timerocUI("timeroc"),
+    sidebarPanel(timerocUI("timeroc")),
     mainPanel(
       plotOutput("plot_timeroc"),
       ggplotdownUI("timeroc"),

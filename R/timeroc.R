@@ -441,8 +441,7 @@ survIDINRI_helper <- function(var.event, var.time, list.vars.ind, t, data, dec.a
 #'   library(survIDINRI)
 #'
 #'   ui <- fluidPage(sidebarLayout(
-#'     sidebarPanel(
-#'     timerocUI("timeroc"),
+#'     sidebarPanel(timerocUI("timeroc")),
 #'     mainPanel(
 #'       plotOutput("plot_timeroc"),
 #'       ggplotdownUI("timeroc"),
