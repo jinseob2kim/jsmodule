@@ -901,7 +901,7 @@ rocModule <- function(input, output, session, data, data_label, data_varStruct =
 
 rocModule2 <- function(input, output, session, data, data_label, data_varStruct = NULL, nfactor.limit = 10, design.survey = NULL, id.cluster = NULL) {
   ## To remove NOTE.
-  level <- variable <- NULL
+  . <- level <- variable <- NULL
 
   if (is.null(data_varStruct)) {
     data_varStruct <- reactive(list(variable = names(data())))
