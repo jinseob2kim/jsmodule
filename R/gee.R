@@ -300,6 +300,8 @@ GEEModuleLinear <- function(input, output, session, data, data_label, data_varSt
       data.table::setkey(label.regress2, "variable", "level")
       label.regress <- data_label()[label.regress2]
     }
+
+    data.regress <- data.regress[order(get(idgee_Plz_Noduplicate)), ]
     y <- input$dep_vars
     xs <- input$indep_vars
     validate(
@@ -589,6 +591,8 @@ GEEModuleLogistic <- function(input, output, session, data, data_label, data_var
       data.table::setkey(label.regress2, "variable", "level")
       label.regress <- data_label()[label.regress2]
     }
+
+    data.logistic <- data.logistic[order(get(idgee_Plz_Noduplicate)), ]
     y <- input$dep_vars
     xs <- input$indep_vars
     data.logistic[[y]] <- as.numeric(as.vector(data.logistic[[y]]))

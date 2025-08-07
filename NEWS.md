@@ -1,10 +1,11 @@
 # jsmodule 1.6.13
 ## Update
-- Added an option to the Kaplan-Meier module to show censored counts in the numbers-at-risk table. When enabled, default label is automatically extended from "Numbers at risk" to "Numbers at risk (number censored)".
-- Added AUC and Brier Score metrics for time-dependent ROC analysis
-- Harrell’s C-index now updates dynamically based on the selected analysis time.
+- Added an option to the `Kaplan-Meier module` to show censored counts in the numbers-at-risk table. When enabled, default label is automatically extended from "Numbers at risk" to "Numbers at risk (number censored)".
+- Added AUC and Brier Score metrics for time-dependent `ROC` analysis
+- `Harrell’s C-index` now updates dynamically based on the selected analysis time.
 ## Bugfix
-- Fixed an error when selecting factor (categorical) predictors in ROC analysis.
+- Fixed an error when selecting factor (categorical) predictors in `ROC` analysis.
+- Fixed an error for `geeglm` caused by unsorted cluster id (now sorted before fitting).
 
 
 # jsmodule 1.6.12
