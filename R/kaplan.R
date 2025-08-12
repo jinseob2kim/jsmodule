@@ -863,7 +863,8 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
           min = 0, max = 1, value = 0.8
         ),
         textInput(session$ns("xaxis_km"), "x-axis text", "Time-to-event"),
-        radioButtons(session$ns("pal_km"), "Line color", choices = rownames(RColorBrewer::brewer.pal.info), selected = "Set1", inline = T),
+        # radioButtons(session$ns("pal_km"), "Line color", choices = rownames(RColorBrewer::brewer.pal.info), selected = "Set1", inline = T),
+        radioButtons(session$ns("pal_km"), "Line color", choices = c("Set1", "black", "npg", "aaas", "nejm", "lancet", "jama", "jco", "frontiers"), selected = "Set1", inline = T),
         sliderInput(session$ns("linewidth_km"), "Line Width", min = 0, max = 2, value = 1, step = 0.1)
       )
     } else {
@@ -883,7 +884,8 @@ kaplanModule <- function(input, output, session, data, data_label, data_varStruc
           min = 0, max = 1, value = 0.1 + input$ylims[1]
         ),
         h3("Line"),
-        radioButtons(session$ns("pal_km"), "Line color", choices = c("black", rownames(RColorBrewer::brewer.pal.info)), selected = "Set1", inline = T),
+        # radioButtons(session$ns("pal_km"), "Line color", choices = c("black", rownames(RColorBrewer::brewer.pal.info)), selected = "Set1", inline = T),
+        radioButtons(session$ns("pal_km"), "Line color", choices = c("Set1", "black", "npg", "aaas", "nejm", "lancet", "jama", "jco", "frontiers"), selected = "Set1", inline = T),
         checkboxInput(session$ns("linetype"), "Different line type", value = F),
         h3("Others"),
         textInput(session$ns("xaxis_km"), "x-axis text", "Time-to-event"),
