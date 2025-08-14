@@ -111,7 +111,7 @@ boxUI <- function(id, label = "boxplot") {
 #' @import shiny
 #' @importFrom data.table data.table .SD :=
 #' @importFrom ggpubr ggboxplot stat_compare_means geom_pwc
-#' @importFrom ggplot2 ggsave
+#' @importFrom ggplot2 ggsave after_stat
 #' @importFrom rvg dml
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 #' @importFrom scales label_pvalue
@@ -497,7 +497,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
               label.x.npc = pval.coord[1],
               label.y.npc = pval.coord[2],
               aes(
-                label = scales::label_pvalue(add_p = TRUE)(after_stat(p))
+                label = scales::label_pvalue(add_p = TRUE)(ggplot2::after_stat(p))
               ),
             )
         }
@@ -508,7 +508,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
               method = ppval.name,
               size = pval.font.size[3],
               label.size = pval.font.size[2],
-              aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p))),
+              aes(label = scales::label_pvalue(add_p = TRUE)(ggplot2::after_stat(p))),
             )
         }
 
@@ -519,7 +519,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
               size = pval.font.size[3],
               label.size = pval.font.size[2],
               # aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p)))
-              aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p)), group = !!sym(input$strata))
+              aes(label = scales::label_pvalue(add_p = TRUE)(ggplot2::after_stat(p)), group = !!sym(input$strata))
             )
         }
 

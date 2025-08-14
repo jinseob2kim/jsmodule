@@ -221,6 +221,13 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
                 inline = TRUE,
                 choices = pval.choices
               ),
+              radioButtons(
+                session$ns("pvalue_style"),
+                label = NULL,
+                inline = TRUE,
+                choices = c("exact number(p=0.05)" = "number", "stars(*)" = "stars"),
+                selected = "number"
+              )
             ),
             tabPanel(
               "isPvalueFalse",
@@ -251,8 +258,15 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
                 label = NULL,
                 inline = TRUE,
                 choices = c("T-test" = "t_test", "Wilcoxon" = "wilcox_test")
-              ),
             ),
+            radioButtons(
+              session$ns("pvalue_style"),
+              label = NULL,
+              inline = TRUE,
+              choices = c("exact number(p=0.05)" = "number", "stars(*)" = "stars"),
+              selected = "number"
+            )
+          ),
             tabPanel(
               "isPairFalse",
               NULL
@@ -282,6 +296,13 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
                 label = NULL,
                 inline = TRUE,
                 choices = c("T-test" = "t_test", "Wilcoxon" = "wilcox_test")
+              ),
+              radioButtons(
+                session$ns("pvalue_style"),
+                label = NULL,
+                inline = TRUE,
+                choices = c("exact number(p=0.05)" = "number", "stars(*)" = "stars"),
+                selected = "number"
               )
             ),
             tabPanel(
@@ -469,18 +490,18 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         if (input$strata != "None") {
           data <- data[!is.na(get(input$strata))]
         }
+
         add.params <- list()
         cor.coeff.args <- list(p.accuracy = 0.001)
 
-        add <- "mean"
-        if (input$jitter) {
-          add <- c("mean", "jitter")
-        }
-        if (input$mean) {
-          add <- "mean_se"
-        }
-        if (input$mean & input$jitter) {
+        if (input$mean && input$jitter) {
           add <- c("jitter", "mean_se")
+        } else if (input$mean) {
+          add <- "mean_se"
+        } else if (input$jitter) {
+          add <- c("mean", "jitter")
+        } else {
+          add <- "mean"
         }
 
         pval.font.size <- c(input$pvalfont, input$p_pvalfont, input$p_pvalfont / 10)
@@ -490,48 +511,106 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         spval.name <- input$s_pvalue
 
 
+        group_var <- NULL
+        if (isTRUE(input$fill)) {
+          group_var <- if (input$strata == "None") input$x_bar else input$strata
+        } else if (input$strata != "None") {
+          group_var <- input$strata
+        }
+
+        pal <- ifelse(is.null(input$pal_bar), "Set1", input$pal_bar)
+
+        palette_arg <- NULL
+        if (!is.null(group_var)) {
+          n_group <- data[!is.na(get(group_var)), uniqueN(get(group_var))]
+          if (pal == "black") {
+            palette_arg <- rep("black", max(1, n_group))
+          } else {
+            palette_arg <- pal
+          }
+        }
+
         res.plot <- ggpubr::ggbarplot(data, input$x_bar, input$y_bar,
-          color = color, add = add, add.params = add.params, conf.int = input$lineci,
-          xlab = label[variable == input$x_bar, var_label][1],
-          ylab = label[variable == input$y_bar, var_label][1], na.rm = T,
-          position = position_dodge(), fill = fill,
+                                      color = color, add = add, add.params = add.params, conf.int = input$mean,
+                                      xlab = label[variable == input$x_bar, var_label][1],
+                                      ylab = label[variable == input$y_bar, var_label][1], na.rm = T,
+                                      position = position_dodge(), fill = fill, palette = palette_arg
         )
 
+
+
+
+
         if (input$isPvalue & input$strata == "None") {
-          res.plot <- res.plot +
-            ggpubr::stat_compare_means(
-              method = pval.name,
-              size = pval.font.size[1],
-              label.x.npc = pval.coord[1],
-              label.y.npc = pval.coord[2],
-              aes(
-                label = scales::label_pvalue(add_p = TRUE)(after_stat(p))
-              ),
-            )
+          if (input$pvalue_style == "number") {
+            res.plot <- res.plot +
+              ggpubr::stat_compare_means(
+                method = pval.name,
+                size = pval.font.size[1],
+                label.x.npc = pval.coord[1],
+                label.y.npc = pval.coord[2],
+                aes(
+                  label = scales::label_pvalue(add_p = TRUE)(after_stat(p))
+                )
+              )
+          } else {
+            res.plot <- res.plot +
+              ggpubr::stat_compare_means(
+                method = pval.name,
+                size = pval.font.size[1],
+                label.x.npc = pval.coord[1],
+                label.y.npc = pval.coord[2],
+                aes(
+                  label = ggplot2::after_stat(p.signif))
+                )
+          }
         }
 
         if (input$isPair & vlist()$nclass_factor[input$x_bar] > 2 & input$strata == "None") {
-          res.plot <- res.plot +
-            ggpubr::geom_pwc(
-              method = ppval.name,
-              size = pval.font.size[3],
-              label.size = pval.font.size[2],
-              aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p))),
-            )
+          if (input$pvalue_style == "number") {
+            res.plot <- res.plot +
+              ggpubr::geom_pwc(
+                method = ppval.name,
+                size = pval.font.size[3],
+                label.size = pval.font.size[2],
+                aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p)))
+              )
+          } else {
+             res.plot <- res.plot +
+              ggpubr::geom_pwc(
+                method = ppval.name,
+                size = pval.font.size[3],
+                label.size = pval.font.size[2],
+                aes(label = ggplot2::after_stat(p.signif))
+              )
+          }
         }
+
 
         if (input$isStrata & input$strata != "None") {
-          res.plot <- res.plot +
-            ggpubr::geom_pwc(
-              method = spval.name,
-              size = pval.font.size[3],
-              label.size = pval.font.size[2],
-              aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p)), group = !!sym(input$strata))
-            )
+          if (input$pvalue_style == "number") {
+            res.plot <- res.plot +
+              ggpubr::geom_pwc(
+                method = spval.name,
+                size = pval.font.size[3],
+                label.size = pval.font.size[2],
+                aes(label = scales::label_pvalue(add_p = TRUE)(after_stat(p)), group = !!sym(input$strata))
+              )
+          } else{
+            res.plot <- res.plot +
+              ggpubr::geom_pwc(
+                method = spval.name,
+                size = pval.font.size[3],
+                label.size = pval.font.size[2],
+                aes(label = ggplot2::after_stat(p.signif), group = !!sym(input$strata))
+              )
+          }
         }
 
+
         return(res.plot)
-      })
+      }
+      )
 
       output$downloadControls <- renderUI({
         tagList(
@@ -607,6 +686,14 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
             min = 1, max = 10, value = 4
           ),
           actionButton(session$ns("pval_reset"), "reset"),
+
+          h3("Bar / Fill color"),
+          radioButtons(
+            session$ns("pal_bar"), "Palette",
+            choices = c("Set1", "black", "npg", "aaas", "nejm", "lancet", "jama", "jco", "frontiers"),
+            selected = "Set1", inline = TRUE
+          )
+
         )
       })
 

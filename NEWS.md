@@ -1,3 +1,10 @@
+# jsmodule 1.6.14
+## Update
+- Added a checkbox to select the style of p-value: `exact number` or `stars`.
+## Bugfix
+- Fixed an error for the `boxplot`.
+
+
 # jsmodule 1.6.13
 ## Update
 - Added an option to the `Kaplan-Meier module` to show censored counts in the numbers-at-risk table. When enabled, default label is automatically extended from "Numbers at risk" to "Numbers at risk (number censored)".
