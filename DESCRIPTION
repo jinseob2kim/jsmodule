@@ -45,7 +45,6 @@ Imports:
   officer, 
   pROC, 
   purrr, 
-  RColorBrewer, 
   readr, 
   readxl, 
   rstudioapi, 

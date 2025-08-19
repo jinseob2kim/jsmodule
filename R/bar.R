@@ -121,6 +121,7 @@ barUI <- function(id, label = "barplot") {
 
 
 barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
+  p.signif <- NULL
   moduleServer(
     id,
     function(input, output, session) {
