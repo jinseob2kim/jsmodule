@@ -713,7 +713,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 
 
 #################################
-## NA value checking
+# NA value checking
 # library(shiny)
 # library(data.table)
 # library(jsmodule)

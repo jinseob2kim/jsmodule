@@ -481,6 +481,7 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         req(input$isStrata != "None")
 
         data <- data.table(data())
+        ####
         data <- data[!is.na(get(input$x_bar)) & !is.na(get(input$y_bar))]
 
         if (input$strata != "None") {
@@ -488,6 +489,7 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         }
 
         data[[input$x_bar]] <- droplevels(data[[input$x_bar]])
+        ####
 
         label <- data_label()
         color <- ifelse(input$strata == "None", "black", input$strata)
