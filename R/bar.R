@@ -481,6 +481,14 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         req(input$isStrata != "None")
 
         data <- data.table(data())
+        data <- data[!is.na(get(input$x_bar)) & !is.na(get(input$y_bar))]
+
+        if (input$strata != "None") {
+          data <- data[!is.na(get(input$strata))]
+        }
+
+        data[[input$x_bar]] <- droplevels(data[[input$x_bar]])
+
         label <- data_label()
         color <- ifelse(input$strata == "None", "black", input$strata)
         fill <- "white"
@@ -739,3 +747,57 @@ barServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 # }
 #
 # shinyApp(ui, server)
+
+
+#################################
+# NA value checking
+# library(shiny)
+# library(data.table)
+# library(jsmodule)
+# library(tidyverse)
+# ui <- fluidPage(
+#   sidebarLayout(
+#     sidebarPanel(
+#       barUI("bar")
+#     ),
+#     mainPanel(
+#       plotOutput("bar_plot"),
+#     )
+#   )
+# )
+# server <- function(input, output, session) {
+#   # mtcars 데이터셋에 NA 값 추가
+#   mtcars$am <- as.factor(mtcars$am)
+#   mtcars$vs <- as.factor(mtcars$vs)
+#   mtcars$gear <- as.factor(mtcars$gear)
+#   mtcars$carb <- as.factor(mtcars$carb)
+#   mtcars$cyl <- as.factor(mtcars$cyl)
+#   # x의 factor 값이 NA인 경우 (예: am에 NA 추가)
+#   mtcars$am_test <- as.factor(ifelse(mtcars$am==0, NA, mtcars$am))
+#   # x의 factor 값은 있는데 y 값이 NA인 경우
+#   mtcars$mpg_test <-ifelse(mtcars$am==0, NA, mtcars$mpg)
+#
+#   # x의 factor 값은 있는데 y 값이 NA인 경우
+#   # mtcars_with_na <- rbind(mtcars, data.frame(
+#   #   mpg = NA, cyl = 4, disp = 120, hp = 95, drat = 3.7, wt = 2.2, qsec = 18, vs = 1, am = 1, gear = 4, carb = 2
+#   # ))
+#
+#   # x의 factor 값이 NA인 경우 (예: am에 NA 추가)
+#   #mtcars_with_na[1, "am"] <- NA
+#
+#   # 데이터 라벨을 생성
+#   data <- reactive(mtcars)
+#   data.label <- reactive(jstable::mk.lev(mtcars))
+#
+#   # barServer 업데이트
+#   out_bar <- barServer("bar", data = data, data_label = data.label,
+#                        data_varStruct = NULL)
+#
+#   output$bar_plot <- renderPlot({
+#     print(out_bar())
+#   })
+# }
+#
+#
+# shinyApp(ui, server)
+#################################
