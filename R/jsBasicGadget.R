@@ -185,6 +185,7 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
             scatterUI("scatter")
           ),
           mainPanel(
+            optionUI("scatter"),
             withLoader(plotOutput("scatter_plot"), type = "html", loader = "loader6"),
             ggplotdownUI("scatter")
           )
@@ -1006,6 +1007,7 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
             scatterUI("scatter")
           ),
           mainPanel(
+            optionUI("scatter"),
             withLoader(
               plotOutput("scatter_plot"),
               type = "html",
