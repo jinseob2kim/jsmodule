@@ -36,6 +36,7 @@ ui <- fluidPage(
       scatterUI("scatter")
     ),
     mainPanel(
+      optionUI("scatter"),
       plotOutput("scatter_plot"),
       ggplotdownUI("scatter")
     )

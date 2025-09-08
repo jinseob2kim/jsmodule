@@ -14,6 +14,7 @@
 #'       scatterUI("scatter")
 #'     ),
 #'     mainPanel(
+#'       optionUI("scatter"),
 #'       plotOutput("scatter_plot"),
 #'       ggplotdownUI("scatter")
 #'     )
@@ -85,6 +86,7 @@ scatterUI <- function(id, label = "scatterplot") {
 #'       scatterUI("scatter")
 #'     ),
 #'     mainPanel(
+#'       optionUI("scatter"),
 #'       plotOutput("scatter_plot"),
 #'       ggplotdownUI("scatter")
 #'     )

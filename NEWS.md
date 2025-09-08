@@ -1,6 +1,7 @@
 # jsmodule 1.6.14
 ## Update
 - Added a checkbox to select the style of p-value: `exact number` or `stars`.
+- Added a optionUI feature in scatter plot including color pallette feat.
 ## Bugfix
 - Fixed an error for the `boxplot`.
 
