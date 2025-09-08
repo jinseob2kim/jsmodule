@@ -55,16 +55,16 @@ boxUI <- function(id, label = "boxplot") {
 }
 
 
-# optionUI <- function(id) {
-#   # Create a namespace function using the provided id
-#   ns <- NS(id)
-#
-#   shinyWidgets::dropdownButton(
-#     uiOutput(ns("option_box")),
-#     circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
-#     tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
-#   )
-# }
+optionUI <- function(id) {
+  # Create a namespace function using the provided id
+  ns <- NS(id)
+
+  shinyWidgets::dropdownButton(
+    uiOutput(ns("option_box")),
+    circle = TRUE, status = "danger", icon = icon("gear"), width = "300px",
+    tooltip = shinyWidgets::tooltipOptions(title = "Click to see other options !")
+  )
+}
 
 
 #' @title boxServer: shiny module server for boxplot.
@@ -116,7 +116,7 @@ boxUI <- function(id, label = "boxplot") {
 #' @importFrom officer read_pptx add_slide ph_with ph_location
 #' @importFrom scales label_pvalue
 #' @importFrom shinyWidgets dropdownButton tooltipOptions
-
+#' @importFrom shiny validate need
 
 
 boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit = 10) {
@@ -156,6 +156,8 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         ))
       })
 
+
+
       output$vars_box <- renderUI({
         tagList(
           selectizeInput(session$ns("x_box"), "X variable",
@@ -179,7 +181,6 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
           selected = unlist(strata_select)[1]
         )
       })
-
 
       output$pvalue <- renderUI({
         req(!is.null(input$x_box))
@@ -457,6 +458,17 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
         req(input$isStrata != "None")
 
         data <- data.table(data())
+
+        data <- data[!is.na(get(input$x_box)) & !is.na(get(input$y_box))]
+
+        if (input$strata != "None") {
+          data <- data[!is.na(get(input$strata))]
+        }
+
+        data[[input$x_box]] <- droplevels(data[[input$x_box]])
+
+
+
         label <- data_label()
         color <- ifelse(input$strata == "None", input$x_box, input$strata)
         fill <- ifelse(input$strata == "None", input$x_box, input$strata)
@@ -613,7 +625,7 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 #####
 
 
-#
+
 # ui <- navbarPage("basic statistics",
 #                  navbarMenu("Plot", icon = icon("bar-chart-o"),
 #                             tabPanel("Boxplot",
@@ -638,14 +650,121 @@ boxServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.limit
 #
 #       output$box_plot <- renderPlot({
 #         print(out_box())
+#       })
 #
+# }
+
+
+# ui <- navbarPage("Basic Statistics",
+#                  navbarMenu("Plot", icon = icon("bar-chart"),
+#                             tabPanel("Boxplot",
+#                                      sidebarLayout(
+#                                        sidebarPanel(
+#                                          boxUI("box")
+#                                        ),
+#                                        mainPanel(
+#                                          plotOutput("box_plot"),
+#                                          ggplotdownUI("box")
+#                                        )
+#                                      )
+#                             )
+#                  )
+# )
+
+# ui <- navbarPage("Basic Statistics",
+#                  navbarMenu("Plot", icon = icon("bar-chart"),
+#                             tabPanel("Boxplot",
+#                                      sidebarLayout(
+#                                        sidebarPanel(
+#                                          boxUI("box")
+#                                        ),
+#                                        mainPanel(
+#                                          optionUI("box"),
+#                                          plotOutput("box_plot"),
+#                                          #ggplotdownUI("box")
+#                                        )
+#                                      )
+#                             )
+#                  )
+# )
+
+
+
+# server <- function(input, output, session) {
+#     mtcars$am <- as.factor(mtcars$am)
+#     mtcars$vs <- as.factor(mtcars$vs)
+#     mtcars$gear <- as.factor(mtcars$gear)
+#     mtcars$carb <- as.factor(mtcars$carb)
+#     mtcars$cyl <- as.factor(mtcars$cyl)
+#     data <- reactive(mtcars)
+#     data.label <- reactive(jstable::mk.lev(mtcars))
+#     out_box <- boxServer("box", data = data, data_label = data.label,
+#                              data_varStruct = NULL)
 #
-# output$box_plot <- renderPlot({
-#   #  print(out_box())
+#   out_box <- boxServer("box",
+#                        data = data, data_label = data.label,
+#                        data_varStruct = NULL
+#   )
+#
+#   output$box_plot <- renderPlot({
+#     print(out_box())
+#   })
+# }
+
+
+#################################
+# NA value checking
+# library(shiny)
+# library(data.table)
+# library(jsmodule)
+# library(tidyverse)
+# ui <- fluidPage(
+#   sidebarLayout(
+#     sidebarPanel(
+#       boxUI("box")
+#     ),
+#     mainPanel(
+#       plotOutput("box_plot"),
+#       #ggplotdownUI("box")
+#     )
+#   )
+# )
+# server <- function(input, output, session) {
+#   # mtcars 데이터셋에 NA 값 추가
+#   mtcars$am <- as.factor(mtcars$am)
+#   mtcars$vs <- as.factor(mtcars$vs)
+#   mtcars$gear <- as.factor(mtcars$gear)
+#   mtcars$carb <- as.factor(mtcars$carb)
+#   mtcars$cyl <- as.factor(mtcars$cyl)
+#   # x의 factor 값이 NA인 경우 (예: am에 NA 추가)
+#   mtcars$am_test <- as.factor(ifelse(mtcars$am==0, NA, mtcars$am))
+#   # x의 factor 값은 있는데 y 값이 NA인 경우
+#   mtcars$mpg_test <-ifelse(mtcars$am==0, NA, mtcars$mpg)
+#
+#   # x의 factor 값은 있는데 y 값이 NA인 경우
+#   # mtcars_with_na <- rbind(mtcars, data.frame(
+#   #   mpg = NA, cyl = 4, disp = 120, hp = 95, drat = 3.7, wt = 2.2, qsec = 18, vs = 1, am = 1, gear = 4, carb = 2
+#   # ))
+#
+#   # x의 factor 값이 NA인 경우 (예: am에 NA 추가)
+#   #mtcars_with_na[1, "am"] <- NA
+#
+#   # 데이터 라벨을 생성
+#   data <- reactive(mtcars)
+#   data.label <- reactive(jstable::mk.lev(mtcars))
+#
+#   # boxServer 업데이트
+#   out_box <- boxServer("box", data = data, data_label = data.label,
+#                        data_varStruct = NULL)
+#
+#   output$box_plot <- renderPlot({
+#     print(out_box())
 #   })
 # }
 #
+#
 # shinyApp(ui, server)
+#################################
 
 #
 #
