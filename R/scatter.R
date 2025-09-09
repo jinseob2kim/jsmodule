@@ -14,6 +14,7 @@
 #'       scatterUI("scatter")
 #'     ),
 #'     mainPanel(
+#'       optionUI("scatter"),
 #'       plotOutput("scatter_plot"),
 #'       ggplotdownUI("scatter")
 #'     )
@@ -85,6 +86,7 @@ scatterUI <- function(id, label = "scatterplot") {
 #'       scatterUI("scatter")
 #'     ),
 #'     mainPanel(
+#'       optionUI("scatter"),
 #'       plotOutput("scatter_plot"),
 #'       ggplotdownUI("scatter")
 #'     )
@@ -267,13 +269,54 @@ scatterServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.l
           cor.coeff.args <- list(aes_string(color = input$strata), p.accuracy = 0.001)
         }
 
-
-
-        ggpubr::ggscatter(data, input$x_scatter, input$y_scatter,
+        # Apply option settings with default values if not available
+        point_size <- ifelse(is.null(input$point_size), 1.5, input$point_size)
+        point_alpha <- ifelse(is.null(input$point_alpha), 0.8, input$point_alpha)
+        line_size <- ifelse(is.null(input$line_size), 1, input$line_size)
+        ci_alpha <- ifelse(is.null(input$ci_alpha), 0.2, input$ci_alpha)
+        
+        # Update add.params for line settings
+        if (input$lineall == T) {
+          add.params <- list(color = "black", size = line_size)
+        } else if (add != "none") {
+          add.params <- list(size = line_size)
+        }
+        
+        # Apply palette settings
+        pal <- ifelse(is.null(input$pal_scatter), "Set1", input$pal_scatter)
+        
+        palette_arg <- NULL
+        if (input$strata != "None") {
+          n_group <- data[!is.na(get(input$strata)), uniqueN(get(input$strata))]
+          if (pal == "black") {
+            palette_arg <- rep("black", max(1, n_group))
+          } else {
+            palette_arg <- pal
+          }
+        } else {
+          # strata가 None이어도 단일 색상 적용 가능
+          if (pal == "black") {
+            palette_arg <- "black"
+          } else {
+            palette_arg <- pal
+          }
+        }
+        
+        # Create base plot
+        p <- ggpubr::ggscatter(data, input$x_scatter, input$y_scatter,
           color = color, add = add, add.params = add.params, conf.int = input$lineci,
-          cor.coef = cor.coef, cor.method = cor.method, cor.coeff.args = cor.coeff.args, xlab = label[variable == input$x_scatter, var_label][1],
-          ylab = label[variable == input$y_scatter, var_label][1], na.rm = T
+          cor.coef = cor.coef, cor.method = cor.method, cor.coeff.args = cor.coeff.args, 
+          xlab = label[variable == input$x_scatter, var_label][1],
+          ylab = label[variable == input$y_scatter, var_label][1], na.rm = T,
+          size = point_size, alpha = point_alpha, palette = palette_arg
         )
+        
+        # Adjust legend position if strata is used
+        if (input$strata != "None" && !is.null(input$legendx) && !is.null(input$legendy)) {
+          p <- p + ggplot2::theme(legend.position = c(input$legendx, input$legendy))
+        }
+        
+        p
       })
 
       output$downloadControls <- renderUI({
@@ -295,6 +338,62 @@ scatterServer <- function(id, data, data_label, data_varStruct = NULL, nfactor.l
             4,
             sliderInput(session$ns("fig_height"), "Height (in):",
               min = 5, max = 15, value = 6
+            )
+          )
+        )
+      })
+
+      output$option_kaplan <- renderUI({
+        tagList(
+          h3("Point settings"),
+          sliderInput(session$ns("point_size"), "Point size",
+            min = 0.5, max = 5, value = 1.5, step = 0.1
+          ),
+          sliderInput(session$ns("point_alpha"), "Point transparency",
+            min = 0.1, max = 1, value = 0.8, step = 0.1
+          ),
+          conditionalPanel("input.line != 'None'",
+            ns = session$ns,
+            tagList(
+              h3("Regression line settings"),
+              sliderInput(session$ns("line_size"), "Line width",
+                min = 0.1, max = 3, value = 1, step = 0.1
+              ),
+              sliderInput(session$ns("ci_alpha"), "Confidence interval transparency",
+                min = 0.1, max = 1, value = 0.2, step = 0.1
+              )
+            )
+          ),
+          conditionalPanel("input.stat_cor != 'None'",
+            ns = session$ns,
+            tagList(
+              h3("Correlation display"),
+              sliderInput(session$ns("cor_x"), "Correlation x-position",
+                min = 0, max = 1, value = 0.05, step = 0.05
+              ),
+              sliderInput(session$ns("cor_y"), "Correlation y-position",
+                min = 0, max = 1, value = 0.95, step = 0.05
+              ),
+              sliderInput(session$ns("cor_size"), "Correlation font size",
+                min = 2, max = 8, value = 4, step = 0.5
+              )
+            )
+          ),
+          h3("Point / Fill color"),
+          radioButtons(session$ns("pal_scatter"), "Palette", 
+            choices = c("Set1", "black", "npg", "aaas", "nejm", "lancet", "jama", "jco", "frontiers"), 
+            selected = "Set1", inline = T
+          ),
+          conditionalPanel("input.strata != 'None'",
+            ns = session$ns,
+            tagList(
+              h3("Legend position"),
+              sliderInput(session$ns("legendx"), "Legend x-position",
+                min = 0, max = 1, value = 0.85, step = 0.05
+              ),
+              sliderInput(session$ns("legendy"), "Legend y-position",
+                min = 0, max = 1, value = 0.8, step = 0.05
+              )
             )
           )
         )
