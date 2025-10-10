@@ -196,8 +196,8 @@ DataManager <- R6::R6Class("DataManager",
             "\u003c" = 1 - as.integer(out[[var_name]] < cut_input),
             "\u003e" = 1 - as.integer(out[[var_name]] > cut_input)
           )
-          # FIX maintained: Create an ordered factor for ROC analysis to work correctly.
-          out[, BinaryGroupRandom := factor(new_val, ordered = TRUE)]
+          # Create binary factor variable
+          out[, BinaryGroupRandom := factor(new_val, levels = c(0, 1))]
 
           cn.new <- paste0(var_name, "_group_", sym.ineq2[con_input], cut_input)
           data.table::setnames(out, "BinaryGroupRandom", cn.new)
@@ -284,15 +284,16 @@ DataManager <- R6::R6Class("DataManager",
 
       observeEvent(self$input$check_binary,
         {
-          req(self$input$check_binary)
           data_info <- self$initial_data_info()
           var.conti <- setdiff(names(data_info$data), c(data_info$factor_original, self$input$factor_vname))
           self$output$binary_var <- renderUI({
+            req(self$input$check_binary == TRUE)
             selectInput(self$ns("var_binary"), "Variables to dichotomize",
               choices = var.conti, multiple = TRUE, selected = var.conti[1]
             )
           })
           self$output$binary_val <- renderUI({
+            req(self$input$check_binary == TRUE)
             req(length(self$input$var_binary) > 0)
             tagList(lapply(seq_along(self$input$var_binary), function(v) {
               med <- stats::quantile(data_info$data[[self$input$var_binary[[v]]]], c(0.05, 0.5, 0.95), na.rm = TRUE)
@@ -310,15 +311,16 @@ DataManager <- R6::R6Class("DataManager",
 
       observeEvent(self$input$check_ref,
         {
-          req(self$input$check_ref)
           data_info <- self$initial_data_info()
           var.factor <- c(data_info$factor_original, self$input$factor_vname)
           self$output$ref_var <- renderUI({
+            req(self$input$check_ref == TRUE)
             selectInput(self$ns("var_ref"), "Variables to change reference",
               choices = var.factor, multiple = TRUE, selected = var.factor[1]
             )
           })
           self$output$ref_val <- renderUI({
+            req(self$input$check_ref == TRUE)
             req(length(self$input$var_ref) > 0)
             tagList(lapply(seq_along(self$input$var_ref), function(v) {
               selectInput(self$ns(paste0("con_ref", v)), paste0("Reference: ", self$input$var_ref[[v]]),
@@ -333,14 +335,15 @@ DataManager <- R6::R6Class("DataManager",
 
       observeEvent(self$input$check_subset,
         {
-          req(self$input$check_subset)
           data_info <- self$initial_data_info()
           self$output$subset_var <- renderUI({
+            req(self$input$check_subset == TRUE)
             selectInput(self$ns("var_subset"), "Subset variables",
               choices = names(data_info$data), multiple = TRUE, selected = names(data_info$data)[1]
             )
           })
           self$output$subset_val <- renderUI({
+            req(self$input$check_subset == TRUE)
             req(length(self$input$var_subset) > 0)
             var.factor <- c(data_info$factor_original, self$input$factor_vname)
             tagList(lapply(seq_along(self$input$var_subset), function(v) {
