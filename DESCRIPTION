@@ -64,7 +64,8 @@ Imports:
   ggrepel,
   htmltools,
   riskRegression,
-  R6
+  R6,
+  svglite
 URL: https://jinseob2kim.github.io/jsmodule/, https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
 Suggests: 
