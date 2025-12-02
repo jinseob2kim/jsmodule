@@ -98,28 +98,15 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
               h4(icon("key"), " API Configuration"),
               fluidRow(
                 column(6,
-                  tags$div(
-                    tags$label(
-                      "AI Provider",
-                      tags$span(
-                        class = "info-tooltip",
-                        icon("circle-info"),
-                        tags$span(
-                          class = "tooltiptext",
-                          uiOutput(ns("provider_info"), inline = TRUE)
-                        )
-                      )
+                  selectInput(
+                    ns("provider"),
+                    "AI Provider",
+                    choices = c(
+                      "Anthropic (Claude)" = "anthropic",
+                      "OpenAI (GPT)" = "openai",
+                      "Google (Gemini)" = "google"
                     ),
-                    selectInput(
-                      ns("provider"),
-                      NULL,
-                      choices = c(
-                        "Anthropic (Claude)" = "anthropic",
-                        "OpenAI (GPT)" = "openai",
-                        "Google (Gemini)" = "google"
-                      ),
-                      selected = "anthropic"
-                    )
+                    selected = "anthropic"
                   ),
                   tags$div(
                     style = "margin-top: 10px;",
@@ -141,6 +128,13 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
                       ", ",
                       tags$code("GOOGLE_API_KEY")
                     )
+                  ),
+                  actionButton(
+                    ns("check_api_key"),
+                    "Check API Key",
+                    icon = icon("key"),
+                    class = "btn-info",
+                    style = "width: 100%; margin-top: 10px;"
                   )
                 )
               ),
@@ -176,6 +170,7 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
           hr(),
           # Chat history
           div(
+            id = ns("chat_container"),
             style = paste0(
               "max-height: 400px; overflow-y: auto; ",
               "border: 1px solid #ddd; padding: 10px; ",
@@ -249,7 +244,7 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
             }
           ", ns("code_editor"), ns("code_editor")))),
           fluidRow(
-            column(6,
+            column(4,
               actionButton(
                 ns("run_code"),
                 "Run Code",
@@ -258,7 +253,7 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
                 style = "width: 100%; margin-top: 10px;"
               )
             ),
-            column(6,
+            column(4,
               actionButton(
                 ns("edit_code"),
                 "Edit Code",
@@ -266,8 +261,39 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
                 class = "btn-info",
                 style = "width: 100%; margin-top: 10px;"
               )
+            ),
+            column(4,
+              actionButton(
+                ns("copy_code"),
+                "Copy Code",
+                icon = icon("copy"),
+                class = "btn-secondary",
+                style = "width: 100%; margin-top: 10px;"
+              )
             )
-          )
+          ),
+          tags$script(HTML(sprintf("
+            $(document).on('click', '#%s', function() {
+              var editor = ace.edit('%s');
+              var code = editor.getValue();
+              navigator.clipboard.writeText(code).then(function() {
+                // Show success notification
+                Shiny.setInputValue('%s', Math.random());
+              }).catch(function(err) {
+                console.error('Failed to copy: ', err);
+              });
+            });
+
+            // Auto-scroll chat to bottom
+            Shiny.addCustomMessageHandler('scrollChat', function(message) {
+              setTimeout(function() {
+                var container = document.getElementById(message.id);
+                if (container) {
+                  container.scrollTop = container.scrollHeight;
+                }
+              }, 100);
+            });
+          ", ns("copy_code"), ns("code_editor"), ns("copy_success"))))
         ),
         wellPanel(
           h4(icon("chart-line"), " Results"),
@@ -275,9 +301,10 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
           hr(),
           h5("Download Options"),
           fluidRow(
-            column(4, uiOutput(ns("download_pptx_ui"))),
-            column(4, uiOutput(ns("download_word_ui"))),
-            column(4, uiOutput(ns("download_excel_ui")))
+            column(3, uiOutput(ns("download_pptx_ui"))),
+            column(3, uiOutput(ns("download_word_ui"))),
+            column(3, uiOutput(ns("download_excel_ui"))),
+            column(3, uiOutput(ns("download_txt_ui")))
           ),
           uiOutput(ns("ppt_size_ui"))
         )
@@ -360,51 +387,6 @@ aiAssistant <- function(input, output, session, data, data_label,
     }
   })
 
-  # Pattern-based model filtering (avoid hardcoding specific models)
-  filter_chat_models <- function(models, provider) {
-    if (is.null(models) || length(models) == 0) {
-      return(models)
-    }
-
-    # Exclusion patterns: Remove unwanted model types
-    exclude_patterns <- c(
-      "vision",      # Vision/multimodal image models
-      "-v$",         # Vision models (e.g., gemini-pro-v)
-      "image",       # Image generation models
-      "embedding",   # Embedding models
-      "moderation",  # Moderation models
-      "whisper",     # Audio transcription models
-      "tts",         # Text-to-speech models
-      "dall-e",      # Image generation
-      "bison",       # Google's old Bison models
-      "gecko",       # Google's small Gecko models
-      "instant",     # Claude instant (older, smaller models)
-      "search"       # Search models
-    )
-
-    # Apply exclusion patterns
-    for (pattern in exclude_patterns) {
-      models <- models[!grepl(pattern, models, ignore.case = TRUE)]
-    }
-
-    # Provider-specific version filtering (keep recent models only)
-    if (provider == "anthropic") {
-      # Keep Claude 3+, 4+ models
-      # Pattern: claude-3-*, claude-4-* (includes 3.5, 4.5, etc.)
-      models <- models[grepl("claude-[34]", models)]
-    } else if (provider == "openai") {
-      # Keep GPT-4+ and GPT-5+ models
-      # Pattern: gpt-4-*, gpt-5-*
-      models <- models[grepl("^gpt-[45]", models)]
-    } else if (provider == "google") {
-      # Keep Gemini 2.5+, 3+ models only
-      # Pattern: gemini-2.5-*, gemini-3.*, gemini-3-*, gemini-*-exp
-      models <- models[grepl("gemini-(2\\.5|3[\\.-]|exp-)", models)]
-    }
-
-    return(models)
-  }
-
   # Fetch available models from provider
   fetch_models <- function(provider, api_key) {
     if (is.null(api_key) || api_key == "") {
@@ -423,8 +405,6 @@ aiAssistant <- function(input, output, session, data, data_label,
         content <- httr::content(response, "parsed")
         if (!is.null(content$data)) {
           models <- sapply(content$data, function(m) m$id)
-          # Apply pattern-based filtering
-          models <- filter_chat_models(models, provider)
           return(models)
         }
       } else if (provider == "openai") {
@@ -437,8 +417,6 @@ aiAssistant <- function(input, output, session, data, data_label,
         content <- httr::content(response, "parsed")
         if (!is.null(content$data)) {
           models <- sapply(content$data, function(m) m$id)
-          # Apply pattern-based filtering
-          models <- filter_chat_models(models, provider)
           return(sort(models, decreasing = TRUE))
         }
       } else if (provider == "google") {
@@ -464,8 +442,6 @@ aiAssistant <- function(input, output, session, data, data_label,
             return(NA)
           })
           models <- all_models[!is.na(all_models)]
-          # Apply pattern-based filtering
-          models <- filter_chat_models(models, provider)
           return(models)
         }
       }
@@ -547,84 +523,104 @@ aiAssistant <- function(input, output, session, data, data_label,
     )
   })
 
-  # Provider information (for popover)
-  output$provider_info <- renderUI({
-    provider <- get_provider()
-
-    info <- switch(provider,
-      "anthropic" = list(
-        name = "Anthropic Claude",
-        model = "claude-sonnet-4-20250514",
-        description = "Advanced reasoning & code generation",
-        status = "Available"
-      ),
-      "openai" = list(
-        name = "OpenAI GPT",
-        model = "gpt-4-turbo",
-        description = "General-purpose language model",
-        status = "Available"
-      ),
-      "google" = list(
-        name = "Google Gemini",
-        model = "gemini-1.5-flash",
-        description = "Fast & efficient multimodal AI",
-        status = "Available"
-      )
-    )
-
-    tags$div(
-      style = "padding: 5px;",
-      tags$p(tags$strong(info$name), style = "margin-bottom: 5px;"),
-      tags$p(
-        tags$small(
-          tags$code(info$model), tags$br(),
-          info$description, tags$br(),
-          tags$span(
-            icon("check-circle"), " ", info$status,
-            style = "color: green;"
-          )
-        ),
-        style = "margin: 0;"
-      )
-    )
-  })
-
-  # Update models when provider or API key changes
-  observeEvent(list(get_provider(), get_api_key()), {
+  # Check API key and fetch models when button clicked
+  observeEvent(input$check_api_key, {
     provider <- get_provider()
     api_key_val <- get_api_key()
 
-    if (!is.null(provider) && !is.null(api_key_val) && api_key_val != "") {
-      # Check if AI_MODEL env var is set
-      env_model <- Sys.getenv("AI_MODEL", unset = "")
+    if (is.null(api_key_val) || api_key_val == "") {
+      showNotification(
+        "Please enter an API key first.",
+        type = "warning",
+        duration = 3
+      )
+      return()
+    }
 
-      models <- fetch_models(provider, api_key_val)
-      available_models(models)
+    # Show loading notification
+    showNotification(
+      "Fetching available models...",
+      id = "fetching_models",
+      type = "message",
+      duration = NULL
+    )
 
-      # Set default model
-      if (!is.null(models) && length(models) > 0) {
-        # Priority: AI_MODEL env var > provider default
-        if (env_model != "" && env_model %in% models) {
-          selected_model(env_model)
-        } else {
-          default_model <- switch(provider,
-            "anthropic" = models[grepl("sonnet-4", models)][1],
-            "openai" = models[grepl("gpt-4", models)][1],
-            "google" = "gemini-1.5-flash",
-            models[1]
-          )
-          if (!is.na(default_model)) {
-            selected_model(default_model)
+    # Fetch models
+    models <- fetch_models(provider, api_key_val)
+
+    # Remove loading notification
+    removeNotification("fetching_models")
+
+    if (is.null(models) || length(models) == 0) {
+      showNotification(
+        "Failed to fetch models. Please check your API key.",
+        type = "error",
+        duration = 5
+      )
+      available_models(NULL)
+      selected_model(NULL)
+      return()
+    }
+
+    # Success - update available models
+    available_models(models)
+
+    # Set default model
+    env_model <- Sys.getenv("AI_MODEL", unset = "")
+    if (env_model != "" && env_model %in% models) {
+      selected_model(env_model)
+    } else {
+      default_model <- switch(provider,
+        "anthropic" = models[grepl("sonnet-4", models)][1],
+        "openai" = models[grepl("gpt-4", models)][1],
+        "google" = "gemini-1.5-flash",
+        models[1]
+      )
+      if (!is.na(default_model)) {
+        selected_model(default_model)
+      } else {
+        selected_model(models[1])
+      }
+    }
+
+    showNotification(
+      sprintf("Successfully loaded %d models", length(models)),
+      type = "message",
+      duration = 3
+    )
+  })
+
+  # Auto-fetch models when API config UI is hidden (environment-based config)
+  observe({
+    if (!show_api_config) {
+      provider <- get_provider()
+      api_key_val <- get_api_key()
+
+      if (!is.null(provider) && !is.null(api_key_val) && api_key_val != "") {
+        env_model <- Sys.getenv("AI_MODEL", unset = "")
+        models <- fetch_models(provider, api_key_val)
+        available_models(models)
+
+        if (!is.null(models) && length(models) > 0) {
+          if (env_model != "" && env_model %in% models) {
+            selected_model(env_model)
           } else {
-            selected_model(models[1])
+            default_model <- switch(provider,
+              "anthropic" = models[grepl("sonnet-4", models)][1],
+              "openai" = models[grepl("gpt-4", models)][1],
+              "google" = "gemini-1.5-flash",
+              models[1]
+            )
+            if (!is.na(default_model)) {
+              selected_model(default_model)
+            } else {
+              selected_model(models[1])
+            }
           }
         }
       }
-    } else {
-      available_models(NULL)
-      selected_model(NULL)
     }
-  }, ignoreNULL = FALSE)
+  })
 
   # Model selector UI
   output$model_selector <- renderUI({
@@ -634,15 +630,24 @@ aiAssistant <- function(input, output, session, data, data_label,
       return(tags$div(
         style = "color: #888; font-size: 12px;",
         icon("info-circle"),
-        " Enter API key to load models"
+        " Click 'Check API Key' to load models"
       ))
     }
 
-    selectInput(
-      session$ns("selected_model"),
-      "Model",
-      choices = models,
-      selected = selected_model()
+    tagList(
+      selectInput(
+        session$ns("selected_model"),
+        "Model",
+        choices = models,
+        selected = selected_model()
+      ),
+      actionButton(
+        session$ns("apply_config"),
+        "Apply Configuration",
+        icon = icon("check"),
+        class = "btn-primary",
+        style = "width: 100%; margin-top: 10px;"
+      )
     )
   })
 
@@ -653,22 +658,86 @@ aiAssistant <- function(input, output, session, data, data_label,
     }
   })
 
+  # Apply configuration when button clicked
+  observeEvent(input$apply_config, {
+    provider <- get_provider()
+    api_key_val <- get_api_key()
+    model <- selected_model()
+
+    if (is.null(api_key_val) || api_key_val == "") {
+      showNotification(
+        "Please enter an API key first.",
+        type = "warning",
+        duration = 3
+      )
+      return()
+    }
+
+    if (is.null(model)) {
+      showNotification(
+        "Please select a model first.",
+        type = "warning",
+        duration = 3
+      )
+      return()
+    }
+
+    # Configuration successful
+    provider_name <- switch(provider,
+      "anthropic" = "Anthropic Claude",
+      "openai" = "OpenAI GPT",
+      "google" = "Google Gemini",
+      "Unknown"
+    )
+
+    showNotification(
+      sprintf("Configuration applied: %s - %s", provider_name, model),
+      type = "message",
+      duration = 3
+    )
+  })
+
   # API status indicator
   output$api_status <- renderUI({
     api_key_val <- get_api_key()
+    models <- available_models()
+    model <- selected_model()
+    provider <- get_provider()
+
+    provider_name <- switch(provider,
+      "anthropic" = "Anthropic Claude",
+      "openai" = "OpenAI GPT",
+      "google" = "Google Gemini",
+      "Unknown"
+    )
 
     if (is.null(api_key_val) || api_key_val == "") {
       tags$div(
         class = "alert alert-warning",
+        style = "margin-top: 15px;",
         icon("exclamation-triangle"),
-        " API key not configured"
+        sprintf(" Step 1: Enter your %s API key", provider_name)
+      )
+    } else if (is.null(models) || length(models) == 0) {
+      tags$div(
+        class = "alert alert-info",
+        style = "margin-top: 15px;",
+        icon("info-circle"),
+        sprintf(" Step 2: Click 'Check API Key' to load %s models", provider_name)
+      )
+    } else if (is.null(model)) {
+      tags$div(
+        class = "alert alert-info",
+        style = "margin-top: 15px;",
+        icon("info-circle"),
+        sprintf(" Step 3: Select a model and click 'Apply Configuration'")
       )
     } else {
       tags$div(
         class = "alert alert-success",
+        style = "margin-top: 15px;",
         icon("check-circle"),
-        " API key configured (",
-        nchar(api_key_val), " characters)"
+        sprintf(" Ready: %s - %s (%d models available)", provider_name, model, length(models))
       )
     }
   })
@@ -2024,7 +2093,8 @@ aiAssistant <- function(input, output, session, data, data_label,
         if (msg$role == "user") {
           tags$div(
             style = "background-color: #e3f2fd; padding: 8px; margin: 5px 0; border-radius: 8px;",
-            tags$strong(icon("user"), " You: "), msg$content
+            tags$strong(icon("user"), " You: "),
+            tags$span(style = "white-space: pre-wrap;", msg$content)
           )
         } else if (msg$role == "assistant") {
           tags$div(
@@ -2035,10 +2105,20 @@ aiAssistant <- function(input, output, session, data, data_label,
         } else {
           tags$div(
             style = "background-color: #ffebee; padding: 8px; margin: 5px 0; border-radius: 8px;",
-            tags$strong(icon("exclamation-triangle"), " Error: "), msg$content
+            tags$strong(icon("exclamation-triangle"), " Error: "),
+            tags$span(style = "white-space: pre-wrap;", msg$content)
           )
         }
       })
+    )
+  })
+
+  # Auto-scroll chat to bottom when history updates
+  observe({
+    display_history()  # Create dependency on history changes
+    session$sendCustomMessage(
+      type = "scrollChat",
+      message = list(id = session$ns("chat_container"))
     )
   })
 
@@ -2074,6 +2154,11 @@ aiAssistant <- function(input, output, session, data, data_label,
                         label = "Edit Code",
                         icon = icon("edit"))
     }
+  })
+
+  # Copy code notification
+  observeEvent(input$copy_success, {
+    showNotification("Code copied to clipboard!", type = "message", duration = 2)
   })
 
   # Run code
@@ -2117,6 +2202,9 @@ aiAssistant <- function(input, output, session, data, data_label,
     } else if (is.list(result) && length(result) > 0 &&
                all(sapply(result, function(x) inherits(x, c("ggplot", "gg", "gtable", "grob", "recordedplot"))))) {
       result_type("plot")
+      execution_result(result)
+    } else if (inherits(result, "flextable")) {
+      result_type("flextable")
       execution_result(result)
     } else if (is.data.frame(result) || is.matrix(result)) {
       result_type("table")
@@ -2173,6 +2261,10 @@ aiAssistant <- function(input, output, session, data, data_label,
       return(plotOutput(session$ns("result_plot"), height = "400px"))
     }
 
+    if (rtype == "flextable") {
+      return(htmltools::HTML(flextable::htmltools_value(result)))
+    }
+
     if (rtype == "table") {
       return(DTOutput(session$ns("result_table")))
     }
@@ -2194,7 +2286,7 @@ aiAssistant <- function(input, output, session, data, data_label,
 
   output$download_word_ui <- renderUI({
     rtype <- result_type()
-    if (rtype == "table") {
+    if (rtype == "table" || rtype == "flextable") {
       downloadButton(session$ns("download_word"), "Word", icon = icon("file-word"), class = "btn-info btn-sm")
     }
   })
@@ -2203,6 +2295,15 @@ aiAssistant <- function(input, output, session, data, data_label,
     rtype <- result_type()
     if (rtype == "table") {
       downloadButton(session$ns("download_excel"), "Excel", icon = icon("file-excel"), class = "btn-info btn-sm")
+    }
+  })
+
+  output$download_txt_ui <- renderUI({
+    result <- execution_result()
+    code <- current_code()
+    # Show TXT download if there's any result or code
+    if (!is.null(result) || (!is.null(code) && code != "")) {
+      downloadButton(session$ns("download_txt"), "TXT", icon = icon("file-alt"), class = "btn-info btn-sm")
     }
   })
 
@@ -2320,6 +2421,11 @@ aiAssistant <- function(input, output, session, data, data_label,
                   doc <- officer::body_add_gg(doc, plots[[i]], width = 6, height = 4)
                   incProgress(0.6 / length(plots), detail = paste("Adding plot", i))
                 }
+              } else if (rtype == "flextable") {
+                # Word에 flextable 추가 (이미 포맷팅된 테이블)
+                doc <- officer::body_add_par(doc, "Analysis Results", style = "heading 2")
+                doc <- flextable::body_add_flextable(doc, result)
+                incProgress(0.7, detail = "Adding table")
               } else if (rtype == "table") {
                 # Word에 테이블 추가
                 df <- as.data.frame(result)
@@ -2404,6 +2510,72 @@ aiAssistant <- function(input, output, session, data, data_label,
                 duration = 10
               )
             }
+          )
+        }
+      )
+    }
+  )
+
+  output$download_txt <- downloadHandler(
+    filename = function() {
+      paste0("result_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".txt")
+    },
+    content = function(file) {
+      tryCatch(
+        {
+          result <- execution_result()
+          code <- current_code()
+          rtype <- result_type()
+
+          # Create text content
+          content_lines <- c()
+
+          # Add code section
+          if (!is.null(code) && code != "") {
+            content_lines <- c(
+              content_lines,
+              paste(rep("=", 70), collapse = ""),
+              "R CODE",
+              paste(rep("=", 70), collapse = ""),
+              "",
+              code,
+              ""
+            )
+          }
+
+          # Add result section
+          if (!is.null(result)) {
+            content_lines <- c(
+              content_lines,
+              paste(rep("=", 70), collapse = ""),
+              "RESULT",
+              paste(rep("=", 70), collapse = ""),
+              ""
+            )
+
+            if (rtype == "table") {
+              # Convert table to text
+              result_text <- capture.output(print(as.data.frame(result)))
+              content_lines <- c(content_lines, result_text)
+            } else if (rtype == "plot") {
+              content_lines <- c(content_lines, "[Plot result - cannot be displayed in text format]")
+            } else {
+              # Other results (text, list, etc.)
+              result_text <- capture.output(print(result))
+              content_lines <- c(content_lines, result_text)
+            }
+          }
+
+          # Write to file
+          writeLines(content_lines, file)
+
+          showNotification("TXT file downloaded successfully", type = "message")
+        },
+        error = function(e) {
+          showNotification(
+            paste("Error generating TXT file:", e$message),
+            type = "error",
+            duration = 10
           )
         }
       )
