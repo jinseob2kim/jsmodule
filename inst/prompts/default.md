@@ -764,9 +764,10 @@ Include necessary libraries at the top: `library(jskm)`, `library(jstable)`, etc
 ### 3. Regression Result Tables
 - ✅ **REQUIRED**:
   - Cox regression → `jstable::cox2.display()`
-  - Logistic/GLM, Linear regression → `jstable::glmshow.display()`
+  - Logistic/GLM → `jstable::glmshow.display()`
+  - Linear regression → base R `summary()`
   - GEE models → `jstable::geeglm.display()`
-- ❌ **NEVER USE**: `broom::tidy()`, `stargazer`, custom summary tables, base `summary()`
+- ❌ **NEVER USE**: `broom::tidy()`, `stargazer`, custom summary tables for Cox/GLM/GEE
 
 ### 4. ROC Analysis
 - ✅ **REQUIRED**: `pROC::roc()`, `pROC::ggroc()` for ROC curves
@@ -834,11 +835,10 @@ result <- glmshow.display(fit, decimal = 2)
 
 #### Linear Regression
 ```r
-# Continuous outcome regression
-library(jstable)
-
-fit <- lm(age ~ sex + rx + nodes, data = out)
-result <- glmshow.display(fit, decimal = 2)
+# Continuous outcome regression - use base R summary()
+fit <- lm(outcome ~ age + sex + rx, data = out)
+result <- summary(fit)
+print(result)
 ```
 
 #### GEE Models (Repeated Measures)
@@ -1007,9 +1007,10 @@ result <- ft  # Also display in app
 - ❌ Forgetting `model = TRUE`: `coxph(Surv(time, status) ~ age, data = out)`
 - ✅ Required for display: `coxph(..., model = TRUE)`
 
-**glm/lm display:**
-- ❌ Using wrong function: `lm.display()`
-- ✅ Correct function: `glmshow.display()` for both lm and glm
+**Regression display:**
+- ❌ Using `glmshow.display()` for linear models (lm) - it doesn't work!
+- ✅ For lm: use base R `summary(fit)`
+- ✅ For glm: use `glmshow.display(fit, decimal = 2)`
 
 ### Variable Type Conversions
 

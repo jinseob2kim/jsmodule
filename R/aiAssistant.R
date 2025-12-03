@@ -29,11 +29,15 @@
 #' @rdname aiAssistantUI
 #' @export
 #' @import shiny
+#' @import shinyjs
 
 aiAssistantUI <- function(id, show_api_config = TRUE) {
   ns <- NS(id)
 
   tagList(
+    # Enable shinyjs
+    shinyjs::useShinyjs(),
+
     # Custom CSS for tooltip (Bootstrap style)
     tags$style(HTML("
       .info-tooltip {
@@ -231,20 +235,31 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
             fontSize = 13,
             showLineNumbers = TRUE,
             highlightActiveLine = TRUE,
-            readOnly = TRUE,
+            readOnly = FALSE,
             showPrintMargin = FALSE,
-            placeholder = "No code generated yet."
+            placeholder = "No code generated yet. You can edit the code here."
           ),
           tags$style(HTML(sprintf("
-            #%s.ace_editor.ace_read-only {
-              cursor: default !important;
+            /* Editable code editor style */
+            #%s.ace_editor {
+              cursor: text !important;
+              opacity: 1;
+              border: 2px solid #2196F3 !important;
+              box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
             }
-            #%s .ace_text-input {
-              cursor: default !important;
+            #%s.ace_editor .ace_content {
+              cursor: text !important;
             }
-          ", ns("code_editor"), ns("code_editor")))),
+            #%s.ace_editor .ace_text-layer {
+              cursor: text !important;
+            }
+            #%s.ace_editor .ace_scroller {
+              cursor: text !important;
+            }
+          ",
+          ns("code_editor"), ns("code_editor"), ns("code_editor"), ns("code_editor")))),
           fluidRow(
-            column(4,
+            column(6,
               actionButton(
                 ns("run_code"),
                 "Run Code",
@@ -253,16 +268,7 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
                 style = "width: 100%; margin-top: 10px;"
               )
             ),
-            column(4,
-              actionButton(
-                ns("edit_code"),
-                "Edit Code",
-                icon = icon("edit"),
-                class = "btn-info",
-                style = "width: 100%; margin-top: 10px;"
-              )
-            ),
-            column(4,
+            column(6,
               actionButton(
                 ns("copy_code"),
                 "Copy Code",
@@ -846,6 +852,110 @@ aiAssistant <- function(input, output, session, data, data_label,
     )
   }
 
+  # Helper: Determine result type and store result
+  # Unified logic for classifying and storing execution results
+  determine_result_type <- function(res, store_result = TRUE) {
+    result_info <- list()
+
+    # Single plot
+    if (inherits(res, c("ggplot", "gg", "gtable", "grob", "recordedplot"))) {
+      result_info$type <- "plot"
+      result_info$value <- list(res)
+      result_info$message <- "Plot generated successfully. The plot is now displayed in the Results panel."
+
+    # Multiple plots
+    } else if (is.list(res) && length(res) > 0 &&
+               all(sapply(res, function(x) inherits(x, c("ggplot", "gg", "gtable", "grob", "recordedplot"))))) {
+      result_info$type <- "plot"
+      result_info$value <- res
+      result_info$message <- sprintf("Generated %d plots successfully. All plots are displayed in the Results panel.", length(res))
+
+    # Flextable
+    } else if (inherits(res, "flextable")) {
+      result_info$type <- "flextable"
+      result_info$value <- res
+      result_info$message <- "Flextable generated successfully."
+
+    # Table object (from table() function)
+    } else if (inherits(res, "table")) {
+      result_info$type <- "table"
+      result_info$value <- as.data.frame(res)
+      result_info$message <- sprintf("Table generated: %d rows × %d columns",
+                                     nrow(as.data.frame(res)), ncol(as.data.frame(res)))
+
+    # Data frame or matrix
+    } else if (is.data.frame(res) || is.matrix(res)) {
+      result_info$type <- "table"
+      result_info$value <- res
+      result_info$message <- sprintf(
+        "Table generated: %d rows × %d columns\nFirst few rows:\n%s",
+        nrow(res), ncol(res),
+        paste(capture.output(print(head(res, 3))), collapse = "\n")
+      )
+
+    # List with $table element (e.g., CreateTableOneJS result)
+    } else if (is.list(res) && !is.null(res$table)) {
+      result_info$type <- "table"
+      result_info$value <- res$table
+      result_info$message <- sprintf("Table extracted from list result: %d rows × %d columns",
+                                     nrow(res$table), ncol(res$table))
+
+    # Everything else as text
+    } else {
+      result_info$type <- "text"
+      result_info$value <- res
+      result_info$message <- paste(capture.output(print(res)), collapse = "\n")
+    }
+
+    # Store in reactive values if requested
+    if (store_result) {
+      execution_result(result_info$value)
+      result_type(result_info$type)
+    }
+
+    return(result_info)
+  }
+
+  # Helper: Build analysis context section for prompts
+  build_analysis_context <- function(context_info) {
+    if (is.null(context_info) || length(context_info) == 0) {
+      return("")
+    }
+
+    context_section <- "\n\n## ANALYSIS CONTEXT\n"
+    context_section <- paste0(context_section,
+      "The user has already performed the following analyses in the application. ",
+      "You can reference these previous results when the user mentions 'the previous analysis', ",
+      "'the table/plot I showed you', or asks for follow-up analyses:\n\n")
+
+    for (name in names(context_info)) {
+      item <- context_info[[name]]
+
+      # Show description if available
+      if (!is.null(item$description)) {
+        context_section <- paste0(context_section, "- ", name, ": ", item$description, "\n")
+      }
+
+      # Show code if available
+      if (!is.null(item$code)) {
+        context_section <- paste0(context_section, "  Code:\n```r\n", item$code, "\n```\n")
+      }
+    }
+    context_section <- paste0(context_section, "\n")
+
+    return(context_section)
+  }
+
+  # Helper: Get default model for provider
+  get_default_model <- function(provider) {
+    switch(provider,
+      "anthropic" = "claude-sonnet-4-20250514",
+      "openai" = "gpt-4-turbo",
+      "google" = "gemini-1.5-flash",
+      "claude-sonnet-4-20250514"
+    )
+  }
+
   # Validate R code for safety
   validate_code_safety <- function(code) {
     # List of dangerous functions to block
@@ -972,38 +1082,13 @@ aiAssistant <- function(input, output, session, data, data_label,
         # Store successful code
         current_code(code)
 
-        # Return result summary
-        if (inherits(res, c("ggplot", "gg", "gtable", "grob", "recordedplot"))) {
-          execution_result(list(res))
-          result_type("plot")
-          return(list(
-            success = TRUE,
-            result = "Plot generated successfully. The plot is now displayed in the Results panel."
-          ))
-        } else if (is.list(res) && all(sapply(res, function(x) inherits(x, c("ggplot", "gg"))))) {
-          execution_result(res)
-          result_type("plot")
-          return(list(
-            success = TRUE,
-            result = sprintf("Generated %d plots successfully. All plots are displayed in the Results panel.", length(res))
-          ))
-        } else if (is.data.frame(res) || is.matrix(res)) {
-          execution_result(res)
-          result_type("table")
-          df_summary <- sprintf(
-            "Table generated: %d rows × %d columns\nFirst few rows:\n%s",
-            nrow(res), ncol(res),
-            paste(capture.output(print(head(res, 3))), collapse = "\n")
-          )
-          return(list(success = TRUE, result = df_summary))
-        } else {
-          execution_result(res)
-          result_type("text")
-          return(list(
-            success = TRUE,
-            result = paste(capture.output(print(res)), collapse = "\n")
-          ))
-        }
+        # Determine result type and store (using unified helper)
+        result_info <- determine_result_type(res, store_result = TRUE)
+
+        return(list(
+          success = TRUE,
+          result = result_info$message
+        ))
 
       } else if (tool_name == "get_data_summary") {
         d <- data()
@@ -1166,39 +1251,12 @@ aiAssistant <- function(input, output, session, data, data_label,
 
     # Use default model if not selected
     if (is.null(model)) {
-      model <- switch(provider,
-        "anthropic" = "claude-sonnet-4-20250514",
-        "openai" = "gpt-4-turbo",
-        "google" = "gemini-1.5-flash",
-        "claude-sonnet-4-20250514"
-      )
+      model <- get_default_model(provider)
       message("[DEBUG] Using default model: ", model)
     }
 
-    # Build analysis context section
-    context_section <- ""
-    if (!is.null(context_info) && length(context_info) > 0) {
-      context_section <- "\n\n## ANALYSIS CONTEXT\n"
-      context_section <- paste0(context_section,
-        "The user has already performed the following analyses in the application. ",
-        "You can reference these previous results when the user mentions 'the previous analysis', ",
-        "'the table/plot I showed you', or asks for follow-up analyses:\n\n")
-
-      for (name in names(context_info)) {
-        item <- context_info[[name]]
-
-        # Show description if available
-        if (!is.null(item$description)) {
-          context_section <- paste0(context_section, "- ", name, ": ", item$description, "\n")
-        }
-
-        # Show code if available
-        if (!is.null(item$code)) {
-          context_section <- paste0(context_section, "  Code:\n```r\n", item$code, "\n```\n")
-        }
-      }
-      context_section <- paste0(context_section, "\n")
-    }
+    # Build analysis context section (using helper)
+    context_section <- build_analysis_context(context_info)
 
     # Build system prompt (simplified for tool use)
     system_prompt <- paste0(
@@ -1672,38 +1730,11 @@ aiAssistant <- function(input, output, session, data, data_label,
 
     # Use default model if not selected
     if (is.null(model)) {
-      model <- switch(provider,
-        "anthropic" = "claude-sonnet-4-20250514",
-        "openai" = "gpt-4-turbo",
-        "google" = "gemini-1.5-flash",
-        "claude-sonnet-4-20250514"
-      )
+      model <- get_default_model(provider)
     }
 
-    # Build analysis context section
-    context_section <- ""
-    if (!is.null(context_info) && length(context_info) > 0) {
-      context_section <- "\n\n## ANALYSIS CONTEXT\n"
-      context_section <- paste0(context_section,
-        "The user has already performed the following analyses in the application. ",
-        "You can reference these previous results when the user mentions 'the previous analysis', ",
-        "'the table/plot I showed you', or asks for follow-up analyses:\n\n")
-
-      for (name in names(context_info)) {
-        item <- context_info[[name]]
-
-        # Show description if available
-        if (!is.null(item$description)) {
-          context_section <- paste0(context_section, "- ", name, ": ", item$description, "\n")
-        }
-
-        # Show code if available
-        if (!is.null(item$code)) {
-          context_section <- paste0(context_section, "  Code:\n```r\n", item$code, "\n```\n")
-        }
-      }
-      context_section <- paste0(context_section, "\n")
-    }
+    # Build analysis context section (using helper)
+    context_section <- build_analysis_context(context_info)
 
     # Build system prompt from template + context
     system_prompt <- paste0(
@@ -1955,7 +1986,12 @@ aiAssistant <- function(input, output, session, data, data_label,
     req(input$user_input)
     user_msg <- input$user_input
 
-    # Update display history
+    # Immediately clear and disable input field
+    updateTextAreaInput(session, "user_input", value = "")
+    shinyjs::disable("user_input")
+    shinyjs::disable("send_btn")
+
+    # Update display history immediately (show user message right away)
     new_display <- c(display_history(),
                      list(list(role = "user", content = user_msg)))
     display_history(new_display)
@@ -2053,8 +2089,9 @@ aiAssistant <- function(input, output, session, data, data_label,
       display_history(new_display)
     }
 
-    # Clear input
-    updateTextAreaInput(session, "user_input", value = "")
+    # Re-enable input field after response
+    shinyjs::enable("user_input")
+    shinyjs::enable("send_btn")
   })
 
   # Display token usage
@@ -2092,21 +2129,42 @@ aiAssistant <- function(input, output, session, data, data_label,
       lapply(history, function(msg) {
         if (msg$role == "user") {
           tags$div(
-            style = "background-color: #e3f2fd; padding: 8px; margin: 5px 0; border-radius: 8px;",
+            style = paste0(
+              "background-color: #e3f2fd; padding: 8px; margin: 5px 0; ",
+              "border-radius: 8px; word-wrap: break-word; overflow-wrap: break-word;"
+            ),
             tags$strong(icon("user"), " You: "),
-            tags$span(style = "white-space: pre-wrap;", msg$content)
+            tags$span(
+              style = "white-space: pre-wrap; word-break: break-word;",
+              msg$content
+            )
           )
         } else if (msg$role == "assistant") {
           tags$div(
-            style = "background-color: #f5f5f5; padding: 8px; margin: 5px 0; border-radius: 8px;",
+            style = paste0(
+              "background-color: #f5f5f5; padding: 8px; margin: 5px 0; ",
+              "border-radius: 8px; word-wrap: break-word; overflow-wrap: break-word;"
+            ),
             tags$strong(icon("robot"), " AI: "),
-            tags$pre(style = "white-space: pre-wrap; font-size: 11px; margin-top: 5px;", msg$content)
+            tags$pre(
+              style = paste0(
+                "white-space: pre-wrap; font-size: 11px; margin-top: 5px; ",
+                "word-break: break-word; overflow-wrap: break-word; margin-bottom: 0;"
+              ),
+              msg$content
+            )
           )
         } else {
           tags$div(
-            style = "background-color: #ffebee; padding: 8px; margin: 5px 0; border-radius: 8px;",
+            style = paste0(
+              "background-color: #ffebee; padding: 8px; margin: 5px 0; ",
+              "border-radius: 8px; word-wrap: break-word; overflow-wrap: break-word;"
+            ),
             tags$strong(icon("exclamation-triangle"), " Error: "),
-            tags$span(style = "white-space: pre-wrap;", msg$content)
+            tags$span(
+              style = "white-space: pre-wrap; word-break: break-word;",
+              msg$content
+            )
           )
         }
       })
@@ -2122,38 +2180,10 @@ aiAssistant <- function(input, output, session, data, data_label,
     )
   })
 
-  # Reactive value for edit mode
-  edit_mode <- reactiveVal(FALSE)
-
   # Update code editor when current_code changes
   observe({
     code <- current_code()
     shinyAce::updateAceEditor(session, "code_editor", value = code)
-  })
-
-  # Toggle edit mode
-  observeEvent(input$edit_code, {
-    code <- current_code()
-    req(code != "")
-
-    is_editing <- edit_mode()
-
-    if (!is_editing) {
-      # Enter edit mode
-      edit_mode(TRUE)
-      shinyAce::updateAceEditor(session, "code_editor", readOnly = FALSE)
-      updateActionButton(session, "edit_code",
-                        label = "Save Changes",
-                        icon = icon("save"))
-    } else {
-      # Save and exit edit mode
-      current_code(input$code_editor)
-      edit_mode(FALSE)
-      shinyAce::updateAceEditor(session, "code_editor", readOnly = TRUE)
-      updateActionButton(session, "edit_code",
-                        label = "Edit Code",
-                        icon = icon("edit"))
-    }
   })
 
   # Copy code notification
@@ -2163,8 +2193,12 @@ aiAssistant <- function(input, output, session, data, data_label,
 
   # Run code
   observeEvent(input$run_code, {
-    code <- current_code()
+    # Get code from editor (user may have edited it)
+    code <- input$code_editor
     req(code != "")
+
+    # Update current_code with the edited version
+    current_code(code)
 
     # Prepare environment with data
     env <- new.env()
@@ -2195,27 +2229,8 @@ aiAssistant <- function(input, output, session, data, data_label,
 
     result <- exec_result$value
 
-    # Determine result type
-    if (inherits(result, c("ggplot", "gg", "gtable", "grob", "recordedplot"))) {
-      result_type("plot")
-      execution_result(list(result))
-    } else if (is.list(result) && length(result) > 0 &&
-               all(sapply(result, function(x) inherits(x, c("ggplot", "gg", "gtable", "grob", "recordedplot"))))) {
-      result_type("plot")
-      execution_result(result)
-    } else if (inherits(result, "flextable")) {
-      result_type("flextable")
-      execution_result(result)
-    } else if (is.data.frame(result) || is.matrix(result)) {
-      result_type("table")
-      execution_result(result)
-    } else if (is.list(result) && !is.null(result$table)) {
-      result_type("table")
-      execution_result(result$table)
-    } else {
-      result_type("text")
-      execution_result(result)
-    }
+    # Determine result type and store (using unified helper)
+    determine_result_type(result, store_result = TRUE)
   })
 
   # Render plot
