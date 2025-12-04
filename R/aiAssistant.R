@@ -30,6 +30,7 @@
 #' @export
 #' @import shiny
 #' @import shinyjs
+#' @importFrom shinyWidgets pickerInput actionBttn noUiSliderInput sendSweetAlert
 
 aiAssistantUI <- function(id, show_api_config = TRUE) {
   ns <- NS(id)
@@ -38,284 +39,404 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
     # Enable shinyjs
     shinyjs::useShinyjs(),
 
-    # Custom CSS for tooltip (Bootstrap style)
-    tags$style(HTML("
-      .info-tooltip {
-        position: relative;
-        display: inline-block;
-        cursor: help;
-        color: #0d6efd;
-        margin-left: 5px;
+    # CSS for AI Assistant
+    tags$style(HTML(paste0("
+      /* Card component */
+      .ai-card {
+        background: #F9FAED;
+        border: 1px solid #DEDCA6;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
       }
-      .info-tooltip .tooltiptext {
-        visibility: hidden;
-        width: 280px;
-        background-color: #fff;
-        color: #212529;
-        text-align: left;
-        border-radius: 0.375rem;
-        border: 1px solid rgba(0,0,0,.15);
-        padding: 12px;
-        position: absolute;
-        z-index: 1000;
-        top: -5px;
-        left: 105%;
-        opacity: 0;
-        transition: opacity 0.2s;
-        font-size: 13px;
-        line-height: 1.5;
-        box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
-      }
-      .info-tooltip .tooltiptext::before {
-        content: '';
-        position: absolute;
-        top: 15px;
-        right: 100%;
-        margin-top: -6px;
-        border-width: 6px;
-        border-style: solid;
-        border-color: transparent #fff transparent transparent;
-        z-index: 1;
-      }
-      .info-tooltip .tooltiptext::after {
-        content: '';
-        position: absolute;
-        top: 15px;
-        right: 100%;
-        margin-top: -7px;
-        border-width: 7px;
-        border-style: solid;
-        border-color: transparent rgba(0,0,0,.15) transparent transparent;
-      }
-      .info-tooltip:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
-      }
-    ")),
 
-    # API Configuration Section (conditional on show_api_config)
+      .ai-card-header {
+        background: linear-gradient(135deg, #1E3C1E 0%, #4A774A 100%);
+        color: white;
+        padding: 1rem 1.25rem;
+        border-radius: 8px 8px 0 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .ai-card-header h5,
+      .ai-card-header h4 {
+        margin: 0;
+        color: white;
+        font-weight: 600;
+      }
+
+      .ai-card-body {
+        padding: 1.5rem;
+      }
+
+      /* Chat message bubbles */
+      .user-message {
+        background: #007bff;
+        color: white;
+        padding: 0.5rem 0.75rem;
+        margin: 0.25rem 0;
+        border-radius: 1rem 1rem 0.25rem 1rem;
+        max-width: 80%;
+        margin-left: auto;
+        word-wrap: break-word;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      .user-message > div {
+        word-wrap: break-word;
+        word-break: break-word;
+        overflow-wrap: break-word;
+      }
+
+      .user-message .mt-2 {
+        margin-top: 0.25rem !important;
+        word-wrap: break-word;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        white-space: pre-wrap;
+      }
+
+      .ai-message {
+        background: #f1f3f4;
+        color: #1A1A1A;
+        padding: 0.5rem 0.75rem;
+        margin: 0.25rem 0;
+        border-radius: 1rem 1rem 1rem 0.25rem;
+        max-width: 80%;
+        word-wrap: break-word;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      .ai-message .mt-2 {
+        margin-top: 0.25rem !important;
+      }
+
+      .ai-message .mb-0 {
+        margin-bottom: 0 !important;
+      }
+
+      .error-message {
+        background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%);
+        color: white;
+        padding: 0.5rem 0.75rem;
+        margin: 0.25rem 0;
+        border-radius: 0.75rem;
+        border-left: 4px solid #a94442;
+      }
+
+      .error-message .mt-2 {
+        margin-top: 0.25rem !important;
+      }
+
+      /* Chat container with custom scrollbar */
+      .chat-container {
+        max-height: 450px;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: #FCFCFC;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+      }
+
+      .chat-container::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .chat-container::-webkit-scrollbar-track {
+        background: #E3F0E3;
+        border-radius: 10px;
+      }
+
+      .chat-container::-webkit-scrollbar-thumb {
+        background: #4A774A;
+        border-radius: 10px;
+      }
+
+      /* Code editor container */
+      .code-editor-container {
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+      }
+
+      /* Form inputs focus state - jsmodule green */
+      #", ns("provider"), ":focus,
+      #", ns("api_key_input"), ":focus,
+      #", ns("user_input"), ":focus {
+        border-color: #4A774A;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(74, 119, 74, 0.15);
+      }
+
+      /* Compact input area - remove extra margins */
+      .shiny-input-container {
+        margin-bottom: 0 !important;
+      }
+
+      .form-group {
+        margin-bottom: 0 !important;
+      }
+    "))),
+
+    # API Configuration Section
     if (show_api_config) {
-      tagList(
+      div(
+        class = "ai-card",
+        div(
+          class = "ai-card-header",
+          tags$h5(icon("key"), " API Configuration")
+        ),
+        div(
+          class = "ai-card-body",
         fluidRow(
-          column(12,
-            wellPanel(
-              h4(icon("key"), " API Configuration"),
-              fluidRow(
-                column(6,
-                  selectInput(
-                    ns("provider"),
-                    "AI Provider",
-                    choices = c(
-                      "Anthropic (Claude)" = "anthropic",
-                      "OpenAI (GPT)" = "openai",
-                      "Google (Gemini)" = "google"
-                    ),
-                    selected = "anthropic"
-                  ),
-                  tags$div(
-                    style = "margin-top: 10px;",
-                    uiOutput(ns("model_selector"))
-                  )
-                ),
-                column(6,
-                  passwordInput(
-                    ns("api_key_input"),
-                    "API Key",
-                    placeholder = "Enter your API key or leave empty for env var"
-                  ),
-                  helpText(
-                    tags$small(
-                      "Env vars: ",
-                      tags$code("ANTHROPIC_API_KEY"),
-                      ", ",
-                      tags$code("OPENAI_API_KEY"),
-                      ", ",
-                      tags$code("GOOGLE_API_KEY")
-                    )
-                  ),
-                  actionButton(
-                    ns("check_api_key"),
-                    "Check API Key",
-                    icon = icon("key"),
-                    class = "btn-info",
-                    style = "width: 100%; margin-top: 10px;"
-                  )
+          column(6,
+            shinyWidgets::pickerInput(
+              ns("provider"),
+              "AI Provider",
+              choices = c(
+                "Anthropic (Claude)" = "anthropic",
+                "OpenAI (GPT)" = "openai",
+                "Google (Gemini)" = "google"
+              ),
+              selected = "anthropic",
+              options = list(
+                style = "btn-default"
+              )
+            ),
+            uiOutput(ns("model_selector"))
+          ),
+          column(6,
+            tags$label("API Key"),
+            div(
+              style = "display: flex; gap: 10px; align-items: flex-end;",
+              div(
+                style = "flex: 1;",
+                passwordInput(
+                  ns("api_key_input"),
+                  NULL,
+                  placeholder = "Enter your API key or leave empty for env var"
                 )
               ),
-              uiOutput(ns("api_status"))
+              shinyWidgets::actionBttn(
+                ns("check_api_key"),
+                "Check",
+                icon = icon("check"),
+                style = "material-flat",
+                color = "primary",
+                size = "sm"
+              )
+            ),
+            tags$small(
+              class = "text-muted d-block",
+              "Env vars: ",
+              tags$code("ANTHROPIC_API_KEY"),
+              ", ",
+              tags$code("OPENAI_API_KEY"),
+              ", ",
+              tags$code("GOOGLE_API_KEY")
             )
           )
         ),
-        hr()
+        uiOutput(ns("api_status"))
+        )
       )
     } else {
-      # Show minimal status when API config UI is hidden
-      tagList(
-        fluidRow(
-          column(12,
-            uiOutput(ns("env_config_status"))
-          )
-        ),
-        hr()
-      )
+      uiOutput(ns("env_config_status"))
     },
 
     # Main Interface
     fluidRow(
+      # Chat Panel
       column(6,
-        wellPanel(
-          h4(icon("comments"), " Chat"),
-          p(
+        div(
+          class = "ai-card",
+          style = "min-height: 750px;",
+          div(
+            class = "ai-card-header",
+            tags$h5(icon("comments"), " AI Chat Assistant")
+          ),
+          div(
+            class = "ai-card-body",
+          tags$p(
+            class = "text-muted mb-3",
             "Ask for statistical analysis. ",
             tags$em("Example: 'Create survival curve by rx'")
           ),
           # Token usage display
           uiOutput(ns("token_display")),
-          hr(),
           # Chat history
           div(
             id = ns("chat_container"),
-            style = paste0(
-              "max-height: 400px; overflow-y: auto; ",
-              "border: 1px solid #ddd; padding: 10px; ",
-              "border-radius: 5px; background-color: #fafafa;"
-            ),
+            class = "chat-container my-3",
             uiOutput(ns("chat_history"))
           ),
-          hr(),
-          # Input area
-          fluidRow(
-            column(9,
+          # Input area - compact layout
+          div(
+            style = "display: flex; gap: 0.5rem; align-items: flex-start;",
+            div(
+              style = "flex: 1;",
               textAreaInput(
                 ns("user_input"),
                 NULL,
-                placeholder = "Enter your analysis request... (Enter to send, Shift+Enter for new line)",
+                placeholder = "Type your message... (Enter to send, Shift+Enter for new line)",
                 width = "100%",
-                rows = 2
-              ),
-              tags$script(HTML(sprintf("
-                $(document).ready(function() {
-                  $('#%s').on('keydown', function(e) {
-                    if (e.keyCode === 13 && !e.shiftKey) {
-                      e.preventDefault();
-                      $('#%s').click();
-                    }
-                  });
-                });
-              ", ns("user_input"), ns("send_btn"))))
+                rows = 3
+              )
             ),
-            column(3,
-              actionButton(
+            div(
+              style = "display: flex; flex-direction: column; gap: 0.5rem; min-width: 100px;",
+              shinyWidgets::actionBttn(
                 ns("send_btn"),
                 "Send",
                 icon = icon("paper-plane"),
-                class = "btn-primary",
-                style = "width: 100%; margin-top: 5px;"
+                style = "material-flat",
+                color = "primary",
+                size = "sm",
+                block = TRUE
               ),
-              actionButton(
+              shinyWidgets::actionBttn(
                 ns("clear_chat"),
                 "Clear",
                 icon = icon("trash"),
-                class = "btn-warning",
-                style = "width: 100%; margin-top: 5px;"
-              )
-            )
-          )
-        )
-      ),
-      column(6,
-        wellPanel(
-          h4(icon("code"), " Generated Code"),
-          shinyAce::aceEditor(
-            outputId = ns("code_editor"),
-            value = "",
-            mode = "r",
-            theme = "monokai",
-            height = "400px",
-            fontSize = 13,
-            showLineNumbers = TRUE,
-            highlightActiveLine = TRUE,
-            readOnly = FALSE,
-            showPrintMargin = FALSE,
-            placeholder = "No code generated yet. You can edit the code here."
-          ),
-          tags$style(HTML(sprintf("
-            /* Editable code editor style */
-            #%s.ace_editor {
-              cursor: text !important;
-              opacity: 1;
-              border: 2px solid #2196F3 !important;
-              box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
-            }
-            #%s.ace_editor .ace_content {
-              cursor: text !important;
-            }
-            #%s.ace_editor .ace_text-layer {
-              cursor: text !important;
-            }
-            #%s.ace_editor .ace_scroller {
-              cursor: text !important;
-            }
-          ",
-          ns("code_editor"), ns("code_editor"), ns("code_editor"), ns("code_editor")))),
-          fluidRow(
-            column(6,
-              actionButton(
-                ns("run_code"),
-                "Run Code",
-                icon = icon("play"),
-                class = "btn-success",
-                style = "width: 100%; margin-top: 10px;"
-              )
-            ),
-            column(6,
-              actionButton(
-                ns("copy_code"),
-                "Copy Code",
-                icon = icon("copy"),
-                class = "btn-secondary",
-                style = "width: 100%; margin-top: 10px;"
+                style = "material-flat",
+                color = "warning",
+                size = "sm",
+                block = TRUE
               )
             )
           ),
           tags$script(HTML(sprintf("
-            $(document).on('click', '#%s', function() {
-              var editor = ace.edit('%s');
-              var code = editor.getValue();
-              navigator.clipboard.writeText(code).then(function() {
-                // Show success notification
-                Shiny.setInputValue('%s', Math.random());
-              }).catch(function(err) {
-                console.error('Failed to copy: ', err);
+            $(document).ready(function() {
+              var isComposing = false;
+
+              // Track IME composition status (for Korean, Chinese, Japanese)
+              $('#%s').on('compositionstart', function() {
+                isComposing = true;
+              });
+
+              $('#%s').on('compositionend', function() {
+                isComposing = false;
+              });
+
+              // Handle Enter key with IME support
+              $('#%s').on('keydown', function(e) {
+                if (e.keyCode === 13 && !e.shiftKey) {
+                  if (!isComposing) {
+                    e.preventDefault();
+                    // Add small delay to ensure input value is updated
+                    setTimeout(function() {
+                      $('#%s').click();
+                    }, 50);
+                  }
+                }
               });
             });
+          ", ns("user_input"), ns("user_input"), ns("user_input"), ns("send_btn"))))
+          )
+        )
+      ),
 
-            // Auto-scroll chat to bottom
-            Shiny.addCustomMessageHandler('scrollChat', function(message) {
-              setTimeout(function() {
-                var container = document.getElementById(message.id);
-                if (container) {
-                  container.scrollTop = container.scrollHeight;
-                }
-              }, 100);
-            });
-          ", ns("copy_code"), ns("code_editor"), ns("copy_success"))))
+      # Code & Results Panel
+      column(6,
+        # Code Editor Card
+        div(
+          class = "ai-card",
+          style = "margin-bottom: 1.5rem;",
+          div(
+            class = "ai-card-header",
+            tags$h5(icon("code"), " Generated Code")
+          ),
+          div(
+            class = "ai-card-body",
+            div(
+              class = "code-editor-container",
+              shinyAce::aceEditor(
+                outputId = ns("code_editor"),
+                value = "",
+                mode = "r",
+                theme = "monokai",
+                height = "350px",
+                fontSize = 13,
+                showLineNumbers = TRUE,
+                highlightActiveLine = TRUE,
+                readOnly = FALSE,
+                showPrintMargin = FALSE,
+                placeholder = "No code generated yet. You can edit the code here."
+              )
+            ),
+            div(
+              style = "display: flex; gap: 10px; margin-top: 1rem;",
+              shinyWidgets::actionBttn(
+                ns("run_code"),
+                "Run Code",
+                icon = icon("play"),
+                style = "material-flat",
+                color = "success",
+                size = "sm"
+              ),
+              shinyWidgets::actionBttn(
+                ns("copy_code"),
+                "Copy Code",
+                icon = icon("copy"),
+                style = "material-flat",
+                color = "default",
+                size = "sm"
+              )
+            )
+          )
         ),
-        wellPanel(
-          h4(icon("chart-line"), " Results"),
+
+        # Results Card
+        div(
+          class = "ai-card",
+          div(
+            class = "ai-card-header",
+            tags$h5(icon("chart-line"), " Analysis Results")
+          ),
+          div(
+            class = "ai-card-body",
           uiOutput(ns("result_output")),
-          hr(),
-          h5("Download Options"),
-          fluidRow(
-            column(3, uiOutput(ns("download_pptx_ui"))),
-            column(3, uiOutput(ns("download_word_ui"))),
-            column(3, uiOutput(ns("download_excel_ui"))),
-            column(3, uiOutput(ns("download_txt_ui")))
+          tags$hr(),
+          tags$h6("Download Options", class = "mt-3 mb-3"),
+          div(
+            style = "display: flex; gap: 0.5rem; flex-wrap: wrap;",
+            uiOutput(ns("download_pptx_ui")),
+            uiOutput(ns("download_word_ui")),
+            uiOutput(ns("download_excel_ui")),
+            uiOutput(ns("download_txt_ui"))
           ),
           uiOutput(ns("ppt_size_ui"))
+          )
         )
       )
-    )
+    ),
+
+    # Copy code script
+    tags$script(HTML(sprintf("
+      $(document).on('click', '#%s', function() {
+        var editor = ace.edit('%s');
+        var code = editor.getValue();
+        navigator.clipboard.writeText(code).then(function() {
+          Shiny.setInputValue('%s', Math.random());
+        }).catch(function(err) {
+          console.error('Failed to copy: ', err);
+        });
+      });
+
+      // Auto-scroll chat to bottom
+      Shiny.addCustomMessageHandler('scrollChat', function(message) {
+        setTimeout(function() {
+          var container = document.getElementById(message.id);
+          if (container) {
+            container.scrollTop = container.scrollHeight;
+          }
+        }, 100);
+      });
+    ", ns("copy_code"), ns("code_editor"), ns("copy_success"))))
   )
 }
 
@@ -641,18 +762,24 @@ aiAssistant <- function(input, output, session, data, data_label,
     }
 
     tagList(
-      selectInput(
+      shinyWidgets::pickerInput(
         session$ns("selected_model"),
         "Model",
         choices = models,
-        selected = selected_model()
+        selected = selected_model(),
+        options = list(
+          `live-search` = TRUE,
+          style = "btn-default"
+        )
       ),
-      actionButton(
+      shinyWidgets::actionBttn(
         session$ns("apply_config"),
         "Apply Configuration",
         icon = icon("check"),
-        class = "btn-primary",
-        style = "width: 100%; margin-top: 10px;"
+        style = "material-flat",
+        color = "primary",
+        size = "sm",
+        block = TRUE
       )
     )
   })
@@ -1714,6 +1841,12 @@ aiAssistant <- function(input, output, session, data, data_label,
 
   # AI API call function (legacy - without tool use)
   call_ai <- function(user_message, conversation_history = list(), context_info = NULL) {
+    # [DEBUG] Log function entry
+    cat(sprintf("[DEBUG-API] call_ai() entered: message length=%d, first 100 chars='%s'\n",
+                nchar(user_message),
+                substr(user_message, 1, 100)),
+        file = stderr())
+
     API_KEY <- get_api_key()
     provider <- get_provider()
     model <- selected_model()
@@ -1748,6 +1881,13 @@ aiAssistant <- function(input, output, session, data, data_label,
       conversation_history,
       list(list(role = "user", content = user_message))
     )
+
+    # [DEBUG] Log messages array before API call
+    last_user_msg <- messages[[length(messages)]]$content
+    cat(sprintf("[DEBUG-API] Messages array created: last user message length=%d, first 100 chars='%s'\n",
+                nchar(last_user_msg),
+                substr(last_user_msg, 1, 100)),
+        file = stderr())
 
     # Call appropriate API based on provider
     if (provider == "anthropic") {
@@ -1784,6 +1924,11 @@ aiAssistant <- function(input, output, session, data, data_label,
       }
 
       assistant_message <- parsed_content$content[[1]]$text
+
+      # [DEBUG] Log API response
+      cat(sprintf("[DEBUG-API] API response received: assistant message length=%d\n",
+                  nchar(assistant_message)),
+          file = stderr())
 
       # Extract token usage
       usage <- list(
@@ -1837,6 +1982,11 @@ aiAssistant <- function(input, output, session, data, data_label,
       }
 
       assistant_message <- parsed_content$choices[[1]]$message$content
+
+      # [DEBUG] Log API response
+      cat(sprintf("[DEBUG-API] OpenAI response received: assistant message length=%d\n",
+                  nchar(assistant_message)),
+          file = stderr())
 
       # Extract token usage
       usage <- list(
@@ -1904,6 +2054,11 @@ aiAssistant <- function(input, output, session, data, data_label,
         if (!is.null(candidate$content$parts) &&
             length(candidate$content$parts) > 0) {
           assistant_message <- candidate$content$parts[[1]]$text
+
+          # [DEBUG] Log API response
+          cat(sprintf("[DEBUG-API] Google response received: assistant message length=%d\n",
+                      nchar(assistant_message)),
+              file = stderr())
 
           # Extract token usage
           usage <- list(
@@ -1986,6 +2141,12 @@ aiAssistant <- function(input, output, session, data, data_label,
     req(input$user_input)
     user_msg <- input$user_input
 
+    # [DEBUG] Log original input
+    cat(sprintf("[DEBUG] Step 1 - Input received: length=%d, first 100 chars='%s'\n",
+                nchar(user_msg),
+                substr(user_msg, 1, 100)),
+        file = stderr())
+
     # Immediately clear and disable input field
     updateTextAreaInput(session, "user_input", value = "")
     shinyjs::disable("user_input")
@@ -1995,6 +2156,11 @@ aiAssistant <- function(input, output, session, data, data_label,
     new_display <- c(display_history(),
                      list(list(role = "user", content = user_msg)))
     display_history(new_display)
+
+    # [DEBUG] Log display history update
+    cat(sprintf("[DEBUG] Step 2 - Display history updated: message length=%d\n",
+                nchar(new_display[[length(new_display)]]$content)),
+        file = stderr())
 
     # Prepare analysis context info
     context_info <- NULL
@@ -2020,13 +2186,19 @@ aiAssistant <- function(input, output, session, data, data_label,
           ))
         }
 
-        # Debug output to console
-        cat("[DEBUG] Calling AI API...\n", file = stderr())
+        # [DEBUG] Log before API call
+        cat(sprintf("[DEBUG] Step 3 - Before API call: message length=%d, first 100 chars='%s'\n",
+                    nchar(user_msg),
+                    substr(user_msg, 1, 100)),
+            file = stderr())
         showNotification("Calling AI API...", type = "message", duration = 2)
 
         result <- call_ai(user_msg, chat_history(), context_info = context_info)
 
-        cat("[DEBUG] AI API returned: ", if (result$success) "SUCCESS" else "FAILED", "\n", file = stderr())
+        # [DEBUG] Log after API call
+        cat(sprintf("[DEBUG] Step 4 - After API call: status=%s\n",
+                    if (result$success) "SUCCESS" else "FAILED"),
+            file = stderr())
         if (result$success) {
           showNotification("AI response received", type = "message", duration = 2)
         } else {
@@ -2045,11 +2217,22 @@ aiAssistant <- function(input, output, session, data, data_label,
     })
 
     if (response$success) {
+      # [DEBUG] Log before updating chat history
+      cat(sprintf("[DEBUG] Step 5 - Before chat_history update: user_msg length=%d\n",
+                  nchar(user_msg)),
+          file = stderr())
+
       # Update API history
       new_history <- c(chat_history(),
                        list(list(role = "user", content = user_msg)),
                        list(list(role = "assistant", content = response$message)))
       chat_history(new_history)
+
+      # [DEBUG] Log after chat_history update
+      user_msg_in_history <- new_history[[length(new_history) - 1]]$content
+      cat(sprintf("[DEBUG] Step 6 - After chat_history update: stored user_msg length=%d\n",
+                  nchar(user_msg_in_history)),
+          file = stderr())
 
       # Update display
       new_display <- c(display_history(),
@@ -2103,18 +2286,18 @@ aiAssistant <- function(input, output, session, data, data_label,
     }
 
     tags$div(
-      class = "alert alert-info",
-      style = "padding: 8px; margin-bottom: 10px; font-size: 12px;",
-      tags$strong(icon("chart-bar"), " Token Usage: "),
-      tags$span(
-        sprintf("Input: %s | Output: %s | Total: %s",
-                format(usage$input_tokens, big.mark = ","),
-                format(usage$output_tokens, big.mark = ","),
-                format(usage$total_tokens, big.mark = ","))
+      class = "token-badge mb-2",
+      tags$div(
+        icon("chart-bar"), " ",
+        tags$strong("Tokens:"),
+        sprintf(" %s", format(usage$total_tokens, big.mark = ","))
       ),
-      tags$br(),
-      tags$strong(icon("dollar-sign"), " Estimated Cost: "),
-      tags$span(sprintf("$%.4f", usage$total_cost))
+      tags$div(
+        class = "mt-1",
+        icon("dollar-sign"), " ",
+        tags$strong("Cost:"),
+        sprintf(" $%.4f", usage$total_cost)
+      )
     )
   })
 
@@ -2122,47 +2305,57 @@ aiAssistant <- function(input, output, session, data, data_label,
   output$chat_history <- renderUI({
     history <- display_history()
     if (length(history) == 0) {
-      return(p("Start a conversation...", style = "color: gray; font-style: italic;"))
+      return(tags$div(
+        class = "text-center text-muted py-4",
+        icon("comments", class = "fa-3x mb-3"),
+        tags$p("Start a conversation with your AI assistant...")
+      ))
+    }
+
+    # [DEBUG] Log rendering
+    cat(sprintf("[DEBUG] Step 7 - Rendering chat history: %d messages\n", length(history)),
+        file = stderr())
+    for (i in seq_along(history)) {
+      if (history[[i]]$role == "user") {
+        cat(sprintf("[DEBUG] Step 7.%d - User message: length=%d, first 100 chars='%s'\n",
+                    i, nchar(history[[i]]$content), substr(history[[i]]$content, 1, 100)),
+            file = stderr())
+      }
     }
 
     tagList(
       lapply(history, function(msg) {
         if (msg$role == "user") {
           tags$div(
-            style = paste0(
-              "background-color: #e3f2fd; padding: 8px; margin: 5px 0; ",
-              "border-radius: 8px; word-wrap: break-word; overflow-wrap: break-word;"
-            ),
-            tags$strong(icon("user"), " You: "),
-            tags$span(
-              style = "white-space: pre-wrap; word-break: break-word;",
-              msg$content
+            class = "user-message",
+            tags$div(
+              tags$strong(icon("user"), " You"),
+              tags$div(
+                class = "mt-2",
+                style = "white-space: pre-wrap; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;",
+                msg$content
+              )
             )
           )
         } else if (msg$role == "assistant") {
           tags$div(
-            style = paste0(
-              "background-color: #f5f5f5; padding: 8px; margin: 5px 0; ",
-              "border-radius: 8px; word-wrap: break-word; overflow-wrap: break-word;"
-            ),
-            tags$strong(icon("robot"), " AI: "),
-            tags$pre(
-              style = paste0(
-                "white-space: pre-wrap; font-size: 11px; margin-top: 5px; ",
-                "word-break: break-word; overflow-wrap: break-word; margin-bottom: 0;"
-              ),
-              msg$content
+            class = "ai-message",
+            tags$div(
+              tags$strong(icon("robot"), " AI Assistant"),
+              tags$pre(
+                class = "mt-2 mb-0",
+                style = "white-space: pre-wrap; background: transparent; border: none; color: inherit;",
+                msg$content
+              )
             )
           )
         } else {
           tags$div(
-            style = paste0(
-              "background-color: #ffebee; padding: 8px; margin: 5px 0; ",
-              "border-radius: 8px; word-wrap: break-word; overflow-wrap: break-word;"
-            ),
-            tags$strong(icon("exclamation-triangle"), " Error: "),
-            tags$span(
-              style = "white-space: pre-wrap; word-break: break-word;",
+            class = "error-message",
+            tags$strong(icon("exclamation-triangle"), " Error"),
+            tags$div(
+              class = "mt-2",
+              style = "white-space: pre-wrap;",
               msg$content
             )
           )
@@ -2188,7 +2381,12 @@ aiAssistant <- function(input, output, session, data, data_label,
 
   # Copy code notification
   observeEvent(input$copy_success, {
-    showNotification("Code copied to clipboard!", type = "message", duration = 2)
+    shinyWidgets::sendSweetAlert(
+      session,
+      title = "Success!",
+      text = "Code copied to clipboard",
+      type = "success"
+    )
   })
 
   # Run code
@@ -2331,8 +2529,24 @@ aiAssistant <- function(input, output, session, data, data_label,
       tagList(
         if (n > 1) p(tags$b(paste0(n, " plots → ", n, " slides")), style = "color: #2196F3;"),
         fluidRow(
-          column(6, sliderInput(session$ns("ppt_width"), "PPT Width", min = 5, max = 20, value = 10, step = 0.5)),
-          column(6, sliderInput(session$ns("ppt_height"), "PPT Height", min = 5, max = 15, value = 7.5, step = 0.5))
+          column(6,
+            shinyWidgets::noUiSliderInput(
+              session$ns("ppt_width"),
+              "PPT Width",
+              min = 5, max = 20, value = 10, step = 0.5,
+              color = "#4A774A",
+              tooltips = TRUE
+            )
+          ),
+          column(6,
+            shinyWidgets::noUiSliderInput(
+              session$ns("ppt_height"),
+              "PPT Height",
+              min = 5, max = 15, value = 7.5, step = 0.5,
+              color = "#4A774A",
+              tooltips = TRUE
+            )
+          )
         )
       )
     }
