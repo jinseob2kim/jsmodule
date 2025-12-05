@@ -194,17 +194,46 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
           class = "ai-card-body",
         fluidRow(
           column(6,
-            shinyWidgets::pickerInput(
-              ns("provider"),
-              "AI Provider",
-              choices = c(
-                "Anthropic (Claude)" = "anthropic",
-                "OpenAI (GPT)" = "openai",
-                "Google (Gemini)" = "google"
+            tags$div(
+              tags$label(
+                "AI Provider ",
+                tags$a(
+                  icon("info-circle"),
+                  id = ns("provider_info"),
+                  href = "#",
+                  style = "color: #4A774A; cursor: pointer; text-decoration: none;",
+                  onclick = "return false;"
+                )
               ),
-              selected = "anthropic",
-              options = list(
-                style = "btn-default"
+              tags$script(HTML(sprintf("
+                $('#%s').on('click', function(e) {
+                  e.preventDefault();
+                  var provider = $('#%s').val();
+                  var url = '';
+                  if (provider === 'anthropic') {
+                    url = 'https://console.anthropic.com/settings/keys';
+                  } else if (provider === 'openai') {
+                    url = 'https://platform.openai.com/api-keys';
+                  } else if (provider === 'google') {
+                    url = 'https://aistudio.google.com/app/apikey';
+                  }
+                  if (url) {
+                    window.open(url, '_blank');
+                  }
+                });
+              ", ns("provider_info"), ns("provider")))),
+              shinyWidgets::pickerInput(
+                ns("provider"),
+                NULL,
+                choices = c(
+                  "Anthropic (Claude)" = "anthropic",
+                  "OpenAI (GPT)" = "openai",
+                  "Google (Gemini)" = "google"
+                ),
+                selected = "anthropic",
+                options = list(
+                  style = "btn-default"
+                )
               )
             ),
             uiOutput(ns("model_selector"))
@@ -241,7 +270,27 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
             )
           )
         ),
-        uiOutput(ns("api_status"))
+        uiOutput(ns("api_status")),
+        # System Prompt Section
+        tags$hr(),
+        tags$div(
+          style = "margin-top: 15px;",
+          checkboxInput(
+            ns("use_custom_prompt"),
+            "Use Custom System Prompt",
+            value = FALSE
+          ),
+          conditionalPanel(
+            condition = sprintf("input['%s']", ns("use_custom_prompt")),
+            textAreaInput(
+              ns("custom_prompt"),
+              "Custom System Prompt",
+              placeholder = "Enter custom instructions for the AI...",
+              rows = 6,
+              width = "100%"
+            )
+          )
+        )
         )
       )
     } else {
@@ -385,6 +434,14 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
                 style = "material-flat",
                 color = "default",
                 size = "sm"
+              ),
+              shinyWidgets::actionBttn(
+                ns("save_chat"),
+                "Save Chat",
+                icon = icon("save"),
+                style = "material-flat",
+                color = "primary",
+                size = "sm"
               )
             )
           )
@@ -435,6 +492,19 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
             container.scrollTop = container.scrollHeight;
           }
         }, 100);
+      });
+
+      // Download chat history
+      Shiny.addCustomMessageHandler('downloadChat', function(message) {
+        var blob = new Blob([message.content], {type: 'application/json'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = message.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       });
     ", ns("copy_code"), ns("code_editor"), ns("copy_success"))))
   )
@@ -699,8 +769,8 @@ aiAssistant <- function(input, output, session, data, data_label,
     } else {
       default_model <- switch(provider,
         "anthropic" = models[grepl("sonnet-4", models)][1],
-        "openai" = models[grepl("gpt-4", models)][1],
-        "google" = "gemini-1.5-flash",
+        "openai" = models[grepl("gpt-5|gpt-4", models)][1],
+        "google" = models[grepl("gemini-3|gemini-2", models)][1],
         models[1]
       )
       if (!is.na(default_model)) {
@@ -734,8 +804,8 @@ aiAssistant <- function(input, output, session, data, data_label,
           } else {
             default_model <- switch(provider,
               "anthropic" = models[grepl("sonnet-4", models)][1],
-              "openai" = models[grepl("gpt-4", models)][1],
-              "google" = "gemini-1.5-flash",
+              "openai" = models[grepl("gpt-5|gpt-4", models)][1],
+              "google" = models[grepl("gemini-3|gemini-2", models)][1],
               models[1]
             )
             if (!is.na(default_model)) {
@@ -893,6 +963,21 @@ aiAssistant <- function(input, output, session, data, data_label,
   } else {
     default_prompt
   }
+
+  # Reactive system prompt (user can customize)
+  system_prompt_text <- reactive({
+    use_custom <- input$use_custom_prompt
+    if (isTRUE(use_custom)) {
+      custom <- input$custom_prompt
+      if (!is.null(custom) && nchar(trimws(custom)) > 0) {
+        custom
+      } else {
+        stats_guide_text
+      }
+    } else {
+      stats_guide_text
+    }
+  })
 
   # Reactive values
   chat_history <- reactiveVal(list())
@@ -1077,8 +1162,8 @@ aiAssistant <- function(input, output, session, data, data_label,
   get_default_model <- function(provider) {
     switch(provider,
       "anthropic" = "claude-sonnet-4-20250514",
-      "openai" = "gpt-4-turbo",
-      "google" = "gemini-1.5-flash",
+      "openai" = "gpt-5-turbo",
+      "google" = "gemini-3-flash",
       "claude-sonnet-4-20250514"
     )
   }
@@ -1399,7 +1484,7 @@ aiAssistant <- function(input, output, session, data, data_label,
       "3. If code execution fails, analyze the error and fix it\n",
       "4. Use get_data_summary or get_column_info to explore data first\n",
       "5. Never write file-saving code (write.xlsx, ggsave, etc.)\n\n",
-      stats_guide_text,
+      system_prompt_text(),
       context_section
     )
 
@@ -1435,7 +1520,7 @@ aiAssistant <- function(input, output, session, data, data_label,
             ),
             body = jsonlite::toJSON(list(
               model = model,
-              max_tokens = 4096,
+              max_tokens = 8192,
               system = system_prompt,
               messages = messages,
               tools = tools
@@ -1563,7 +1648,7 @@ aiAssistant <- function(input, output, session, data, data_label,
             body = jsonlite::toJSON(list(
               model = model,
               messages = openai_messages,
-              max_tokens = 4096,
+              max_tokens = 8192,
               tools = openai_tools,
               tool_choice = "auto"
             ), auto_unbox = TRUE),
@@ -1871,7 +1956,7 @@ aiAssistant <- function(input, output, session, data, data_label,
 
     # Build system prompt from template + context
     system_prompt <- paste0(
-      stats_guide_text, "\n\n",
+      system_prompt_text(), "\n\n",
       "## Current Project Context\n",
       data_context(),
       context_section
@@ -2387,6 +2472,38 @@ aiAssistant <- function(input, output, session, data, data_label,
       text = "Code copied to clipboard",
       type = "success"
     )
+  })
+
+  # Save chat history
+  observeEvent(input$save_chat, {
+    history <- chat_history()
+    if (length(history) == 0) {
+      cat(stderr(), "[DEBUG] No chat history to save\n")
+      showNotification("No chat history to save", type = "warning")
+      return(NULL)
+    }
+
+    # Convert to structured format
+    chat_data <- list(
+      timestamp = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+      provider = get_provider(),
+      model = selected_model(),
+      messages = history
+    )
+
+    # Convert to JSON string
+    json_content <- jsonlite::toJSON(chat_data, pretty = TRUE, auto_unbox = TRUE)
+
+    # Send to JavaScript for download
+    session$sendCustomMessage(
+      type = "downloadChat",
+      message = list(
+        content = as.character(json_content),
+        filename = paste0("chat_history_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".json")
+      )
+    )
+
+    cat(stderr(), sprintf("[DEBUG] Chat history saved: %d messages\n", length(history)))
   })
 
   # Run code
