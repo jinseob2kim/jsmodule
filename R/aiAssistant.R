@@ -30,7 +30,7 @@
 #' @export
 #' @import shiny
 #' @import shinyjs
-#' @importFrom shinyWidgets pickerInput actionBttn noUiSliderInput sendSweetAlert
+#' @importFrom shinyWidgets pickerInput actionBttn noUiSliderInput
 
 aiAssistantUI <- function(id, show_api_config = TRUE) {
   ns <- NS(id)
@@ -202,26 +202,13 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
                   id = ns("provider_info"),
                   href = "#",
                   style = "color: #4A774A; cursor: pointer; text-decoration: none;",
-                  onclick = "return false;"
+                  onclick = "return false;",
+                  `data-toggle` = "tooltip",
+                  `data-placement` = "top",
+                  `data-html` = "true",
+                  title = ""
                 )
               ),
-              tags$script(HTML(sprintf("
-                $('#%s').on('click', function(e) {
-                  e.preventDefault();
-                  var provider = $('#%s').val();
-                  var url = '';
-                  if (provider === 'anthropic') {
-                    url = 'https://console.anthropic.com/settings/keys';
-                  } else if (provider === 'openai') {
-                    url = 'https://platform.openai.com/api-keys';
-                  } else if (provider === 'google') {
-                    url = 'https://aistudio.google.com/app/apikey';
-                  }
-                  if (url) {
-                    window.open(url, '_blank');
-                  }
-                });
-              ", ns("provider_info"), ns("provider")))),
               shinyWidgets::pickerInput(
                 ns("provider"),
                 NULL,
@@ -234,7 +221,102 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
                 options = list(
                   style = "btn-default"
                 )
-              )
+              ),
+              tags$script(HTML(sprintf("
+                (function() {
+                  var providerId = '%s';
+                  var infoId = '%s';
+
+                  var providerMeta = {
+                    anthropic: {
+                      tooltip: '<strong>Anthropic Claude</strong><br/>Base URL: https://api.anthropic.com/v1/messages<br/>Models: Claude 3.5 Sonnet, Claude 3 Opus, etc.<br/><em>Click to get API key</em>',
+                      url: 'https://console.anthropic.com/settings/keys'
+                    },
+                    openai: {
+                      tooltip: '<strong>OpenAI</strong><br/>Base URL: https://api.openai.com/v1/chat/completions<br/>Models: GPT-5, GPT-4o, etc.<br/><em>Click to get API key</em>',
+                      url: 'https://platform.openai.com/api-keys'
+                    },
+                    google: {
+                      tooltip: '<strong>Google Gemini</strong><br/>Base URL: https://generativelanguage.googleapis.com/v1beta<br/>Models: Gemini 3 Pro, Gemini 2.5 Pro, Gemini 2.5 Flash, etc.<br/><em>Click to get API key</em>',
+                      url: 'https://aistudio.google.com/app/apikey'
+                    }
+                  };
+
+                  function getProvider() {
+                    var el = document.getElementById(providerId);
+                    return el && el.value ? el.value : 'anthropic';
+                  }
+
+                  function ensureShinyValue(provider) {
+                    if (!window.Shiny || typeof Shiny.setInputValue !== 'function') {
+                      return;
+                    }
+                    var current;
+                    if (typeof Shiny.getInputValue === 'function') {
+                      current = Shiny.getInputValue(providerId);
+                    } else if (Shiny.shinyapp && Shiny.shinyapp.$inputValues) {
+                      current = Shiny.shinyapp.$inputValues[providerId];
+                    }
+                    if (typeof current === 'undefined') {
+                      Shiny.setInputValue(providerId, provider, { priority: 'event' });
+                    }
+                  }
+
+                  function refreshTooltip(provider) {
+                    var meta = providerMeta[provider] || providerMeta.anthropic;
+                    var $info = $('#' + infoId);
+                    if (!$info.length || !meta.tooltip) {
+                      return;
+                    }
+                    $info.attr('data-original-title', meta.tooltip);
+                    if (typeof $.fn.tooltip === 'function') {
+                      if ($info.data('bs.tooltip')) {
+                        $info.tooltip('destroy');
+                      }
+                      $info.tooltip({ html: true, placement: 'top' });
+                    }
+                  }
+
+                  function onProviderChange() {
+                    var provider = getProvider();
+                    refreshTooltip(provider);
+                    ensureShinyValue(provider);
+                  }
+
+                  function bindProviderSelect() {
+                    var $picker = $('#' + providerId);
+                    if (!$picker.length) {
+                      return;
+                    }
+                    $picker.off('.aiProvider')
+                      .on('changed.bs.select.aiProvider', onProviderChange)
+                      .on('change.aiProvider', onProviderChange);
+                    onProviderChange();
+                  }
+
+                  function bindInfoButton() {
+                    $('#' + infoId).off('.aiProvider').on('click.aiProvider', function(e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      var provider = getProvider();
+                      var meta = providerMeta[provider];
+                      if (meta && meta.url) {
+                        window.open(meta.url, '_blank');
+                      }
+                    });
+                  }
+
+                  $(document).on('shiny:connected', function() {
+                    bindProviderSelect();
+                    bindInfoButton();
+                  });
+                  $(document).on('shiny:recalculated', bindProviderSelect);
+                  $(function() {
+                    bindProviderSelect();
+                    bindInfoButton();
+                  });
+                })();
+              ", ns("provider"), ns("provider_info"))))
             ),
             uiOutput(ns("model_selector"))
           ),
@@ -290,6 +372,24 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
               width = "100%"
             )
           )
+        ),
+        # Max Tokens Section
+        tags$hr(),
+        tags$div(
+          style = "margin-top: 15px;",
+          numericInput(
+            ns("max_tokens"),
+            "Max Response Tokens",
+            value = 8192,
+            min = 1024,
+            max = 16384,
+            step = 512,
+            width = "100%"
+          ),
+          tags$small(
+            class = "text-muted",
+            "Controls maximum length of AI responses (1,024 - 16,384, step: 512)"
+          )
         )
         )
       )
@@ -331,7 +431,7 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
               textAreaInput(
                 ns("user_input"),
                 NULL,
-                placeholder = "Type your message... (Enter to send, Shift+Enter for new line)",
+                placeholder = "Type your message... (Press Send button or Ctrl+Enter to send)",
                 width = "100%",
                 rows = 3
               )
@@ -360,31 +460,15 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
           ),
           tags$script(HTML(sprintf("
             $(document).ready(function() {
-              var isComposing = false;
-
-              // Track IME composition status (for Korean, Chinese, Japanese)
-              $('#%s').on('compositionstart', function() {
-                isComposing = true;
-              });
-
-              $('#%s').on('compositionend', function() {
-                isComposing = false;
-              });
-
-              // Handle Enter key with IME support
+              // Ctrl+Enter to send (optional shortcut)
               $('#%s').on('keydown', function(e) {
-                if (e.keyCode === 13 && !e.shiftKey) {
-                  if (!isComposing) {
-                    e.preventDefault();
-                    // Add small delay to ensure input value is updated
-                    setTimeout(function() {
-                      $('#%s').click();
-                    }, 50);
-                  }
+                if (e.keyCode === 13 && e.ctrlKey) {
+                  e.preventDefault();
+                  $('#%s').click();
                 }
               });
             });
-          ", ns("user_input"), ns("user_input"), ns("user_input"), ns("send_btn"))))
+          ", ns("user_input"), ns("send_btn"))))
           )
         )
       ),
@@ -506,7 +590,29 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       });
-    ", ns("copy_code"), ns("code_editor"), ns("copy_success"))))
+
+      // Real-time validation for max_tokens input
+      $(document).ready(function() {
+        $('#%s').on('input change', function() {
+          var value = parseInt($(this).val());
+          var inputGroup = $(this).closest('.form-group');
+
+          if (isNaN(value) || value < 1024 || value > 16384) {
+            $(this).css('border-color', '#dc3545');
+            $(this).css('box-shadow', '0 0 0 0.2rem rgba(220,53,69,.25)');
+
+            // Show or update error message
+            if (inputGroup.find('.token-error').length === 0) {
+              inputGroup.append('<small class=\"token-error text-danger\">Value must be between 1,024 and 16,384</small>');
+            }
+          } else {
+            $(this).css('border-color', '');
+            $(this).css('box-shadow', '');
+            inputGroup.find('.token-error').remove();
+          }
+        });
+      });
+    ", ns("copy_code"), ns("code_editor"), ns("copy_success"), ns("max_tokens"))))
   )
 }
 
@@ -565,9 +671,17 @@ aiAssistant <- function(input, output, session, data, data_label,
                         show_api_config = TRUE,
                         analysis_context = NULL) {
 
-  # Reactive values for model list
+  # Reactive values for model list and settings
   available_models <- reactiveVal(list())
   selected_model <- reactiveVal(NULL)
+
+  # Get max tokens from input or default
+  get_max_tokens <- reactive({
+    if (!is.null(input$max_tokens)) {
+      return(as.integer(input$max_tokens))
+    }
+    return(8192L)  # Default value
+  })
 
   # Get provider from environment or input
   get_provider <- reactive({
@@ -720,6 +834,30 @@ aiAssistant <- function(input, output, session, data, data_label,
     )
   })
 
+  # Reset models when provider changes
+  observeEvent(input$provider, {
+    req(input$provider)
+    message("[DEBUG] Provider changed to: ", input$provider)
+
+    # Clear models and selection when provider changes
+    available_models(NULL)
+    selected_model(NULL)
+
+    # Show notification
+    provider_name <- switch(input$provider,
+      "anthropic" = "Anthropic Claude",
+      "openai" = "OpenAI GPT",
+      "google" = "Google Gemini",
+      "Unknown"
+    )
+
+    showNotification(
+      paste0("Switched to ", provider_name, ". Please check your API key to load models."),
+      type = "message",
+      duration = 3
+    )
+  }, ignoreInit = TRUE)
+
   # Check API key and fetch models when button clicked
   observeEvent(input$check_api_key, {
     provider <- get_provider()
@@ -831,12 +969,19 @@ aiAssistant <- function(input, output, session, data, data_label,
       ))
     }
 
+    # Get current selection or use first model as default
+    current_selection <- isolate(selected_model())
+    if (is.null(current_selection) && length(models) > 0) {
+      current_selection <- models[1]
+      selected_model(current_selection)
+    }
+
     tagList(
       shinyWidgets::pickerInput(
         session$ns("selected_model"),
         "Model",
         choices = models,
-        selected = selected_model(),
+        selected = current_selection,
         options = list(
           `live-search` = TRUE,
           style = "btn-default"
@@ -856,10 +1001,10 @@ aiAssistant <- function(input, output, session, data, data_label,
 
   # Update selected model when user changes selection
   observeEvent(input$selected_model, {
-    if (!is.null(input$selected_model)) {
-      selected_model(input$selected_model)
-    }
-  })
+    req(input$selected_model)
+    selected_model(input$selected_model)
+    message("[DEBUG] Model selection changed to: ", input$selected_model)
+  }, ignoreNULL = TRUE, ignoreInit = FALSE)
 
   # Apply configuration when button clicked
   observeEvent(input$apply_config, {
@@ -980,11 +1125,12 @@ aiAssistant <- function(input, output, session, data, data_label,
   })
 
   # Reactive values
-  chat_history <- reactiveVal(list())
+  chat_history <- reactiveVal(list())  # Recent 5 conversations for API (10 messages)
+  full_chat_history <- reactiveVal(list())  # Full conversation history for saving
   display_history <- reactiveVal(list())
   current_code <- reactiveVal("")
   execution_result <- reactiveVal(NULL)
-  result_type <- reactiveVal("none")  # "plot", "table", "text", "error", "none"
+  result_type <- reactiveVal("none")  # "plot", "table", "text", "error", "none", "loading"
 
   # Token tracking
   token_usage <- reactiveVal(list(
@@ -1520,7 +1666,7 @@ aiAssistant <- function(input, output, session, data, data_label,
             ),
             body = jsonlite::toJSON(list(
               model = model,
-              max_tokens = 8192,
+              max_tokens = get_max_tokens(),
               system = system_prompt,
               messages = messages,
               tools = tools
@@ -1648,7 +1794,7 @@ aiAssistant <- function(input, output, session, data, data_label,
             body = jsonlite::toJSON(list(
               model = model,
               messages = openai_messages,
-              max_tokens = 8192,
+              max_tokens = get_max_tokens(),
               tools = openai_tools,
               tool_choice = "auto"
             ), auto_unbox = TRUE),
@@ -1791,7 +1937,7 @@ aiAssistant <- function(input, output, session, data, data_label,
               tools = list(gemini_tools),
               generationConfig = list(
                 temperature = 0.7,
-                maxOutputTokens = 4096
+                maxOutputTokens = get_max_tokens()
               )
             ), auto_unbox = TRUE),
             encode = "json"
@@ -1987,7 +2133,7 @@ aiAssistant <- function(input, output, session, data, data_label,
           ),
           body = jsonlite::toJSON(list(
             model = model,
-            max_tokens = 4096,
+            max_tokens = get_max_tokens(),
             system = system_prompt,
             messages = messages
           ), auto_unbox = TRUE),
@@ -2041,7 +2187,7 @@ aiAssistant <- function(input, output, session, data, data_label,
           body = jsonlite::toJSON(list(
             model = model,
             messages = openai_messages,
-            max_tokens = 4096,
+            max_tokens = get_max_tokens(),
             temperature = 0.7
           ), auto_unbox = TRUE),
           encode = "json"
@@ -2107,7 +2253,7 @@ aiAssistant <- function(input, output, session, data, data_label,
             ),
             generationConfig = list(
               temperature = 0.7,
-              maxOutputTokens = 4096
+              maxOutputTokens = get_max_tokens()
             )
           ), auto_unbox = TRUE),
           encode = "json"
@@ -2226,6 +2372,18 @@ aiAssistant <- function(input, output, session, data, data_label,
     req(input$user_input)
     user_msg <- input$user_input
 
+    # Validate max_tokens
+    max_tokens_value <- get_max_tokens()
+    if (max_tokens_value < 1024 || max_tokens_value > 16384) {
+      showNotification(
+        sprintf("Max Response Tokens must be between 1,024 and 16,384 (current: %s)",
+                format(max_tokens_value, big.mark = ",")),
+        type = "error",
+        duration = 5
+      )
+      return()
+    }
+
     # [DEBUG] Log original input
     cat(sprintf("[DEBUG] Step 1 - Input received: length=%d, first 100 chars='%s'\n",
                 nchar(user_msg),
@@ -2236,6 +2394,14 @@ aiAssistant <- function(input, output, session, data, data_label,
     updateTextAreaInput(session, "user_input", value = "")
     shinyjs::disable("user_input")
     shinyjs::disable("send_btn")
+
+    # Disable code editor
+    shinyjs::runjs(sprintf("
+      var editor = ace.edit('%s');
+      editor.setReadOnly(true);
+      editor.container.style.opacity = '0.6';
+      editor.container.style.pointerEvents = 'none';
+    ", session$ns("code_editor")))
 
     # Update display history immediately (show user message right away)
     new_display <- c(display_history(),
@@ -2307,10 +2473,22 @@ aiAssistant <- function(input, output, session, data, data_label,
                   nchar(user_msg)),
           file = stderr())
 
-      # Update API history
+      # Update full chat history (no limit)
+      full_history <- c(full_chat_history(),
+                        list(list(role = "user", content = user_msg)),
+                        list(list(role = "assistant", content = response$message)))
+      full_chat_history(full_history)
+
+      # Update API history (keep only last 5 conversations = 10 messages)
       new_history <- c(chat_history(),
                        list(list(role = "user", content = user_msg)),
                        list(list(role = "assistant", content = response$message)))
+
+      # Keep only last 10 messages (5 user-assistant pairs)
+      if (length(new_history) > 10) {
+        new_history <- tail(new_history, 10)
+      }
+
       chat_history(new_history)
 
       # [DEBUG] Log after chat_history update
@@ -2357,9 +2535,17 @@ aiAssistant <- function(input, output, session, data, data_label,
       display_history(new_display)
     }
 
-    # Re-enable input field after response
+    # Re-enable input field and code editor after response
     shinyjs::enable("user_input")
     shinyjs::enable("send_btn")
+
+    # Re-enable code editor
+    shinyjs::runjs(sprintf("
+      var editor = ace.edit('%s');
+      editor.setReadOnly(false);
+      editor.container.style.opacity = '1';
+      editor.container.style.pointerEvents = 'auto';
+    ", session$ns("code_editor")))
   })
 
   # Display token usage
@@ -2466,17 +2652,74 @@ aiAssistant <- function(input, output, session, data, data_label,
 
   # Copy code notification
   observeEvent(input$copy_success, {
-    shinyWidgets::sendSweetAlert(
-      session,
-      title = "Success!",
-      text = "Code copied to clipboard",
-      type = "success"
-    )
+    showNotification("Code copied to clipboard", type = "message", duration = 3)
+  })
+
+  # Ask AI to fix error
+  observeEvent(input$fix_error, {
+    # Get current code and error
+    code <- current_code()
+    result <- execution_result()
+
+    if (!is.null(result) && !is.null(result$message)) {
+      # Build detailed error report
+      error_details <- paste(
+        "Error message:",
+        result$message,
+        sep = "\n"
+      )
+
+      if (!is.null(result$call) && result$call != "Unknown") {
+        error_details <- paste(
+          error_details,
+          sprintf("\nFailed call: %s", result$call),
+          sep = ""
+        )
+      }
+
+      if (!is.null(result$class)) {
+        error_details <- paste(
+          error_details,
+          sprintf("\nError type: %s", result$class),
+          sep = ""
+        )
+      }
+
+      if (!is.null(result$traceback) && length(result$traceback) > 0) {
+        traceback_text <- paste(result$traceback, collapse = "\n")
+        error_details <- paste(
+          error_details,
+          sprintf("\n\nTraceback:\n%s", traceback_text),
+          sep = ""
+        )
+      }
+
+      # Create full error report message
+      error_msg <- sprintf(
+"I ran this code and got an error:
+
+```r
+%s
+```
+
+%s
+
+Please help me fix this error.",
+        code,
+        error_details
+      )
+
+      # Insert into chat input
+      updateTextAreaInput(session, "user_input", value = error_msg)
+
+      # Scroll to chat input
+      shinyjs::runjs(sprintf("document.getElementById('%s').scrollIntoView({behavior: 'smooth', block: 'center'});", session$ns("user_input")))
+    }
   })
 
   # Save chat history
   observeEvent(input$save_chat, {
-    history <- chat_history()
+    history <- full_chat_history()  # Use full history, not limited chat_history
     if (length(history) == 0) {
       cat(stderr(), "[DEBUG] No chat history to save\n")
       showNotification("No chat history to save", type = "warning")
@@ -2515,6 +2758,10 @@ aiAssistant <- function(input, output, session, data, data_label,
     # Update current_code with the edited version
     current_code(code)
 
+    # Clear previous results and show loading state
+    execution_result(NULL)
+    result_type("loading")
+
     # Prepare environment with data
     env <- new.env()
     env$out <- data()
@@ -2524,8 +2771,10 @@ aiAssistant <- function(input, output, session, data, data_label,
     exec_result <- tryCatch({
       parsed <- parse(text = code)
       res <- NULL
+      line_num <- 1
       for (expr in parsed) {
         res <- eval(expr, envir = env)
+        line_num <- line_num + length(attr(expr, "srcref")[[1]])
       }
       # Check for result variable
       if (exists("result", envir = env)) {
@@ -2533,12 +2782,32 @@ aiAssistant <- function(input, output, session, data, data_label,
       }
       list(success = TRUE, value = res)
     }, error = function(e) {
-      list(success = FALSE, message = e$message)
+      # Get detailed error information
+      error_call <- if (!is.null(e$call)) deparse(e$call) else "Unknown"
+      error_class <- paste(class(e), collapse = ", ")
+
+      # Try to get line number from traceback
+      trace_lines <- capture.output(traceback())
+
+      # Build detailed error info
+      list(
+        success = FALSE,
+        message = e$message,
+        call = error_call,
+        class = error_class,
+        traceback = trace_lines
+      )
     })
 
     if (!exec_result$success) {
       result_type("error")
-      execution_result(list(error = TRUE, message = exec_result$message))
+      execution_result(list(
+        error = TRUE,
+        message = exec_result$message,
+        call = exec_result$call,
+        class = exec_result$class,
+        traceback = exec_result$traceback
+      ))
       return()
     }
 
@@ -2580,10 +2849,67 @@ aiAssistant <- function(input, output, session, data, data_label,
       return(p("Run code to see results here.", style = "color: gray;"))
     }
 
+    if (rtype == "loading") {
+      return(tags$div(
+        style = "text-align: center; padding: 40px;",
+        icon("spinner", class = "fa-spin fa-3x", style = "color: #4A774A;"),
+        tags$p(
+          style = "margin-top: 15px; color: #666; font-size: 16px;",
+          "Running code..."
+        )
+      ))
+    }
+
     if (rtype == "error") {
       return(tags$div(
-        style = "color: red;",
-        tags$strong("Execution Error: "), result$message
+        # Main error message
+        tags$div(
+          style = "color: red; margin-bottom: 10px;",
+          tags$strong("Execution Error: "), result$message
+        ),
+        # Collapsible error details
+        tags$details(
+          style = "margin-bottom: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 10px;",
+          tags$summary(
+            style = "cursor: pointer; font-weight: bold; color: #856404;",
+            icon("info-circle"), " Error Details (click to expand)"
+          ),
+          tags$div(
+            style = "margin-top: 10px; font-family: monospace; font-size: 12px;",
+            if (!is.null(result$call) && result$call != "Unknown") {
+              tags$div(
+                tags$strong("Failed call: "),
+                tags$code(result$call),
+                tags$br()
+              )
+            },
+            if (!is.null(result$class)) {
+              tags$div(
+                tags$strong("Error type: "),
+                tags$code(result$class),
+                tags$br()
+              )
+            },
+            if (!is.null(result$traceback) && length(result$traceback) > 0) {
+              tags$div(
+                tags$strong("Traceback:"),
+                tags$pre(
+                  style = "background: #f8f9fa; padding: 10px; margin-top: 5px; overflow-x: auto;",
+                  paste(result$traceback, collapse = "\n")
+                )
+              )
+            }
+          )
+        ),
+        # Ask AI button
+        shinyWidgets::actionBttn(
+          session$ns("fix_error"),
+          "Ask AI to Fix",
+          icon = icon("robot"),
+          style = "material-flat",
+          color = "danger",
+          size = "sm"
+        )
       ))
     }
 
