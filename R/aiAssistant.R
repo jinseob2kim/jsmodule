@@ -671,6 +671,12 @@ aiAssistant <- function(input, output, session, data, data_label,
                         show_api_config = TRUE,
                         analysis_context = NULL) {
 
+  allowed_packages <- c(
+    "jstable", "jskm", "jsmodule", "survival",
+    "ggplot2", "ggpubr", "pROC", "data.table",
+    "DT", "gridExtra", "GGally"
+  )
+
   # Reactive values for model list and settings
   available_models <- reactiveVal(list())
   selected_model <- reactiveVal(NULL)
@@ -1140,76 +1146,6 @@ aiAssistant <- function(input, output, session, data, data_label,
     total_cost = 0
   ))
 
-  # Tool execution status
-  tool_execution_log <- reactiveVal(list())
-
-  # Define available tools for AI function calling
-  get_tools_schema <- function() {
-    list(
-      list(
-        name = "execute_r_code",
-        description = "Execute R code in the analysis environment and return the result. Use this to run statistical analysis code. The code should store the final result in a variable named 'result'.",
-        input_schema = list(
-          type = "object",
-          properties = list(
-            code = list(
-              type = "string",
-              description = "The R code to execute. Must be valid R syntax. Store final output in 'result' variable."
-            ),
-            description = list(
-              type = "string",
-              description = "Brief description of what this code does (for logging purposes)"
-            )
-          ),
-          required = list("code")
-        )
-      ),
-      list(
-        name = "get_data_summary",
-        description = "Get comprehensive summary of the dataset including structure, variable types, and basic statistics",
-        input_schema = list(
-          type = "object",
-          properties = list(
-            detailed = list(
-              type = "boolean",
-              description = "If true, includes statistical summaries for all variables. Default false."
-            )
-          ),
-          required = list()
-        )
-      ),
-      list(
-        name = "get_column_info",
-        description = "Get detailed information about specific column(s) including unique values, missing data, and distribution",
-        input_schema = list(
-          type = "object",
-          properties = list(
-            columns = list(
-              type = "array",
-              items = list(type = "string"),
-              description = "Column names to get information about"
-            )
-          ),
-          required = list("columns")
-        )
-      ),
-      list(
-        name = "get_data_sample",
-        description = "Get sample rows from the dataset to understand the actual data values",
-        input_schema = list(
-          type = "object",
-          properties = list(
-            n_rows = list(
-              type = "integer",
-              description = "Number of rows to sample. Default 10, max 50."
-            )
-          ),
-          required = list()
-        )
-      )
-    )
-  }
-
   # Helper: Determine result type and store result
   # Unified logic for classifying and storing execution results
   determine_result_type <- function(res, store_result = TRUE) {
@@ -1324,8 +1260,6 @@ aiAssistant <- function(input, output, session, data, data_label,
       "setwd", "source",  # Directory/source changes
       "options", "par",  # Global settings (partially allowed for plots)
       "install\\.packages", "remove\\.packages",  # Package management
-      "library\\((?!jstable|jskm|jsmodule|survival|ggplot2|ggpubr|pROC|data\\.table)",  # Restrict libraries
-      "require\\((?!jstable|jskm|jsmodule|survival|ggplot2|ggpubr|pROC|data\\.table)",
       "eval\\(", "evalq\\(",  # Nested eval
       "assign\\(.+envir\\s*=\\s*\\.GlobalEnv",  # Global env assignment
       "<<-"  # Super assignment
@@ -1356,198 +1290,47 @@ aiAssistant <- function(input, output, session, data, data_label,
     })
   }
 
-  # Execute tools called by AI
-  execute_tool <- function(tool_name, tool_input) {
-    tryCatch({
-      if (tool_name == "execute_r_code") {
-        code <- tool_input$code
-        description <- if (!is.null(tool_input$description)) tool_input$description else "Code execution"
+  create_execution_env <- function() {
+    env <- new.env(parent = .GlobalEnv)
+    env$out <- data()
+    env$out.label <- if (!is.null(data_label)) data_label() else NULL
 
-        # Validate code safety
-        safety_check <- validate_code_safety(code)
-        if (!safety_check$safe) {
-          return(list(
-            success = FALSE,
-            result = sprintf("Code validation failed: %s", safety_check$reason)
-          ))
+    safe_library <- function(package, ..., character.only = FALSE) {
+      pkg_name <- if (character.only) {
+        if (!is.character(package) || length(package) != 1) {
+          stop("When character.only = TRUE, 'package' must be a single character string.")
         }
-
-        # Create restricted environment
-        env <- new.env(parent = emptyenv())
-
-        # Add only allowed base functions
-        allowed_functions <- c(
-          # Data manipulation
-          "c", "list", "data.frame", "matrix", "cbind", "rbind",
-          "names", "colnames", "rownames", "nrow", "ncol", "dim",
-          "head", "tail", "subset", "merge", "transform",
-          # Math & stats
-          "sum", "mean", "median", "sd", "var", "min", "max", "range",
-          "quantile", "cor", "cov", "t.test", "chisq.test", "fisher.test",
-          # Logical & control
-          "if", "else", "for", "while", "function", "return",
-          "ifelse", "switch", "which", "any", "all",
-          # Type conversion
-          "as.numeric", "as.character", "as.factor", "as.integer",
-          "as.data.frame", "as.matrix", "as.list",
-          "is.na", "is.null", "is.factor", "is.numeric",
-          # Utility
-          "print", "cat", "paste", "paste0", "sprintf",
-          "length", "unique", "table", "summary", "str",
-          "grep", "grepl", "sub", "gsub", "strsplit"
-        )
-
-        for (fn in allowed_functions) {
-          if (exists(fn, envir = baseenv())) {
-            env[[fn]] <- get(fn, envir = baseenv())
-          }
-        }
-
-        # Add data objects
-        env$out <- data()
-        env$out.label <- if (!is.null(data_label)) data_label() else NULL
-
-        # Add allowed packages to search path
-        env$library <- function(package, ...) {
-          pkg_name <- as.character(substitute(package))
-          allowed_pkgs <- c("jstable", "jskm", "jsmodule", "survival",
-                           "ggplot2", "ggpubr", "pROC", "data.table",
-                           "DT", "gridExtra", "GGally")
-          if (pkg_name %in% allowed_pkgs) {
-            base::library(package, character.only = TRUE, ...)
-            # Copy package functions to environment
-            pkg_env <- as.environment(paste0("package:", pkg_name))
-            for (obj in ls(pkg_env)) {
-              env[[obj]] <- get(obj, envir = pkg_env)
-            }
-          } else {
-            stop(sprintf("Package '%s' is not allowed", pkg_name))
-          }
-        }
-
-        # Execute code in restricted environment
-        parsed <- parse(text = code)
-        res <- NULL
-        for (expr in parsed) {
-          res <- eval(expr, envir = env)
-        }
-
-        # Check for result variable
-        if (exists("result", envir = env)) {
-          res <- get("result", envir = env)
-        }
-
-        # Store successful code
-        current_code(code)
-
-        # Determine result type and store (using unified helper)
-        result_info <- determine_result_type(res, store_result = TRUE)
-
-        return(list(
-          success = TRUE,
-          result = result_info$message
-        ))
-
-      } else if (tool_name == "get_data_summary") {
-        d <- data()
-        detailed <- if (!is.null(tool_input$detailed)) tool_input$detailed else FALSE
-
-        factor_vars <- names(d)[sapply(d, is.factor)]
-        numeric_vars <- names(d)[sapply(d, is.numeric)]
-
-        summary_text <- sprintf(
-          "Dataset Summary:\n- Rows: %d\n- Columns: %d\n- Factor variables (%d): %s\n- Numeric variables (%d): %s",
-          nrow(d), ncol(d),
-          length(factor_vars), paste(factor_vars, collapse = ", "),
-          length(numeric_vars), paste(numeric_vars, collapse = ", ")
-        )
-
-        if (detailed) {
-          summary_text <- paste0(
-            summary_text, "\n\nStatistical Summary:\n",
-            paste(capture.output(summary(d)), collapse = "\n")
-          )
-        }
-
-        return(list(success = TRUE, result = summary_text))
-
-      } else if (tool_name == "get_column_info") {
-        d <- data()
-        columns <- tool_input$columns
-
-        info_list <- lapply(columns, function(col) {
-          if (!col %in% names(d)) {
-            return(sprintf("Column '%s' not found", col))
-          }
-
-          vec <- d[[col]]
-          n_missing <- sum(is.na(vec))
-
-          if (is.factor(vec) || is.character(vec)) {
-            unique_vals <- unique(vec)
-            n_unique <- length(unique_vals)
-            top_values <- head(sort(table(vec), decreasing = TRUE), 5)
-
-            sprintf(
-              "Column: %s\nType: %s\nMissing: %d (%.1f%%)\nUnique values: %d\nTop 5 values:\n%s",
-              col, class(vec)[1], n_missing, 100 * n_missing / length(vec),
-              n_unique,
-              paste(capture.output(print(top_values)), collapse = "\n")
-            )
-          } else {
-            sprintf(
-              "Column: %s\nType: %s\nMissing: %d (%.1f%%)\nMin: %.2f\nMax: %.2f\nMean: %.2f\nMedian: %.2f",
-              col, class(vec)[1], n_missing, 100 * n_missing / length(vec),
-              min(vec, na.rm = TRUE), max(vec, na.rm = TRUE),
-              mean(vec, na.rm = TRUE), median(vec, na.rm = TRUE)
-            )
-          }
-        })
-
-        return(list(
-          success = TRUE,
-          result = paste(info_list, collapse = "\n\n")
-        ))
-
-      } else if (tool_name == "get_data_sample") {
-        d <- data()
-        n_rows <- if (!is.null(tool_input$n_rows)) min(tool_input$n_rows, 50) else 10
-
-        sample_idx <- if (nrow(d) <= n_rows) {
-          1:nrow(d)
-        } else {
-          sample(nrow(d), n_rows)
-        }
-
-        sample_data <- d[sample_idx, ]
-
-        result_text <- sprintf(
-          "Sample of %d rows from dataset:\n%s",
-          nrow(sample_data),
-          paste(capture.output(print(sample_data)), collapse = "\n")
-        )
-
-        return(list(success = TRUE, result = result_text))
-
+        package
       } else {
-        return(list(
-          success = FALSE,
-          result = paste("Unknown tool:", tool_name)
-        ))
-      }
-    }, error = function(e) {
-      # Store error for debugging
-      if (tool_name == "execute_r_code") {
-        result_type("error")
-        execution_result(list(error = TRUE, message = e$message))
+        deparse(substitute(package))
       }
 
-      return(list(
-        success = FALSE,
-        result = sprintf("Error executing tool: %s", e$message)
-      ))
-    })
+      pkg_name <- trimws(pkg_name[1])
+      if (!nzchar(pkg_name)) {
+        stop("Package name cannot be empty.")
+      }
+
+      if (!pkg_name %in% allowed_packages) {
+        stop(sprintf(
+          "Package '%s' is not allowed. Allowed packages: %s",
+          pkg_name,
+          paste(allowed_packages, collapse = ", ")
+        ))
+      }
+
+      base::library(pkg_name, character.only = TRUE, ...)
+      invisible(TRUE)
+    }
+
+    env$library <- safe_library
+    env$require <- function(package, ..., character.only = FALSE) {
+      safe_library(package, ..., character.only = character.only)
+      TRUE
+    }
+
+    env
   }
+
 
   # Build context from data
   data_context <- reactive({
@@ -1591,486 +1374,10 @@ aiAssistant <- function(input, output, session, data, data_label,
     return(context)
   })
 
-  # AI API call function with tool use (function calling)
-  call_ai_with_tools <- function(user_message, conversation_history = list(), max_iterations = 5, context_info = NULL) {
-    API_KEY <- get_api_key()
-    provider <- get_provider()
-    model <- selected_model()
-
-    message("[DEBUG] call_ai_with_tools - Provider: ", provider, ", Model: ", model %||% "default")
-
-    if (API_KEY == "" || is.null(API_KEY)) {
-      message("[ERROR] API key is not configured")
-      return(list(
-        success = FALSE,
-        message = "API key not configured."
-      ))
-    }
-
-    # Use default model if not selected
-    if (is.null(model)) {
-      model <- get_default_model(provider)
-      message("[DEBUG] Using default model: ", model)
-    }
-
-    # Build analysis context section (using helper)
-    context_section <- build_analysis_context(context_info)
-
-    # Build system prompt (simplified for tool use)
-    system_prompt <- paste0(
-      "You are an R statistical analysis expert. ",
-      "Use the provided tools to help users analyze their data:\n",
-      "- execute_r_code: Run R code to perform analysis\n",
-      "- get_data_summary: Get dataset overview\n",
-      "- get_column_info: Get detailed column information\n",
-      "- get_data_sample: See actual data values\n\n",
-      "IMPORTANT GUIDELINES:\n",
-      "1. Always use jsmodule/jstable/jskm functions for analysis\n",
-      "2. Store final results in 'result' variable\n",
-      "3. If code execution fails, analyze the error and fix it\n",
-      "4. Use get_data_summary or get_column_info to explore data first\n",
-      "5. Never write file-saving code (write.xlsx, ggsave, etc.)\n\n",
-      system_prompt_text(),
-      context_section
-    )
-
-    # Get tools schema
-    tools <- get_tools_schema()
-
-    # Initialize conversation
-    messages <- c(
-      conversation_history,
-      list(list(role = "user", content = user_message))
-    )
-
-    # Tool use loop
-    iteration <- 0
-    accumulated_tokens <- list(input = 0, output = 0)
-    tool_log <- list()
-
-    while (iteration < max_iterations) {
-      iteration <- iteration + 1
-
-      message("[DEBUG] Iteration ", iteration, "/", max_iterations)
-
-      # Call API based on provider
-      if (provider == "anthropic") {
-        message("[DEBUG] Calling Anthropic API with model: ", model)
-        response <- tryCatch({
-          httr::POST(
-            url = "https://api.anthropic.com/v1/messages",
-            httr::add_headers(
-              "x-api-key" = API_KEY,
-              "anthropic-version" = "2023-06-01",
-              "content-type" = "application/json"
-            ),
-            body = jsonlite::toJSON(list(
-              model = model,
-              max_tokens = get_max_tokens(),
-              system = system_prompt,
-              messages = messages,
-              tools = tools
-            ), auto_unbox = TRUE),
-            encode = "json"
-          )
-        }, error = function(e) {
-          return(list(success = FALSE, message = paste("API error:", e$message)))
-        })
-
-        if (inherits(response, "list") && !is.null(response$success) && !response$success) {
-          return(response)
-        }
-
-        parsed <- httr::content(response, "parsed")
-
-        if (!is.null(parsed$error)) {
-          return(list(success = FALSE, message = parsed$error$message))
-        }
-
-        # Track tokens
-        if (!is.null(parsed$usage)) {
-          accumulated_tokens$input <- accumulated_tokens$input + (parsed$usage$input_tokens %||% 0)
-          accumulated_tokens$output <- accumulated_tokens$output + (parsed$usage$output_tokens %||% 0)
-        }
-
-        # Check stop reason
-        stop_reason <- parsed$stop_reason
-
-        if (stop_reason == "end_turn") {
-          # Final answer
-          final_text <- ""
-          for (content_block in parsed$content) {
-            if (content_block$type == "text") {
-              final_text <- paste0(final_text, content_block$text)
-            }
-          }
-
-          return(list(
-            success = TRUE,
-            message = final_text,
-            usage = list(
-              input_tokens = accumulated_tokens$input,
-              output_tokens = accumulated_tokens$output
-            ),
-            tool_log = tool_log
-          ))
-
-        } else if (stop_reason == "tool_use") {
-          # Execute tools
-          tool_results <- list()
-
-          for (content_block in parsed$content) {
-            if (content_block$type == "tool_use") {
-              tool_name <- content_block$name
-              tool_input <- content_block$input
-              tool_id <- content_block$id
-
-              # Execute tool
-              result <- execute_tool(tool_name, tool_input)
-
-              # Log tool use
-              tool_log[[length(tool_log) + 1]] <- list(
-                name = tool_name,
-                input = tool_input,
-                result = result
-              )
-
-              # Add tool result
-              tool_results[[length(tool_results) + 1]] <- list(
-                type = "tool_result",
-                tool_use_id = tool_id,
-                content = if (result$success) result$result else paste("Error:", result$result)
-              )
-            }
-          }
-
-          # Add assistant message and tool results to conversation
-          messages[[length(messages) + 1]] <- list(
-            role = "assistant",
-            content = parsed$content
-          )
-
-          messages[[length(messages) + 1]] <- list(
-            role = "user",
-            content = tool_results
-          )
-
-          # Continue loop to get next response
-          next
-
-        } else {
-          return(list(
-            success = FALSE,
-            message = paste("Unexpected stop reason:", stop_reason)
-          ))
-        }
-
-      } else if (provider == "openai") {
-        # OpenAI tool calling implementation
-        # Convert tools to OpenAI format
-        openai_tools <- lapply(tools, function(tool) {
-          list(
-            type = "function",
-            `function` = list(
-              name = tool$name,
-              description = tool$description,
-              parameters = tool$input_schema
-            )
-          )
-        })
-
-        openai_messages <- c(
-          list(list(role = "system", content = system_prompt)),
-          messages
-        )
-
-        response <- tryCatch({
-          httr::POST(
-            url = "https://api.openai.com/v1/chat/completions",
-            httr::add_headers(
-              "Authorization" = paste("Bearer", API_KEY),
-              "Content-Type" = "application/json"
-            ),
-            body = jsonlite::toJSON(list(
-              model = model,
-              messages = openai_messages,
-              max_tokens = get_max_tokens(),
-              tools = openai_tools,
-              tool_choice = "auto"
-            ), auto_unbox = TRUE),
-            encode = "json"
-          )
-        }, error = function(e) {
-          return(list(success = FALSE, message = paste("API error:", e$message)))
-        })
-
-        if (inherits(response, "list") && !is.null(response$success) && !response$success) {
-          return(response)
-        }
-
-        parsed <- httr::content(response, "parsed")
-
-        if (!is.null(parsed$error)) {
-          return(list(success = FALSE, message = parsed$error$message %||% "Unknown error"))
-        }
-
-        # Track tokens
-        if (!is.null(parsed$usage)) {
-          accumulated_tokens$input <- accumulated_tokens$input + (parsed$usage$prompt_tokens %||% 0)
-          accumulated_tokens$output <- accumulated_tokens$output + (parsed$usage$completion_tokens %||% 0)
-        }
-
-        message_obj <- parsed$choices[[1]]$message
-
-        # Check if tool calls exist
-        if (!is.null(message_obj$tool_calls) && length(message_obj$tool_calls) > 0) {
-          # Execute tools
-          tool_messages <- list()
-
-          for (tool_call in message_obj$tool_calls) {
-            tool_name <- tool_call$`function`$name
-            tool_input <- jsonlite::fromJSON(tool_call$`function`$arguments)
-
-            # Execute tool
-            result <- execute_tool(tool_name, tool_input)
-
-            # Log tool use
-            tool_log[[length(tool_log) + 1]] <- list(
-              name = tool_name,
-              input = tool_input,
-              result = result
-            )
-
-            # Add tool result message
-            tool_messages[[length(tool_messages) + 1]] <- list(
-              role = "tool",
-              tool_call_id = tool_call$id,
-              name = tool_name,
-              content = if (result$success) result$result else paste("Error:", result$result)
-            )
-          }
-
-          # Add assistant message and tool results
-          messages[[length(messages) + 1]] <- message_obj
-          messages <- c(messages, tool_messages)
-
-          # Continue loop
-          next
-
-        } else {
-          # Final answer
-          final_text <- message_obj$content %||% ""
-
-          return(list(
-            success = TRUE,
-            message = final_text,
-            usage = list(
-              input_tokens = accumulated_tokens$input,
-              output_tokens = accumulated_tokens$output
-            ),
-            tool_log = tool_log
-          ))
-        }
-
-      } else if (provider == "google") {
-        # Google Gemini function calling implementation
-        # Convert tools to Gemini format
-        gemini_tools <- list(
-          function_declarations = lapply(tools, function(tool) {
-            list(
-              name = tool$name,
-              description = tool$description,
-              parameters = tool$input_schema
-            )
-          })
-        )
-
-        # Convert messages to Gemini format
-        gemini_contents <- list()
-        for (msg in messages) {
-          if (msg$role == "user") {
-            if (is.list(msg$content) && !is.null(msg$content[[1]]$type)) {
-              # This is a tool result
-              gemini_contents[[length(gemini_contents) + 1]] <- list(
-                role = "model",
-                parts = lapply(msg$content, function(tool_res) {
-                  list(
-                    functionResponse = list(
-                      name = tool_res$name %||% "unknown",
-                      response = list(
-                        result = tool_res$content
-                      )
-                    )
-                  )
-                })
-              )
-            } else {
-              # Regular user message
-              gemini_contents[[length(gemini_contents) + 1]] <- list(
-                role = "user",
-                parts = list(list(text = msg$content))
-              )
-            }
-          } else if (msg$role == "assistant") {
-            # Assistant message (may contain function calls)
-            gemini_contents[[length(gemini_contents) + 1]] <- list(
-              role = "model",
-              parts = if (is.list(msg$content)) msg$content else list(list(text = msg$content))
-            )
-          }
-        }
-
-        response <- tryCatch({
-          httr::POST(
-            url = paste0(
-              "https://generativelanguage.googleapis.com/v1beta/",
-              "models/", model, ":generateContent?key=", API_KEY
-            ),
-            httr::add_headers(
-              "Content-Type" = "application/json"
-            ),
-            body = jsonlite::toJSON(list(
-              contents = gemini_contents,
-              systemInstruction = list(
-                parts = list(list(text = system_prompt))
-              ),
-              tools = list(gemini_tools),
-              generationConfig = list(
-                temperature = 0.7,
-                maxOutputTokens = get_max_tokens()
-              )
-            ), auto_unbox = TRUE),
-            encode = "json"
-          )
-        }, error = function(e) {
-          return(list(success = FALSE, message = paste("API error:", e$message)))
-        })
-
-        if (inherits(response, "list") && !is.null(response$success) && !response$success) {
-          return(response)
-        }
-
-        parsed <- httr::content(response, "parsed")
-
-        if (!is.null(parsed$error)) {
-          error_msg <- if (!is.null(parsed$error$message)) {
-            parsed$error$message
-          } else {
-            "Unknown Google API error"
-          }
-          return(list(success = FALSE, message = error_msg))
-        }
-
-        # Track tokens
-        if (!is.null(parsed$usageMetadata)) {
-          accumulated_tokens$input <- accumulated_tokens$input + (parsed$usageMetadata$promptTokenCount %||% 0)
-          accumulated_tokens$output <- accumulated_tokens$output + (parsed$usageMetadata$candidatesTokenCount %||% 0)
-        }
-
-        # Check if response has function calls
-        if (!is.null(parsed$candidates) && length(parsed$candidates) > 0) {
-          candidate <- parsed$candidates[[1]]
-
-          if (!is.null(candidate$content$parts)) {
-            parts <- candidate$content$parts
-
-            # Check for function calls
-            has_function_call <- FALSE
-            function_call_parts <- list()
-            tool_results_for_response <- list()
-
-            for (part in parts) {
-              if (!is.null(part$functionCall)) {
-                has_function_call <- TRUE
-                tool_name <- part$functionCall$name
-                tool_input <- part$functionCall$args
-
-                # Execute tool
-                result <- execute_tool(tool_name, tool_input)
-
-                # Log tool use
-                tool_log[[length(tool_log) + 1]] <- list(
-                  name = tool_name,
-                  input = tool_input,
-                  result = result
-                )
-
-                # Store function call part
-                function_call_parts[[length(function_call_parts) + 1]] <- part
-
-                # Prepare tool result for next request
-                tool_results_for_response[[length(tool_results_for_response) + 1]] <- list(
-                  type = "tool_result",
-                  name = tool_name,
-                  content = if (result$success) result$result else paste("Error:", result$result)
-                )
-              }
-            }
-
-            if (has_function_call) {
-              # Add assistant message with function calls
-              messages[[length(messages) + 1]] <- list(
-                role = "assistant",
-                content = parts
-              )
-
-              # Add user message with function results
-              messages[[length(messages) + 1]] <- list(
-                role = "user",
-                content = tool_results_for_response
-              )
-
-              # Continue loop
-              next
-
-            } else {
-              # Final answer - extract text
-              final_text <- ""
-              for (part in parts) {
-                if (!is.null(part$text)) {
-                  final_text <- paste0(final_text, part$text)
-                }
-              }
-
-              return(list(
-                success = TRUE,
-                message = final_text,
-                usage = list(
-                  input_tokens = accumulated_tokens$input,
-                  output_tokens = accumulated_tokens$output
-                ),
-                tool_log = tool_log
-              ))
-            }
-          }
-        }
-
-        # If we get here, something went wrong
-        return(list(
-          success = FALSE,
-          message = "Failed to parse Google Gemini response"
-        ))
-
-      } else {
-        return(list(
-          success = FALSE,
-          message = paste("Unknown provider:", provider)
-        ))
-      }
-    }
-
-    # Max iterations reached
-    return(list(
-      success = FALSE,
-      message = sprintf("Maximum iterations (%d) reached without final answer", max_iterations),
-      tool_log = tool_log
-    ))
-  }
-
   # Helper function for null coalescing
   `%||%` <- function(a, b) if (is.null(a)) b else a
 
-  # AI API call function (legacy - without tool use)
+  # AI API call function
   call_ai <- function(user_message, conversation_history = list(), context_info = NULL) {
     # [DEBUG] Log function entry
     cat(sprintf("[DEBUG-API] call_ai() entered: message length=%d, first 100 chars='%s'\n",
@@ -2755,6 +2062,17 @@ Please help me fix this error.",
     code <- input$code_editor
     req(code != "")
 
+    safety_check <- validate_code_safety(code)
+    if (!safety_check$safe) {
+      result_type("error")
+      execution_result(list(
+        error = TRUE,
+        message = safety_check$reason
+      ))
+      showNotification(safety_check$reason, type = "error", duration = 5)
+      return()
+    }
+
     # Update current_code with the edited version
     current_code(code)
 
@@ -2762,10 +2080,8 @@ Please help me fix this error.",
     execution_result(NULL)
     result_type("loading")
 
-    # Prepare environment with data
-    env <- new.env()
-    env$out <- data()
-    env$out.label <- if (!is.null(data_label)) data_label() else NULL
+    # Prepare environment with data and restricted helpers
+    env <- create_execution_env()
 
     # Execute code
     exec_result <- tryCatch({

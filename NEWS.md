@@ -1,3 +1,17 @@
+# jsmodule 2.0.0
+## New Features
+- Introduced the `jsmodule AI Assistant`, which connects to Anthropic, OpenAI, and Google LLMs so you can generate analyses, scripts, and export-ready visuals without leaving the app.
+- The assistant automatically leverages context captured in `Data Manager`, enabling follow-up questions that reference earlier tables or plots.
+- Prompts never include row-level data, and the execution sandbox blocks dangerous calls, preventing direct data exposure and prompt-injection attacks.
+
+## Update
+- Unified AI configuration panel with provider picker, API-key validation, and automatic model discovery for each provider.
+- Model-aware code generation with integrated editing, execution, and copy-to-clipboard shortcuts plus toast confirmations.
+- Conversation history with live rendering of user/assistant messages, downloadable transcripts, and per-session token/cost tracking.
+- Result viewers for tables, plots, and flextables, including export options to PPTX, Word, Excel, and TXT.
+- Contextual helper actions (error-to-prompt conversion, code summary, save chat) to streamline iterative AI-assisted analysis.
+
+
 # jsmodule 1.6.15
 ## Refactor
 - Introduced `DataManager` R6 class to streamline data loading and preprocessing across Shiny modules, reducing code duplication.
