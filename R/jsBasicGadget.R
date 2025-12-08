@@ -355,6 +355,11 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
           )
         )
       )
+    ),
+    tabPanel(
+      title = "AI Assistant",
+      icon = icon("robot"),
+      aiAssistantUI("basic_ai")
     )
   )
 
@@ -753,6 +758,16 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
     output$forestplot_glmbi <- renderPlot({
       outtable_glmbi()[[2]]
     })
+
+    callModule(
+      aiAssistant,
+      "basic_ai",
+      data = data,
+      data_label = data.label,
+      data_varStruct = NULL,
+      show_api_config = TRUE
+    )
+
     session$onSessionEnded(function() {
       stopApp()
     })
@@ -776,14 +791,56 @@ jsBasicGadget <- function(data, nfactor.limit = 20) {
 #'  \code{\link[rstudioapi]{rstudio-editors}}
 #' @rdname jsBasicAddin
 #' @export
-#' @importFrom rstudioapi getActiveDocumentContext
+#' @importFrom rstudioapi getActiveDocumentContext showPrompt isAvailable
 
 jsBasicAddin <- function() {
+  if (!rstudioapi::isAvailable()) {
+    stop("RStudio is required to launch the Basic statistics addin.", call. = FALSE)
+  }
+
   context <- rstudioapi::getActiveDocumentContext()
-  # Set the default data to use based on the selection.
-  dataString <- context$selection[[1]]$text
+  dataString <- ""
+
+  if (length(context$selection) > 0) {
+    selected <- context$selection[[1]]$text
+    if (!is.null(selected)) {
+      dataString <- trimws(selected)
+    }
+  }
+
+  if (!nzchar(dataString)) {
+    candidates <- ls(envir = .GlobalEnv)
+    candidates <- Filter(function(obj) {
+      inherits(get(obj, envir = .GlobalEnv), c("data.frame", "data.table", "tbl_df", "tbl"))
+    }, candidates)
+
+    if (length(candidates) == 0) {
+      stop("No data.frame/tibble objects found in the global environment. Please create or load data first.", call. = FALSE)
+    }
+
+    prompt <- rstudioapi::showPrompt(
+      title = "Select data",
+      message = "Enter the name of a data.frame/tibble to analyze:",
+      default = candidates[1]
+    )
+
+    if (is.null(prompt) || !nzchar(prompt)) {
+      stop("Addin cancelled: no data selected.", call. = FALSE)
+    }
+
+    dataString <- trimws(prompt)
+  }
+
+  if (!exists(dataString, envir = .GlobalEnv)) {
+    stop(sprintf("Object '%s' not found in the global environment.", dataString), call. = FALSE)
+  }
+
   data <- get(dataString, envir = .GlobalEnv)
-  # viewer <- dialogViewer("Subset", width = 1000, height = 800)
+
+  if (!is.data.frame(data)) {
+    stop(sprintf("Object '%s' is not a data.frame/tibble.", dataString), call. = FALSE)
+  }
+
   jsBasicGadget(data)
 }
 
@@ -1188,6 +1245,11 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
           )
         )
       )
+    ),
+    tabPanel(
+      title = "AI Assistant",
+      icon = icon("robot"),
+      aiAssistantUI("basic_ext_ai")
     )
   )
 
@@ -1650,6 +1712,16 @@ jsBasicExtAddin <- function(nfactor.limit = 20, max.filesize = 2048) {
     output$forestplot_glmbi <- renderPlot({
       outtable_glmbi()[[2]]
     })
+
+    callModule(
+      aiAssistant,
+      "basic_ext_ai",
+      data = data,
+      data_label = data.label,
+      data_varStruct = NULL,
+      show_api_config = TRUE
+    )
+
     session$onSessionEnded(function() {
       stopApp()
     })

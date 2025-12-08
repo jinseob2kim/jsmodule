@@ -1,7 +1,7 @@
 Package: jsmodule
 Title: 'RStudio' Addins and 'Shiny' Modules for Medical Research
-Version: 1.6.15
-Date: 2025-10-10
+Version: 2.0.0
+Date: 2025-12-05
 Authors@R: c(
   person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c("aut", "cre"),  comment = c(ORCID = "0000-0002-9403-605X")),
   person("Zarathu", role = c("cph", "fnd")),
@@ -23,49 +23,54 @@ Depends: R (>= 3.4.0)
 License: Apache License 2.0 
 Encoding: UTF-8
 RoxygenNote: 7.3.2
-Imports: 
-  data.table, 
-  DT, 
-  epiDisplay, 
+Imports:
+  data.table,
+  DT,
+  epiDisplay,
   flextable,
-  forestploter, 
-  geepack, 
-  GGally, 
-  ggplot2, 
+  forestploter,
+  geepack,
+  GGally,
+  ggplot2,
   bslib,
-  ggpubr, 
-  haven, 
-  Hmisc, 
-  jskm(>= 0.4.4), 
-  jstable(>= 1.3.8), 
-  labelled, 
+  ggpubr,
+  haven,
+  Hmisc,
+  jskm(>= 0.4.4),
+  jstable(>= 1.3.8),
+  labelled,
   MatchIt(>= 3.0.0),
-  maxstat, 
-  methods, 
-  officer, 
-  pROC, 
-  purrr, 
-  readr, 
-  readxl, 
-  rstudioapi, 
-  rvg, 
+  maxstat,
+  methods,
+  officer,
+  pROC,
+  purrr,
+  readr,
+  readxl,
+  rstudioapi,
+  rvg,
   scales,
-  see, 
-  shiny, 
-  shinycustomloader, 
+  see,
+  shiny,
+  shinyAce,
+  shinycustomloader,
   shinyjs,
-  shinyWidgets, 
-  stats, 
-  survey, 
-  survIDINRI, 
-  survival, 
-  timeROC, 
+  shinyWidgets,
+  stats,
+  survey,
+  survIDINRI,
+  survival,
+  timeROC,
   utils,
   ggrepel,
   htmltools,
   riskRegression,
   R6,
-  svglite
+  svglite,
+  httr,
+  jsonlite,
+  openxlsx,
+  gridExtra
 URL: https://jinseob2kim.github.io/jsmodule/, https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
 Suggests: 
