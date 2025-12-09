@@ -1138,7 +1138,8 @@ aiAssistant <- function(input, output, session, data, data_label,
   display_history <- reactiveVal(list())
   current_code <- reactiveVal("")
   execution_result <- reactiveVal(NULL)
-  result_type <- reactiveVal("none")  # "plot", "table", "text", "error", "none", "loading"
+  result_type <- reactiveVal("none")  # "plot", "table", "text", "error", "none", "loading", "mixed"
+  current_result_index <- reactiveVal(1)  # For navigating through all result types
 
   # Token tracking
   token_usage <- reactiveVal(list(
@@ -1183,6 +1184,78 @@ aiAssistant <- function(input, output, session, data, data_label,
       result_info$value <- res
       result_info$message <- sprintf("Generated %d plots successfully. All plots are displayed in the Results panel.", length(res))
 
+    # Multiple tables (list of data frames or matrices)
+    } else if (is.list(res) && length(res) > 0 &&
+               all(sapply(res, function(x) is.data.frame(x) || is.matrix(x)))) {
+      result_info$type <- "table"
+      result_info$value <- res
+      result_info$message <- sprintf("Generated %d tables successfully. All tables are displayed in the Results panel.", length(res))
+
+    # Mixed plots and tables
+    } else if (is.list(res) && length(res) > 0) {
+      # Separate plots, tables, and other results
+      plots <- list()
+      tables <- list()
+      others <- list()
+
+      for (item in res) {
+        if (inherits(item, c("ggplot", "gg", "gtable", "gTree", "grob", "recordedplot", "ggmatrix", "forestplot"))) {
+          plots <- c(plots, list(item))
+        } else if (is.data.frame(item) || is.matrix(item)) {
+          tables <- c(tables, list(item))
+        } else {
+          # Store other types (summary, text, etc.)
+          others <- c(others, list(item))
+        }
+      }
+
+      # Count total results
+      total_count <- length(plots) + length(tables) + length(others)
+      has_multiple_types <- sum(c(length(plots) > 0, length(tables) > 0, length(others) > 0)) > 1
+
+      # If we have multiple types, use mixed
+      if (has_multiple_types) {
+        result_info$type <- "mixed"
+
+        # Combine all results into a single list with type information
+        combined_results <- list()
+        for (plot in plots) {
+          combined_results <- c(combined_results, list(list(type = "plot", value = plot)))
+        }
+        for (table in tables) {
+          combined_results <- c(combined_results, list(list(type = "table", value = table)))
+        }
+        for (other in others) {
+          combined_results <- c(combined_results, list(list(type = "text", value = other)))
+        }
+
+        result_info$value <- combined_results
+
+        # Build message
+        msg_parts <- c()
+        if (length(plots) > 0) msg_parts <- c(msg_parts, sprintf("%d plot%s", length(plots), if(length(plots) > 1) "s" else ""))
+        if (length(tables) > 0) msg_parts <- c(msg_parts, sprintf("%d table%s", length(tables), if(length(tables) > 1) "s" else ""))
+        if (length(others) > 0) msg_parts <- c(msg_parts, sprintf("%d text result%s", length(others), if(length(others) > 1) "s" else ""))
+
+        result_info$message <- sprintf("Generated %s successfully. All results are displayed in the Results panel.",
+                                      paste(msg_parts, collapse = ", "))
+      } else if (length(plots) > 0) {
+        # Only plots found
+        result_info$type <- "plot"
+        result_info$value <- plots
+        result_info$message <- sprintf("Generated %d plots successfully. All plots are displayed in the Results panel.", length(plots))
+      } else if (length(tables) > 0) {
+        # Only tables found
+        result_info$type <- "table"
+        result_info$value <- tables
+        result_info$message <- sprintf("Generated %d tables successfully. All tables are displayed in the Results panel.", length(tables))
+      } else {
+        # Only other types (text, summary, etc.)
+        result_info$type <- "text"
+        result_info$value <- others
+        result_info$message <- sprintf("Generated %d text result%s successfully.", length(others), if(length(others) > 1) "s" else "")
+      }
+
     # Flextable
     } else if (inherits(res, "flextable")) {
       result_info$type <- "flextable"
@@ -1192,14 +1265,14 @@ aiAssistant <- function(input, output, session, data, data_label,
     # Table object (from table() function)
     } else if (inherits(res, "table")) {
       result_info$type <- "table"
-      result_info$value <- as.data.frame(res)
+      result_info$value <- list(as.data.frame(res))
       result_info$message <- sprintf("Table generated: %d rows × %d columns",
                                      nrow(as.data.frame(res)), ncol(as.data.frame(res)))
 
     # Data frame or matrix
     } else if (is.data.frame(res) || is.matrix(res)) {
       result_info$type <- "table"
-      result_info$value <- res
+      result_info$value <- list(res)
       result_info$message <- sprintf(
         "Table generated: %d rows × %d columns\nFirst few rows:\n%s",
         nrow(res), ncol(res),
@@ -1209,7 +1282,7 @@ aiAssistant <- function(input, output, session, data, data_label,
     # List with $table element (e.g., CreateTableOneJS result)
     } else if (is.list(res) && !is.null(res$table)) {
       result_info$type <- "table"
-      result_info$value <- res$table
+      result_info$value <- list(res$table)
       result_info$message <- sprintf("Table extracted from list result: %d rows × %d columns",
                                      nrow(res$table), ncol(res$table))
 
@@ -2154,6 +2227,7 @@ Please fix the code to ensure it returns a proper result that can be displayed a
     # Clear previous results and show loading state
     execution_result(NULL)
     result_type("loading")
+    current_result_index(1)  # Reset result index for new results
 
     # Prepare environment with data and restricted helpers
     env <- create_execution_env()
@@ -2210,21 +2284,33 @@ Please fix the code to ensure it returns a proper result that can be displayed a
 
   # Render plot
   output$result_plot <- renderPlot({
-    plots <- execution_result()
+    result <- execution_result()
     rtype <- result_type()
-    req(rtype == "plot")
+    req(rtype %in% c("plot", "mixed"))
 
-    n <- length(plots)
-    if (n == 1) {
-      plot_obj <- plots[[1]]
-      # Use grid.draw for gtable/gTree objects, print for others
-      if (inherits(plot_obj, c("gtable", "gTree")) && !inherits(plot_obj, "gg")) {
-        grid::grid.draw(plot_obj)
-      } else {
-        print(plot_obj)
-      }
+    idx <- current_result_index()
+
+    # Extract plot based on type
+    if (rtype == "mixed") {
+      # Get current item from mixed results
+      req(idx <= length(result))
+      current_item <- result[[idx]]
+      req(current_item$type == "plot")
+      plot_obj <- current_item$value
     } else {
-      gridExtra::grid.arrange(grobs = plots, ncol = min(n, 2))
+      # Regular plot type
+      plots <- result
+      n <- length(plots)
+      if (idx < 1) idx <- 1
+      if (idx > n) idx <- n
+      plot_obj <- plots[[idx]]
+    }
+
+    # Use grid.draw for gtable/gTree objects, print for others
+    if (inherits(plot_obj, c("gtable", "gTree")) && !inherits(plot_obj, "gg")) {
+      grid::grid.draw(plot_obj)
+    } else {
+      print(plot_obj)
     }
   }, height = 400)
 
@@ -2232,8 +2318,27 @@ Please fix the code to ensure it returns a proper result that can be displayed a
   output$result_table <- renderDT({
     result <- execution_result()
     rtype <- result_type()
-    req(rtype == "table")
-    DT::datatable(as.data.frame(result), rownames = TRUE,
+    req(rtype %in% c("table", "mixed"))
+
+    idx <- current_result_index()
+
+    # Extract table based on type
+    if (rtype == "mixed") {
+      # Get current item from mixed results
+      req(idx <= length(result))
+      current_item <- result[[idx]]
+      req(current_item$type == "table")
+      table_obj <- current_item$value
+    } else {
+      # Regular table type
+      tables <- result
+      n <- length(tables)
+      if (idx < 1) idx <- 1
+      if (idx > n) idx <- n
+      table_obj <- tables[[idx]]
+    }
+
+    DT::datatable(as.data.frame(table_obj), rownames = TRUE,
                   options = list(scrollX = TRUE, pageLength = 10))
   })
 
@@ -2360,7 +2465,45 @@ Please fix the code to ensure it returns a proper result that can be displayed a
     }
 
     if (rtype == "plot") {
-      return(plotOutput(session$ns("result_plot"), height = "400px"))
+      plots <- execution_result()
+      n <- length(plots)
+      idx <- current_result_index()
+
+      # Ensure index is valid
+      if (idx < 1 || idx > n) {
+        current_result_index(1)
+        idx <- 1
+      }
+
+      return(tagList(
+        # Navigation controls (only show if multiple plots)
+        if (n > 1) {
+          div(
+            style = "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;",
+            div(
+              style = "display: flex; gap: 10px;",
+              actionButton(
+                session$ns("result_prev"),
+                icon("arrow-left"),
+                class = "btn-sm btn-secondary",
+                style = if (idx == 1) "opacity: 0.5; cursor: not-allowed;" else ""
+              ),
+              actionButton(
+                session$ns("result_next"),
+                icon("arrow-right"),
+                class = "btn-sm btn-secondary",
+                style = if (idx == n) "opacity: 0.5; cursor: not-allowed;" else ""
+              )
+            ),
+            tags$span(
+              style = "font-weight: bold; color: #495057;",
+              sprintf("%d of %d", idx, n)
+            )
+          )
+        },
+        # Plot output
+        plotOutput(session$ns("result_plot"), height = "400px")
+      ))
     }
 
     if (rtype == "flextable") {
@@ -2368,7 +2511,104 @@ Please fix the code to ensure it returns a proper result that can be displayed a
     }
 
     if (rtype == "table") {
-      return(DTOutput(session$ns("result_table")))
+      tables <- execution_result()
+      n <- length(tables)
+      idx <- current_result_index()
+
+      # Ensure index is valid
+      if (idx < 1 || idx > n) {
+        current_result_index(1)
+        idx <- 1
+      }
+
+      return(tagList(
+        # Navigation controls (only show if multiple tables)
+        if (n > 1) {
+          div(
+            style = "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;",
+            div(
+              style = "display: flex; gap: 10px;",
+              actionButton(
+                session$ns("result_prev"),
+                icon("arrow-left"),
+                class = "btn-sm btn-secondary",
+                style = if (idx == 1) "opacity: 0.5; cursor: not-allowed;" else ""
+              ),
+              actionButton(
+                session$ns("result_next"),
+                icon("arrow-right"),
+                class = "btn-sm btn-secondary",
+                style = if (idx == n) "opacity: 0.5; cursor: not-allowed;" else ""
+              )
+            ),
+            tags$span(
+              style = "font-weight: bold; color: #495057;",
+              sprintf("%d of %d", idx, n)
+            )
+          )
+        },
+        # Table output
+        DTOutput(session$ns("result_table"))
+      ))
+    }
+
+    if (rtype == "mixed") {
+      results <- execution_result()
+      n <- length(results)
+      idx <- current_result_index()
+
+      # Ensure index is valid
+      if (idx < 1 || idx > n) {
+        current_result_index(1)
+        idx <- 1
+      }
+
+      # Get current result item
+      current_item <- results[[idx]]
+      current_type <- current_item$type
+
+      return(tagList(
+        # Unified navigation controls
+        if (n > 1) {
+          div(
+            style = "display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;",
+            div(
+              style = "display: flex; gap: 10px;",
+              actionButton(
+                session$ns("result_prev"),
+                icon("arrow-left"),
+                class = "btn-sm btn-secondary",
+                style = if (idx == 1) "opacity: 0.5; cursor: not-allowed;" else ""
+              ),
+              actionButton(
+                session$ns("result_next"),
+                icon("arrow-right"),
+                class = "btn-sm btn-secondary",
+                style = if (idx == n) "opacity: 0.5; cursor: not-allowed;" else ""
+              )
+            ),
+            tags$span(
+              style = "font-weight: bold; color: #495057;",
+              sprintf("%d of %d", idx, n)
+            )
+          )
+        },
+        # Render based on current item type
+        if (current_type == "plot") {
+          plotOutput(session$ns("result_plot"), height = "400px")
+        } else if (current_type == "table") {
+          DTOutput(session$ns("result_table"))
+        } else {
+          # Text result
+          tags$div(
+            style = "max-height: 400px; overflow-y: auto;",
+            tags$pre(
+              style = "font-size: 11px; white-space: pre-wrap;",
+              paste(capture.output(print(current_item$value)), collapse = "\n")
+            )
+          )
+        }
+      ))
     }
 
     # text
@@ -2381,21 +2621,21 @@ Please fix the code to ensure it returns a proper result that can be displayed a
   # Download UI elements
   output$download_pptx_ui <- renderUI({
     rtype <- result_type()
-    if (rtype == "plot") {
+    if (rtype %in% c("plot", "mixed")) {
       downloadButton(session$ns("download_pptx"), "PPT", icon = icon("file-powerpoint"), class = "btn-info btn-sm")
     }
   })
 
   output$download_word_ui <- renderUI({
     rtype <- result_type()
-    if (rtype == "table" || rtype == "flextable") {
+    if (rtype %in% c("table", "flextable", "mixed")) {
       downloadButton(session$ns("download_word"), "Word", icon = icon("file-word"), class = "btn-info btn-sm")
     }
   })
 
   output$download_excel_ui <- renderUI({
     rtype <- result_type()
-    if (rtype == "table") {
+    if (rtype %in% c("table", "mixed")) {
       downloadButton(session$ns("download_excel"), "Excel", icon = icon("file-excel"), class = "btn-info btn-sm")
     }
   })
@@ -2464,6 +2704,36 @@ Please fix the code to ensure it returns a proper result that can be displayed a
     )
   })
 
+  # Unified navigation: Previous
+  observeEvent(input$result_prev, {
+    result <- execution_result()
+    rtype <- result_type()
+    req(rtype %in% c("plot", "table", "mixed"))
+
+    # Get total count based on type
+    n <- if (rtype == "mixed") length(result) else length(result)
+    idx <- current_result_index()
+
+    if (idx > 1) {
+      current_result_index(idx - 1)
+    }
+  })
+
+  # Unified navigation: Next
+  observeEvent(input$result_next, {
+    result <- execution_result()
+    rtype <- result_type()
+    req(rtype %in% c("plot", "table", "mixed"))
+
+    # Get total count based on type
+    n <- if (rtype == "mixed") length(result) else length(result)
+    idx <- current_result_index()
+
+    if (idx < n) {
+      current_result_index(idx + 1)
+    }
+  })
+
   # Download handlers
   output$download_pptx <- downloadHandler(
     filename = function() {
@@ -2486,12 +2756,18 @@ Please fix the code to ensure it returns a proper result that can be displayed a
 
           tryCatch({
             # Handle different result types
-            if (rtype == "plot") {
-              # Single or multiple plots
-              plots <- if (is.list(result) && !inherits(result, c("gg", "ggplot"))) {
-                result
+            if (rtype == "plot" || rtype == "mixed") {
+              # Extract plots (for mixed, only use plots)
+              if (rtype == "mixed") {
+                # Extract only plot items from mixed results
+                plots <- lapply(result, function(item) {
+                  if (item$type == "plot") item$value else NULL
+                })
+                plots <- Filter(Negate(is.null), plots)
+              } else if (is.list(result) && !inherits(result, c("gg", "ggplot"))) {
+                plots <- result
               } else {
-                list(result)
+                plots <- list(result)
               }
 
               for (i in seq_along(plots)) {
@@ -2513,7 +2789,7 @@ Please fix the code to ensure it returns a proper result that can be displayed a
               }
 
             } else if (rtype == "table") {
-              # Table result
+              # Table result (should not reach here for PPT, but kept for safety)
               df <- as.data.frame(result)
               ft <- flextable::flextable(df)
               ft <- flextable::autofit(ft)
@@ -2557,36 +2833,36 @@ Please fix the code to ensure it returns a proper result that can be displayed a
               doc <- officer::read_docx()
               incProgress(0.1, detail = "Creating document...")
 
-              if (rtype == "plot") {
-                # Word에 그래프 추가
-                plots <- if (is.list(result) && !inherits(result, c("gg", "ggplot"))) {
-                  result
-                } else {
-                  list(result)
-                }
-
-                for (i in seq_along(plots)) {
-                  if (i > 1) {
-                    doc <- officer::body_add_break(doc)
-                  }
-                  doc <- officer::body_add_par(doc, paste("Plot", i), style = "heading 2")
-                  doc <- officer::body_add_gg(doc, plots[[i]], width = 6, height = 4)
-                  incProgress(0.6 / length(plots), detail = paste("Adding plot", i))
-                }
-              } else if (rtype == "flextable") {
+              if (rtype == "flextable") {
                 # Word에 flextable 추가 (이미 포맷팅된 테이블)
                 doc <- officer::body_add_par(doc, "Analysis Results", style = "heading 2")
                 doc <- flextable::body_add_flextable(doc, result)
                 incProgress(0.7, detail = "Adding table")
-              } else if (rtype == "table") {
-                # Word에 테이블 추가
-                df <- as.data.frame(result)
-                ft <- flextable::flextable(df)
-                ft <- flextable::autofit(ft)
+              } else if (rtype == "table" || rtype == "mixed") {
+                # Word에 테이블 추가 (여러 테이블 지원)
+                # Extract tables (for mixed, only use tables)
+                if (rtype == "mixed") {
+                  # Extract only table items from mixed results
+                  tables <- lapply(result, function(item) {
+                    if (item$type == "table") item$value else NULL
+                  })
+                  tables <- Filter(Negate(is.null), tables)
+                } else {
+                  tables <- result
+                }
 
-                doc <- officer::body_add_par(doc, "Analysis Results", style = "heading 2")
-                doc <- flextable::body_add_flextable(doc, ft)
-                incProgress(0.7, detail = "Adding table")
+                for (i in seq_along(tables)) {
+                  if (i > 1) {
+                    doc <- officer::body_add_break(doc)
+                  }
+                  df <- as.data.frame(tables[[i]])
+                  ft <- flextable::flextable(df)
+                  ft <- flextable::autofit(ft)
+
+                  doc <- officer::body_add_par(doc, paste("Table", i), style = "heading 2")
+                  doc <- flextable::body_add_flextable(doc, ft)
+                  incProgress(0.6 / length(tables), detail = paste("Adding table", i))
+                }
               }
 
               incProgress(0.2, detail = "Saving file...")
@@ -2637,17 +2913,32 @@ Please fix the code to ensure it returns a proper result that can be displayed a
                   duration = 10
                 )
                 return()
-              } else if (rtype == "table") {
-                # Excel에 테이블 추가
-                df <- as.data.frame(result)
+              } else if (rtype == "table" || rtype == "mixed") {
+                # Excel에 테이블 추가 (여러 테이블은 각각 시트로)
+                # Extract tables (for mixed, only use tables)
+                if (rtype == "mixed") {
+                  # Extract only table items from mixed results
+                  tables <- lapply(result, function(item) {
+                    if (item$type == "table") item$value else NULL
+                  })
+                  tables <- Filter(Negate(is.null), tables)
+                } else {
+                  tables <- result
+                }
 
                 # 워크북 생성
                 wb <- openxlsx::createWorkbook()
 
-                # 결과 시트 추가
-                openxlsx::addWorksheet(wb, "Results")
-                openxlsx::writeData(wb, "Results", df, rowNames = FALSE)
-                incProgress(0.7, detail = "Adding table")
+                # 각 테이블을 별도 시트로 추가
+                for (i in seq_along(tables)) {
+                  sheet_name <- if (length(tables) > 1) paste0("Table_", i) else "Results"
+                  df <- as.data.frame(tables[[i]])
+
+                  openxlsx::addWorksheet(wb, sheet_name)
+                  openxlsx::writeData(wb, sheet_name, df, rowNames = FALSE)
+
+                  incProgress(0.6 / length(tables), detail = paste("Adding table", i))
+                }
 
                 incProgress(0.2, detail = "Saving file...")
                 openxlsx::saveWorkbook(wb, file, overwrite = TRUE)

@@ -58,11 +58,12 @@ result <- ...  # Store final output in 'result' variable
 - Example:
   ```r
   # ✅ Good: Brief and meaningful
-  fit <- coxph(Surv(time, status) ~ age + rx, data = out, model = TRUE)
+  # IMPORTANT: Replace variable names with your actual data
+  fit <- coxph(Surv(time_var, status_var) ~ age_var + treatment_var, data = out, model = TRUE)
 
   # ❌ Avoid: Obvious comments
   # Create a Cox proportional hazards model using coxph function
-  fit <- coxph(Surv(time, status) ~ age + rx, data = out, model = TRUE)
+  fit <- coxph(Surv(time_var, status_var) ~ age_var + treatment_var, data = out, model = TRUE)
   ```
 
 ### Explanation Style
@@ -102,10 +103,12 @@ result <- ...  # Store final output in 'result' variable
 out$status_num <- as.numeric(out$status)  # This is WRONG!
 
 # ✅ CORRECT: Convert factor to character first, then to integer
-out$status_num <- as.integer(as.character(out$status))
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+out$status_num <- as.integer(as.character(out$status_var))
 
 # Then use status_num in ALL Surv() calls
-fit <- coxph(Surv(time, status_num) ~ age + rx, data = out, model = TRUE)
+# IMPORTANT: Replace variable names with your actual data
+fit <- coxph(Surv(time_var, status_num) ~ age_var + treatment_var, data = out, model = TRUE)
 ```
 
 **Why this matters**: Using `as.numeric()` on factors returns level indices (1, 2) instead of actual values (0, 1), causing incorrect survival analysis results.
@@ -116,7 +119,8 @@ fit <- coxph(Surv(time, status_num) ~ age + rx, data = out, model = TRUE)
 
 ```r
 # 1. Variable existence check
-required_vars <- c("time", "status", "treatment")
+# IMPORTANT: Replace with your actual variable names
+required_vars <- c("time_var", "status_var", "treatment_var")
 missing_vars <- setdiff(required_vars, names(out))
 if(length(missing_vars) > 0) {
   stop(paste("Missing variables:", paste(missing_vars, collapse=", ")))
@@ -133,7 +137,8 @@ if(is.factor(out$group_var) && length(levels(out$group_var)) < 2) {
 }
 
 # 4. Event count check (for survival analysis)
-out$status_num <- as.integer(as.character(out$status))
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+out$status_num <- as.integer(as.character(out$status_var))
 n_events <- sum(out$status_num == 1, na.rm = TRUE)
 if(n_events < 10) {
   warning("Very few events (< 10). Cox model may be unstable.")
@@ -152,18 +157,21 @@ if(missing_pct > 0.3) {
 **Error: "status must be numeric"**
 ```r
 # ❌ Problem: Status is factor
-fit <- survfit(Surv(time, status) ~ rx, data = out)
+# IMPORTANT: Replace variable names with your actual data
+fit <- survfit(Surv(time_var, status_var) ~ treatment_var, data = out)
 
 # ✅ Solution: Pre-convert factor to numeric (REQUIRED)
-out$status_num <- as.integer(as.character(out$status))
-fit <- survfit(Surv(time, status_num) ~ rx, data = out)
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+out$status_num <- as.integer(as.character(out$status_var))
+fit <- survfit(Surv(time_var, status_num) ~ treatment_var, data = out)
 ```
 
 **Error: "Time must be positive"**
 ```r
 # Check time variable
-summary(out$time)  # Look for zeros or negatives
-out <- out[out$time > 0, ]  # Remove invalid times
+# IMPORTANT: Replace 'time_var' with your actual time variable name
+summary(out$time_var)  # Look for zeros or negatives
+out <- out[out$time_var > 0, ]  # Remove invalid times
 ```
 
 #### 2. Model Fitting Errors
@@ -172,10 +180,12 @@ out <- out[out$time > 0, ]  # Remove invalid times
 - **Solution**: Check correlation matrix, remove redundant variables
 ```r
 # Check correlations
-cor(out[, c("age", "bmi", "weight")])  # If >0.9, remove one
+# IMPORTANT: Replace with your actual continuous variable names
+cor(out[, c("age_var", "bmi_var", "weight_var")])  # If >0.9, remove one
 
 # Check VIF
-car::vif(lm(outcome ~ age + bmi + weight, data = out))  # VIF > 10 indicates problem
+# IMPORTANT: Replace variable names with your actual data
+car::vif(lm(outcome_var ~ age_var + bmi_var + weight_var, data = out))  # VIF > 10 indicates problem
 ```
 
 **Error: "glm.fit: fitted probabilities numerically 0 or 1"**
@@ -194,13 +204,14 @@ fit <- logistf(outcome ~ predictor, data = out)
 **Always convert explicitly:**
 ```r
 # Factor to numeric
-out$status_num <- as.integer(as.character(out$status))
+# IMPORTANT: Replace with your actual variable names
+out$status_num <- as.integer(as.character(out$status_var))
 
 # Character to factor
-out$group <- factor(out$group)
+out$group_var <- factor(out$group_var)
 
 # Date formatting
-out$date <- as.Date(out$date, format = "%Y-%m-%d")
+out$date_var <- as.Date(out$date_var, format = "%Y-%m-%d")
 ```
 
 ### Error Response Format
@@ -216,7 +227,8 @@ When code fails or might fail:
 
 ```r
 # Convert factor status to numeric
-fit <- survfit(Surv(time, as.integer(as.character(status))) ~ rx, data = out)
+# IMPORTANT: Replace variable names with your actual data
+fit <- survfit(Surv(time_var, as.integer(as.character(status_var))) ~ treatment_var, data = out)
 result <- jskm(fit, data = out, table = TRUE, pval = TRUE)
 ```
 
@@ -242,8 +254,8 @@ result <- jskm(fit, data = out, table = TRUE, pval = TRUE)
 ```
 시간-사건 데이터 분석에는 두 가지 접근이 가능합니다:
 
-1. **Cox regression** - 시간과 사건을 함께 분석 (Surv(time, status))
-2. **Logistic regression** - 사건 발생 여부만 분석 (status만 사용)
+1. **Cox regression** - 시간과 사건을 함께 분석 (Surv(time_var, status_var))
+2. **Logistic regression** - 사건 발생 여부만 분석 (status_var만 사용)
 
 어느 방법을 원하시나요? 또는 연구 목적을 알려주시면 추천해드리겠습니다.
 ```
@@ -331,10 +343,11 @@ AI: "앞서 생성한 age_group 변수를 사용해서 로지스틱 회귀분석
 **Variable naming:**
 ```r
 # First analysis
-out$age_group <- cut(out$age, breaks = c(0, 60, Inf))
+# IMPORTANT: Replace with your actual variable names
+out$age_group <- cut(out$age_var, breaks = c(0, 60, Inf))
 
 # Later analysis - reuse same variable name
-fit <- glm(outcome ~ age_group + sex, data = out, family = binomial)
+fit <- glm(outcome_var ~ age_group + sex_var, data = out, family = binomial)
 ```
 
 **Grouping variable:**
@@ -353,11 +366,12 @@ fit <- glm(outcome ~ age_group + sex, data = out, family = binomial)
 **Avoid redundancy:**
 ```r
 # ❌ Don't recreate if already done
-out$age_group <- cut(out$age, breaks = c(0, 60, Inf))
+# IMPORTANT: Replace with your actual variable names
+out$age_group <- cut(out$age_var, breaks = c(0, 60, Inf))
 
 # ✅ Just reference it
 # Using age_group created earlier
-fit <- coxph(Surv(time, status) ~ age_group + sex, data = out)
+fit <- coxph(Surv(time_var, status_var) ~ age_group + sex_var, data = out)
 ```
 
 ### Progressive Enhancement
@@ -389,7 +403,8 @@ AI: [Enhanced plot with previous parameters + new modifications]
 #### Linear Regression
 ```r
 # Fit model
-fit <- lm(outcome ~ age + sex + rx, data = out)
+# IMPORTANT: Replace variable names with your actual data
+fit <- lm(outcome_var ~ age_var + sex_var + treatment_var, data = out)
 result <- glmshow.display(fit, decimal = 2)
 
 # Check assumptions
@@ -401,11 +416,13 @@ plot(fit)  # Residual plots
 #### Logistic Regression
 ```r
 # Fit model
-fit <- glm(outcome ~ age + sex + rx, data = out, family = binomial)
+# IMPORTANT: Replace variable names with your actual data
+fit <- glm(outcome_var ~ age_var + sex_var + treatment_var, data = out, family = binomial)
 result <- glmshow.display(fit, decimal = 2)
 
 # Check for complete separation
-table(out$outcome, out$rx)  # Check for 0 cells
+# IMPORTANT: Replace variable names
+table(out$outcome_var, out$treatment_var)  # Check for 0 cells
 
 # Hosmer-Lemeshow goodness of fit (if needed)
 library(ResourceSelection)
@@ -415,8 +432,11 @@ hoslem.test(fit$y, fitted(fit))
 #### Cox Regression - Proportional Hazards
 ```r
 # Fit model
-fit <- coxph(Surv(time, status) ~ age + sex + rx, data = out, model = TRUE)
-result <- cox2.display(fit, dec = 2)
+# IMPORTANT: Replace variable names with your actual data
+fit <- coxph(Surv(time_var, status_var) ~ age_var + sex_var + treatment_var, data = out, model = TRUE)
+
+# IMPORTANT: Extract $table component for display
+result <- cox2.display(fit, dec = 2)$table
 
 # Check proportional hazards assumption
 ph_test <- cox.zph(fit)
@@ -439,8 +459,9 @@ if(nrow(out) < 30) {
 }
 
 # Events per variable (EPV) for Cox regression
-n_events <- sum(out$status == 1)
-n_predictors <- 3  # age, sex, rx
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+n_events <- sum(out$status_var == 1)
+n_predictors <- 3  # Count your actual number of predictors
 epv <- n_events / n_predictors
 
 if(epv < 10) {
@@ -455,7 +476,8 @@ if(epv < 10) {
 ```r
 # Check VIF (Variance Inflation Factor)
 library(car)
-fit <- lm(outcome ~ age + bmi + weight + height, data = out)
+# IMPORTANT: Replace variable names with your actual continuous variables
+fit <- lm(outcome_var ~ age_var + bmi_var + weight_var + height_var, data = out)
 vif_values <- vif(fit)
 
 if(any(vif_values > 10)) {
@@ -508,14 +530,15 @@ Proportional hazards assumption이 age 변수에서 위배되었습니다 (p = 0
 
 ```r
 # ✅ Good: Create new variables
-out$age_group <- cut(out$age, breaks = c(0, 60, Inf))
-out$log_var <- log(out$var + 1)
+# IMPORTANT: Replace with your actual variable names
+out$age_group <- cut(out$age_var, breaks = c(0, 60, Inf))
+out$log_var <- log(out$continuous_var + 1)
 
 # ✅ Good: Create subset with new name
 out_complete <- out[complete.cases(out), ]
 
 # ❌ Avoid: Overwriting original (unless explicitly requested)
-out <- subset(out, age > 18)
+out <- subset(out, age_var > 18)
 out <- out[complete.cases(out), ]
 ```
 
@@ -570,17 +593,18 @@ if(nrow(out) > 50000) {
 
 ```r
 # Check for impossible values
-if(any(out$age < 0, na.rm = TRUE)) {
+# IMPORTANT: Replace with your actual variable names
+if(any(out$age_var < 0, na.rm = TRUE)) {
   warning("Negative age values detected. Check data quality.")
 }
 
-if(any(out$time <= 0, na.rm = TRUE)) {
+if(any(out$time_var <= 0, na.rm = TRUE)) {
   warning("Non-positive time values detected. These will be excluded.")
-  out <- out[out$time > 0, ]
+  out <- out[out$time_var > 0, ]
 }
 
 # Check for extreme outliers
-extreme_age <- out$age > 120
+extreme_age <- out$age_var > 120
 if(any(extreme_age, na.rm = TRUE)) {
   warning("Extreme age values (>120) detected. Verify data entry.")
 }
@@ -600,13 +624,14 @@ gc()  # Garbage collection
 **Always validate conversions:**
 ```r
 # Factor to numeric - ALWAYS check first
-levels(out$status)  # Check levels before converting
+# IMPORTANT: Replace 'status_var' with your actual variable name
+levels(out$status_var)  # Check levels before converting
 
 # Safe conversion
-out$status_num <- as.integer(as.character(out$status))
+out$status_num <- as.integer(as.character(out$status_var))
 
 # Verify conversion
-table(original = out$status, converted = out$status_num)
+table(original = out$status_var, converted = out$status_num)
 ```
 
 ---
@@ -646,7 +671,8 @@ table(original = out$status, converted = out$status_num)
 ```r
 # ✅ Good reporting
 # HR = 1.85 (95% CI: 1.23-2.78, p = 0.003)
-result <- cox2.display(fit, dec = 2)
+# IMPORTANT: Extract $table component for display
+result <- cox2.display(fit, dec = 2)$table
 
 # Add clinical interpretation if effect is small
 if(hr > 1 & hr < 1.2) {
@@ -684,8 +710,11 @@ message("ARR = ", round(absolute_risk_reduction * 100, 1), "%")
 #### Hazard Ratios with Clinical Context
 ```r
 # Interpret HR with clinical meaning
-fit <- coxph(Surv(time, status) ~ treatment + age + sex, data = out, model = TRUE)
-result <- cox2.display(fit, dec = 2)
+# IMPORTANT: Replace variable names with your actual data
+fit <- coxph(Surv(time_var, status_var) ~ treatment_var + age_var + sex_var, data = out, model = TRUE)
+
+# IMPORTANT: Extract $table component for display
+result <- cox2.display(fit, dec = 2)$table
 
 # Add interpretation
 message("Treatment HR = 0.65 means 35% reduction in hazard of event compared to control.")
@@ -696,13 +725,14 @@ message("Treatment HR = 0.65 means 35% reduction in hazard of event compared to 
 **Always check for adverse events:**
 ```r
 # Adverse event rates
-ae_rate_treatment <- sum(out$adverse_event[out$group == "treatment"]) /
-                     sum(out$group == "treatment")
-ae_rate_control <- sum(out$adverse_event[out$group == "control"]) /
-                   sum(out$group == "control")
+# IMPORTANT: Replace variable names with your actual data
+ae_rate_level1 <- sum(out$event_var[out$group_var == "Level1"]) /
+                  sum(out$group_var == "Level1")
+ae_rate_level2 <- sum(out$event_var[out$group_var == "Level2"]) /
+                  sum(out$group_var == "Level2")
 
-message("Adverse event rate: Treatment = ", round(ae_rate_treatment * 100, 1),
-        "%, Control = ", round(ae_rate_control * 100, 1), "%")
+message("Adverse event rate: Level1 = ", round(ae_rate_level1 * 100, 1),
+        "%, Level2 = ", round(ae_rate_level2 * 100, 1), "%")
 ```
 
 **Report dropout/loss to follow-up:**
@@ -721,11 +751,12 @@ if(completion_rate < 0.8) {
 **ITT vs. Per-Protocol:**
 ```r
 # Intention-to-Treat analysis (primary)
-fit_itt <- coxph(Surv(time, status) ~ treatment, data = out_all)
+# IMPORTANT: Replace variable names with your actual data
+fit_itt <- coxph(Surv(time_var, status_var) ~ treatment_var, data = out_all)
 
 # Per-protocol analysis (secondary)
 out_pp <- out_all[out_all$protocol_compliant == TRUE, ]
-fit_pp <- coxph(Surv(time, status) ~ treatment, data = out_pp)
+fit_pp <- coxph(Surv(time_var, status_var) ~ treatment_var, data = out_pp)
 
 message("Report both ITT and per-protocol results for transparency.")
 ```
@@ -748,7 +779,8 @@ p_adjusted <- p.adjust(p_values, method = "bonferroni")
 library(survival)
 library(jskm)
 
-fit <- survfit(Surv(time, status) ~ treatment, data = out)
+# IMPORTANT: Replace variable names with your actual data
+fit <- survfit(Surv(time_var, status_var) ~ treatment_var, data = out)
 
 # 1. Median survival with CI
 summary(fit)$table  # median, 0.95LCL, 0.95UCL
@@ -828,10 +860,14 @@ result <- jskm(fit, data = out, table = TRUE, pval = TRUE,
 ```r
 # ✅ CORRECT: Always return as list
 # Each item = separate PowerPoint slide = separate display
+# IMPORTANT: Replace variable names and fit objects with your actual data
 p1 <- jskm(fit1, data = subset1, table = TRUE)
 p2 <- jskm(fit2, data = subset2, table = TRUE)
-p3 <- CreateTableOneJS(...)
-p4 <- cox2.display(...)
+
+# IMPORTANT: Extract $table from jstable functions
+# Replace ... with your actual function arguments
+p3 <- CreateTableOneJS(...)$table  # Extract table component
+p4 <- cox2.display(...)$table      # Extract table component
 
 result <- list(p1, p2, p3, p4)
 ```
@@ -924,14 +960,15 @@ Include necessary libraries at the top: `library(jskm)`, `library(jstable)`, etc
 - **Examples**:
   ```r
   # ✅ CORRECT: base R subsetting
-  subset_data <- out[out$age > 50, ]
+  # IMPORTANT: Replace variable names with your actual data
+  subset_data <- out[out$numeric_var > 50, ]
 
   # ✅ CORRECT: base R new variables
-  out$age_group <- cut(out$age, breaks = c(0, 60, Inf))
+  out$categorical_var <- cut(out$numeric_var, breaks = c(0, 60, Inf))
 
   # ❌ WRONG: dplyr
-  subset_data <- out %>% filter(age > 50)  # Don't use this!
-  out <- out %>% mutate(age_group = ...)    # Don't use this!
+  subset_data <- out %>% filter(numeric_var > 50)  # Don't use this!
+  out <- out %>% mutate(categorical_var = ...)     # Don't use this!
   ```
 
 ---
@@ -943,12 +980,15 @@ Include necessary libraries at the top: `library(jskm)`, `library(jstable)`, etc
 ```r
 # Basic Table 1 with grouping
 library(jstable)
+
+# IMPORTANT: Replace variable names with your actual data
+# IMPORTANT: Extract $table component for display
 result <- CreateTableOneJS(
-  vars = c("age", "sex", "rx"),  # Variables to summarize
-  strata = "rx",                  # Grouping variable (optional)
+  vars = c("var1", "var2", "var3"),  # Replace with your variables to summarize
+  strata = "group_var",               # Replace with your grouping variable (optional)
   data = out,
   labeldata = out.label
-)
+)$table  # Extract table component
 ```
 
 ### 11.2 Survival Analysis
@@ -959,9 +999,10 @@ result <- CreateTableOneJS(
 library(jskm)
 library(survival)
 
+# IMPORTANT: Replace variable names with your actual data
 # If status is factor, pre-convert to numeric
-out$status_num <- as.integer(as.character(out$status))
-fit <- survfit(Surv(time, status_num) ~ rx, data = out)
+out$status_num <- as.integer(as.character(out$status_var))
+fit <- survfit(Surv(time_var, status_num) ~ treatment_var, data = out)
 result <- jskm(fit, data = out, table = TRUE, pval = TRUE, label.nrisk = "No. at risk")
 ```
 
@@ -971,14 +1012,17 @@ result <- jskm(fit, data = out, table = TRUE, pval = TRUE, label.nrisk = "No. at
 library(jstable)
 library(survival)
 
+# IMPORTANT: Replace variable names with your actual data
 # Best practice: Pre-convert status to numeric
-out$status_num <- as.integer(as.character(out$status))
-fit <- coxph(Surv(time, status_num) ~ age + sex + rx,
+out$status_num <- as.integer(as.character(out$status_var))
+fit <- coxph(Surv(time_var, status_num) ~ age_var + sex_var + treatment_var,
              data = out, model = TRUE)
-result <- cox2.display(fit, dec = 2)
 
-# With labels
-result <- LabeljsCox(cox2.display(fit), out.label)
+# IMPORTANT: Extract $table component for display
+result <- cox2.display(fit, dec = 2)$table
+
+# With labels (LabeljsCox accepts full cox2.display object)
+result <- LabeljsCox(cox2.display(fit), out.label)$table
 ```
 
 ### 11.3 Regression Analysis
@@ -988,14 +1032,16 @@ result <- LabeljsCox(cox2.display(fit), out.label)
 # Binary outcome regression
 library(jstable)
 
-fit <- glm(status ~ age + sex + rx, data = out, family = binomial)
+# IMPORTANT: Replace variable names with your actual data
+fit <- glm(outcome_var ~ age_var + sex_var + treatment_var, data = out, family = binomial)
 result <- glmshow.display(fit, decimal = 2)
 ```
 
 #### Linear Regression
 ```r
 # Continuous outcome regression - use base R summary()
-fit <- lm(outcome ~ age + sex + rx, data = out)
+# IMPORTANT: Replace variable names with your actual data
+fit <- lm(outcome_var ~ age_var + sex_var + treatment_var, data = out)
 result <- summary(fit)
 print(result)
 ```
@@ -1006,13 +1052,14 @@ print(result)
 library(geepack)
 library(jstable)
 
+# IMPORTANT: Replace variable names with your actual data
 # Linear GEE
-fit <- geeglm(outcome ~ time + group, id = id, data = out,
+fit <- geeglm(outcome_var ~ time_var + group_var, id = id_var, data = out,
               family = gaussian, corstr = "exchangeable")
 result <- geeglm.display(fit)
 
 # Logistic GEE
-fit <- geeglm(outcome ~ time + group, id = id, data = out,
+fit <- geeglm(outcome_var ~ time_var + group_var, id = id_var, data = out,
               family = binomial, corstr = "exchangeable")
 result <- geeglm.display(fit)
 ```
@@ -1023,15 +1070,17 @@ result <- geeglm.display(fit)
 # Single ROC curve
 library(pROC)
 
-roc_obj <- roc(out$status, out$predicted_prob)
+# IMPORTANT: Replace variable names with your actual data
+roc_obj <- roc(out$outcome_var, out$predicted_prob_var)
 result <- ggroc(roc_obj) +
   theme_minimal() +
   ggtitle(sprintf("AUC = %.3f", auc(roc_obj)))
 
 # Multiple ROC curves comparison
 library(pROC)
-roc1 <- roc(out$status, out$model1_prob)
-roc2 <- roc(out$status, out$model2_prob)
+# IMPORTANT: Replace variable names with your actual data
+roc1 <- roc(out$outcome_var, out$model1_prob_var)
+roc2 <- roc(out$outcome_var, out$model2_prob_var)
 result <- ggroc(list(Model1 = roc1, Model2 = roc2)) +
   theme_minimal() +
   ggtitle(sprintf("AUC: Model1=%.3f, Model2=%.3f", auc(roc1), auc(roc2)))
@@ -1039,8 +1088,9 @@ result <- ggroc(list(Model1 = roc1, Model2 = roc2)) +
 # Time-dependent ROC
 library(timeROC)
 library(survival)
-troc <- timeROC(T = out$time, delta = out$status,
-                marker = out$marker, cause = 1,
+# IMPORTANT: Replace variable names with your actual data
+troc <- timeROC(T = out$time_var, delta = out$status_var,
+                marker = out$marker_var, cause = 1,
                 times = c(365, 730), iid = TRUE)
 result <- plot(troc, time = 365, title = "Time-dependent ROC at 1 year")
 ```
@@ -1115,19 +1165,22 @@ library(survey)
 library(jstable)
 library(jskm)
 
-design <- svydesign(ids = ~psu, strata = ~strata, weights = ~weight, data = out)
+# IMPORTANT: Replace survey design variable names with your actual data
+design <- svydesign(ids = ~psu_var, strata = ~strata_var, weights = ~weight_var, data = out)
 
 # IMPORTANT: Replace variable names with your actual data
-# Survey Table 1 - jstable function
-result <- svyCreateTableOneJS(vars = c("var1", "var2"), strata = "group_var",
-                              data = design, labeldata = out.label)
+# Survey Table 1 - jstable function (extract $table component)
+result <- svyCreateTableOneJS(vars = c("var1", "var2", "var3"), strata = "group_var",
+                              data = design, labeldata = out.label)$table
 
 # Survey KM plot - jskm function
-fit <- svykm(Surv(time, status) ~ group_var, design = design)
+# IMPORTANT: Replace variable names with your actual data
+fit <- svykm(Surv(time_var, status_var) ~ group_var, design = design)
 result <- svyjskm(fit, design = design, table = TRUE, pval = TRUE)
 
 # Survey regression - jstable function
-result <- svyregress.display(svyglm(outcome ~ var1 + var2, design = design, family = binomial))
+# IMPORTANT: Replace variable names with your actual data
+result <- svyregress.display(svyglm(outcome_var ~ var1 + var2, design = design, family = binomial))
 ```
 
 ### 11.7 Advanced Analysis
@@ -1184,37 +1237,41 @@ library(forestploter)
 # - 'age' → your subgroup variable
 
 # Step 0: Check variable existence (REQUIRED)
-required_vars <- c("time", "status", "rx", "age")
+# IMPORTANT: Replace with your actual variable names
+required_vars <- c("time_var", "status_var", "treatment_var", "subgroup_var")
 missing_vars <- setdiff(required_vars, names(out))
 if(length(missing_vars) > 0) {
   stop(paste("Missing variables:", paste(missing_vars, collapse=", ")))
 }
 
 # Step 1: Pre-convert status variable (REQUIRED for survival functions)
-out$status_num <- as.integer(as.character(out$status))
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+out$status_num <- as.integer(as.character(out$status_var))
 
 # Step 2: Create subgroup variable as factor (REQUIRED)
-# Modify breaks and labels to match your data
-out$age_group <- factor(cut(out$age, breaks = c(0, 50, 60, 70, Inf),
+# IMPORTANT: Replace with your actual subgroup variable and appropriate breaks/labels
+out$subgroup_var_factor <- factor(cut(out$subgroup_var, breaks = c(0, 50, 60, 70, Inf),
                             labels = c("<50", "50-60", "60-70", ">=70")))
 
 # Step 2.5: Validate subgroup creation
-if(!is.factor(out$age_group)) {
-  stop("age_group must be a factor variable.")
+# IMPORTANT: Replace 'subgroup_var_factor' with the actual variable name you created in Step 2
+if(!is.factor(out$subgroup_var_factor)) {
+  stop("subgroup_var_factor must be a factor variable.")
 }
 
-if(length(levels(out$age_group)) < 2) {
-  stop("Subgroup variable must have at least 2 levels. Check age_group creation.")
+if(length(levels(out$subgroup_var_factor)) < 2) {
+  stop("Subgroup variable must have at least 2 levels. Check subgroup_var_factor creation.")
 }
 
 # Print subgroup distribution for validation
-print("Age Group Distribution:")
-print(table(out$age_group, useNA = "ifany"))
+print("Subgroup Variable Distribution:")
+print(table(out$subgroup_var_factor, useNA = "ifany"))
 
 # Step 3: Use jstable's TableSubgroupMultiCox (same as forestcoxServer uses)
+# IMPORTANT: Replace variable names with your actual data
 forest_result <- TableSubgroupMultiCox(
-  formula = Surv(time, status_num) ~ rx,  # Modify 'rx' to your treatment variable
-  var_subgroup = "age_group",  # Must be factor variable name as string
+  formula = Surv(time_var, status_num) ~ treatment_var,  # Replace with your treatment variable
+  var_subgroup = "subgroup_var_factor",  # Must match the factor variable name from Step 2
   data = out
 )
 
@@ -1264,32 +1321,36 @@ library(forestploter)
 # - 'sex' → your subgroup variable
 
 # Step 0: Check variable existence (REQUIRED)
-required_vars <- c("outcome", "treatment", "age", "sex")
+# IMPORTANT: Replace with your actual variable names
+required_vars <- c("outcome_var", "treatment_var", "subgroup_var")
 missing_vars <- setdiff(required_vars, names(out))
 if(length(missing_vars) > 0) {
   stop(paste("Missing variables:", paste(missing_vars, collapse=", ")))
 }
 
 # Step 1: Ensure subgroup variable is factor (REQUIRED)
-out$sex <- factor(out$sex)
+# IMPORTANT: Replace 'subgroup_var' with your actual subgroup variable name
+out$subgroup_var <- factor(out$subgroup_var)
 
 # Step 1.5: Validate subgroup creation
-if(!is.factor(out$sex)) {
-  stop("sex must be a factor variable.")
+# IMPORTANT: Replace 'subgroup_var' with the actual variable name you used in Step 1
+if(!is.factor(out$subgroup_var)) {
+  stop("subgroup_var must be a factor variable.")
 }
 
-if(length(levels(out$sex)) < 2) {
-  stop("Subgroup variable must have at least 2 levels. Check sex variable.")
+if(length(levels(out$subgroup_var)) < 2) {
+  stop("Subgroup variable must have at least 2 levels. Check subgroup_var variable.")
 }
 
 # Print subgroup distribution for validation
-print("Sex Distribution:")
-print(table(out$sex, useNA = "ifany"))
+print("Subgroup Variable Distribution:")
+print(table(out$subgroup_var, useNA = "ifany"))
 
 # Step 2: Use jstable's TableSubgroupMultiGLM (same as forestglmServer uses)
+# IMPORTANT: Replace variable names with your actual data
 forest_result <- TableSubgroupMultiGLM(
-  formula = outcome ~ treatment + age,  # Modify variable names
-  var_subgroup = "sex",  # Must be factor variable name as string
+  formula = outcome_var ~ treatment_var + covariate_var,  # Replace with your variables
+  var_subgroup = "subgroup_var",  # Must match the factor variable name from Step 1
   data = out,
   family = binomial  # Use binomial for logistic regression
 )
@@ -1348,7 +1409,8 @@ Correlation analysis is essential for exploratory data analysis and checking mul
 
 ```r
 # IMPORTANT: Check which variables exist and are numeric
-var_candidates <- c("age", "bmi", "blood_pressure", "cholesterol", "weight", "height")
+# IMPORTANT: Replace with your actual continuous variable names
+var_candidates <- c("continuous_var1", "continuous_var2", "continuous_var3", "continuous_var4", "continuous_var5")
 
 # Check existence
 available_vars <- var_candidates[var_candidates %in% names(out)]
@@ -1385,7 +1447,8 @@ library(GGally)
 
 # IMPORTANT: First check variable existence (see above)
 # Select numeric variables for correlation
-numeric_vars <- c("age", "bmi", "blood_pressure", "cholesterol")
+# IMPORTANT: Replace with your actual continuous variable names
+numeric_vars <- c("continuous_var1", "continuous_var2", "continuous_var3", "continuous_var4")
 
 # Verify all variables exist and are numeric
 missing_vars <- setdiff(numeric_vars, names(out))
@@ -1421,7 +1484,8 @@ result <- ggpairs(out[, c(numeric_vars, "group_var")],
 
 ```r
 # Check predictor correlations before multivariable modeling
-predictor_vars <- c("age", "bmi", "smoking_years", "pack_years")
+# IMPORTANT: Replace with your actual predictor variable names
+predictor_vars <- c("predictor_var1", "predictor_var2", "predictor_var3", "predictor_var4")
 result <- ggpairs(out[, predictor_vars],
                   title = "Predictor Variable Correlations",
                   upper = list(continuous = wrap("cor", size = 4, color = "blue")),
@@ -1454,26 +1518,27 @@ When data violates parametric assumptions (normality, equal variance), use non-p
 
 ```r
 # IMPORTANT: Check variable existence
-required_vars <- c("outcome", "group")
+# IMPORTANT: Replace with your actual variable names
+required_vars <- c("outcome_var", "group_var")
 missing_vars <- setdiff(required_vars, names(out))
 if(length(missing_vars) > 0) {
   stop(paste("Missing variables:", paste(missing_vars, collapse=", ")))
 }
 
 # Check group has multiple levels
-if(is.factor(out$group)) {
-  if(length(levels(out$group)) < 2) {
+if(is.factor(out$group_var)) {
+  if(length(levels(out$group_var)) < 2) {
     stop("Group variable must have at least 2 levels.")
   }
 } else {
-  unique_groups <- length(unique(out$group))
+  unique_groups <- length(unique(out$group_var))
   if(unique_groups < 2) {
     stop("Group variable must have at least 2 unique values.")
   }
 }
 
 # Check sufficient sample size per group
-group_sizes <- table(out$group)
+group_sizes <- table(out$group_var)
 if(any(group_sizes < 5)) {
   warning("Some groups have <5 observations. Results may be unreliable.")
   print(group_sizes)
@@ -1486,7 +1551,8 @@ if(any(group_sizes < 5)) {
 library(jstable)
 
 # IMPORTANT: First check variable existence (see above)
-vars_to_test <- c("age", "bmi", "lab_value")
+# IMPORTANT: Replace with your actual continuous variable names
+vars_to_test <- c("continuous_var1", "continuous_var2", "continuous_var3")
 
 # Verify variables exist
 missing_vars <- setdiff(vars_to_test, names(out))
@@ -1495,14 +1561,15 @@ if(length(missing_vars) > 0) {
 }
 
 # Verify strata variable exists
-if(!"treatment" %in% names(out)) {
-  stop("Strata variable 'treatment' not found.")
+# IMPORTANT: Replace 'group_var' with your actual grouping variable name
+if(!"group_var" %in% names(out)) {
+  stop("Strata variable 'group_var' not found.")
 }
 
 # CreateTableOneJS includes normality test
 table1 <- CreateTableOneJS(
   vars = vars_to_test,
-  strata = "treatment",
+  strata = "group_var",  # Replace with your grouping variable
   data = out,
   labeldata = out.label,
   testNormal = "shapiro"  # Shapiro-Wilk test
@@ -1519,22 +1586,23 @@ table1 <- CreateTableOneJS(
 # When: n < 30, non-normal distribution, or ordinal data
 
 # IMPORTANT: Check variable existence first (see above)
-required_vars <- c("outcome", "group")
+# IMPORTANT: Replace with your actual variable names
+required_vars <- c("outcome_var", "group_var")
 missing_vars <- setdiff(required_vars, names(out))
 if(length(missing_vars) > 0) {
   stop(paste("Missing variables:", paste(missing_vars, collapse=", ")))
 }
 
 # Check group has exactly 2 levels
-unique_groups <- length(unique(out$group))
+unique_groups <- length(unique(out$group_var))
 if(unique_groups != 2) {
   stop(paste("Mann-Whitney test requires exactly 2 groups. Found:", unique_groups))
 }
 
-result <- wilcox.test(outcome ~ group, data = out)
+result <- wilcox.test(outcome_var ~ group_var, data = out)
 
 # Report median (IQR) instead of mean (SD)
-by(out$outcome, out$group, function(x) {
+by(out$outcome_var, out$group_var, function(x) {
   paste0("Median = ", median(x), " (IQR: ",
          quantile(x, 0.25), "-", quantile(x, 0.75), ")")
 })
@@ -1546,10 +1614,11 @@ by(out$outcome, out$group, function(x) {
 # Non-parametric alternative to one-way ANOVA
 # When: >2 groups with non-normal distribution
 
-result <- kruskal.test(outcome ~ group, data = out)
+# IMPORTANT: Replace with your actual variable names
+result <- kruskal.test(outcome_var ~ group_var, data = out)
 
 # Post-hoc pairwise comparisons
-pairwise.wilcox.test(out$outcome, out$group, p.adjust.method = "bonferroni")
+pairwise.wilcox.test(out$outcome_var, out$group_var, p.adjust.method = "bonferroni")
 ```
 
 #### Friedman Test (Repeated Measures)
@@ -1558,7 +1627,8 @@ pairwise.wilcox.test(out$outcome, out$group, p.adjust.method = "bonferroni")
 # Non-parametric alternative to repeated measures ANOVA
 # Data must be in long format
 
-result <- friedman.test(value ~ timepoint | id, data = out_long)
+# IMPORTANT: Replace with your actual variable names
+result <- friedman.test(value_var ~ timepoint_var | id_var, data = out_long)
 ```
 
 **When to use**:
@@ -1582,30 +1652,32 @@ When performing multiple statistical tests (subgroup analyses, multiple endpoint
 
 ```r
 # IMPORTANT: Verify required variables exist
-required_vars <- c("time", "status", "treatment", "subgroup_variable")
+# IMPORTANT: Replace with your actual variable names
+required_vars <- c("time_var", "status_var", "treatment_var", "subgroup_var")
 missing_vars <- setdiff(required_vars, names(out))
 if(length(missing_vars) > 0) {
   stop(paste("Missing variables:", paste(missing_vars, collapse=", ")))
 }
 
 # Pre-convert status variable (REQUIRED)
-out$status_num <- as.integer(as.character(out$status))
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+out$status_num <- as.integer(as.character(out$status_var))
 
 # Check subgroup variable has valid values
-if(is.factor(out$subgroup_variable)) {
-  subgroup_levels <- levels(out$subgroup_variable)
+if(is.factor(out$subgroup_var)) {
+  subgroup_levels <- levels(out$subgroup_var)
   if(length(subgroup_levels) < 2) {
     stop("Subgroup variable must have at least 2 levels.")
   }
 } else {
-  subgroup_levels <- unique(out$subgroup_variable)
+  subgroup_levels <- unique(out$subgroup_var)
   if(length(subgroup_levels) < 2) {
     stop("Subgroup variable must have at least 2 unique values.")
   }
 }
 
 # Check sample size per subgroup
-subgroup_sizes <- table(out$subgroup_variable)
+subgroup_sizes <- table(out$subgroup_var)
 print("Subgroup Sizes:")
 print(subgroup_sizes)
 
@@ -1628,23 +1700,25 @@ library(survival)
 # - 'treatment' → your treatment/exposure variable
 
 # Step 0: Check variable existence (REQUIRED - see above)
-required_vars <- c("time", "status", "treatment", "subgroup_variable")
+# IMPORTANT: Replace with your actual variable names
+required_vars <- c("time_var", "status_var", "treatment_var", "subgroup_var")
 missing_vars <- setdiff(required_vars, names(out))
 if(length(missing_vars) > 0) {
   stop(paste("Missing variables:", paste(missing_vars, collapse=", ")))
 }
 
 # Pre-convert status variable
-out$status_num <- as.integer(as.character(out$status))
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+out$status_num <- as.integer(as.character(out$status_var))
 
 # Define subgroups (IMPORTANT: Replace with your actual subgroup levels)
 # Get unique levels from your subgroup variable
-subgroups <- unique(out$subgroup_variable)
+subgroups <- unique(out$subgroup_var)
 p_values <- numeric(length(subgroups))
 
 for (i in seq_along(subgroups)) {
   # Safe subsetting (works for both data.frame and data.table)
-  subset_data <- out[out$subgroup_variable == subgroups[i], ]
+  subset_data <- out[out$subgroup_var == subgroups[i], ]
 
   # Skip if subset is too small
   if (nrow(subset_data) < 20) {
@@ -1654,7 +1728,8 @@ for (i in seq_along(subgroups)) {
   }
 
   # Fit model
-  fit <- coxph(Surv(time, status_num) ~ treatment, data = subset_data, model = TRUE)
+  # IMPORTANT: Replace 'treatment_var' with your actual treatment variable name
+  fit <- coxph(Surv(time_var, status_num) ~ treatment_var, data = subset_data, model = TRUE)
 
   # Extract p-value directly from model summary (NOT from jstable)
   # This gives numeric p-value, not character string
@@ -1705,7 +1780,8 @@ print(correction_results)
 # All outcome variables must be binary (0/1) for logistic regression
 
 # Test multiple outcomes
-outcomes <- c("mortality", "stroke", "mi", "bleeding")
+# IMPORTANT: Replace with your actual outcome variable names
+outcomes <- c("outcome1_var", "outcome2_var", "outcome3_var", "outcome4_var")
 p_values <- numeric(length(outcomes))
 
 for (i in seq_along(outcomes)) {
@@ -1717,12 +1793,14 @@ for (i in seq_along(outcomes)) {
   }
 
   # Fit model
-  formula_str <- paste0(outcomes[i], " ~ treatment + age + sex")
+  # IMPORTANT: Replace 'treatment_var', 'age_var', 'sex_var' with your actual variable names
+  formula_str <- paste0(outcomes[i], " ~ treatment_var + age_var + sex_var")
   fit <- glm(as.formula(formula_str), data = out, family = binomial)
 
   # Extract p-value from model summary (NOT from glmshow.display)
+  # IMPORTANT: Replace 'treatment_var' with your actual treatment variable name
   fit_summary <- summary(fit)
-  p_values[i] <- fit_summary$coefficients["treatment", "Pr(>|z|)"]
+  p_values[i] <- fit_summary$coefficients["treatment_var", "Pr(>|z|)"]
 }
 
 # Remove NA values
@@ -1777,42 +1855,46 @@ Test whether treatment effects differ across subgroups using interaction terms. 
 
 ```r
 # IMPORTANT: Check variable existence for interaction analysis
-required_vars <- c("time", "status", "treatment", "age_group", "sex")
+# IMPORTANT: Replace variable names with your actual data
+required_vars <- c("time_var", "status_var", "treatment_var", "subgroup_var1", "subgroup_var2")
 missing_vars <- setdiff(required_vars, names(out))
 if(length(missing_vars) > 0) {
   stop(paste("Missing variables:", paste(missing_vars, collapse=", ")))
 }
 
 # Pre-convert status (REQUIRED)
-out$status_num <- as.integer(as.character(out$status))
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+out$status_num <- as.integer(as.character(out$status_var))
 
 # Check interaction variables are factors
-if(!is.factor(out$age_group)) {
-  out$age_group <- factor(out$age_group)
-  message("Converted age_group to factor")
+# IMPORTANT: Replace 'subgroup_var1' and 'subgroup_var2' with your actual variable names
+if(!is.factor(out$subgroup_var1)) {
+  out$subgroup_var1 <- factor(out$subgroup_var1)
+  message("Converted subgroup_var1 to factor")
 }
 
-if(!is.factor(out$sex)) {
-  out$sex <- factor(out$sex)
-  message("Converted sex to factor")
+if(!is.factor(out$subgroup_var2)) {
+  out$subgroup_var2 <- factor(out$subgroup_var2)
+  message("Converted subgroup_var2 to factor")
 }
 
 # Check factor levels
-if(length(levels(out$age_group)) < 2) {
-  stop("age_group must have at least 2 levels for interaction analysis.")
+if(length(levels(out$subgroup_var1)) < 2) {
+  stop("subgroup_var1 must have at least 2 levels for interaction analysis.")
 }
 
-if(length(levels(out$sex)) < 2) {
-  stop("sex must have at least 2 levels for interaction analysis.")
+if(length(levels(out$subgroup_var2)) < 2) {
+  stop("subgroup_var2 must have at least 2 levels for interaction analysis.")
 }
 
 # Check sample sizes in cross-tabulation
-crosstab <- table(out$treatment, out$age_group)
-print("Treatment x Age Group Cross-tabulation:")
+# IMPORTANT: Replace 'treatment_var' and 'subgroup_var1' with your actual variable names
+crosstab <- table(out$treatment_var, out$subgroup_var1)
+print("Treatment x Subgroup Cross-tabulation:")
 print(crosstab)
 
 if(any(crosstab < 10)) {
-  warning("Some treatment x age_group combinations have <10 observations. Interaction test may be unreliable.")
+  warning("Some treatment x subgroup combinations have <10 observations. Interaction test may be unreliable.")
 }
 ```
 
@@ -1822,8 +1904,9 @@ if(any(crosstab < 10)) {
 library(jstable)
 
 # IMPORTANT: First check variable existence (see above)
-vars_to_summarize <- c("age", "sex", "comorbidity")
-strata_vars <- c("treatment", "age_group")
+# IMPORTANT: Replace with your actual variable names
+vars_to_summarize <- c("var1", "var2", "var3")
+strata_vars <- c("treatment_var", "subgroup_var1")
 
 # Verify all variables exist
 missing_vars <- setdiff(c(vars_to_summarize, strata_vars), names(out))
@@ -1848,24 +1931,29 @@ library(jstable)
 library(survival)
 
 # IMPORTANT: First check variable existence (REQUIRED - see above)
-required_vars <- c("time", "status", "treatment", "age_group", "sex")
+# IMPORTANT: Replace with your actual variable names
+required_vars <- c("time_var", "status_var", "treatment_var", "subgroup_var1", "subgroup_var2")
 missing_vars <- setdiff(required_vars, names(out))
 if(length(missing_vars) > 0) {
   stop(paste("Missing variables:", paste(missing_vars, collapse=", ")))
 }
 
 # Pre-convert status
-out$status_num <- as.integer(as.character(out$status))
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+out$status_num <- as.integer(as.character(out$status_var))
 
-# Model with interaction: treatment * age_group
-fit_interaction <- coxph(Surv(time, status_num) ~ treatment * age_group + sex,
+# Model with interaction: treatment * subgroup
+# IMPORTANT: Replace variable names with your actual data
+fit_interaction <- coxph(Surv(time_var, status_num) ~ treatment_var * subgroup_var1 + subgroup_var2,
                          data = out, model = TRUE)
-result_interaction <- cox2.display(fit_interaction, dec = 2)
+# IMPORTANT: Extract $table component for display
+result_interaction <- cox2.display(fit_interaction, dec = 2)$table
 
 # Model with main effects only
-fit_main <- coxph(Surv(time, status_num) ~ treatment + age_group + sex,
+fit_main <- coxph(Surv(time_var, status_num) ~ treatment_var + subgroup_var1 + subgroup_var2,
                   data = out, model = TRUE)
-result_main <- cox2.display(fit_main, dec = 2)
+# IMPORTANT: Extract $table component for display
+result_main <- cox2.display(fit_main, dec = 2)$table
 
 # Likelihood ratio test for interaction
 lr_test <- anova(fit_main, fit_interaction)
@@ -1874,7 +1962,7 @@ interaction_pval <- lr_test[2, "Pr(>|Chi|)"]
 
 if (interaction_pval < 0.05) {
   message("Significant interaction detected (p = ", round(interaction_pval, 3), ")")
-  message("Perform stratified analyses by age_group")
+  message("Perform stratified analyses by subgroup")
 }
 ```
 
@@ -1882,51 +1970,54 @@ if (interaction_pval < 0.05) {
 
 ```r
 # IMPORTANT: Only run this if interaction p-value < 0.05
-# Replace 'age_group' and 'treatment' with your actual variable names
+# IMPORTANT: Replace variable names with your actual data
 
 # Separate analysis for each subgroup
 # IMPORTANT: Use safe subsetting (works for both data.frame and data.table)
 
-# Young patients
-subset_young <- out[out$age_group == "Young", ]
-if (nrow(subset_young) < 20) {
-  stop("Young subgroup too small (n < 20). Cannot perform analysis.")
+# First subgroup level
+# IMPORTANT: Replace 'subgroup_var1' and level names with your actual data
+subset_level1 <- out[out$subgroup_var1 == "Level1", ]
+if (nrow(subset_level1) < 20) {
+  stop("Level1 subgroup too small (n < 20). Cannot perform analysis.")
 }
 
-fit_young <- coxph(Surv(time, status_num) ~ treatment + sex,
-                   data = subset_young, model = TRUE)
+# IMPORTANT: Replace variable names with your actual data
+fit_level1 <- coxph(Surv(time_var, status_num) ~ treatment_var + subgroup_var2,
+                   data = subset_level1, model = TRUE)
 
-# Old patients
-subset_old <- out[out$age_group == "Old", ]
-if (nrow(subset_old) < 20) {
-  stop("Old subgroup too small (n < 20). Cannot perform analysis.")
+# Second subgroup level
+subset_level2 <- out[out$subgroup_var1 == "Level2", ]
+if (nrow(subset_level2) < 20) {
+  stop("Level2 subgroup too small (n < 20). Cannot perform analysis.")
 }
 
-fit_old <- coxph(Surv(time, status_num) ~ treatment + sex,
-                 data = subset_old, model = TRUE)
+fit_level2 <- coxph(Surv(time_var, status_num) ~ treatment_var + subgroup_var2,
+                 data = subset_level2, model = TRUE)
 
 # Extract HRs from model summary (NOT from jstable)
 # jstable returns character strings, we need numeric values
-summary_young <- summary(fit_young)
-summary_old <- summary(fit_old)
+summary_level1 <- summary(fit_level1)
+summary_level2 <- summary(fit_level2)
 
-hr_young <- summary_young$conf.int["treatment", "exp(coef)"]
-ci_young_lower <- summary_young$conf.int["treatment", "lower .95"]
-ci_young_upper <- summary_young$conf.int["treatment", "upper .95"]
+# IMPORTANT: Replace 'treatment_var' with your actual treatment variable name
+hr_level1 <- summary_level1$conf.int["treatment_var", "exp(coef)"]
+ci_level1_lower <- summary_level1$conf.int["treatment_var", "lower .95"]
+ci_level1_upper <- summary_level1$conf.int["treatment_var", "upper .95"]
 
-hr_old <- summary_old$conf.int["treatment", "exp(coef)"]
-ci_old_lower <- summary_old$conf.int["treatment", "lower .95"]
-ci_old_upper <- summary_old$conf.int["treatment", "upper .95"]
+hr_level2 <- summary_level2$conf.int["treatment_var", "exp(coef)"]
+ci_level2_lower <- summary_level2$conf.int["treatment_var", "lower .95"]
+ci_level2_upper <- summary_level2$conf.int["treatment_var", "upper .95"]
 
 # Display results
-message("Treatment HR in young: ", round(hr_young, 2),
-        " (95% CI: ", round(ci_young_lower, 2), "-", round(ci_young_upper, 2), ")")
-message("Treatment HR in old: ", round(hr_old, 2),
-        " (95% CI: ", round(ci_old_lower, 2), "-", round(ci_old_upper, 2), ")")
+message("Treatment HR in level1: ", round(hr_level1, 2),
+        " (95% CI: ", round(ci_level1_lower, 2), "-", round(ci_level1_upper, 2), ")")
+message("Treatment HR in level2: ", round(hr_level2, 2),
+        " (95% CI: ", round(ci_level2_lower, 2), "-", round(ci_level2_upper, 2), ")")
 
-# For display with jstable (optional)
-result_young <- cox2.display(fit_young, dec = 2)
-result_old <- cox2.display(fit_old, dec = 2)
+# For display with jstable (optional) - extract $table component
+result_level1 <- cox2.display(fit_level1, dec = 2)$table
+result_level2 <- cox2.display(fit_level2, dec = 2)$table
 ```
 
 #### Logistic Regression with Interaction
@@ -1935,21 +2026,23 @@ result_old <- cox2.display(fit_old, dec = 2)
 library(jstable)
 
 # IMPORTANT: Replace variable names with your actual data
-# - 'outcome' → your binary outcome (0/1)
-# - 'treatment' → your treatment variable
-# - 'sex' → your interaction variable
+# - 'outcome_var' → your binary outcome (0/1)
+# - 'treatment_var' → your treatment variable
+# - 'subgroup_var' → your interaction variable
 
-# Test treatment-by-sex interaction
-fit_interaction <- glm(outcome ~ treatment * sex + age,
+# Test treatment-by-subgroup interaction
+# IMPORTANT: Replace variable names with your actual data
+fit_interaction <- glm(outcome_var ~ treatment_var * subgroup_var + covariate_var,
                       data = out, family = binomial)
 
 # Extract interaction p-value from model summary (NOT from glmshow.display)
 summary_interaction <- summary(fit_interaction)
 
 # Interaction term name depends on variable types
-# For factor variables: "treatment:sexFemale" or similar
+# For factor variables: "treatment_var:subgroup_varLevel" or similar
 # Check: print(rownames(summary_interaction$coefficients))
-interaction_term_name <- grep("treatment.*sex|sex.*treatment",
+# IMPORTANT: Replace 'treatment_var' and 'subgroup_var' with your actual variable names
+interaction_term_name <- grep("treatment_var.*subgroup_var|subgroup_var.*treatment_var",
                               rownames(summary_interaction$coefficients),
                               value = TRUE)[1]
 
@@ -1964,32 +2057,35 @@ message("Interaction p-value: ", round(interaction_pval, 4))
 if (interaction_pval < 0.05) {
   message("Significant interaction detected. Performing stratified analyses.")
 
-  # Stratified analysis by sex (safe subsetting)
-  subset_male <- out[out$sex == "Male", ]
-  subset_female <- out[out$sex == "Female", ]
+  # Stratified analysis by subgroup (safe subsetting)
+  # IMPORTANT: Replace 'subgroup_var' and level names with your actual data
+  subset_level1 <- out[out$subgroup_var == "Level1", ]
+  subset_level2 <- out[out$subgroup_var == "Level2", ]
 
   # Check sufficient sample size
-  if (nrow(subset_male) < 20 | nrow(subset_female) < 20) {
+  if (nrow(subset_level1) < 20 | nrow(subset_level2) < 20) {
     warning("One or more subgroups has <20 observations.")
   }
 
   # Fit stratified models
-  fit_male <- glm(outcome ~ treatment + age, data = subset_male, family = binomial)
-  fit_female <- glm(outcome ~ treatment + age, data = subset_female, family = binomial)
+  # IMPORTANT: Replace variable names with your actual data
+  fit_level1 <- glm(outcome_var ~ treatment_var + covariate_var, data = subset_level1, family = binomial)
+  fit_level2 <- glm(outcome_var ~ treatment_var + covariate_var, data = subset_level2, family = binomial)
 
   # Display with jstable
-  result_male <- glmshow.display(fit_male, decimal = 2)
-  result_female <- glmshow.display(fit_female, decimal = 2)
+  result_level1 <- glmshow.display(fit_level1, decimal = 2)
+  result_level2 <- glmshow.display(fit_level2, decimal = 2)
 
   # Extract ORs from model summaries for comparison
-  summary_male <- summary(fit_male)
-  summary_female <- summary(fit_female)
+  summary_level1 <- summary(fit_level1)
+  summary_level2 <- summary(fit_level2)
 
-  or_male <- exp(summary_male$coefficients["treatment", "Estimate"])
-  or_female <- exp(summary_female$coefficients["treatment", "Estimate"])
+  # IMPORTANT: Replace 'treatment_var' with your actual treatment variable name
+  or_level1 <- exp(summary_level1$coefficients["treatment_var", "Estimate"])
+  or_level2 <- exp(summary_level2$coefficients["treatment_var", "Estimate"])
 
-  message("Treatment OR in males: ", round(or_male, 2))
-  message("Treatment OR in females: ", round(or_female, 2))
+  message("Treatment OR in level1: ", round(or_level1, 2))
+  message("Treatment OR in level2: ", round(or_level2, 2))
 }
 
 # Common errors and solutions:
@@ -2001,24 +2097,29 @@ if (interaction_pval < 0.05) {
 
 ```r
 # Combine stratified results for forest plot visualization
-subgroups <- c("Male", "Female", "Age<60", "Age>=60", "No_comorbidity", "With_comorbidity")
+# IMPORTANT: Replace subgroup names with your actual subgroup levels
+subgroups <- c("Subgroup1", "Subgroup2", "Subgroup3", "Subgroup4", "Subgroup5", "Subgroup6")
 forest_data <- data.frame()
 
 for (subgroup in subgroups) {
-  subset_data <- out[subgroup_filter == subgroup]
-  subset_data$status_num <- as.integer(as.character(subset_data$status))
+  # IMPORTANT: Replace 'subgroup_filter_var' with your actual subgroup filter variable
+  subset_data <- out[subgroup_filter_var == subgroup]
+  # IMPORTANT: Replace 'status_var' with your actual status variable name
+  subset_data$status_num <- as.integer(as.character(subset_data$status_var))
 
   if (nrow(subset_data) >= 20) {
-    fit <- coxph(Surv(time, status_num) ~ treatment, data = subset_data, model = TRUE)
+    # IMPORTANT: Replace 'time_var' and 'treatment_var' with your actual variable names
+    fit <- coxph(Surv(time_var, status_num) ~ treatment_var, data = subset_data, model = TRUE)
     cox_result <- cox2.display(fit, dec = 2)
 
+    # IMPORTANT: Replace 'treatment_var' with your actual treatment variable name
     forest_data <- rbind(forest_data, data.frame(
       Subgroup = subgroup,
       N = nrow(subset_data),
-      HR = cox_result$table["treatment", "HR"],
-      Lower = cox_result$table["treatment", "lower .95"],
-      Upper = cox_result$table["treatment", "upper .95"],
-      P = cox_result$table["treatment", "p.value"]
+      HR = cox_result$table["treatment_var", "HR"],
+      Lower = cox_result$table["treatment_var", "lower .95"],
+      Upper = cox_result$table["treatment_var", "upper .95"],
+      P = cox_result$table["treatment_var", "p.value"]
     ))
   }
 }
@@ -2062,10 +2163,12 @@ library(ggpubr)
 ### Data Preparation
 ```r
 # Handle factor conversion for survival analysis
-out$status_num <- as.integer(as.character(out$status))
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+out$status_num <- as.integer(as.character(out$status_var))
 
 # Create categorical variables
-out$age_group <- cut(out$age, breaks = c(0, 60, Inf),
+# IMPORTANT: Replace 'age_var' with your actual age variable name
+out$age_group <- cut(out$age_var, breaks = c(0, 60, Inf),
                      labels = c("<60", "≥60"))
 ```
 
@@ -2087,7 +2190,8 @@ result <- list(p1, p2, p3)
 library(flextable)
 library(officer)
 
-fit <- glm(status ~ sex + age, data = out, family = binomial)
+# IMPORTANT: Replace variable names with your actual data
+fit <- glm(outcome_var ~ covariate1_var + covariate2_var, data = out, family = binomial)
 glm_res <- glmshow.display(fit, decimal = 2)
 
 # Create formatted table
@@ -2123,16 +2227,17 @@ result <- ft  # Also display in app
 - ✅ Always include: `jskm(fit, data = out, table = TRUE, pval = TRUE)`
 
 **Survival functions:**
-- ❌ Using factor status directly: `Surv(time, status)`
-- ❌ Inline conversion (can cause scoping errors): `Surv(time, as.integer(as.character(status)))`
+- ❌ Using factor status directly: `Surv(time_var, status_var)`
+- ❌ Inline conversion (can cause scoping errors): `Surv(time_var, as.integer(as.character(status_var)))`
 - ✅ Pre-convert to numeric (recommended):
   ```r
-  out$status_num <- as.integer(as.character(out$status))
-  fit <- survfit(Surv(time, status_num) ~ rx, data = out)
+  # IMPORTANT: Replace variable names with your actual data
+  out$status_num <- as.integer(as.character(out$status_var))
+  fit <- survfit(Surv(time_var, status_num) ~ treatment_var, data = out)
   ```
 
 **cox2.display:**
-- ❌ Forgetting `model = TRUE`: `coxph(Surv(time, status) ~ age, data = out)`
+- ❌ Forgetting `model = TRUE`: `coxph(Surv(time_var, status_var) ~ covariate_var, data = out)`
 - ✅ Required for display: `coxph(..., model = TRUE)`
 
 **Regression display:**
@@ -2145,10 +2250,12 @@ result <- ft  # Also display in app
 **Always convert explicitly:**
 ```r
 # Factor to numeric (for survival analysis)
-out$status_num <- as.integer(as.character(out$status))
+# IMPORTANT: Replace 'status_var' with your actual status variable name
+out$status_num <- as.integer(as.character(out$status_var))
 
 # Numeric to factor (for grouping)
-out$group <- factor(out$group)
+# IMPORTANT: Replace 'group_var' with your actual grouping variable name
+out$group_factor <- factor(out$group_var)
 ```
 
 ### Statistical Best Practices
