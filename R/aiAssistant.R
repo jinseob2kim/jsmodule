@@ -335,7 +335,7 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
               shinyWidgets::actionBttn(
                 ns("check_api_key"),
                 "Check",
-                icon = icon("check"),
+                icon = icon("key"),
                 style = "material-flat",
                 color = "primary",
                 size = "sm"
@@ -674,7 +674,8 @@ aiAssistant <- function(input, output, session, data, data_label,
   allowed_packages <- c(
     "jstable", "jskm", "jsmodule", "survival",
     "ggplot2", "ggpubr", "pROC", "data.table",
-    "DT", "gridExtra", "GGally"
+    "DT", "gridExtra", "GGally", "forestploter",
+    "MatchIt", "timeROC"
   )
 
   # Reactive values for model list and settings
@@ -993,12 +994,13 @@ aiAssistant <- function(input, output, session, data, data_label,
           style = "btn-default"
         )
       ),
+      tags$hr(style = "margin-top: 20px; margin-bottom: 15px;"),
       shinyWidgets::actionBttn(
         session$ns("apply_config"),
         "Apply Configuration",
-        icon = icon("check"),
+        icon = icon("save"),
         style = "material-flat",
-        color = "primary",
+        color = "success",
         size = "sm",
         block = TRUE
       )
@@ -1151,15 +1153,32 @@ aiAssistant <- function(input, output, session, data, data_label,
   determine_result_type <- function(res, store_result = TRUE) {
     result_info <- list()
 
-    # Single plot
-    if (inherits(res, c("ggplot", "gg", "gtable", "grob", "recordedplot"))) {
+    # Check for NULL or empty result
+    if (is.null(res)) {
+      result_info$type <- "unknown"
+      result_info$value <- NULL
+      result_info$message <- "No result was generated. The code executed but did not return a value."
+
+      if (store_result) {
+        execution_result(NULL)
+        result_type("unknown")
+      }
+      return(result_info)
+    }
+
+    # Single plot (comprehensive plot class support)
+    # - ggplot/gg: ggplot2, ggpubr, jskm, pROC::ggroc
+    # - ggmatrix: GGally::ggpairs
+    # - gtable/gTree/grob: grid graphics, gridExtra::grid.arrange/arrangeGrob, forestploter::forest
+    # - recordedplot: base R plot()
+    if (inherits(res, c("ggplot", "gg", "gtable", "gTree", "grob", "recordedplot", "ggmatrix", "forestplot"))) {
       result_info$type <- "plot"
       result_info$value <- list(res)
       result_info$message <- "Plot generated successfully. The plot is now displayed in the Results panel."
 
     # Multiple plots
     } else if (is.list(res) && length(res) > 0 &&
-               all(sapply(res, function(x) inherits(x, c("ggplot", "gg", "gtable", "grob", "recordedplot"))))) {
+               all(sapply(res, function(x) inherits(x, c("ggplot", "gg", "gtable", "gTree", "grob", "recordedplot", "ggmatrix", "forestplot"))))) {
       result_info$type <- "plot"
       result_info$value <- res
       result_info$message <- sprintf("Generated %d plots successfully. All plots are displayed in the Results panel.", length(res))
@@ -1194,11 +1213,35 @@ aiAssistant <- function(input, output, session, data, data_label,
       result_info$message <- sprintf("Table extracted from list result: %d rows × %d columns",
                                      nrow(res$table), ncol(res$table))
 
-    # Everything else as text
+    # Unrecognized type - mark as unknown
+    } else if (is.list(res) && length(res) == 0) {
+      result_info$type <- "unknown"
+      result_info$value <- NULL
+      result_info$message <- paste0(
+        "Empty list result. Object class: ", paste(class(res), collapse = ", "),
+        "\nThe code executed but produced an empty result."
+      )
+
+    # Everything else - try to display as text but mark potential issues
     } else {
-      result_info$type <- "text"
-      result_info$value <- res
-      result_info$message <- paste(capture.output(print(res)), collapse = "\n")
+      # Check if it's a recognizable object that we should warn about
+      obj_class <- paste(class(res), collapse = ", ")
+
+      # Common plot types that might not be captured
+      if (any(grepl("plot|graph|chart|figure", obj_class, ignore.case = TRUE))) {
+        result_info$type <- "unknown"
+        result_info$value <- NULL
+        result_info$message <- paste0(
+          "Result type not fully supported: ", obj_class,
+          "\nThis appears to be a plot but was not recognized. ",
+          "The plot may have been displayed but cannot be saved or exported."
+        )
+      } else {
+        # Try to display as text
+        result_info$type <- "text"
+        result_info$value <- res
+        result_info$message <- paste(capture.output(print(res)), collapse = "\n")
+      }
     }
 
     # Store in reactive values if requested
@@ -1258,7 +1301,7 @@ aiAssistant <- function(input, output, session, data, data_label,
       "Sys\\.setenv", "Sys\\.unsetenv",  # Environment modification
       "unlink", "file\\.remove", "file\\.create", "dir\\.create",  # File operations
       "setwd", "source",  # Directory/source changes
-      "options", "par",  # Global settings (partially allowed for plots)
+      "options",  # Global settings
       "install\\.packages", "remove\\.packages",  # Package management
       "eval\\(", "evalq\\(",  # Nested eval
       "assign\\(.+envir\\s*=\\s*\\.GlobalEnv",  # Global env assignment
@@ -1267,10 +1310,6 @@ aiAssistant <- function(input, output, session, data, data_label,
 
     for (pattern in dangerous_patterns) {
       if (grepl(pattern, code, perl = TRUE)) {
-        # Allow par() for plot settings
-        if (pattern == "par" && grepl("par\\(", code)) {
-          next
-        }
         return(list(
           safe = FALSE,
           reason = sprintf("Blocked pattern detected: %s", pattern)
@@ -1370,6 +1409,13 @@ aiAssistant <- function(input, output, session, data, data_label,
         paste(capture.output(print(head(dl, 10))), collapse = "\n")
       )
     }
+
+    # Add allowed packages information
+    context <- paste0(context,
+      "\n## Allowed R Packages\n",
+      "Only these packages can be loaded with library():\n",
+      "- ", paste(allowed_packages, collapse = ", "), "\n"
+    )
 
     return(context)
   })
@@ -1610,7 +1656,7 @@ aiAssistant <- function(input, output, session, data, data_label,
 
       return(list(
         success = FALSE,
-        message = "Failed to parse Google API response"
+        message = "Failed to parse Google API response. Please retry. If the issue persists, try a different model or simplify your question."
       ))
 
     } else {
@@ -2024,6 +2070,35 @@ Please help me fix this error.",
     }
   })
 
+  # Handle "Ask AI to Fix" for no result (unknown type)
+  observeEvent(input$fix_no_result, {
+    code <- current_code()
+
+    # Build message for AI
+    no_result_msg <- sprintf(
+"I ran this code but it didn't produce any result:
+
+```r
+%s
+```
+
+The code executed without errors, but no result was displayed in the Results panel. This might be because:
+- The result was not properly assigned to the 'result' variable
+- An unsupported object type was returned
+- The code only performed side effects without returning a value
+- A function returned NULL or an empty result
+
+Please fix the code to ensure it returns a proper result that can be displayed and exported.",
+      code
+    )
+
+    # Insert into chat input
+    updateTextAreaInput(session, "user_input", value = no_result_msg)
+
+    # Scroll to chat input
+    shinyjs::runjs(sprintf("document.getElementById('%s').scrollIntoView({behavior: 'smooth', block: 'center'});", session$ns("user_input")))
+  })
+
   # Save chat history
   observeEvent(input$save_chat, {
     history <- full_chat_history()  # Use full history, not limited chat_history
@@ -2141,7 +2216,13 @@ Please help me fix this error.",
 
     n <- length(plots)
     if (n == 1) {
-      print(plots[[1]])
+      plot_obj <- plots[[1]]
+      # Use grid.draw for gtable/gTree objects, print for others
+      if (inherits(plot_obj, c("gtable", "gTree")) && !inherits(plot_obj, "gg")) {
+        grid::grid.draw(plot_obj)
+      } else {
+        print(plot_obj)
+      }
     } else {
       gridExtra::grid.arrange(grobs = plots, ncol = min(n, 2))
     }
@@ -2229,6 +2310,55 @@ Please help me fix this error.",
       ))
     }
 
+    # Handle unknown/unrecognized result types
+    if (rtype == "unknown") {
+      return(tags$div(
+        class = "alert alert-warning",
+        style = "background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 15px; margin-bottom: 15px;",
+        tags$div(
+          style = "display: flex; align-items: center; margin-bottom: 10px;",
+          icon("exclamation-triangle", style = "color: #856404; font-size: 24px; margin-right: 10px;"),
+          tags$strong("No Result Generated", style = "color: #856404; font-size: 16px;")
+        ),
+        tags$p(
+          style = "margin-bottom: 10px; color: #856404;",
+          "The code executed but did not produce a recognizable result."
+        ),
+        tags$details(
+          tags$summary(
+            style = "cursor: pointer; font-weight: bold; color: #856404; margin-bottom: 10px;",
+            icon("info-circle"), " Why did this happen? (click to expand)"
+          ),
+          tags$div(
+            style = "margin-top: 10px;",
+            tags$p("This might happen when:"),
+            tags$ul(
+              tags$li("The result was not properly assigned to the ", tags$code("result"), " variable"),
+              tags$li("An unsupported object type was returned"),
+              tags$li("The code only performed side effects without returning a value"),
+              tags$li("A function returned ", tags$code("NULL"), " or an empty result")
+            )
+          )
+        ),
+        tags$div(
+          style = "margin-top: 15px; padding-top: 15px; border-top: 1px solid #ffc107;",
+          tags$strong("Suggestion:"),
+          tags$p(
+            style = "margin-top: 5px;",
+            "Click the button below to ask AI to fix the code automatically."
+          )
+        ),
+        shinyWidgets::actionBttn(
+          session$ns("fix_no_result"),
+          "Ask AI to Fix",
+          icon = icon("robot"),
+          style = "material-flat",
+          color = "warning",
+          size = "sm"
+        )
+      ))
+    }
+
     if (rtype == "plot") {
       return(plotOutput(session$ns("result_plot"), height = "400px"))
     }
@@ -2306,9 +2436,32 @@ Please help me fix this error.",
               tooltips = TRUE
             )
           )
+        ),
+        div(
+          style = "margin-top: 10px;",
+          actionButton(
+            session$ns("reset_ppt_size"),
+            "Reset",
+            icon = icon("undo"),
+            class = "btn-secondary btn-sm"
+          )
         )
       )
     }
+  })
+
+  # Reset PPT size to default values
+  observeEvent(input$reset_ppt_size, {
+    shinyWidgets::updateNoUiSliderInput(
+      session = session,
+      inputId = "ppt_width",
+      value = 10
+    )
+    shinyWidgets::updateNoUiSliderInput(
+      session = session,
+      inputId = "ppt_height",
+      value = 7.5
+    )
   })
 
   # Download handlers
@@ -2343,8 +2496,19 @@ Please help me fix this error.",
 
               for (i in seq_along(plots)) {
                 doc <- officer::add_slide(doc, layout = "Title and Content", master = "Office Theme")
-                doc <- officer::ph_with(doc, rvg::dml(code = print(plots[[i]])),
-                                       location = officer::ph_location(width = w, height = h, left = 0, top = 0.5))
+
+                # Handle different plot types
+                plot_obj <- plots[[i]]
+                if (inherits(plot_obj, c("gtable", "gTree")) && !inherits(plot_obj, "gg")) {
+                  # Use grid.draw for gtable/gTree objects
+                  doc <- officer::ph_with(doc, rvg::dml(code = grid::grid.draw(plot_obj)),
+                                         location = officer::ph_location(width = w, height = h, left = 0, top = 0.5))
+                } else {
+                  # Use print for ggplot and other objects
+                  doc <- officer::ph_with(doc, rvg::dml(code = print(plot_obj)),
+                                         location = officer::ph_location(width = w, height = h, left = 0, top = 0.5))
+                }
+
                 incProgress(0.6 / length(plots), detail = paste("Adding plot", i))
               }
 
