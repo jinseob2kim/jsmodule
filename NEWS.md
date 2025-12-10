@@ -1,3 +1,12 @@
+# jsmodule 2.0.1
+## Update
+- Generalized all variable names in AI Assistant prompts to use placeholder patterns (`_var` suffix), making code examples applicable to any dataset instead of being tied to specific example data (e.g., `age`, `sex`, `time`, `status`, `rx`).
+- Added `# IMPORTANT: Replace with your actual variable names` comments to all code examples in AI prompts to guide users in adapting generated code to their data.
+- Improved AI Assistant prompt clarity by replacing dataset-specific examples with generic placeholders across all statistical analysis sections.
+
+## Bugfix
+- Fixed AI Assistant result handling to properly support mixed result types (tables, plots, and flextables) returned from analysis code.
+
 # jsmodule 2.0.0
 ## New Features
 - Introduced the `jsmodule AI Assistant`, which connects to Anthropic, OpenAI, and Google LLMs so you can generate analyses, scripts, and export-ready visuals without leaving the app.
