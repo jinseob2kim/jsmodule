@@ -1317,6 +1317,13 @@ aiAssistant <- function(input, output, session, data, data_label,
       result_info$value <- res
       result_info$message <- sprintf("Generated %d plots successfully. All plots are displayed in the Results panel.", length(res))
 
+    # Summary objects (lm, glm, coxph, etc.) - check before list processing
+    } else if (any(grepl("^summary\\.", class(res)))) {
+      result_info$type <- "text"
+      # Store as character vector (each line separate) for proper rendering
+      result_info$value <- list(capture.output(print(res)))
+      result_info$message <- "Summary statistics generated successfully."
+
     # Multiple tables (list of data frames or matrices)
     } else if (is.list(res) && length(res) > 0 &&
                all(sapply(res, function(x) is.data.frame(x) || is.matrix(x)))) {
@@ -2738,19 +2745,33 @@ Please fix the code to ensure it returns a proper result that can be displayed a
         } else if (current_type == "table") {
           DTOutput(session$ns("result_table"))
         } else {
-          # Text result
+          # Text result (already captured as character vector)
           tags$div(
             style = "max-height: 400px; overflow-y: auto;",
             tags$pre(
-              style = "font-size: 11px; white-space: pre-wrap;",
-              paste(capture.output(print(current_item$value)), collapse = "\n")
+              style = "font-size: 11px; white-space: pre-wrap; background: #f8f9fa; padding: 10px; border-radius: 4px;",
+              paste(current_item$value, collapse = "\n")
             )
           )
         }
       ))
     }
 
-    # text
+    # text (result is a list containing character vectors)
+    if (rtype == "text") {
+      text_content <- if (is.list(result) && length(result) > 0) {
+        paste(result[[1]], collapse = "\n")
+      } else {
+        paste(capture.output(print(result)), collapse = "\n")
+      }
+
+      return(tags$pre(
+        style = "max-height: 400px; overflow-y: auto; font-size: 11px; background: #f8f9fa; padding: 10px; border-radius: 4px; white-space: pre-wrap;",
+        text_content
+      ))
+    }
+
+    # Fallback for other types
     return(tags$pre(
       style = "max-height: 400px; overflow-y: auto; font-size: 11px;",
       paste(capture.output(print(result)), collapse = "\n")
@@ -3141,8 +3162,30 @@ Please fix the code to ensure it returns a proper result that can be displayed a
               content_lines <- c(content_lines, result_text)
             } else if (rtype == "plot") {
               content_lines <- c(content_lines, "[Plot result - cannot be displayed in text format]")
+            } else if (rtype == "text") {
+              # Text results (already captured as character vector)
+              if (is.list(result) && length(result) > 0) {
+                content_lines <- c(content_lines, result[[1]])
+              } else {
+                result_text <- capture.output(print(result))
+                content_lines <- c(content_lines, result_text)
+              }
+            } else if (rtype == "mixed") {
+              # Mixed results - process each item
+              for (i in seq_along(result)) {
+                item <- result[[i]]
+                content_lines <- c(content_lines, sprintf("--- Result %d/%d ---", i, length(result)))
+                if (item$type == "table") {
+                  result_text <- capture.output(print(as.data.frame(item$value)))
+                  content_lines <- c(content_lines, result_text, "")
+                } else if (item$type == "plot") {
+                  content_lines <- c(content_lines, "[Plot - cannot be displayed in text format]", "")
+                } else if (item$type == "text") {
+                  content_lines <- c(content_lines, item$value, "")
+                }
+              }
             } else {
-              # Other results (text, list, etc.)
+              # Other results (fallback)
               result_text <- capture.output(print(result))
               content_lines <- c(content_lines, result_text)
             }
