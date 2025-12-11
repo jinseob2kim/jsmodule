@@ -1,18 +1,24 @@
 #' @title aiAssistantUI: AI Assistant module UI
 #' @description AI-powered statistical analysis assistant module UI
-#' @param id id
+#' @param id Module's namespace ID. Used to create unique identifiers for UI elements.
 #' @param show_api_config If TRUE, shows API configuration UI. If FALSE, uses only env vars. Default: TRUE
-#' @return AI Assistant module UI
+#' @return Shiny UI tagList containing the AI Assistant interface with chat, code editor, and result panels
 #' @details Provides an interactive chat interface with AI for statistical analysis code generation
 #' @examples
+#' \dontrun{
+#' # Setup: Add API key to .Renviron file
+#' # usethis::edit_r_environ()
+#' # Add line: ANTHROPIC_API_KEY=your_actual_key_here
+#' # Save and restart R
+#'
 #' library(shiny)
 #' library(DT)
 #' library(survival)
 #'
+#' # Example 1: Basic usage with auto-generated variable structure
 #' ui <- fluidPage(
-#'   fluidRow(
-#'     column(12, aiAssistantUI("ai"))
-#'   )
+#'   titlePanel("AI Statistical Assistant"),
+#'   aiAssistantUI("ai")
 #' )
 #'
 #' server <- function(input, output, session) {
@@ -22,9 +28,61 @@
 #'   callModule(aiAssistant, "ai",
 #'     data = data,
 #'     data_label = data.label,
-#'     data_varStruct = NULL,
-#'     api_key = Sys.getenv("ANTHROPIC_API_KEY")
+#'     data_varStruct = NULL  # Auto-generates variable structure
 #'   )
+#' }
+#'
+#' shinyApp(ui, server)
+#'
+#' # Example 2: With custom variable structure and analysis context
+#' ui2 <- fluidPage(
+#'   titlePanel("Survival Analysis Assistant"),
+#'   aiAssistantUI("ai")
+#' )
+#'
+#' server2 <- function(input, output, session) {
+#'   data <- reactive(colon)
+#'   data.label <- reactive(jstable::mk.lev(colon))
+#'
+#'   # Custom variable structure for survival analysis
+#'   var_struct <- reactive({
+#'     list(
+#'       variable = names(colon),
+#'       Base = c("rx", "sex", "age", "obstruct", "nodes"),
+#'       Event = "status",
+#'       Time = "time"
+#'     )
+#'   })
+#'
+#'   callModule(aiAssistant, "ai",
+#'     data = data,
+#'     data_label = data.label,
+#'     data_varStruct = var_struct,
+#'     analysis_context = reactive({
+#'       "Colon cancer adjuvant chemotherapy trial (survival::colon).
+#'        Primary outcome: time to recurrence or death (status/time).
+#'        Treatment groups: Observation, Levamisole, Levamisole+5-FU."
+#'     })
+#'   )
+#' }
+#'
+#' shinyApp(ui2, server2)
+#'
+#' # Example 3: Production deployment without API config UI
+#' ui_prod <- fluidPage(
+#'   aiAssistantUI("ai", show_api_config = FALSE)
+#' )
+#'
+#' server_prod <- function(input, output, session) {
+#'   # Relies entirely on .Renviron configuration
+#'   callModule(aiAssistant, "ai",
+#'     data = reactive(mtcars),
+#'     data_label = reactive(jstable::mk.lev(mtcars)),
+#'     show_api_config = FALSE
+#'   )
+#' }
+#'
+#' shinyApp(ui_prod, server_prod)
 #' }
 #' @rdname aiAssistantUI
 #' @export
@@ -622,24 +680,42 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
 #' @param input input
 #' @param output output
 #' @param session session
-#' @param data Data (reactive)
-#' @param data_label Data label (reactive)
-#' @param data_varStruct Variable structure list of data, Default: NULL
-#' @param api_key API key for AI service. If NULL, reads from provider-specific env var
-#' @param stats_guide Optional custom statistical guide text. If NULL, uses default guide
+#' @param data Data (reactive). Should return the current data set each time it is called.
+#' @param data_label Data label (reactive). Typically created with `jstable::mk.lev()`.
+#' @param data_varStruct Variable structure list of data (reactive or NULL). If NULL, automatically generates `list(variable = names(data()))`. Can also be a reactive returning a named list with elements like `Base`, `Event`, `Time`, etc. Default: NULL
+#' @param api_key API key for AI service. If NULL, reads from provider-specific environment variables (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`) configured in `.Renviron` file
+#' @param stats_guide Optional custom statistical guide text to override default guidelines. Can be a character string or reactive. If NULL, uses built-in statistical best practices guide. Useful for adding domain-specific statistical conventions or organizational standards.
 #' @param show_api_config If TRUE, shows API config UI. If FALSE, uses only env vars. Default: TRUE
-#' @param analysis_context Optional reactive or list containing previous analysis results. AI can reference these when user asks follow-up questions. Default: NULL
-#' @return AI Assistant module server
-#' @details Provides interactive statistical analysis code generation using AI
+#' @param analysis_context Optional character string, list, or reactive returning that information. Used to pass prior analysis context that the AI can reference in follow-up questions.
+#' @return Server module (no explicit return value). Creates reactive outputs and observers for chat conversation history, generated code execution, analysis results (tables, plots, text), and export functionality.
+#' @details
+#' \itemize{
+#'   \item `data` and `data_label` must be reactives; their values are re-evaluated every time the module needs data.
+#'   \item `data_varStruct` can be NULL (auto-generated) or a reactive returning a named list with elements like `variable`, `Base`, `Event`, `Time`, etc. This mirrors the structure used by other *jsmodule* components.
+#'   \item Generated code runs in a sandbox that only exposes the supplied data and allows the following packages: \code{jstable}, \code{jskm}, \code{jsmodule}, \code{survival}, \code{ggplot2}, \code{ggpubr}, \code{pROC}, \code{data.table}, \code{DT}, \code{gridExtra}, \code{GGally}, \code{forestploter}, \code{MatchIt}, \code{timeROC}.
+#'   \item API keys are resolved in the order: explicit `api_key` argument, UI input (if `show_api_config = TRUE`), provider-specific environment variables (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`).
+#'   \item To use environment variables for API keys, add them to your `.Renviron` file (use `usethis::edit_r_environ()` to open it) with lines like: \cr
+#'     `ANTHROPIC_API_KEY=your_key_here` \cr
+#'     `OPENAI_API_KEY=your_key_here` \cr
+#'     `GOOGLE_API_KEY=your_key_here` \cr
+#'     Then restart R session for changes to take effect.
+#'   \item `analysis_context` can be a static string/list or a reactive that returns a description of prior analyses (tables, plots, code snippets). The text is appended to the system prompt so the AI can reference earlier steps.
+#' }
 #' @examples
+#' \dontrun{
+#' # Setup: Add API key to .Renviron file
+#' # usethis::edit_r_environ()
+#' # Add line: ANTHROPIC_API_KEY=your_actual_key_here
+#' # Save and restart R
+#'
 #' library(shiny)
 #' library(DT)
 #' library(survival)
 #'
+#' # Example 1: Basic usage with auto-generated variable structure
 #' ui <- fluidPage(
-#'   fluidRow(
-#'     column(12, aiAssistantUI("ai"))
-#'   )
+#'   titlePanel("AI Statistical Assistant"),
+#'   aiAssistantUI("ai")
 #' )
 #'
 #' server <- function(input, output, session) {
@@ -649,9 +725,61 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
 #'   callModule(aiAssistant, "ai",
 #'     data = data,
 #'     data_label = data.label,
-#'     data_varStruct = NULL,
-#'     api_key = Sys.getenv("ANTHROPIC_API_KEY")
+#'     data_varStruct = NULL  # Auto-generates variable structure
 #'   )
+#' }
+#'
+#' shinyApp(ui, server)
+#'
+#' # Example 2: With custom variable structure and analysis context
+#' ui2 <- fluidPage(
+#'   titlePanel("Survival Analysis Assistant"),
+#'   aiAssistantUI("ai")
+#' )
+#'
+#' server2 <- function(input, output, session) {
+#'   data <- reactive(colon)
+#'   data.label <- reactive(jstable::mk.lev(colon))
+#'
+#'   # Custom variable structure for survival analysis
+#'   var_struct <- reactive({
+#'     list(
+#'       variable = names(colon),
+#'       Base = c("rx", "sex", "age", "obstruct", "nodes"),
+#'       Event = "status",
+#'       Time = "time"
+#'     )
+#'   })
+#'
+#'   callModule(aiAssistant, "ai",
+#'     data = data,
+#'     data_label = data.label,
+#'     data_varStruct = var_struct,
+#'     analysis_context = reactive({
+#'       "Colon cancer adjuvant chemotherapy trial (survival::colon).
+#'        Primary outcome: time to recurrence or death (status/time).
+#'        Treatment groups: Observation, Levamisole, Levamisole+5-FU."
+#'     })
+#'   )
+#' }
+#'
+#' shinyApp(ui2, server2)
+#'
+#' # Example 3: Production deployment without API config UI
+#' ui_prod <- fluidPage(
+#'   aiAssistantUI("ai", show_api_config = FALSE)
+#' )
+#'
+#' server_prod <- function(input, output, session) {
+#'   # Relies entirely on .Renviron configuration
+#'   callModule(aiAssistant, "ai",
+#'     data = reactive(mtcars),
+#'     data_label = reactive(jstable::mk.lev(mtcars)),
+#'     show_api_config = FALSE
+#'   )
+#' }
+#'
+#' shinyApp(ui_prod, server_prod)
 #' }
 #' @rdname aiAssistant
 #' @export
@@ -677,6 +805,11 @@ aiAssistant <- function(input, output, session, data, data_label,
     "DT", "gridExtra", "GGally", "forestploter",
     "MatchIt", "timeROC"
   )
+
+  # Initialize data_varStruct as reactive if not provided
+  if (is.null(data_varStruct)) {
+    data_varStruct <- reactive(list(variable = names(data())))
+  }
 
   # Reactive values for model list and settings
   available_models <- reactiveVal(list())
@@ -1184,6 +1317,13 @@ aiAssistant <- function(input, output, session, data, data_label,
       result_info$value <- res
       result_info$message <- sprintf("Generated %d plots successfully. All plots are displayed in the Results panel.", length(res))
 
+    # Summary objects (lm, glm, coxph, etc.) - check before list processing
+    } else if (any(grepl("^summary\\.", class(res)))) {
+      result_info$type <- "text"
+      # Store as character vector (each line separate) for proper rendering
+      result_info$value <- list(capture.output(print(res)))
+      result_info$message <- "Summary statistics generated successfully."
+
     # Multiple tables (list of data frames or matrices)
     } else if (is.list(res) && length(res) > 0 &&
                all(sapply(res, function(x) is.data.frame(x) || is.matrix(x)))) {
@@ -1449,7 +1589,7 @@ aiAssistant <- function(input, output, session, data, data_label,
     req(data())
     d <- data()
     dl <- if (!is.null(data_label)) data_label() else NULL
-    vs <- if (!is.null(data_varStruct)) data_varStruct else NULL
+    vs <- data_varStruct()
 
     factor_vars <- names(d)[sapply(d, is.factor)]
     numeric_vars <- names(d)[sapply(d, is.numeric)]
@@ -1463,17 +1603,23 @@ aiAssistant <- function(input, output, session, data, data_label,
       if (length(numeric_vars) > 10) " ..." else "", "\n"
     )
 
-    if (!is.null(vs)) {
+    # Add variable structure information if available
+    if (!is.null(vs$Base)) {
       context <- paste0(context,
         "\n## Variable Structure\n",
-        "- Base: ", paste(head(vs$Base, 5), collapse = ", "), " ...\n"
+        "- Base: ", paste(head(vs$Base, 5), collapse = ", "),
+        if (length(vs$Base) > 5) " ..." else "", "\n"
       )
-      if (!is.null(vs$Event)) {
-        context <- paste0(context, "- Event: ", paste(vs$Event, collapse = ", "), "\n")
-      }
-      if (!is.null(vs$Time)) {
-        context <- paste0(context, "- Time: ", paste(vs$Time, collapse = ", "), "\n")
-      }
+    }
+    if (!is.null(vs$Event)) {
+      context <- paste0(context,
+        if (is.null(vs$Base)) "\n## Variable Structure\n" else "",
+        "- Event: ", paste(vs$Event, collapse = ", "), "\n")
+    }
+    if (!is.null(vs$Time)) {
+      context <- paste0(context,
+        if (is.null(vs$Base) && is.null(vs$Event)) "\n## Variable Structure\n" else "",
+        "- Time: ", paste(vs$Time, collapse = ", "), "\n")
     }
 
     if (!is.null(dl)) {
@@ -2599,19 +2745,33 @@ Please fix the code to ensure it returns a proper result that can be displayed a
         } else if (current_type == "table") {
           DTOutput(session$ns("result_table"))
         } else {
-          # Text result
+          # Text result (already captured as character vector)
           tags$div(
             style = "max-height: 400px; overflow-y: auto;",
             tags$pre(
-              style = "font-size: 11px; white-space: pre-wrap;",
-              paste(capture.output(print(current_item$value)), collapse = "\n")
+              style = "font-size: 11px; white-space: pre-wrap; background: #f8f9fa; padding: 10px; border-radius: 4px;",
+              paste(current_item$value, collapse = "\n")
             )
           )
         }
       ))
     }
 
-    # text
+    # text (result is a list containing character vectors)
+    if (rtype == "text") {
+      text_content <- if (is.list(result) && length(result) > 0) {
+        paste(result[[1]], collapse = "\n")
+      } else {
+        paste(capture.output(print(result)), collapse = "\n")
+      }
+
+      return(tags$pre(
+        style = "max-height: 400px; overflow-y: auto; font-size: 11px; background: #f8f9fa; padding: 10px; border-radius: 4px; white-space: pre-wrap;",
+        text_content
+      ))
+    }
+
+    # Fallback for other types
     return(tags$pre(
       style = "max-height: 400px; overflow-y: auto; font-size: 11px;",
       paste(capture.output(print(result)), collapse = "\n")
@@ -3002,8 +3162,30 @@ Please fix the code to ensure it returns a proper result that can be displayed a
               content_lines <- c(content_lines, result_text)
             } else if (rtype == "plot") {
               content_lines <- c(content_lines, "[Plot result - cannot be displayed in text format]")
+            } else if (rtype == "text") {
+              # Text results (already captured as character vector)
+              if (is.list(result) && length(result) > 0) {
+                content_lines <- c(content_lines, result[[1]])
+              } else {
+                result_text <- capture.output(print(result))
+                content_lines <- c(content_lines, result_text)
+              }
+            } else if (rtype == "mixed") {
+              # Mixed results - process each item
+              for (i in seq_along(result)) {
+                item <- result[[i]]
+                content_lines <- c(content_lines, sprintf("--- Result %d/%d ---", i, length(result)))
+                if (item$type == "table") {
+                  result_text <- capture.output(print(as.data.frame(item$value)))
+                  content_lines <- c(content_lines, result_text, "")
+                } else if (item$type == "plot") {
+                  content_lines <- c(content_lines, "[Plot - cannot be displayed in text format]", "")
+                } else if (item$type == "text") {
+                  content_lines <- c(content_lines, item$value, "")
+                }
+              }
             } else {
-              # Other results (text, list, etc.)
+              # Other results (fallback)
               result_text <- capture.output(print(result))
               content_lines <- c(content_lines, result_text)
             }
