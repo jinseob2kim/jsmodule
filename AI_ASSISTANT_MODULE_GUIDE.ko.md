@@ -297,10 +297,73 @@ Q: "wt.loss ~ age + sex + ph.ecog 선형모델에서 VIF로 다중공선성 확�
 ## 보안 고려사항
 
 ### 코드 실행 보안
-- **샌드박스 실행**: 제한된 환경에서 코드 실행
-- **파일 접근 불가**: 시스템의 파일을 읽거나 쓸 수 없음
-- **네트워크 접근 불가**: 외부 API 호출 불가 (AI 제공자 API 제외)
+
+#### 환경 인식 실행 (개발 vs 프로덕션)
+
+AI Assistant 모듈은 보안과 사용성의 균형을 위해 **환경 인식 코드 실행**을 구현합니다:
+
+**개발 모드** (기본값):
+- 표준 `eval()` 함수로 코드 실행
+- 디버깅과 개발이 용이
+- 모든 콘솔 출력 표시
+- 로컬, 신뢰할 수 있는 환경에 적합
+
+**프로덕션 모드**:
+- `RAppArmor::eval.secure()`로 샌드박스 실행 (Linux 전용)
+- 향상된 보안 및 리소스 제한:
+  - 1GB RAM 제한
+  - 1MB 파일 크기 제한
+  - 10초 타임아웃
+  - 새 프로세스 생성 금지
+- 시스템 명령 실행 방지
+- 공개 배포 시 필수
+
+**환경 감지**:
+모듈은 다음을 통해 프로덕션 환경을 자동 감지합니다:
+1. `DEPLOYMENT_ENV` 환경 변수 (`production` 또는 `development`)
+2. shinyapps.io 배포 감지
+3. RStudio Connect 감지
+4. `.production` 마커 파일
+
+**배포 모드 설정**:
+
+로컬 개발용 (기본값):
+```r
+# 별도 설정 불필요 - 기본값이 개발 모드
+# 또는 .Renviron에 명시적으로 설정:
+DEPLOYMENT_ENV=development
+```
+
+프로덕션 배포용:
+```r
+# .Renviron 파일에 추가:
+DEPLOYMENT_ENV=production
+```
+
+또는 마커 파일 생성:
+```bash
+# 앱 디렉토리에서
+touch .production
+```
+
+**Linux 서버 설정** (RAppArmor용):
+```bash
+# AppArmor 설치
+sudo apt-get install apparmor apparmor-utils libapparmor-dev
+
+# R 패키지 설치
+R -e "install.packages('RAppArmor')"
+```
+
+**플랫폼 지원**:
+- ✅ **Linux**: 완전한 RAppArmor 샌드박싱 사용 가능
+- ⚠️ **macOS/Windows**: 프로덕션 모드에서 경고와 함께 표준 eval로 폴백
+- 권장사항: 최대 보안을 위해 Linux 서버에 배포
+
+#### 기본 보안 기능
 - **패키지 화이트리스트**: 승인된 패키지만 허용
+- **실행 전 검토**: 실행 전 코드 편집 가능
+- **오류 처리**: 시스템 정보 없는 안전한 오류 메시지
 
 ### API 키 보안
 

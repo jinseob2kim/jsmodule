@@ -675,6 +675,86 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
 }
 
 
+# Helper Functions for Environment Detection and Safe Evaluation ----
+
+#' Detect if running in production/deployment environment
+#' @return Logical. TRUE if in production, FALSE if local development
+#' @details Default is FALSE (development mode) when DEPLOYMENT_ENV is not set
+is_production_environment <- function() {
+  # Method 1: Check for custom environment variable (recommended)
+  # Default to "development" if not set
+  deployment_env <- Sys.getenv("DEPLOYMENT_ENV", unset = "development")
+  if (deployment_env == "production") {
+    return(TRUE)
+  }
+
+  # Method 2: Detect shinyapps.io
+  if (nzchar(Sys.getenv("SHINY_PORT")) &&
+      Sys.getenv("R_CONFIG_ACTIVE") == "shinyapps") {
+    return(TRUE)
+  }
+
+  # Method 3: Detect RStudio Connect
+  if (Sys.getenv("RSTUDIO_PRODUCT") == "CONNECT") {
+    return(TRUE)
+  }
+
+  # Method 4: Check for .production marker file
+  if (file.exists(".production")) {
+    return(TRUE)
+  }
+
+  # Method 5: Check if running on specific server hostname
+  hostname <- Sys.info()["nodename"]
+  if (grepl("shinyapps\\.io|rstudio\\.cloud", hostname, ignore.case = TRUE)) {
+    return(TRUE)
+  }
+
+  # Default: local development mode
+  return(FALSE)
+}
+
+#' Safe evaluation wrapper with environment-aware security
+#' @param expr Expression to evaluate
+#' @param envir Environment for evaluation
+#' @param timeout Timeout in seconds (default: 10)
+#' @return Evaluation result
+#' @details In production mode, uses RAppArmor::eval.secure if available.
+#'   In development mode, uses standard eval for easier debugging.
+safe_eval_expr <- function(expr, envir, timeout = 10) {
+  # Production environment: Use RAppArmor if available
+  if (is_production_environment()) {
+    if (.Platform$OS.type == "unix" &&
+        requireNamespace("RAppArmor", quietly = TRUE)) {
+
+      # Use RAppArmor for sandboxed execution
+      return(RAppArmor::eval.secure(
+        expr,
+        envir = envir,
+        timeout = timeout,
+        RLIMIT_AS = 1e9,      # 1GB RAM limit
+        RLIMIT_FSIZE = 1e6,   # 1MB file size limit
+        RLIMIT_CPU = timeout, # CPU time limit
+        RLIMIT_NPROC = 0,     # No new processes allowed
+        profile = "r-base"    # AppArmor profile
+      ))
+
+    } else {
+      # Production mode but RAppArmor not available
+      warning(
+        "Production environment detected but RAppArmor not available. ",
+        "Using standard eval. For security, install RAppArmor on Linux systems. ",
+        "Run: install.packages('RAppArmor')"
+      )
+      return(eval(expr, envir = envir))
+    }
+  }
+
+  # Development environment: Use standard eval for easier debugging
+  return(eval(expr, envir = envir))
+}
+
+
 #' @title aiAssistant: AI Assistant module server
 #' @description AI-powered statistical analysis assistant module server
 #' @param input input
@@ -2384,7 +2464,7 @@ Please fix the code to ensure it returns a proper result that can be displayed a
       res <- NULL
       line_num <- 1
       for (expr in parsed) {
-        res <- eval(expr, envir = env)
+        res <- safe_eval_expr(expr, envir = env, timeout = 10)
         line_num <- line_num + length(attr(expr, "srcref")[[1]])
       }
       # Check for result variable

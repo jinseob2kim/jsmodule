@@ -297,10 +297,73 @@ Q: "Check VIF for multicollinearity in the linear model with wt.loss ~ age + sex
 ## Security Considerations
 
 ### Code Execution Security
-- **Sandboxed Execution**: Code runs in restricted environment
-- **No File Access**: Cannot read/write files on system
-- **No Network Access**: Cannot make external API calls (except AI provider APIs)
+
+#### Environment-Aware Execution (Development vs Production)
+
+The AI Assistant module implements **environment-aware code execution** to balance security and usability:
+
+**Development Mode** (Default):
+- Uses standard `eval()` for code execution
+- Easier debugging and development
+- All console output visible
+- Suitable for local, trusted environments
+
+**Production Mode**:
+- Uses `RAppArmor::eval.secure()` for sandboxed execution (Linux only)
+- Enhanced security with resource limits:
+  - 1GB RAM limit
+  - 1MB file size limit
+  - 10 second timeout
+  - No new process creation
+- Prevents system command execution
+- Required for public deployments
+
+**Environment Detection**:
+The module automatically detects production environments using:
+1. `DEPLOYMENT_ENV` environment variable (`production` or `development`)
+2. shinyapps.io deployment detection
+3. RStudio Connect detection
+4. `.production` marker file
+
+**Setting Deployment Mode**:
+
+For local development (default):
+```r
+# No setup needed - defaults to development mode
+# Or explicitly set in .Renviron:
+DEPLOYMENT_ENV=development
+```
+
+For production deployment:
+```r
+# Add to .Renviron file:
+DEPLOYMENT_ENV=production
+```
+
+Or create a marker file:
+```bash
+# In your app directory
+touch .production
+```
+
+**Linux Server Setup** (for RAppArmor):
+```bash
+# Install AppArmor
+sudo apt-get install apparmor apparmor-utils libapparmor-dev
+
+# Install R package
+R -e "install.packages('RAppArmor')"
+```
+
+**Platform Support**:
+- ✅ **Linux**: Full RAppArmor sandboxing available
+- ⚠️ **macOS/Windows**: Falls back to standard eval with warning in production mode
+- Recommendation: Deploy on Linux servers for maximum security
+
+#### Basic Security Features
 - **Package Whitelist**: Only approved packages allowed
+- **Pre-execution Review**: Code can be edited before execution
+- **Error Handling**: Safe error messages without system information
 
 ### API Key Security
 
