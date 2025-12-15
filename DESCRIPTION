@@ -22,7 +22,7 @@ Description: 'RStudio' addins and 'Shiny' modules for descriptive statistics, re
 Depends: R (>= 3.4.0)
 License: Apache License 2.0 
 Encoding: UTF-8
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Imports:
   data.table,
   DT,
@@ -66,7 +66,6 @@ Imports:
   htmltools,
   riskRegression,
   R6,
-  svglite,
   httr,
   jsonlite,
   openxlsx,
@@ -78,5 +77,6 @@ Suggests:
   shinytest,
   knitr,
   rmarkdown,
-  RAppArmor
+  RAppArmor,
+  svglite
 VignetteBuilder: knitr
