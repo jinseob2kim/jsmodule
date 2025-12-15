@@ -1666,7 +1666,11 @@ aiAssistant <- function(input, output, session, data, data_label,
 
   # Build context from data
   data_context <- reactive({
-    req(data())
+    # Check if data is available
+    if (is.null(data()) || nrow(data()) == 0) {
+      stop("Please upload data first using the 'Data' tab before using AI Assistant.")
+    }
+
     d <- data()
     dl <- if (!is.null(data_label)) data_label() else NULL
     vs <- data_varStruct()
@@ -1753,10 +1757,26 @@ aiAssistant <- function(input, output, session, data, data_label,
     context_section <- build_analysis_context(context_info)
 
     # Build system prompt from template + context
+    # Check if data is available first
+    data_ctx <- tryCatch({
+      data_context()
+    }, error = function(e) {
+      # Return error if data validation fails
+      return(list(
+        success = FALSE,
+        message = "Please upload data first using the 'Data' tab before using AI Assistant."
+      ))
+    })
+
+    # If data_context returned an error structure, return it immediately
+    if (is.list(data_ctx) && !is.null(data_ctx$success) && !data_ctx$success) {
+      return(data_ctx)
+    }
+
     system_prompt <- paste0(
       system_prompt_text(), "\n\n",
       "## Current Project Context\n",
-      data_context(),
+      data_ctx,
       context_section
     )
 
