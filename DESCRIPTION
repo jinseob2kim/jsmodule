@@ -73,9 +73,10 @@ Imports:
   gridExtra
 URL: https://jinseob2kim.github.io/jsmodule/, https://github.com/jinseob2kim/jsmodule
 BugReports: https://github.com/jinseob2kim/jsmodule/issues
-Suggests: 
+Suggests:
   testthat,
   shinytest,
   knitr,
-  rmarkdown
+  rmarkdown,
+  RAppArmor
 VignetteBuilder: knitr
