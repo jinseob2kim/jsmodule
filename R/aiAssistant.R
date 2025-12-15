@@ -87,8 +87,9 @@
 #' @rdname aiAssistantUI
 #' @export
 #' @import shiny
-#' @import shinyjs
+#' @importFrom shinyjs useShinyjs disable enable runjs click
 #' @importFrom shinyWidgets pickerInput actionBttn noUiSliderInput
+#' @importFrom utils capture.output head tail
 
 aiAssistantUI <- function(id, show_api_config = TRUE) {
   ns <- NS(id)
@@ -1486,7 +1487,7 @@ aiAssistant <- function(input, output, session, data, data_label,
     } else if (inherits(res, "table")) {
       result_info$type <- "table"
       result_info$value <- list(as.data.frame(res))
-      result_info$message <- sprintf("Table generated: %d rows × %d columns",
+      result_info$message <- sprintf("Table generated: %d rows x %d columns",
                                      nrow(as.data.frame(res)), ncol(as.data.frame(res)))
 
     # Data frame or matrix
@@ -1494,7 +1495,7 @@ aiAssistant <- function(input, output, session, data, data_label,
       result_info$type <- "table"
       result_info$value <- list(res)
       result_info$message <- sprintf(
-        "Table generated: %d rows × %d columns\nFirst few rows:\n%s",
+        "Table generated: %d rows x %d columns\nFirst few rows:\n%s",
         nrow(res), ncol(res),
         paste(capture.output(print(head(res, 3))), collapse = "\n")
       )
@@ -1503,7 +1504,7 @@ aiAssistant <- function(input, output, session, data, data_label,
     } else if (is.list(res) && !is.null(res$table)) {
       result_info$type <- "table"
       result_info$value <- list(res$table)
-      result_info$message <- sprintf("Table extracted from list result: %d rows × %d columns",
+      result_info$message <- sprintf("Table extracted from list result: %d rows x %d columns",
                                      nrow(res$table), ncol(res$table))
 
     # Unrecognized type - mark as unknown
@@ -2916,7 +2917,7 @@ Please fix the code to ensure it returns a proper result that can be displayed a
     if (rtype == "plot") {
       n <- length(plots)
       tagList(
-        if (n > 1) p(tags$b(paste0(n, " plots → ", n, " slides")), style = "color: #2196F3;"),
+        if (n > 1) p(tags$b(paste0(n, " plots -> ", n, " slides")), style = "color: #2196F3;"),
         fluidRow(
           column(6,
             shinyWidgets::noUiSliderInput(
@@ -3094,12 +3095,12 @@ Please fix the code to ensure it returns a proper result that can be displayed a
               incProgress(0.1, detail = "Creating document...")
 
               if (rtype == "flextable") {
-                # Word에 flextable 추가 (이미 포맷팅된 테이블)
+                # Add flextable to Word document (already formatted table)
                 doc <- officer::body_add_par(doc, "Analysis Results", style = "heading 2")
                 doc <- flextable::body_add_flextable(doc, result)
                 incProgress(0.7, detail = "Adding table")
               } else if (rtype == "table" || rtype == "mixed") {
-                # Word에 테이블 추가 (여러 테이블 지원)
+                # Add tables to Word document (supports multiple tables)
                 # Extract tables (for mixed, only use tables)
                 if (rtype == "mixed") {
                   # Extract only table items from mixed results
@@ -3166,7 +3167,7 @@ Please fix the code to ensure it returns a proper result that can be displayed a
               incProgress(0.1, detail = "Creating workbook...")
 
               if (rtype == "plot") {
-                # Excel은 그래프를 직접 지원하지 않음
+                # Excel does not support plots directly
                 showNotification(
                   "Excel format does not support plots. Please use PowerPoint or Word for plot downloads.",
                   type = "warning",
@@ -3174,7 +3175,7 @@ Please fix the code to ensure it returns a proper result that can be displayed a
                 )
                 return()
               } else if (rtype == "table" || rtype == "mixed") {
-                # Excel에 테이블 추가 (여러 테이블은 각각 시트로)
+                # Add tables to Excel (each table as a separate sheet)
                 # Extract tables (for mixed, only use tables)
                 if (rtype == "mixed") {
                   # Extract only table items from mixed results
@@ -3186,10 +3187,10 @@ Please fix the code to ensure it returns a proper result that can be displayed a
                   tables <- result
                 }
 
-                # 워크북 생성
+                # Create workbook
                 wb <- openxlsx::createWorkbook()
 
-                # 각 테이블을 별도 시트로 추가
+                # Add each table as a separate sheet
                 for (i in seq_along(tables)) {
                   sheet_name <- if (length(tables) > 1) paste0("Table_", i) else "Results"
                   df <- as.data.frame(tables[[i]])
