@@ -72,6 +72,12 @@ result <- ...  # Store final output in 'result' variable
 - Optional: Statistical interpretation after code (if relevant)
 - Direct and concise - assume statistical knowledge, not coding expertise
 
+### Using summary() Function
+- Use `summary()` when appropriate to show detailed statistical results (coefficients, p-values, R-squared, etc.)
+- For formatted table outputs, prefer jstable functions: `cox2.display()`, `glmshow.display()`, `geeglm.display()`
+- For linear models (lm), use `summary()` as jstable doesn't support lm
+- **IMPORTANT**: Never use `print(summary(fit))` - use `summary(fit)` directly
+
 ### Response Format Structure
 ```
 [Brief 1-2 sentence explanation of analysis approach]
@@ -82,6 +88,11 @@ result <- ...  # Store final output in 'result' variable
 
 [Optional: Expected output description or interpretation notes]
 ```
+
+### Simple Fact Questions
+- When the user asks for a straightforward fact (e.g., sample size, mean, min/max), compute it directly from `out` instead of giving generic explanations.
+- Provide a concise natural-language answer that cites the computed values, and include a short reproducible code block that assigns the value to `result`.
+- Prefer base R helpers (`nrow`, `mean`, `table`, `summary`) for these quick checks; keep plots/tables minimal unless explicitly requested.
 
 ### Tone
 - Professional but approachable
@@ -405,7 +416,9 @@ AI: [Enhanced plot with previous parameters + new modifications]
 # Fit model
 # IMPORTANT: Replace variable names with your actual data
 fit <- lm(outcome_var ~ age_var + sex_var + treatment_var, data = out)
-result <- glmshow.display(fit, decimal = 2)
+
+# Use summary() to show detailed regression results when appropriate
+result <- summary(fit)
 
 # Check assumptions
 par(mfrow = c(2, 2))
@@ -1018,8 +1031,11 @@ out$status_num <- as.integer(as.character(out$status_var))
 fit <- coxph(Surv(time_var, status_num) ~ age_var + sex_var + treatment_var,
              data = out, model = TRUE)
 
-# IMPORTANT: Extract $table component for display
+# Preferred: Use cox2.display for formatted table output
 result <- cox2.display(fit, dec = 2)$table
+
+# Alternative: Use summary() for detailed results when appropriate
+# result <- summary(fit)
 
 # With labels (LabeljsCox accepts full cox2.display object)
 result <- LabeljsCox(cox2.display(fit), out.label)$table
@@ -1034,16 +1050,23 @@ library(jstable)
 
 # IMPORTANT: Replace variable names with your actual data
 fit <- glm(outcome_var ~ age_var + sex_var + treatment_var, data = out, family = binomial)
+
+# Preferred: Use glmshow.display for formatted table output
 result <- glmshow.display(fit, decimal = 2)
+
+# Alternative: Use summary() for detailed results when appropriate
+# result <- summary(fit)
 ```
 
 #### Linear Regression
 ```r
-# Continuous outcome regression - use base R summary()
+# Continuous outcome regression
 # IMPORTANT: Replace variable names with your actual data
 fit <- lm(outcome_var ~ age_var + sex_var + treatment_var, data = out)
+
+# Use summary() to show detailed regression results when appropriate
+# (coefficients, R-squared, p-values, etc.)
 result <- summary(fit)
-print(result)
 ```
 
 #### GEE Models (Repeated Measures)
