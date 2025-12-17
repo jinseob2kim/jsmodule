@@ -178,6 +178,54 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
         margin-bottom: 0 !important;
       }
 
+      /* Markdown styling in AI messages */
+      .ai-message code {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 0.1rem 0.3rem;
+        border-radius: 0.25rem;
+        font-family: monospace;
+        font-size: 0.9em;
+      }
+
+      .ai-message pre {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        overflow-x: auto;
+        margin: 0.5rem 0;
+      }
+
+      .ai-message pre code {
+        background: transparent;
+        padding: 0;
+      }
+
+      .ai-message ul, .ai-message ol {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+      }
+
+      .ai-message h1, .ai-message h2, .ai-message h3 {
+        margin: 0.5rem 0;
+        font-weight: 600;
+      }
+
+      .ai-message h1 { font-size: 1.3em; }
+      .ai-message h2 { font-size: 1.2em; }
+      .ai-message h3 { font-size: 1.1em; }
+
+      .ai-message p {
+        margin: 0.3rem 0;
+      }
+
+      .ai-message strong {
+        font-weight: 600;
+      }
+
+      .ai-message em {
+        font-style: italic;
+      }
+
       .error-message {
         background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%);
         color: white;
@@ -2329,10 +2377,9 @@ aiAssistant <- function(input, output, session, data, data_label,
             class = "ai-message",
             tags$div(
               tags$strong(icon("robot"), " AI Assistant"),
-              tags$pre(
+              tags$div(
                 class = "mt-2 mb-0",
-                style = "white-space: pre-wrap; background: transparent; border: none; color: inherit;",
-                msg$content
+                shiny::markdown(msg$content)
               )
             )
           )
