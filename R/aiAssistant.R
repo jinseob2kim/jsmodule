@@ -178,6 +178,54 @@ aiAssistantUI <- function(id, show_api_config = TRUE) {
         margin-bottom: 0 !important;
       }
 
+      /* Markdown styling in AI messages */
+      .ai-message code {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 0.1rem 0.3rem;
+        border-radius: 0.25rem;
+        font-family: monospace;
+        font-size: 0.9em;
+      }
+
+      .ai-message pre {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        overflow-x: auto;
+        margin: 0.5rem 0;
+      }
+
+      .ai-message pre code {
+        background: transparent;
+        padding: 0;
+      }
+
+      .ai-message ul, .ai-message ol {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+      }
+
+      .ai-message h1, .ai-message h2, .ai-message h3 {
+        margin: 0.5rem 0;
+        font-weight: 600;
+      }
+
+      .ai-message h1 { font-size: 1.3em; }
+      .ai-message h2 { font-size: 1.2em; }
+      .ai-message h3 { font-size: 1.1em; }
+
+      .ai-message p {
+        margin: 0.3rem 0;
+      }
+
+      .ai-message strong {
+        font-weight: 600;
+      }
+
+      .ai-message em {
+        font-style: italic;
+      }
+
       .error-message {
         background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%);
         color: white;
@@ -1368,6 +1416,14 @@ aiAssistant <- function(input, output, session, data, data_label,
   determine_result_type <- function(res, store_result = TRUE) {
     result_info <- list()
 
+    capture_console_output <- function(obj) {
+      text <- tryCatch(capture.output(print(obj)), error = function(e) character())
+      if (length(text) == 0) {
+        text <- paste0("<", paste(class(obj), collapse = ", "), ">")
+      }
+      text
+    }
+
     # Check for NULL or empty result
     if (is.null(res)) {
       result_info$type <- "unknown"
@@ -1413,7 +1469,7 @@ aiAssistant <- function(input, output, session, data, data_label,
       result_info$message <- sprintf("Generated %d tables successfully. All tables are displayed in the Results panel.", length(res))
 
     # Mixed plots and tables
-    } else if (is.list(res) && length(res) > 0) {
+    } else if (is.list(res) && !is.data.frame(res) && length(res) > 0) {
       # Separate plots, tables, and other results
       plots <- list()
       tables <- list()
@@ -1426,7 +1482,7 @@ aiAssistant <- function(input, output, session, data, data_label,
           tables <- c(tables, list(item))
         } else {
           # Store other types (summary, text, etc.)
-          others <- c(others, list(item))
+          others <- c(others, list(capture_console_output(item)))
         }
       }
 
@@ -1533,8 +1589,8 @@ aiAssistant <- function(input, output, session, data, data_label,
       } else {
         # Try to display as text
         result_info$type <- "text"
-        result_info$value <- res
-        result_info$message <- paste(capture.output(print(res)), collapse = "\n")
+        result_info$value <- list(capture_console_output(res))
+        result_info$message <- paste(result_info$value[[1]], collapse = "\n")
       }
     }
 
@@ -1660,6 +1716,41 @@ aiAssistant <- function(input, output, session, data, data_label,
       safe_library(package, ..., character.only = character.only)
       TRUE
     }
+
+    # Set graphics device for Unicode character rendering
+    tryCatch({
+      # Use Cairo graphics device for better Unicode support
+      if (capabilities("cairo")) {
+        grDevices::X11.options(type = "cairo")
+      }
+
+      # Set default ggplot2 theme with Unicode font support
+      if (requireNamespace("ggplot2", quietly = TRUE)) {
+        # Try common Unicode fonts that support various scripts
+        # Prioritize fonts with broad character coverage
+        unicode_fonts <- c(
+          # Korean fonts
+          "NanumGothic", "NanumBarunGothic", "Malgun Gothic", "AppleGothic", "Noto Sans KR",
+          # Chinese fonts
+          "SimSun", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC",
+          # Japanese fonts
+          "Meiryo", "MS Gothic", "Hiragino Sans", "Noto Sans CJK JP",
+          # Multi-script fonts
+          "DejaVu Sans", "Liberation Sans",
+          # System default (automatic font selection)
+          "sans"
+        )
+
+        for (font in unicode_fonts) {
+          tryCatch({
+            ggplot2::theme_set(ggplot2::theme_gray(base_family = font))
+            break
+          }, error = function(e) NULL)
+        }
+      }
+    }, error = function(e) {
+      # Silently fail if font setting fails - not critical
+    })
 
     env
   }
@@ -2286,10 +2377,9 @@ aiAssistant <- function(input, output, session, data, data_label,
             class = "ai-message",
             tags$div(
               tags$strong(icon("robot"), " AI Assistant"),
-              tags$pre(
+              tags$div(
                 class = "mt-2 mb-0",
-                style = "white-space: pre-wrap; background: transparent; border: none; color: inherit;",
-                msg$content
+                shiny::markdown(msg$content)
               )
             )
           )
@@ -2585,8 +2675,39 @@ Please fix the code to ensure it returns a proper result that can be displayed a
       table_obj <- tables[[idx]]
     }
 
-    DT::datatable(as.data.frame(table_obj), rownames = TRUE,
-                  options = list(scrollX = TRUE, pageLength = 10))
+    # Convert to data frame while preserving original column labels
+    df <- as.data.frame(table_obj, stringsAsFactors = FALSE, check.names = FALSE)
+
+    # Ensure all character columns use UTF-8 encoding
+    df[] <- lapply(df, function(x) {
+      if (is.character(x)) {
+        Encoding(x) <- "UTF-8"
+        return(x)
+      }
+      if (is.factor(x)) {
+        lvls <- levels(x)
+        Encoding(lvls) <- "UTF-8"
+        levels(x) <- lvls
+        return(x)
+      }
+      x
+    })
+
+    # Convert column names to UTF-8
+    if (!is.null(names(df))) {
+      names(df) <- enc2utf8(names(df))
+    }
+
+    # Only show rownames if they're meaningful (not just 1, 2, 3...)
+    has_rownames <- !is.null(rownames(df)) &&
+                    !identical(rownames(df), as.character(seq_len(nrow(df))))
+
+    DT::datatable(df, rownames = has_rownames,
+                  options = list(
+                    scrollX = TRUE,
+                    pageLength = 10,
+                    autoWidth = FALSE
+                  ))
   })
 
   # Render result output
