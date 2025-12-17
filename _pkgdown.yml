@@ -9,6 +9,34 @@ authors:
     href: https://www.zarathu.com
     html: <img src="https://raw.githubusercontent.com/zarathucorp/zarathu/master/Color%20logo%20-%20no%20background.png"
       height="24" />
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: "Subgroup Analysis"
+      - text: "-------"
+      - text: "Subgroup & Competing Risk Analysis"
+        href: articles/jsmodule_subgroup_cmprsk.html
+      - text: "-------"
+      - text: "AI"
+      - text: "-------"
+      - text: "AI Assistant Guide (EN)"
+        href: articles/ai-assistant-guide.html
+      - text: "AI Assistant 가이드 (KO)"
+        href: articles/ai-assistant-guide-ko.html
+articles:
+- title: "Subgroup Analysis"
+  desc: "Subgroup and competing risk analysis module"
+  contents:
+  - jsmodule_subgroup_cmprsk
+- title: "AI Assistant"
+  desc: "AI-powered statistical code generation"
+  contents:
+  - ai-assistant-guide
+  - ai-assistant-guide-ko
 template:
   bootstrap: 5
   light-switch: yes

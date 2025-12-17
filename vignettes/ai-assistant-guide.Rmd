@@ -1,3 +1,23 @@
+---
+title: "AI Assistant Module Guide"
+author: "Jaewoong Heo"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{AI Assistant Module Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = TRUE,
+  eval = FALSE
+)
+```
+
 # AI Assistant Module
 
 AI-powered statistical analysis code generation module for jsmodule package.
@@ -12,14 +32,14 @@ The AI Assistant module provides an interactive chat interface that generates R 
 
 Add your API key to `.Renviron` file:
 
-```r
+```{r api-setup}
 # Open .Renviron file
 usethis::edit_r_environ()
 
 # Add one of the following lines:
-ANTHROPIC_API_KEY=your_key_here
-OPENAI_API_KEY=your_key_here
-GOOGLE_API_KEY=your_key_here
+# ANTHROPIC_API_KEY=your_key_here
+# OPENAI_API_KEY=your_key_here
+# GOOGLE_API_KEY=your_key_here
 
 # Save and restart R session
 ```
@@ -28,7 +48,7 @@ GOOGLE_API_KEY=your_key_here
 
 #### Option A: Use with jsBasicGadget
 
-```r
+```{r basic-gadget}
 library(jsmodule)
 
 # Launch gadget with AI Assistant included
@@ -39,7 +59,7 @@ jsBasicGadget()
 
 #### Option B: Standalone Shiny App
 
-```r
+```{r standalone-app}
 library(shiny)
 library(jsmodule)
 library(survival)
@@ -127,7 +147,7 @@ The `show_api_config` parameter controls how API keys are managed:
 - **Security Note**: API keys entered in UI are only stored in browser memory and never saved to disk
 - **Recommendation**: Suitable for local development and single-user applications
 
-```r
+```{r dev-mode}
 # Development mode - users can configure in UI
 aiAssistantUI("ai", show_api_config = TRUE)  # Default
 
@@ -147,7 +167,7 @@ callModule(aiAssistant, "ai",
 - **Security Note**: Prevents users from seeing or modifying API keys
 - **Recommendation**: Mandatory for production deployments with shared API keys
 
-```r
+```{r prod-mode}
 # Production mode - API key from .Renviron only
 aiAssistantUI("ai", show_api_config = FALSE)
 
@@ -162,7 +182,7 @@ callModule(aiAssistant, "ai",
 
 ### Custom Variable Structure
 
-```r
+```{r custom-varStruct}
 server <- function(input, output, session) {
   data <- reactive(lung)
   data.label <- reactive(jstable::mk.lev(lung))
@@ -189,7 +209,7 @@ server <- function(input, output, session) {
 
 Provide background information to improve AI responses:
 
-```r
+```{r analysis-context}
 callModule(aiAssistant, "ai",
   data = data,
   data_label = data.label,
@@ -205,7 +225,7 @@ callModule(aiAssistant, "ai",
 
 Hide API configuration UI for production:
 
-```r
+```{r production-deploy}
 ui <- fluidPage(
   aiAssistantUI("ai", show_api_config = FALSE)
 )
@@ -223,14 +243,18 @@ server <- function(input, output, session) {
 
 ### API Key Not Found
 **Problem**: "API key not configured" error
+
 **Solution**:
+
 1. Check `.Renviron` file has correct variable name
 2. Restart R session after editing `.Renviron`
 3. Verify key is valid (test in terminal: `Sys.getenv("ANTHROPIC_API_KEY")`)
 
 ### Code Execution Errors
 **Problem**: Generated code fails to execute
+
 **Solution**:
+
 1. Click "Ask AI to Fix" button for automatic correction
 2. Review code in editor before execution
 3. Check data has required variables
@@ -238,16 +262,19 @@ server <- function(input, output, session) {
 
 ### Summary Results Too Fragmented
 **Problem**: `summary()` results split into many pieces
+
 **Solution**: This is now fixed in the latest version. Update jsmodule package.
 
 ### Text Output Shows Escape Sequences
 **Problem**: `\n` visible instead of line breaks
+
 **Solution**: This is now fixed in the latest version. Update jsmodule package.
 
 ## Best Practices
 
 ### 1. Be Specific in Questions
 ❌ Bad: "analyze this data"
+
 ✅ Good: "perform linear regression with wt.loss as outcome and age, sex, ph.ecog as predictors"
 
 ### 2. Review Generated Code
@@ -320,6 +347,7 @@ The AI Assistant module implements **environment-aware code execution** to balan
 
 **Environment Detection**:
 The module automatically detects production environments using:
+
 1. `DEPLOYMENT_ENV` environment variable (`production` or `development`)
 2. shinyapps.io deployment detection
 3. RStudio Connect detection
@@ -328,16 +356,16 @@ The module automatically detects production environments using:
 **Setting Deployment Mode**:
 
 For local development (default):
-```r
+```{r dev-env}
 # No setup needed - defaults to development mode
 # Or explicitly set in .Renviron:
-DEPLOYMENT_ENV=development
+# DEPLOYMENT_ENV=development
 ```
 
 For production deployment:
-```r
+```{r prod-env}
 # Add to .Renviron file:
-DEPLOYMENT_ENV=production
+# DEPLOYMENT_ENV=production
 ```
 
 Or create a marker file:
@@ -356,6 +384,7 @@ R -e "install.packages('RAppArmor')"
 ```
 
 **Platform Support**:
+
 - ✅ **Linux**: Full RAppArmor sandboxing available
 - ⚠️ **macOS/Windows**: Falls back to standard eval with warning in production mode
 - Recommendation: Deploy on Linux servers for maximum security
@@ -370,45 +399,52 @@ R -e "install.packages('RAppArmor')"
 **⚠️ IMPORTANT: API Key Handling**
 
 **How API Keys are Used**:
+
 - API keys are read from environment variables (`.Renviron`) or UI input
 - When entered in UI, keys exist only in the current R session memory
 - API calls are made using the `httr` package to AI provider APIs
 
 **This is Open Source**:
+
 - All code is publicly available and auditable at https://github.com/jinseob2kim/jsmodule
 - No hidden API key storage or transmission
 - You can review the code yourself
 
 ✅ **What this module does NOT do with API keys**:
+
 - Never saves them anywhere
 - Never logs them
 - Never transmits them except to the AI provider
 
 ✅ **What IS sent to AI providers**:
+
 - Your prompts and questions
 - Data structure information (variable names, types, sample statistics)
 - Previous conversation history
 - Generated code (for error fixing)
 
 **NOT sent**:
+
 - Raw data values (unless explicitly included in your question)
 - File system information
 
 #### Best Practices by Deployment Type
 
 **For Personal/Desktop Use** (Recommended):
-```r
+```{r personal-use}
 # Store API key in .Renviron (user's home directory)
 # This keeps the key private to your user account
-ANTHROPIC_API_KEY=your_key_here
+# ANTHROPIC_API_KEY=your_key_here
 ```
 
 **For Team/Shared Use**:
+
 - Each team member should use their own API key in `.Renviron`
 - Set `show_api_config = TRUE` to allow individual configuration
 - Do NOT share API keys between users
 
 **For Public Web Applications**:
+
 - ⚠️ **NOT RECOMMENDED**: Do not deploy with `show_api_config = TRUE` publicly
 - If you must deploy publicly, consider these alternatives:
   1. Implement server-side API proxy (requires custom backend)
@@ -435,6 +471,7 @@ ANTHROPIC_API_KEY=your_key_here
 #### Compliance Considerations
 
 If you're working with sensitive data:
+
 1. ✅ Data structure and variable names are sent to AI provider
 2. ✅ Statistical summaries may be sent
 3. ⚠️ Avoid including actual data values in questions
@@ -444,7 +481,7 @@ If you're working with sensitive data:
 ### Recommended Security Setup
 
 **For Maximum Security**:
-```r
+```{r max-security}
 # 1. Store API key in .Renviron (never in code)
 usethis::edit_r_environ()
 # Add: ANTHROPIC_API_KEY=your_key
